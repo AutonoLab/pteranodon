@@ -13,8 +13,7 @@ class Gazebo(di):
     def __init__(self) -> None:
         super().__init__()
 
-    # connect hexsoon to uart, and if successful,
-    # connect mavsdk to flight controller
+    # connect mavsdk to Gazebo
     async def connect(self):
         try:
             await self._drone.connect(ADDRESS)
