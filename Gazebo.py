@@ -1,4 +1,4 @@
-from DroneInterface import DroneInterface as di
+from Interfaces.DroneInterface import DroneInterface as di
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
 

@@ -1,4 +1,4 @@
-from BridgeInterface import BridgeInterface as bi
+from Interfaces.BridgeInterface import BridgeInterface as bi
 import serial
 # Concrete implemention of bridge using UART
 
