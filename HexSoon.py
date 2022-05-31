@@ -1,5 +1,4 @@
 from Interfaces.DroneInterface import DroneInterface as di
-from UARTBridge import ID, UARTBridge
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
 
@@ -21,3 +20,19 @@ class HexSoon(di):
         except:
             print("unable to connect mavsdk")
         
+if __name__ == "__main__":
+    locations = [  ]
+
+    drone = HexSoon()
+
+    drone.connect()
+    drone.arm()
+    drone.configureTracker()
+    drone.startTracker()
+    
+    for location in locations:
+        drone.updateTracker(location)
+
+    drone.stopTracker()
+    drone.land()
+

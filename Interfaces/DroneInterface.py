@@ -84,5 +84,5 @@ class DroneInterface():
     async def getCameraFrame():
         pass #TODO
 
-if __name__ == "__main__":
-    pass
+    async def disconnect(self):
+        pass
