@@ -16,16 +16,8 @@ class HexSoon(di):
     # connect hexsoon to uart, and if successful,
     # connect mavsdk to flight controller
     async def connect(self):
-        connectionStatus = self._serialConnection.connectBridge()
-
-        if(connectionStatus):
-            try:
-                await self._drone.connect(ADDRESS)
-                # TODO: add baudrate to ID?
-                # e.g. ID:baudrate
-            except:
-                print("unable to connect mavsdk")
-        
-        else:
-            print("unable to connect serial")
+        try:
+            await self._drone.connect(ADDRESS)
+        except:
+            print("unable to connect mavsdk")
         
