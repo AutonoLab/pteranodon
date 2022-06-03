@@ -4,10 +4,10 @@
 ###############################################
 ##      Open CV and Numpy integration        ##
 ###############################################
-
 import pyrealsense2 as rs
 import numpy as np
 import cv2
+from torch import equal
 
 """
 import Sensor
@@ -47,6 +47,7 @@ class RealSense:
         self.pipeline.start(self.config)
 
     def get_data(self):
+
         # Wait for a coherent pair of frames: depth and color
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
@@ -54,14 +55,37 @@ class RealSense:
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-
-        # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
-        depth_colormap = cv2.applyColorMap(
-            cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
-        )
         data = [color_image, depth_image]
         # Sensor.update(data,)
         return color_image
 
+    def deprojectPixelToPoint(self, frame, cnn_x, cnn_y):
+        # convert center offset pixels to absolute offset from (0,0)
+        #TODO: get info on motion vector
+        x = 320 + cnn_x
+        y = 240 + cnn_y
+
+        # get focal length intrinsic
+        depth_frame = frame.get_depth_frame()
+        depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
+        
+        # get depth at (x, y)
+        depth = depth_frame.get_distance(x, y)
+
+        # get real world point at (x, y)
+        # from perspective of camera: +x right, +y down, +z forward
+        depth_point = rs.rs2_deproject_pixel_to_point(depth_intrin, [x, y], depth)
+        return depth_point
+
     def close(self):
         self.pipeline.stop()
+
+if __name__ == "__main__":
+    rsc = RealSense()
+    frame = rsc.get_data()
+    while True:
+        cv2.imshow("camera_output", frame)
+        if cv2.waitKey(1) != -1:
+            rsc.close()
+            break
+        frame = rsc.get_data()
