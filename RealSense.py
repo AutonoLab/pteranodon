@@ -9,10 +9,8 @@ import numpy as np
 import cv2
 from torch import equal
 
-"""
-import Sensor
+from Sensor import Sensor
 from SensorData import SensorData
-"""
 
 
 class RealSense:
@@ -47,7 +45,6 @@ class RealSense:
         self.pipeline.start(self.config)
 
     def get_data(self):
-
         # Wait for a coherent pair of frames: depth and color
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
@@ -56,19 +53,21 @@ class RealSense:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         data = [color_image, depth_image]
-        # Sensor.update(data,)
+        print(data)
+        # updates sensordata
+        sensor.update(data)
         return color_image
 
     def deprojectPixelToPoint(self, frame, cnn_x, cnn_y):
         # convert center offset pixels to absolute offset from (0,0)
-        #TODO: get info on motion vector
+        # TODO: get info on motion vector
         x = 320 + cnn_x
         y = 240 + cnn_y
 
         # get focal length intrinsic
         depth_frame = frame.get_depth_frame()
         depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
-        
+
         # get depth at (x, y)
         depth = depth_frame.get_distance(x, y)
 
@@ -80,7 +79,9 @@ class RealSense:
     def close(self):
         self.pipeline.stop()
 
+
 if __name__ == "__main__":
+    sensor = Sensor("RealSenseD435")
     rsc = RealSense()
     frame = rsc.get_data()
     while True:
