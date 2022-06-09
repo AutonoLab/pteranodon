@@ -5,13 +5,20 @@ from mavsdk.follow_me import (Config, FollowMeError, TargetLocation)
 from mavsdk import telemetry
 from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed
 from math import atan, degrees, sqrt, pow, cos, sin, radians
-
+import logging
 
 class DroneInterface():
     
     def __init__(self) -> None:
         self._drone = System()
         self._camera = None
+        logging.basicConfig(
+            filename="mavLog.log",
+            filemode="w",
+            format="%(levelname)s %(asctime)s - %(message)s",
+            level=logging.ERROR
+        )
+        self.logger = logging.getLogger()
 
     ## METHODS TO OVERRIDE ##
 
@@ -28,34 +35,45 @@ class DroneInterface():
     async def arm(self):
         try:
             await self._drone.action.arm()
-        except:
-            print("unable to arm")
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
+            
 
     async def takeoff(self):
         try:
             await self._drone.action.takeoff()
-        except:
-            print("unable to takeoff")
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def land(self):
         try:
             await self._drone.action.land()
-        except:
-            print("unable to land")
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def updateTracker(self, lat, long, elev):
         adversaryLocation = TargetLocation(lat, long, 1, 1, 1, 1) 
         try:
             await self._drone.follow_me.set_target_location(adversaryLocation)
-        except:
-            print('unable to update target location') 
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def configureTracker(self):
         config = Config(10, 1, 1, 1.0)
         try:
             await self._drone.follow_me.set_config(config)
-        except:
-            print('unable to set config')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def startTracker(self):
         try:
@@ -66,15 +84,18 @@ class DroneInterface():
     async def stopTracker(self):
         try:
             await self._drone.follow_me.stop()
-        except:
-            print('unable to stop tracker')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def getLocation(self):
         try:
             location = self._drone.telemetry.gps_info()
             return location
-        except: 
-            print('unable to get coordinates')
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def getPositionNED(self):
         try:
@@ -84,14 +105,16 @@ class DroneInterface():
                 break
             return old_pos
         except Exception as e:
-            print(f'unable to get position NED {e}')
+            self.logger.error(e)
+            return False
 
     async def getBatteryLevel(self):
         try:
             batteryLevel = self._drone.telemetry.battery()
             return batteryLevel
-        except: 
-            print('unable to get coordinates')    
+        except Exception as e:
+            self.logger.error(e)
+            return False 
 
     def getCameraFrame(self):
         frame = self._camera.getFrame()
@@ -102,13 +125,11 @@ class DroneInterface():
 
     async def maneuverTo(self, frame, cnn_x, cnn_y):
         localCoordinates = self._camera.deprojectPixelToPoint(frame, cnn_x, cnn_y)
-        Forward = localCoordinates[2]
+        Front = localCoordinates[2]
         Right = localCoordinates[0]
         Down = 0 - localCoordinates[1]
-        try:
-            await self.maneuverWithNED(Forward, Right, Down)
-        except:
-            print('unable to maneuver')
+        
+        return await self.maneuverWithNED(Front, Right, Down)
 
     async def getAngle(self):
         try:
@@ -118,24 +139,27 @@ class DroneInterface():
                 break
             return old_a
         except Exception as e:
-            print(f'unable to get angle {e}')
+            self.logger.error(e)
+            return False
 
     async def maneuverWithNED(self, Front, Right, Down):
+        
+        # get current position
         task = await self.getPositionNED()
         currentPos = task.position
         print(currentPos)
         
+        # get angle of rotation
         task2 = await self.getAngle()
         angle = task2.yaw_deg
-        # get angle of rotation
         angleOfRotation = radians(angle)
         print(angle)
 
-        # convert FRD to NED
+        # convert FRD to NED 
         North = Right*sin(angleOfRotation) + Front*cos(angleOfRotation)
         East = Right*cos(angleOfRotation) - Front*sin(angleOfRotation)
 
-        # add current pos
+        # add offset to curent position
         North = North + currentPos.north_m
         East = East + currentPos.east_m
         Down = Down + currentPos.down_m
@@ -152,8 +176,11 @@ class DroneInterface():
         print(newPos)
         try:
             await self._drone.offboard.set_position_ned(newPos)
-        except:
-            print('unable to maneuver')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
+        
 
     async def setHeadingNED(self, Forward, Right, Down):
         targetSpeed = 5 # fixed speed of 5ms
@@ -175,30 +202,40 @@ class DroneInterface():
         
         try:
             await self._drone.offboard.set_velocity_body(motionVector)
-        except:
-            print('unable to set motion vector')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def offboardHold(self):
         try:
             await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
-        except:
-            print('unable to hold')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
     async def startOffboard(self):
         
         try:
             await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
-        except:
-            print('unable to maneuver')
-        try:
-            await self._drone.offboard.start()
-        except:
-            print('failed to start offboard')
+            try:
+                await self._drone.offboard.start()
+                return True
+            except Exception as e:
+                self.logger.error(e)
+                return False
+        except Exception as e:
+            self.logger.error(e)
+            return False
+
 
     async def stopOffboard(self):
         try:
             await self._drone.offboard.stop()
-        except: 
-            print('failed to stop offboard')
+            return True
+        except Exception as e:
+            self.logger.error(e)
+            return False
 
 
