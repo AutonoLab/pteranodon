@@ -1,3 +1,5 @@
+import asyncio
+from time import time
 from Interfaces.DroneInterface import DroneInterface as di
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
@@ -21,18 +23,20 @@ class HexSoon(di):
             print("unable to connect mavsdk")
         
 if __name__ == "__main__":
-    locations = [  ]
-
     drone = HexSoon()
 
-    drone.connect()
-    drone.arm()
-    drone.configureTracker()
-    drone.startTracker()
-    
-    for location in locations:
-        drone.updateTracker(location)
+    loop = asyncio.get_event_loop()
 
-    drone.stopTracker()
-    drone.land()
+    loop.run_until_complete(drone.connect())
+    time.sleep(5)
+    loop.run_until_complete(drone.arm())
+    loop.run_until_complete(drone.takeoff())
+    time.sleep(10)
+    loop.run_until_complete(drone.startOffboard())
+    time.sleep(5)
+    loop.run_until_complete(drone.maneuverWithNED(10, 10, 0))
+    time.sleep(10)
+    loop.run_until_complete(drone.stopOffboard())
+
+    
 

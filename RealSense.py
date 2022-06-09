@@ -7,7 +7,8 @@
 import pyrealsense2 as rs
 import numpy as np
 import cv2
-from torch import equal
+
+from Interfaces.CameraInterface import CameraInterface
 
 """
 import Sensor
@@ -15,7 +16,7 @@ from SensorData import SensorData
 """
 
 
-class RealSense:
+class RealSense(CameraInterface):
     def __init__(self):
         # Configure depth and color streams
         self.pipeline = rs.pipeline()
@@ -79,6 +80,10 @@ class RealSense:
 
     def close(self):
         self.pipeline.stop()
+
+    def getFrame(self):
+        # Wait for a coherent pair of frames: depth and color
+        return self.pipeline.wait_for_frames()
 
 if __name__ == "__main__":
     rsc = RealSense()
