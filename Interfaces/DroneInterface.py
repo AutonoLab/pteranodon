@@ -169,7 +169,12 @@ class DroneInterface(ABC):
         Right = localCoordinates[0]
         Down = 0 - localCoordinates[1]
 
-        return await self.maneuverWithNED(Front, Right, Down)
+        totalDistance = sqrt( pow(Front,2) + pow(Right, 2) + pow(Down,2) )
+
+        if totalDistance < 5:
+            return await self.offboardHold()
+        else:
+            return await self.maneuverWithNED(Front, Right, Down)
 
     async def _getAngle(self):
         try:
