@@ -1,15 +1,22 @@
-from abc import abstractclassmethod
-from turtle import forward
+# built in libraries
+import asyncio
+from abc import abstractmethod, ABC
+from math import atan, degrees, sqrt, pow, cos, sin, radians
+import logging
+from threading import Thread
+from collections import deque
+from typing import Union
+import time
+
+# 3rd part libs
 from mavsdk import System
 from mavsdk.follow_me import (Config, FollowMeError, TargetLocation)
 from mavsdk import telemetry
 from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed
-from math import atan, degrees, sqrt, pow, cos, sin, radians
-import logging
 
-class DroneInterface():
-    
-    def __init__(self) -> None:
+
+class DroneInterface(ABC):
+    def __init__(self, mavlink_poll_rate: Union[float, None] = None) -> None:
         self._drone = System()
         self._camera = None
         logging.basicConfig(
@@ -18,52 +25,110 @@ class DroneInterface():
             format="%(levelname)s %(asctime)s - %(message)s",
             level=logging.ERROR
         )
-        self.logger = logging.getLogger()
+        self._logger = logging.getLogger()
 
-    ## METHODS TO OVERRIDE ##
+        # attributes related to threaded mavlink commands
+        self._loop = asyncio.get_event_loop()
+        self._stopped = False
 
-    # override this function to meet your specific 
+        # declare threads for dispatching mavlink commands and for doing the controller
+        self._mavlink_queue = deque()
+        self._mavlink_poll_rate = 1.0 / 60.0 if mavlink_poll_rate is None else 1.0 / mavlink_poll_rate
+        self._mavlink_thread = Thread(name="MAVLINK", target=self._mavlink_dispatcher, args=(), kwargs={}, daemon=None)
+
+    # METHODS TO OVERRIDE #
+    # override this function to meet your specific
     # mavsdk device connection requirements
-    @abstractclassmethod
-    async def connect(self):
-        pass
+    # TODO maybe switch this to a public private pair, so _connect is overridden, but high level is the same
+    @abstractmethod
+    async def connect(self) -> bool:
+        return False
+    # END METHODS TO OVERRIDE #
 
-    ## END METHODS TO OVERRIDE ##
+    # method for handling startup of drone. After this, there should only be calls to the public api functions
+    def start(self) -> 'DroneInterface':
+        connect_success = self._loop.run_until_complete(self.connect())
+        if not connect_success:
+            self._logger.fatal("Drone failed to connect in DroneInterface.start, exiting...")
+            raise Exception("Drone failed to connect")
+        arm_success = self._loop.run_until_complete(self._arm())
+        while not arm_success:
+            self._logger.error("Arming failure in DroneInterface.start, retrying...")
+            arm_success = self._loop.run_until_complete(self._arm())
+        return self._start_thread()
 
     # the following functions are standard across connection types
-    
-    async def arm(self):
+    # Methods for thread targetings
+    async def _mavlink_dispatcher(self):
+        elapsed_time = 0.0
+        while not self._stopped:
+            try:
+                # get initial time
+                start_time = time.perf_counter()
+                # get command (using deque as FIFO queue)
+                command = self._mavlink_queue.popleft()
+                self._loop.run_in_executor(None, command)
+                # get final time
+                elapsed_time = time.perf_counter() - start_time
+            except IndexError:
+                pass
+            finally:
+                sleep_dur = self._mavlink_poll_rate - elapsed_time
+                if sleep_dur > 0.0:
+                    time.sleep(sleep_dur)
+
+    def _start_thread(self) -> 'DroneInterface':
+        self._mavlink_thread.start()
+        return self
+
+    def stop(self) -> None:
+        self._stopped = True
+
+    # mavlink related methods
+    # NOTE: the following 3 methods (arm, takeoff, land) were switched to a private public system since their actual
+    # calls can be queued up into the threaded setup. We can later poll the deque for its length
+    # (it has accurate length) and make a decision based on how many actions are stored in the queue. Or if there are
+    # lots of actions we can have it skip the delay
+    async def _arm(self):  # switched to public/private pair, but can probably be just public or private
         try:
             await self._drone.action.arm()
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
-            
 
-    async def takeoff(self):
+    def arm(self):
+        self._mavlink_queue.append(self._arm)
+
+    async def _takeoff(self):
         try:
             await self._drone.action.takeoff()
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
-    async def land(self):
+    def takeoff(self):
+        self._mavlink_queue.append(self._takeoff)
+
+    async def _land(self):
         try:
             await self._drone.action.land()
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
+    def land(self):
+        self._mavlink_queue.append(self._land)
+
     async def updateTracker(self, lat, long, elev):
-        adversaryLocation = TargetLocation(lat, long, 1, 1, 1, 1) 
+        adversaryLocation = TargetLocation(lat, long, 1, 1, 1, 1)
         try:
             await self._drone.follow_me.set_target_location(adversaryLocation)
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def configureTracker(self):
@@ -72,21 +137,21 @@ class DroneInterface():
             await self._drone.follow_me.set_config(config)
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def startTracker(self):
         try:
             await self._drone.follow_me.start()
-        except:
-            print('unable to start tracker')
+        except Exception as e:
+            self._logger.error(e)
 
     async def stopTracker(self):
         try:
             await self._drone.follow_me.stop()
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def getLocation(self):
@@ -94,18 +159,19 @@ class DroneInterface():
             location = self._drone.telemetry.gps_info()
             return location
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def getPositionNED(self):
         try:
             position = self._drone.telemetry.position_velocity_ned()
+            old_pos = None
             async for pos in position:
                 old_pos = pos
                 break
             return old_pos
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def getBatteryLevel(self):
@@ -113,51 +179,58 @@ class DroneInterface():
             batteryLevel = self._drone.telemetry.battery()
             return batteryLevel
         except Exception as e:
-            self.logger.error(e)
-            return False 
+            self._logger.error(e)
+            return False
 
+    # TODO, this should not be a function in the high level class. Should have a sensor setup which opens threads for
+    # TODO: sensors and reads them. Sensors should be stored as a dictionary or list for iterating, Dictionary for
+    # TODO: getting their data out with a consistent system
     def getCameraFrame(self):
         frame = self._camera.getFrame()
         return frame
 
     async def disconnect(self):
-        pass
+        # NOTE added a join for MAVLINK thread
+        self._mavlink_queue.clear()
+        self._mavlink_thread.join()
+        # TODO add other functionalities
 
     async def maneuverTo(self, frame, cnn_x, cnn_y):
         localCoordinates = self._camera.deprojectPixelToPoint(frame, cnn_x, cnn_y)
         Front = localCoordinates[2]
         Right = localCoordinates[0]
         Down = 0 - localCoordinates[1]
-        
+
         return await self.maneuverWithNED(Front, Right, Down)
 
     async def getAngle(self):
         try:
             angle = self._drone.telemetry.attitude_euler()
+            old_a = None
             async for a in angle:
                 old_a = a
                 break
             return old_a
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def maneuverWithNED(self, Front, Right, Down):
-        
+
         # get current position
         task = await self.getPositionNED()
         currentPos = task.position
-        print(currentPos)
-        
+        self._logger.info(currentPos)
+
         # get angle of rotation
         task2 = await self.getAngle()
         angle = task2.yaw_deg
         angleOfRotation = radians(angle)
-        print(angle)
+        self._logger.info(angle)
 
         # convert FRD to NED 
-        North = Right*sin(angleOfRotation) + Front*cos(angleOfRotation)
-        East = Right*cos(angleOfRotation) - Front*sin(angleOfRotation)
+        North = Right * sin(angleOfRotation) + Front * cos(angleOfRotation)
+        East = Right * cos(angleOfRotation) - Front * sin(angleOfRotation)
 
         # add offset to curent position
         North = North + currentPos.north_m
@@ -165,27 +238,26 @@ class DroneInterface():
         Down = Down + currentPos.down_m
 
         # get angle of yaw
-        if ( North == 0 ) and ( East > 0 ):
+        if (North == 0) and (East > 0):
             Yaw = 90
-        elif ( North == 0 ) and ( East < 0 ):
+        elif (North == 0) and (East < 0):
             Yaw = -90
         else:
-            Yaw = degrees( atan( East / North ) )
+            Yaw = degrees(atan(East / North))
 
         newPos = PositionNedYaw(North, East, Down, Yaw)
-        print(newPos)
+        self._logger.info(newPos)
         try:
             await self._drone.offboard.set_position_ned(newPos)
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
-        
 
     async def setHeadingNED(self, Forward, Right, Down):
-        targetSpeed = 5 # fixed speed of 5ms
+        targetSpeed = 5  # fixed speed of 5ms
 
-        totalDistance = sqrt( pow(Forward, 2) + pow(Right, 2) + pow(Down, 2) )
+        totalDistance = sqrt(pow(Forward, 2) + pow(Right, 2) + pow(Down, 2))
         targetTime = totalDistance / targetSpeed
         Forward_ms = Forward / targetTime
         Right_ms = Right / targetTime
@@ -199,43 +271,40 @@ class DroneInterface():
         targetYawSpeed = Yaw / targetTime
 
         motionVector = VelocityBodyYawspeed(Forward_ms, Right_ms, Down_ms, 0)
-        
+
         try:
             await self._drone.offboard.set_velocity_body(motionVector)
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def offboardHold(self):
         try:
-            await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
+            await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
 
     async def startOffboard(self):
-        
+
         try:
-            await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
+            await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
             try:
                 await self._drone.offboard.start()
                 return True
             except Exception as e:
-                self.logger.error(e)
+                self._logger.error(e)
                 return False
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
-
 
     async def stopOffboard(self):
         try:
             await self._drone.offboard.stop()
             return True
         except Exception as e:
-            self.logger.error(e)
+            self._logger.error(e)
             return False
-
-
