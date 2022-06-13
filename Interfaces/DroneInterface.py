@@ -67,7 +67,10 @@ class DroneInterface(ABC):
                 start_time = time.perf_counter()
                 # get command (using deque as FIFO queue)
                 command = self._mavlink_queue.popleft()
-                self._loop.run_until_complete(None, command)  # change from run_until_complete but idk how
+                try:
+                    self._loop.run_until_complete(command)  # change from run_until_complete but idk how
+                except TyperError:
+                    _ = command()
                 # get final time
                 elapsed_time = time.perf_counter() - start_time
             except IndexError:
