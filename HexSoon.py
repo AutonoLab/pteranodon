@@ -1,5 +1,6 @@
 import asyncio
 from time import time
+
 from Interfaces.DroneInterface import DroneInterface as di
 
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     drone = HexSoon()
     loop = asyncio.get_event_loop()
 
-    drone = loop.run_until_complete(drone.start())
+    drone = drone.start()
     time.sleep(5)
 
     loop.run_until_complete(drone.startOffboard())
