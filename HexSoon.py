@@ -4,8 +4,9 @@ from Interfaces.DroneInterface import DroneInterface as di
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
 
+ID = "dev/ttyACM0"
 BAUDRATE = "9600" # TODO: verify baudrate
-ADDRESS = "serial://" + ID + ":" + BAUDRATE
+ADDRESS = "serial:///" + ID
 
 class HexSoon(di):
 
