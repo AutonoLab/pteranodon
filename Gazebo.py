@@ -26,9 +26,9 @@ if __name__ == "__main__":
     drone = Gazebo()
     loop = asyncio.get_event_loop()
 
-    loop.run_until_complete(drone.connect())
+    drone = loop.run_until_complete(drone.start())
     time.sleep(5)
-    loop.run_until_complete(drone.arm())
+    
     loop.run_until_complete(drone.takeoff())
     print('takeoff above')
     time.sleep(10)
