@@ -59,7 +59,7 @@ class DroneInterface(ABC):
 
     # the following functions are standard across connection types
     # Methods for thread targetings
-    async def _mavlink_dispatcher(self):
+    def _mavlink_dispatcher(self):
         elapsed_time = 0.0
         while not self._stopped:
             try:
