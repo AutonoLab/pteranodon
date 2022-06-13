@@ -122,39 +122,7 @@ class DroneInterface(ABC):
     def land(self):
         self._mavlink_queue.append(self._land)
 
-    async def updateTracker(self, lat, long, elev):
-        adversaryLocation = TargetLocation(lat, long, 1, 1, 1, 1)
-        try:
-            await self._drone.follow_me.set_target_location(adversaryLocation)
-            return True
-        except Exception as e:
-            self._logger.error(e)
-            return False
-
-    async def configureTracker(self):
-        config = Config(10, 1, 1, 1.0)
-        try:
-            await self._drone.follow_me.set_config(config)
-            return True
-        except Exception as e:
-            self._logger.error(e)
-            return False
-
-    async def startTracker(self):
-        try:
-            await self._drone.follow_me.start()
-        except Exception as e:
-            self._logger.error(e)
-
-    async def stopTracker(self):
-        try:
-            await self._drone.follow_me.stop()
-            return True
-        except Exception as e:
-            self._logger.error(e)
-            return False
-
-    async def getLocation(self):
+    async def _getLocation(self):
         try:
             location = self._drone.telemetry.gps_info()
             return location
@@ -162,7 +130,7 @@ class DroneInterface(ABC):
             self._logger.error(e)
             return False
 
-    async def getPositionNED(self):
+    async def _getPositionNED(self):
         try:
             position = self._drone.telemetry.position_velocity_ned()
             old_pos = None
@@ -174,7 +142,7 @@ class DroneInterface(ABC):
             self._logger.error(e)
             return False
 
-    async def getBatteryLevel(self):
+    async def _getBatteryLevel(self):
         try:
             batteryLevel = self._drone.telemetry.battery()
             return batteryLevel
@@ -185,7 +153,7 @@ class DroneInterface(ABC):
     # TODO, this should not be a function in the high level class. Should have a sensor setup which opens threads for
     # TODO: sensors and reads them. Sensors should be stored as a dictionary or list for iterating, Dictionary for
     # TODO: getting their data out with a consistent system
-    def getCameraFrame(self):
+    def _getCameraFrame(self):
         frame = self._camera.getFrame()
         return frame
 
@@ -203,7 +171,7 @@ class DroneInterface(ABC):
 
         return await self.maneuverWithNED(Front, Right, Down)
 
-    async def getAngle(self):
+    async def _getAngle(self):
         try:
             angle = self._drone.telemetry.attitude_euler()
             old_a = None
@@ -218,12 +186,12 @@ class DroneInterface(ABC):
     async def maneuverWithNED(self, Front, Right, Down):
 
         # get current position
-        task = await self.getPositionNED()
+        task = await self._getPositionNED()
         currentPos = task.position
         self._logger.info(currentPos)
 
         # get angle of rotation
-        task2 = await self.getAngle()
+        task2 = await self._getAngle()
         angle = task2.yaw_deg
         angleOfRotation = radians(angle)
         self._logger.info(angle)
@@ -254,7 +222,7 @@ class DroneInterface(ABC):
             self._logger.error(e)
             return False
 
-    async def setHeadingNED(self, Forward, Right, Down):
+    async def _setHeadingNED(self, Forward, Right, Down):
         targetSpeed = 5  # fixed speed of 5ms
 
         totalDistance = sqrt(pow(Forward, 2) + pow(Right, 2) + pow(Down, 2))
