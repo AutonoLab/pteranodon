@@ -60,6 +60,7 @@ class DroneInterface(ABC):
     # the following functions are standard across connection types
     # Methods for thread targetings
     def _mavlink_dispatcher(self):
+        command = None
         elapsed_time = 0.0
         while not self._stopped:
             try:
@@ -67,13 +68,17 @@ class DroneInterface(ABC):
                 start_time = time.perf_counter()
                 # get command (using deque as FIFO queue)
                 command = self._mavlink_queue.popleft()
+                self._logger.info(f"Processing command: {command}")
                 try:
                     self._loop.run_until_complete(command)  # change from run_until_complete but idk how
-                except TyperError:
+                    self._logger.info(f"Completed {command} in async mode")
+                except TypeError:
                     _ = command()
+                    self._logger.info(f"Complete {command} in sync mode")
                 # get final time
                 elapsed_time = time.perf_counter() - start_time
             except IndexError:
+                self._logger.info("Command queue is empty, no command dispatched")
                 pass
             finally:
                 sleep_dur = self._mavlink_poll_rate - elapsed_time
