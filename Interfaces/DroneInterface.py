@@ -37,8 +37,6 @@ class DroneInterface(ABC):
         self._mavlink_poll_rate = 1.0 / 60.0 if mavlink_poll_rate is None else 1.0 / mavlink_poll_rate
         self._mavlink_thread = Thread(name="MAVLINK", target=self._mavlink_dispatcher, args=(), kwargs={}, daemon=None)
 
-        self._loop.run_until_complete(self._drone.param.set_param_int("COM_RCL_EXCEPT", 4))
-
         atexit.register(self.stop)
 
     # METHODS TO OVERRIDE #
@@ -56,6 +54,7 @@ class DroneInterface(ABC):
         if not connect_success:
             self._logger.fatal("Drone failed to connect in DroneInterface.start, exiting...")
             raise Exception("Drone failed to connect")
+        self._loop.run_until_complete(self._drone.param.set_param_int("COM_RCL_EXCEPT", 4))
         arm_success = self._loop.run_until_complete(self._arm())
         while not arm_success:
             self._logger.error("Arming failure in DroneInterface.start, retrying...")
