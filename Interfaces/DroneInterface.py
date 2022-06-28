@@ -7,6 +7,7 @@ from threading import Thread
 from collections import deque
 from typing import Union
 import time
+import atexit
 
 # 3rd part libs
 from mavsdk import System
@@ -35,6 +36,10 @@ class DroneInterface(ABC):
         self._mavlink_queue = deque()
         self._mavlink_poll_rate = 1.0 / 60.0 if mavlink_poll_rate is None else 1.0 / mavlink_poll_rate
         self._mavlink_thread = Thread(name="MAVLINK", target=self._mavlink_dispatcher, args=(), kwargs={}, daemon=None)
+
+        loop.run_until_complete(drone._drone.param.set_param_int("COM_RCL_EXCEPT", 4))
+
+        atexit.register(self.stop)
 
     # METHODS TO OVERRIDE #
     # override this function to meet your specific
