@@ -4,10 +4,10 @@ from abc import abstractmethod, ABC
 from math import atan, degrees, sqrt, pow, cos, sin, radians
 import logging
 from threading import Thread
-from collections import deque
 from typing import Union
 import time
 import atexit
+from queue import Queue
 
 # 3rd part libs
 from mavsdk import System
@@ -17,9 +17,12 @@ from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed
 
 
 class DroneInterface(ABC):
-    def __init__(self, mavlink_poll_rate: Union[float, None] = None) -> None:
+    def __init__(self, system_address: str, mavlink_poll_rate: Union[float, None] = None) -> None:
+        # MAVSDK System Setup
         self._drone = System()
-        self._camera = None
+        self._address = system_address
+
+        # Internal Logger setup
         logging.basicConfig(
             filename="mavLog.log",
             filemode="w",
@@ -33,24 +36,29 @@ class DroneInterface(ABC):
         self._stopped = False
 
         # declare threads for dispatching mavlink commands and for doing the controller
-        self._mavlink_queue = deque()
+        self._mavlink_queue = Queue()
         self._mavlink_poll_rate = 1.0 / 60.0 if mavlink_poll_rate is None else 1.0 / mavlink_poll_rate
         self._mavlink_thread = Thread(name="MAVLINK", target=self._mavlink_dispatcher, args=(), kwargs={}, daemon=None)
 
+        # register the stop method to ensure everything gets shut down
         atexit.register(self.stop)
 
-    # METHODS TO OVERRIDE #
-    # override this function to meet your specific
-    # mavsdk device connection requirements
-    # TODO maybe switch this to a public private pair, so _connect is overridden, but high level is the same
-    @abstractmethod
-    async def connect(self) -> bool:
-        return False
-    # END METHODS TO OVERRIDE #
+    async def _connect(self) -> bool:
+        try:
+            await self._drone.connect(system_address=self._address)
+            async for state in self._drone.core.connect_state():
+                if state.is_connected:
+                    break
+            return True
+        except Exception:
+            return False
+
+    def connect(self) -> bool:
+        return self._loop.run_until_complete(self._connect())
 
     # method for handling startup of drone. After this, there should only be calls to the public api functions
     def start(self) -> 'DroneInterface':
-        connect_success = self._loop.run_until_complete(self.connect())
+        connect_success = self.connect()
         if not connect_success:
             self._logger.fatal("Drone failed to connect in DroneInterface.start, exiting...")
             raise Exception("Drone failed to connect")
@@ -70,8 +78,8 @@ class DroneInterface(ABC):
             try:
                 # get initial time
                 start_time = time.perf_counter()
-                # get command (using deque as FIFO queue)
-                command = self._mavlink_queue.popleft()
+                # get command (using FIFO queue)
+                command = self._mavlink_queue.pop()
                 self._logger.info(f"Processing command: {command}")
                 try:
                     self._loop.run_until_complete(command)  # change from run_until_complete but idk how
@@ -88,6 +96,7 @@ class DroneInterface(ABC):
                 sleep_dur = self._mavlink_poll_rate - elapsed_time
                 if sleep_dur > 0.0:
                     time.sleep(sleep_dur)
+        self._loop.run_until_complete(self._drone.action.land())
 
     def _start_thread(self) -> 'DroneInterface':
         self._mavlink_thread.start()
@@ -95,6 +104,9 @@ class DroneInterface(ABC):
 
     def stop(self) -> None:
         self._stopped = True
+        self._mavlink_thread.join()
+        self._drone.__del__()
+        del self._drone
 
     # mavlink related methods
     # NOTE: the following 3 methods (arm, takeoff, land) were switched to a private public system since their actual
@@ -110,7 +122,7 @@ class DroneInterface(ABC):
             return False
 
     def arm(self):
-        self._mavlink_queue.append(self._arm)
+        self._mavlink_queue.put(self._arm)
 
     async def _takeoff(self):
         try:
@@ -121,7 +133,7 @@ class DroneInterface(ABC):
             return False
 
     def takeoff(self):
-        self._mavlink_queue.append(self._takeoff)
+        self._mavlink_queue.put(self._takeoff)
 
     async def _land(self):
         try:
@@ -132,7 +144,7 @@ class DroneInterface(ABC):
             return False
 
     def land(self):
-        self._mavlink_queue.append(self._land)
+        self._mavlink_queue.put(self._land)
 
     async def _getLocation(self):
         try:
@@ -140,7 +152,10 @@ class DroneInterface(ABC):
             return location
         except Exception as e:
             self._logger.error(e)
-            return False
+            return None
+
+    def getLocation(self):
+        return self._loop.run_until_complete(self._getLocation())
 
     async def _getPositionNED(self):
         try:
@@ -170,10 +185,8 @@ class DroneInterface(ABC):
         return frame
 
     async def disconnect(self):
-        # NOTE added a join for MAVLINK thread
-        self._mavlink_queue.clear()
-        self._mavlink_thread.join()
         # TODO add other functionalities
+        pass
 
     async def maneuverTo(self, frame, cnn_x, cnn_y):
         localCoordinates = self._camera.deprojectPixelToPoint(frame, cnn_x, cnn_y)
@@ -272,8 +285,7 @@ class DroneInterface(ABC):
             self._logger.error(e)
             return False
 
-    async def startOffboard(self):
-
+    async def _startOffboard(self):
         try:
             await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
             try:
@@ -286,10 +298,19 @@ class DroneInterface(ABC):
             self._logger.error(e)
             return False
 
-    async def stopOffboard(self):
+    def startOffboard(self):
+        return self._loop.run_until_complete(self._startOffboard())
+
+    async def _stopOffboard(self):
         try:
             await self._drone.offboard.stop()
             return True
         except Exception as e:
             self._logger.error(e)
             return False
+
+    def stopOffboard(self):
+        return self._loop.run_until_complete(self._stopOffboard())
+
+
+
