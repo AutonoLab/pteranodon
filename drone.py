@@ -35,7 +35,6 @@ class Drone(ABC):
         # after connection run setup, then loop, run teardown during cleanup phase
         self.setup()
         self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
-        self._loop_thread.start()
 
     # properties for the class
     @property
@@ -71,6 +70,9 @@ class Drone(ABC):
     def _loop_loop(self): 
         while not self._stopped_loop:
             self.loop()
+
+    def start_loop(self):
+        self._loop_thread.start()
 
     @abstractmethod
     def teardown(self):
@@ -126,7 +128,10 @@ class Drone(ABC):
     # method to stop the thread for processing mavlink commands
     def stop(self):
         self._stopped_loop = True
-        self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
+        try:
+            self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
+        except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
+            pass
 
         # clear the queue and run teardown
         self._queue.clear()
