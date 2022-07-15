@@ -1,24 +1,24 @@
-from abc import abstractmethod
-from pkgutil import get_data
-from typing_extensions import Self
+from abc import ABC, abstractmethod
 
-from click import pass_context
 from SensorData import SensorData
-import datetime
 
 
-class Sensor:
-    def __init__(self, id):
-        self.id = id
-        self.sensor_data = SensorData(None)
+class Sensor(ABC):
+    def __init__(self, name):
+        self._name = name
+        self._sensor_data = SensorData(None)
+
+    @property
+    def name(self):
+        return self._name
 
     def update(self, data):
-        self.sensor_data.update(data)
+        self._sensor_data.update(data)
 
     @abstractmethod
-    def get_data():
+    def get_data(self):
         pass
 
     @abstractmethod
-    def close():
+    def close(self):
         pass

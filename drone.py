@@ -138,11 +138,6 @@ class Drone(ABC):
         self._stopped_mavlink = True
         self._mavlink_thread.join()
 
-    # method for killing threads
-    def kill_threads(self):
-        self._mavlink_thread.terminate()
-        self._loop_thread.terminate()
-
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
     def put(self, obj, args, kwargs):
