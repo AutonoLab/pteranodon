@@ -17,6 +17,7 @@ from SensorData import SensorData
 class RealSense(CameraInterface):
     def __init__(self):
         # Configure depth and color streams
+        super().__init__()
         self.pipeline = rs.pipeline()
         self.config = rs.config()
 
@@ -54,7 +55,6 @@ class RealSense(CameraInterface):
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         data = [color_image, depth_image]
-        print(data)
         # updates sensordata
         sensor.update(data)
         return color_image
@@ -83,6 +83,7 @@ class RealSense(CameraInterface):
     def getFrame(self):
         # Wait for a coherent pair of frames: depth and color
         return self.pipeline.wait_for_frames()
+
 
 if __name__ == "__main__":
     sensor = Sensor("RealSenseD435")

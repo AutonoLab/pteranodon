@@ -1,48 +1,33 @@
-import asyncio
-from time import time
+import time
 
-from Interfaces.DroneInterface import DroneInterface as di
+from drone import Drone
+from RealSense import RealSense
 
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
-class HexSoon(di):
-    ID = "dev/ttyACM0"
-    BAUDRATE = "9600"  # TODO: verify baudrate
-    ADDRESS = "serial:///" + ID
+class Hexsoon(Drone):
+    def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
+        super().__init__(address="serial:///dev/ttyACM0", time_slice=time_slice, min_follow_distance=min_follow_dist)
+        self.cam = RealSense()
+        self.frame = self.cam.get_data()
 
-    def __init__(self) -> None:
-        super().__init__()
+    def setup(self):
+        self.frame = self.cam.get_data()
 
-    # connect hexsoon to uart, and if successful,
-    # connect mavsdk to flight controller
-    async def connect(self) -> bool:
-        try:
-            await self._drone.connect(system_address=f"{HexSoon.ADDRESS}")
-            print("Waiting for drone to connect...")
-            async for state in self._drone.core.connection_state():
-                if state.is_connected:
-                    print(f"-- Connected to drone!")
-                    break
-            return True
-        except:
-            print("unable to connect mavsdk")
-            return False
+    def loop(self):
+        pass
+
+    def teardown(self):
+        self.cam.close()
 
 
 if __name__ == "__main__":
-    drone = HexSoon()
-    loop = asyncio.get_event_loop()
+    drone = Hexsoon()
 
-    drone = drone.start()
-    time.sleep(5)
+    drone.arm()
+    drone.takeoff()
 
-    loop.run_until_complete(drone.startOffboard())
-    time.sleep(5)
-
-    loop.run_until_complete(drone.maneuverWithNED(10, 10, 0))
     time.sleep(10)
 
-    loop.run_until_complete(drone.stopOffboard())
-
-    
-
+    drone.land()
+    drone.stop()
