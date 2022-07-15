@@ -275,10 +275,10 @@ class Drone(ABC):
         self.put(self._maneuver_to, args, kwargs)
 
     async def _maneuver_to(self, front, right, down):
-        totalDistance = sqrt(pow(front,2) + pow(right, 2) + pow(down,2))
+        totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
 
         if totalDistance < self._min_follow_distance:
-            return await self.offboard_hold()
+            return await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
         else:
             return await self._maneuver_with_ned(front, right, down)
 

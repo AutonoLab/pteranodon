@@ -20,20 +20,23 @@ class Hexsoon(Drone):
         print("done init")
 
     def setup(self):
-        self.frame = self.cam.get_data()
+        pass
 
     def loop(self):
         self.frame = self.cam.get_data()
         motion_vector = self.fp.processFrame(self.frame, display=False)
-        cam_point = self.cam.deprojectPixelToPoint(frame=self.frame, cnn_x=motion_vector[0], cnn_y=motion_vector[1])
 
-        # transform the cam_point to the drone_point
-        front, right, down = cam_point[2], cam_point[0], 0 - cam_point[1]
-
-        self.maneuver_to(front, right, down)
+        if motion_vector is not None:
+            cam_point = self.cam.deprojectPixelToPoint(frame=self.frame, cnn_x=motion_vector[0], cnn_y=motion_vector[1])
+            # transform the cam_point to the drone_point
+            front, right, down = cam_point[2], cam_point[0], 0 - cam_point[1]
+            self.maneuver_to(front, right, down)
 
     def teardown(self):
-        self.cam.close()
+        try:
+            self.cam.close()
+        except RuntimeError:
+            pass
         self.fp.close()
 
 
