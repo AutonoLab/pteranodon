@@ -136,6 +136,10 @@ class Video():
 
         return Gst.FlowReturn.OK
 
+    def deprojectPixelToPoint(self, frame, cnn_x, cnn_y):
+        # TODO, probably present in another class or method thing
+        return 10.0, 2.0, 2.0
+
 
 if __name__ == '__main__':
 	# Create the video object
