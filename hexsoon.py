@@ -56,5 +56,9 @@ if __name__ == "__main__":
         drone.start_loop()
         _ = input("press any key to end autonomous flight")
 
-    drone.land()
+    drone.return_to_launch()
+
+    # TODO, I think there needs to be an additional method present which will wait on returning until the drone has landed
+    # I supppose could steal the observe_in_air method from the MAVSDK examples
+
     drone.stop()
