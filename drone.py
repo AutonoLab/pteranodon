@@ -1,6 +1,3 @@
-from mavsdk import System
-from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude
-from mavsdk.action import ActionError
 from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
@@ -9,18 +6,22 @@ import atexit
 from math import atan, degrees, sqrt, pow, cos, sin, radians
 from abc import abstractmethod, ABC
 
+from mavsdk import System
+from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, OffboardError
+from mavsdk.action import ActionError
 
 class Drone(ABC):
-    def __init__(self, address: str, time_slice=0.050, min_follow_distance=5.0, bypass_com_rcl=True):
+    def __init__(self, address: str, time_slice=0.050, min_follow_distance=5.0):
         # setup the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
         self._time_slice = time_slice
         self._min_follow_distance = min_follow_distance
-        self._bypass_com_rcl = bypass_com_rcl
         self._address = address
 
         # setup telemetry fields
+        # TODO, could link this up to the other telemetry through a dictionary where we use a method name
+        # acquired automatically as the key. Then the properties would return self._telemetry_dict[method_name]
         self._telemetry_gps_info = None
         self._telemetry_position_velocity_ned = None
         self._telemetry_battery = None
@@ -43,6 +44,9 @@ class Drone(ABC):
         self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
 
         # setup the futures for telemetry
+        # TODO, I think there is a cleaner interface for handling these. Perhaps naming them all _get_telemetry to start
+        # and then using dir() to identify the methods and using ensure future on those. Lots more telemetry to add
+        # it would future proof the code a lot 
         self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info())
         self._get_position_velocity_ned_task = asyncio.ensure_future(self._get_position_velocity_ned())
         self._get_battery_task = asyncio.ensure_future(self._get_battery())
@@ -100,8 +104,6 @@ class Drone(ABC):
     def _connect(self):
         try:
             self._loop.run_until_complete(self._drone.connect(system_address=self.address))
-            if self._bypass_com_rcl:
-                self._loop.run_until_complete(self._drone.param.set_param_int("COM_RCL_EXCEPT", 4))
         except KeyboardInterrupt:
             self._cleanup()
             raise KeyboardInterrupt
@@ -204,7 +206,7 @@ class Drone(ABC):
         return self._loop.run_until_complete(self._drone.action.get_takeoff_altitude())
 
     def goto_location(self, *args, **kwargs):
-        self.put(self._drone.action.goto_location, args, kwargs)
+        self.put(self._drone.action.goto_location, *args, **kwargs)
 
     def hold(self):
         self.put(self._drone.action.hold)
@@ -222,19 +224,19 @@ class Drone(ABC):
         self.put(self._drone.action.return_to_launch)
 
     def set_actuator(self, *args, **kwargs):
-        self.put(self._drone.action.set_actuator, args, kwargs)
+        self.put(self._drone.action.set_actuator, *args, **kwargs)
 
     def set_current_speed(self, *args, **kwargs):
-        self.put(self._drone.action.set_current_speed, args, kwargs)
+        self.put(self._drone.action.set_current_speed, *args, **kwargs)
 
     def set_maximum_speed(self, *args, **kwargs):
-        self.put(self._drone.action.set_maximum_speed, args, kwargs)
+        self.put(self._drone.action.set_maximum_speed, *args, **kwargs)
 
     def set_return_to_launch_altitude(self, *args, **kwargs):
-        self.put(self._drone.action.set_return_to_launch_altitude, args, kwargs)
+        self.put(self._drone.action.set_return_to_launch_altitude, *args, **kwargs)
 
     def set_takeoff_altitude(self, *args, **kwargs):
-        self.put(self._drone.action.set_takeoff_altitude, args, kwargs)
+        self.put(self._drone.action.set_takeoff_altitude, *args, **kwargs)
 
     def shutdown(self):
         self.put(self._drone.action.shutdown)
@@ -309,10 +311,10 @@ class Drone(ABC):
         self.put(self._drone.offboard.set_velocity_body, VelocityBodyYawspeed(0, 0, 0, 0))
 
     def offboard_set_velocity_body(self, *args, **kwargs):
-        self.put(self._drone.offboard.set_velocity_body, args, kwargs)
+        self.put(self._drone.offboard.set_velocity_body, *args, **kwargs)
 
     def offboard_set_position_ned(self, *args, **kwargs):
-        self.put(self._drone.offboard.set_position_ned, args, kwargs)
+        self.put(self._drone.offboard.set_position_ned, *args, **kwargs)
 
     #########################################################
     # methods for maneuvering
@@ -362,5 +364,3 @@ class Drone(ABC):
 
         new_pos = PositionNedYaw(north, east, down, yaw)
         await self._drone.offboard.set_position_ned(new_pos)
-
-
