@@ -1,9 +1,3 @@
-## License: Apache 2.0. See LICENSE file in root directory.
-## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
-
-###############################################
-##      Open CV and Numpy integration        ##
-###############################################
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -54,19 +48,21 @@ class RealSense(CameraInterface):
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
+<<<<<<< HEAD
+=======
         data = [color_image, depth_image]
+>>>>>>> 7bb03b09652eea9b9a5d4b36965fe7fcbd4894aa
         # updates sensordata
-        sensor.update(data)
-        return color_image
+        # sensor.update(data)
+        return color_image, depth_image, color_frame, depth_frame
 
-    def deprojectPixelToPoint(self, frame, cnn_x, cnn_y):
+    def deprojectPixelToPoint(self, depth_frame, cnn_x, cnn_y):
         # convert center offset pixels to absolute offset from (0,0)
         # TODO: get info on motion vector
         x = 320 + cnn_x
         y = 240 + cnn_y
 
         # get focal length intrinsic
-        depth_frame = frame.get_depth_frame()
         depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
         # get depth at (x, y)
