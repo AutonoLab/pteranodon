@@ -48,10 +48,7 @@ class RealSense(CameraInterface):
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-<<<<<<< HEAD
-=======
-        data = [color_image, depth_image]
->>>>>>> 7bb03b09652eea9b9a5d4b36965fe7fcbd4894aa
+        
         # updates sensordata
         # sensor.update(data)
         return color_image, depth_image, color_frame, depth_frame
