@@ -1,8 +1,8 @@
 from time import sleep
 
-from drone import Drone
+from abstractdrone import AbstractDrone
 
-class Simple(Drone):
+class Simple(AbstractDrone):
     def __init__(self, address="serial:///dev/ttyACM0"):
         super().__init__(address=address)
 

@@ -1,12 +1,12 @@
 import time
 
-from drone import Drone
+from abstractdrone import AbstractDrone
 from RealSense import RealSense
 from hlca import FrameProcessor
 
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
-class Hexsoon(Drone):
+class Hexsoon(AbstractDrone):
     def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
         print("creating camera...")
         self.cam = RealSense()
