@@ -7,7 +7,7 @@ from math import atan, degrees, sqrt, pow, cos, sin, radians
 from abc import abstractmethod, ABC
 
 from mavsdk import System
-from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, OffboardError
+from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, OffboardError
 from mavsdk.action import ActionError
 
 class Drone(ABC):
