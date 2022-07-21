@@ -1,20 +1,12 @@
 import time
 
-<<<<<<< HEAD:csm/csm_gazebo.py
 from easy_drone import AbstractDrone
-=======
-from abstractdrone import AbstractDrone
->>>>>>> 469a3d9b9d83602ec701bb2082f1f0bdc0f60a37:gazebo.py
 from VideoStreamGST import Video
 from hlca import FrameProcessor
 
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
-<<<<<<< HEAD:csm/csm_gazebo.py
 class CSM_Gazebo(AbstractDrone):
-=======
-class Gazebo(AbstractDrone):
->>>>>>> 469a3d9b9d83602ec701bb2082f1f0bdc0f60a37:gazebo.py
     def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
         print("creating camera...")
         self.cam = Video()
