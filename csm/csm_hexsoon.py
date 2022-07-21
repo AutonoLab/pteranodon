@@ -1,12 +1,20 @@
 import time
 
+<<<<<<< HEAD:csm/csm_hexsoon.py
 from easy_drone import AbstractDrone
+=======
+from abstractdrone import AbstractDrone
+>>>>>>> 469a3d9b9d83602ec701bb2082f1f0bdc0f60a37:hexsoon.py
 from RealSense import RealSense
 from hlca import FrameProcessor
 
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
+<<<<<<< HEAD:csm/csm_hexsoon.py
 class CSM_Hexsoon(AbstractDrone):
+=======
+class Hexsoon(AbstractDrone):
+>>>>>>> 469a3d9b9d83602ec701bb2082f1f0bdc0f60a37:hexsoon.py
     def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
         print("creating camera...")
         self.cam = RealSense()
