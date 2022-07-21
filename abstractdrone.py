@@ -484,23 +484,30 @@ class AbstractDrone(ABC):
     #########################################################
     # methods for maneuvering
     #########################################################
-    def maneuver_to(self, front: float, right: float, down: float):
+    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)):
         """
-        param:: front -> float
-        param:: right -> float
-        param:: down -> float
+        :param front: Relative distance in front of drone
+        :param right: Relative distance to the right of drone
+        :param down: Relative distance below the drone
+        :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
+        (front, right, down). If set to False the drone will not move in that direction
         """
-        self.put(self._maneuver_to, front, right, down)
+        self.put(self._maneuver_to, front, right, down, on_dimensions)
 
-    async def _maneuver_to(self, front: float, right: float, down: float) -> None:
+    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
 
         if totalDistance < self._min_follow_distance:
             return await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
         else:
-            return await self._maneuver_with_ned(front, right, down)
+            return await self._maneuver_with_ned(front, right, down, on_dimensions)
 
-    async def _maneuver_with_ned(self, front: float, right: float, down: float) -> None:
+    async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
+        # zero out dimensions that will not be moved
+        front = 0.0 if on_dimensions[0] else front
+        right = 0.0 if on_dimensions[1] else right
+        down = 0.0 if on_dimensions[2] else down
+
         # get current position
         task = self.telemetry_position_velocity_ned
         current_pos = task.position
