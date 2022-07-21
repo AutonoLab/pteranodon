@@ -2,13 +2,11 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-from Interfaces.CameraInterface import CameraInterface
-
 from Sensor import Sensor
 from SensorData import SensorData
 
 
-class RealSense(CameraInterface):
+class RealSense():
     def __init__(self):
         # Configure depth and color streams
         super().__init__()
@@ -48,10 +46,7 @@ class RealSense(CameraInterface):
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-<<<<<<< HEAD
-=======
-        data = [color_image, depth_image]
->>>>>>> 7bb03b09652eea9b9a5d4b36965fe7fcbd4894aa
+        
         # updates sensordata
         # sensor.update(data)
         return color_image, depth_image, color_frame, depth_frame

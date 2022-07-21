@@ -5,6 +5,9 @@ import numpy as np
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
+from easy_drone import Sensor
+from easy_drone import SensorData
+
 
 # ALL CREDIT GOES TO 
 # https://github.com/bozkurthan/PX4-Gazebo-Opencv/blob/master/opencv-gazebo.py

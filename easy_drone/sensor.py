@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from SensorData import SensorData
+from .sensor_data import SensorData
 
 
 class Sensor(ABC):

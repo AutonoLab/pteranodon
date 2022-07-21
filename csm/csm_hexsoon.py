@@ -1,12 +1,12 @@
 import time
 
-from drone import Drone
+from easy_drone import AbstractDrone
 from RealSense import RealSense
 from hlca import FrameProcessor
 
 
 # Concrete implemention of DroneInterface using HexSoon edu 450
-class Hexsoon(Drone):
+class CSM_Hexsoon(AbstractDrone):
     def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
         print("creating camera...")
         self.cam = RealSense()
@@ -20,18 +20,20 @@ class Hexsoon(Drone):
         print("done init")
 
     def setup(self):
-        self.frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
         _ = self.fp.processFrame(self.frame, display=False)
 
     def loop(self):
-        self.frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
         motion_vector = self.fp.processFrame(self.frame, display=False)
 
         if motion_vector is not None:
+            print("acquired a motion vector")
             x, y = motion_vector
-            cam_point = self.cam.deprojectPixelToPoint(frame=self.frame, cnn_x=x, cnn_y=y)
+            cam_point = self.cam.deprojectPixelToPoint(depth_frame, cnn_x=x, cnn_y=y)
             # transform the cam_point to the drone_point
             front, right, down = cam_point[2], cam_point[0], 0 - cam_point[1]
+            print(f"DISPATCHING TO: {front}, {right}, {down}")
             self.maneuver_to(front, right, down)
 
     def teardown(self):
@@ -43,16 +45,19 @@ class Hexsoon(Drone):
 
 
 if __name__ == "__main__":
-    drone = Hexsoon()
+    drone = CSM_Hexsoon()
 
     drone.arm()
     drone.takeoff()
-    time.sleep(5)
 
     key = input("press l to start autonomous flight loop, press any other key to stop flight")
     if key == "l":
         drone.start_loop()
         _ = input("press any key to end autonomous flight")
 
-    drone.land()
+    drone.return_to_launch()
+
+    # TODO, I think there needs to be an additional method present which will wait on returning until the drone has landed
+    # I supppose could steal the observe_in_air method from the MAVSDK examples
+
     drone.stop()
