@@ -507,9 +507,9 @@ class AbstractDrone(ABC):
 
     async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         # zero out dimensions that will not be moved
-        front = 0.0 if on_dimensions[0] else front
-        right = 0.0 if on_dimensions[1] else right
-        down = 0.0 if on_dimensions[2] else down
+        front = 0.0 if not on_dimensions[0] else front
+        right = 0.0 if not on_dimensions[1] else right
+        down = 0.0 if not on_dimensions[2] else down
 
         # get current position
         task = self.telemetry_position_velocity_ned
