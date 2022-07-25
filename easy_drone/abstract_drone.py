@@ -6,6 +6,8 @@ import atexit
 from math import atan, degrees, sqrt, pow, cos, sin, radians
 from abc import abstractmethod, ABC
 from typing import Union, Any, List, Tuple, Callable, Dict, Optional
+import logging
+import sys
 
 from mavsdk import System
 from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, OffboardError
@@ -17,13 +19,17 @@ from .sensor_data import SensorData
 
 
 class AbstractDrone(ABC):
-    def __init__(self, address: str, time_slice=0.050, min_follow_distance=5.0):
+    def __init__(self, address: str, log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0):
         """
         :param address: Connection address for use with mavsdk.System.connect method
         :param time_slice: The interval to process commands in the queue
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
+        # setup the logger first
+        logger_name = "mavlog.log" if log_file_name is None else log_file_name
+        self._logger = self._setup_logger(logger_name)
+
         # set up the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
@@ -59,16 +65,48 @@ class AbstractDrone(ABC):
         # TODO, I think there is a cleaner interface for handling these. Perhaps naming them all _get_telemetry to start
         # and then using dir() to identify the methods and using ensure future on those. Lots more telemetry to add
         # it would future proof the code a lot 
-        self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info())
+        # self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info())
         self._get_position_velocity_ned_task = asyncio.ensure_future(self._get_position_velocity_ned())
-        self._get_battery_task = asyncio.ensure_future(self._get_battery())
+        # self._get_battery_task = asyncio.ensure_future(self._get_battery())
         self._get_attitude_euler_task = asyncio.ensure_future(self._get_attitude_euler())
 
         # finally, start the mavlink thread
         self._mavlink_thread.start()
         sleep(0.002)  # short sleep to ensure thread is started
 
+    # setup the logger
+    def _setup_logger(self, log_file_name: str) -> logging.Logger:
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        stdout_handler.setFormatter(formatter)
+
+        file_handler = logging.FileHandler(log_file_name)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
+        logger.addHandler(stdout_handler)
+
+        return logger
+
+    def _close_logger(self) -> None:
+        handlers = self._logger.handlers[:]
+        for handler in handlers:
+            self._logger.removeHandler(handler)
+            handler.close()
+
     # properties for the class
+    @property
+    def logger(self) -> logging.Logger:
+        """
+        :return: The logger instance setup in the __init__ method of AbstractDrone
+        """
+        return self._logger
+
     @property
     def address(self) -> str:
         """
@@ -209,7 +247,11 @@ class AbstractDrone(ABC):
         """
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
-        self.disarm()
+
+        try:
+            self.disarm()
+        except AttributeError:  # means that _cleanup has already occurred
+            pass
 
         # shutdown the any asyncgens that have been opened
         self._loop.run_until_complete(self._loop.shutdown_asyncgens())
@@ -229,6 +271,9 @@ class AbstractDrone(ABC):
         # finally join the mavlink thread and stop it
         self._stopped_mavlink = True
         self._mavlink_thread.join()
+
+        # close logging
+        self._close_logger()
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
@@ -427,17 +472,18 @@ class AbstractDrone(ABC):
     def _get_telemetry(self, prop):
         pass  # TODO, idea is to have this be a wrapper to check if a telemetry is null and execute some behavior
 
-    async def _get_gps_info(self) -> None:
-        async for gps_info in self._drone.telemetry.gps_info():
-            if gps_info != self._telemetry_gps_info:
-                self._telemetry_gps_info = gps_info
+    # async def _get_gps_info(self) -> None:
+    #     async for gps_info in self._drone.telemetry.gps_info():
+    #         if gps_info != self._telemetry_gps_info:
+    #             self._telemetry_gps_info = gps_info
 
-    @property
-    def telemetry_gps_info(self) -> telemetry.GpsInfo:
-        return self._telemetry_gps_info
+    # @property
+    # def telemetry_gps_info(self) -> telemetry.GpsInfo:
+    #     return self._telemetry_gps_info
 
     async def _get_position_velocity_ned(self):
         async for position in self._drone.telemetry.position_velocity_ned():
+            self._logger.info(f"POS_VEL_NED, N :{position.position.north_m}, E: {position.position.east_m}, D: {position.posiiton.down_m}")
             if position != self._telemetry_position_velocity_ned:
                 self._telemetry_position_velocity_ned = position
 
@@ -445,17 +491,18 @@ class AbstractDrone(ABC):
     def telemetry_position_velocity_ned(self) -> telemetry.PositionVelocityNed:
         return self._telemetry_position_velocity_ned
 
-    async def _get_battery(self):
-        async for battery in self._drone.telemetry.battery():
-            if battery != self._telemetry_battery:
-                self._telemetry_battery = battery
+    # async def _get_battery(self):
+    #     async for battery in self._drone.telemetry.battery():
+    #         if battery != self._telemetry_battery:
+    #             self._telemetry_battery = battery
 
-    @property
-    def telemetry_battery(self) -> telemetry.Battery:
-        return self._telemetry_battery
+    # @property
+    # def telemetry_battery(self) -> telemetry.Battery:
+    #     return self._telemetry_battery
 
     async def _get_attitude_euler(self):
         async for attitude in self._drone.telemetry.attitude_euler():
+            self._logger.info(f"ATTITUDE, yaw_deg: {attitude.yaw_deg}")
             if attitude != self._telemetry_attitude_euler:
                 self._telemetry_attitude_euler = attitude
 
@@ -507,9 +554,9 @@ class AbstractDrone(ABC):
 
     async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         # zero out dimensions that will not be moved
-        front = 0.0 if not on_dimensions[0] else front
-        right = 0.0 if not on_dimensions[1] else right
-        down = 0.0 if not on_dimensions[2] else down
+        front = 0.0 if on_dimensions[0] else front
+        right = 0.0 if on_dimensions[1] else right
+        down = 0.0 if on_dimensions[2] else down
 
         # get current position
         task = self.telemetry_position_velocity_ned
