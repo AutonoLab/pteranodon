@@ -30,9 +30,17 @@ class CSM_Gazebo(AbstractDrone):
 
     def loop(self):
         self.frame = self.cam.frame()
-        _ = self.fp.processFrame(self.frame, display=True)
+        motion_vector = self.fp.processFrame(self.frame, display=True)
 
         # TODO, acquire distance data in gazebo
+        # this is a little too basic of a system
+        if motion_vector is not None:
+            x, y = motion_vector
+            front = 5.0
+            right = (x - 320) * 2.0
+            down = (y - 240) * 2.0
+
+            self.maneuver_to(front, right, down)
 
     def teardown(self):
         self.fp.close()
