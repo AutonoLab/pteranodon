@@ -38,6 +38,13 @@ class AbstractDrone(ABC):
         self._min_follow_distance = min_follow_distance
         self._address = address
 
+        # setup resources for drone control, mavsdk.System, deque, thread, etc..
+        self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
+        self._queue = deque()
+        self._loop = asyncio.get_event_loop()
+        # self._loop.run_forever()  # run forever for telemetry data
+        self._mavlink_thread = Thread(name="Mavlink-Thread", target=self._process_command_loop)
+
         # setup telemetry fields
         # TODO, could link this up to the other telemetry through a dictionary where we use a method name
         # acquired automatically as the key. Then the properties would return self._telemetry_dict[method_name]
@@ -45,12 +52,17 @@ class AbstractDrone(ABC):
         self._telemetry_position_velocity_ned = None
         self._telemetry_battery = None
         self._telemetry_attitude_euler = None
+        self._telemetry_odometry = None
 
-        # setup resources for drone control, mavsdk.System, deque, thread, etc..
-        self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
-        self._queue = deque()
-        self._loop = asyncio.get_event_loop()
-        self._mavlink_thread = Thread(name="Mavlink-Thread", target=self._process_command_loop)
+        # setup the futures for telemetry
+        # TODO, I think there is a cleaner interface for handling these. Perhaps naming them all _get_telemetry to start
+        # and then using dir() to identify the methods and using ensure future on those. Lots more telemetry to add
+        # it would future proof the code a lot 
+        self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info())
+        self._get_position_velocity_ned_task = asyncio.ensure_future(self._get_position_velocity_ned())
+        self._get_battery_task = asyncio.ensure_future(self._get_battery())
+        self._get_attitude_euler_task = asyncio.ensure_future(self._get_attitude_euler())
+        self._get_odometry_task = asyncio.ensure_future(self._get_odometry())
 
         # register the stop method so everything cleans up
         atexit.register(self.stop)
@@ -61,15 +73,6 @@ class AbstractDrone(ABC):
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
         self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
-
-        # setup the futures for telemetry
-        # TODO, I think there is a cleaner interface for handling these. Perhaps naming them all _get_telemetry to start
-        # and then using dir() to identify the methods and using ensure future on those. Lots more telemetry to add
-        # it would future proof the code a lot 
-        # self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info())
-        self._get_position_velocity_ned_task = asyncio.ensure_future(self._get_position_velocity_ned())
-        # self._get_battery_task = asyncio.ensure_future(self._get_battery())
-        self._get_attitude_euler_task = asyncio.ensure_future(self._get_attitude_euler())
 
         # finally, start the mavlink thread
         self._mavlink_thread.start()
@@ -195,7 +198,13 @@ class AbstractDrone(ABC):
             self._cleanup()
             raise KeyboardInterrupt
         finally:
-            pass  # todo, something?
+            self._loop.run_until_complete(self._async_connect())
+
+    async def _async_connect(self):
+        async for state in self._drone.core.connection_state():
+            if state.is_connected:
+                self._logger.info("Drone connection established")
+                break
 
     def _cleanup(self) -> None:
         self._drone.__del__()
@@ -473,63 +482,55 @@ class AbstractDrone(ABC):
     def _get_telemetry(self, prop):
         pass  # TODO, idea is to have this be a wrapper to check if a telemetry is null and execute some behavior
 
-    # async def _get_gps_info(self) -> None:
-    #     async for gps_info in self._drone.telemetry.gps_info():
-    #         if gps_info != self._telemetry_gps_info:
-    #             self._telemetry_gps_info = gps_info
+    async def _get_gps_info(self) -> None:
+        async for gps_info in self._drone.telemetry.gps_info():
+            if gps_info != self._telemetry_gps_info:
+                self._telemetry_gps_info = gps_info
 
-    # @property
-    # def telemetry_gps_info(self) -> telemetry.GpsInfo:
-    #     return self._telemetry_gps_info
+    @property
+    def telemetry_gps_info(self) -> telemetry.GpsInfo:
+        return self._telemetry_gps_info
 
     async def _get_position_velocity_ned(self):
         async for position in self._drone.telemetry.position_velocity_ned():
-            self._logger.info(f"POS_VEL_NED, N :{position.position.north_m}, E: {position.position.east_m}, D: {position.posiiton.down_m}")
             if position != self._telemetry_position_velocity_ned:
+                pos = position.position
+                self._logger.info(f"POS_VEL_NED, N :{pos.north_m}, E: {pos.east_m}, D: {pos.down_m}")
                 self._telemetry_position_velocity_ned = position
 
     @property
     def telemetry_position_velocity_ned(self) -> telemetry.PositionVelocityNed:
         return self._telemetry_position_velocity_ned
 
-    # async def _get_battery(self):
-    #     async for battery in self._drone.telemetry.battery():
-    #         if battery != self._telemetry_battery:
-    #             self._telemetry_battery = battery
+    async def _get_battery(self):
+        async for battery in self._drone.telemetry.battery():
+            if battery != self._telemetry_battery:
+                self._telemetry_battery = battery
 
-    # @property
-    # def telemetry_battery(self) -> telemetry.Battery:
-    #     return self._telemetry_battery
+    @property
+    def telemetry_battery(self) -> telemetry.Battery:
+        return self._telemetry_battery
 
     async def _get_attitude_euler(self):
         async for attitude in self._drone.telemetry.attitude_euler():
-            self._logger.info(f"ATTITUDE, yaw_deg: {attitude.yaw_deg}")
             if attitude != self._telemetry_attitude_euler:
+                self._logger.info(f"ATTITUDE, yaw_deg: {attitude.yaw_deg}")
                 self._telemetry_attitude_euler = attitude
 
     @property
     def telemetry_attitude_euler(self) -> telemetry.EulerAngle:
         return self._telemetry_attitude_euler
 
-    async def observe_is_in_air(drone, running_tasks):
-        """ Monitors whether the drone is flying or not and
-        returns after landing """
-
-        was_in_air = False
-
-        async for is_in_air in drone.telemetry.in_air():
-            if is_in_air:
-                was_in_air = is_in_air
-
-            if was_in_air and not is_in_air:
-                for task in running_tasks:
-                    task.cancel()
-                    try:
-                        await task
-                    except asyncio.CancelledError:
-                        pass
-                await asyncio.get_event_loop().shutdown_asyncgens()
-                return
+    async def _get_odometry(self):
+        async for odom in self._drone.telemetry.odometry():
+            if odom != self._telemetry_odometry:
+                pb = odom.position_body
+                self._logger.info(f"ODOMETRY, {pb.x_m}, {pb.y_m}, {[pb.z_m]}")
+                self._telemetry_odometry = odom
+    
+    @property
+    def telemetry_odometry(self) -> telemetry.Odometry:
+        return self._telemetry_odometry
 
     #########################################################
     # methods for using offboard
