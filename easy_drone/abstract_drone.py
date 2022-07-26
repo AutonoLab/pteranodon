@@ -510,6 +510,26 @@ class AbstractDrone(ABC):
     def telemetry_attitude_euler(self) -> telemetry.EulerAngle:
         return self._telemetry_attitude_euler
 
+    async def observe_is_in_air(drone, running_tasks):
+        """ Monitors whether the drone is flying or not and
+        returns after landing """
+
+        was_in_air = False
+
+        async for is_in_air in drone.telemetry.in_air():
+            if is_in_air:
+                was_in_air = is_in_air
+
+            if was_in_air and not is_in_air:
+                for task in running_tasks:
+                    task.cancel()
+                    try:
+                        await task
+                    except asyncio.CancelledError:
+                        pass
+                await asyncio.get_event_loop().shutdown_asyncgens()
+                return
+
     #########################################################
     # methods for using offboard
     #########################################################
@@ -554,9 +574,9 @@ class AbstractDrone(ABC):
 
     async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         # zero out dimensions that will not be moved
-        front = 0.0 if on_dimensions[0] else front
-        right = 0.0 if on_dimensions[1] else right
-        down = 0.0 if on_dimensions[2] else down
+        front = 0.0 if not on_dimensions[0] else front
+        right = 0.0 if not on_dimensions[1] else right
+        down = 0.0 if not on_dimensions[2] else down
 
         # get current position
         task = self.telemetry_position_velocity_ned
