@@ -28,12 +28,16 @@ class CSM_Hexsoon(AbstractDrone):
         motion_vector = self.fp.processFrame(self.frame, display=False)
 
         if motion_vector is not None:
-            print("acquired a motion vector")
             x, y = motion_vector
             cam_point = self.cam.deprojectPixelToPoint(depth_frame, cnn_x=x, cnn_y=y)
             # transform the cam_point to the drone_point
             front, right, down = cam_point[2], cam_point[0], 0 - cam_point[1]
-            print(f"DISPATCHING TO: {front}, {right}, {down}")
+
+            pos = self.telemetry_position_velocity_ned.position
+
+            log_str = f"Dispatching maneuver_to -> front: {front}, right: {right}, down: {down}\n"
+            log_str += f"       Current Position -> north: {pos.north_m}, east: {pos.east_m}, down: {pos.down_m}"
+            self._logger.info(log_str)
             self.maneuver_to(front, right, down)
 
     def teardown(self):
