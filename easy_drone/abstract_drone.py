@@ -1,6 +1,7 @@
 from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
+import random
 import asyncio
 import atexit
 from math import atan, degrees, sqrt, pow, cos, sin, radians
@@ -46,7 +47,7 @@ class AbstractDrone(ABC):
         self._telemetry_attitude_euler = None
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
-        self._drone = System()
+        self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
         self._queue = deque()
         self._loop = asyncio.get_event_loop()
         self._mavlink_thread = Thread(name="Mavlink-Thread", target=self._process_command_loop)
