@@ -38,6 +38,9 @@ class AbstractDrone(ABC):
         self._min_follow_distance = min_follow_distance
         self._address = address
 
+        # tracker variables for state
+        self._offboard_started = False
+
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
         self._queue = deque()
@@ -305,6 +308,20 @@ class AbstractDrone(ABC):
         # print(f"Printing in put:\n{args}\n{kwargs}\nDone printing in put")
         self._queue.append((obj, args, kwargs))
 
+    def get_data_async(self, obj: Callable, *args: Any, **kwargs: Any) -> Any:
+        """
+        Used to acquire a return value that is generated through a coroutine.
+        Will wait for the coroutine to finish before returning the result.
+        :param obj: A callable function/method which will get executed in the event loop
+        :param args: The arguments for the function/method
+        :param kwargs: The keyword arguments for the function/method
+        :return: Any, the return value of the obj param
+        """
+        task = asyncio.ensure_future(obj(*args, **kwargs), loop=self._loop)
+        while not task.done():
+            sleep(0.0001)
+        return task.result()
+
     ##################################################
     # methods which implement the mavsdk System actions
     ##################################################
@@ -341,21 +358,21 @@ class AbstractDrone(ABC):
         Get the vehicle maximum speed (in metres/second).
         :return: Maximum speed (in metres/second)
         """
-        return self._loop.run_until_complete(self._drone.action.get_maximum_speed())
+        return self.get_data_async(self._drone.action.get_maximum_speed)
 
     def get_return_to_launch_altitude(self) -> float:
         """
         Get the return to launch minimum return altitude (in meters).
         :return: Return altitude relative to takeoff location (in meters)
         """
-        return self._loop.run_until_complete(self._drone.action.get_return_to_launch_altitude())
+        return self.get_data_async(self._drone.action.get_return_to_launch_altitude)
 
     def get_takeoff_altitude(self) -> float:
         """
         Get the takeoff altitude (in meters above ground).
         :return: Takeoff altitude relative to ground/takeoff location (in meters)
         """
-        return self._loop.run_until_complete(self._drone.action.get_takeoff_altitude())
+        return self.get_data_async(self._drone.action.get_takeoff_altitude)
 
     def goto_location(self, *args: float, **kwargs: float) -> None:
         """
@@ -558,23 +575,24 @@ class AbstractDrone(ABC):
     #########################################################
     # methods for maneuvering
     #########################################################
-    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)):
+    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
         """
+        A movement command for moving relative to the drones current position. The front direction is aligned directly with 
+        the drones front as defined in the configuration.
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
         :param down: Relative distance below the drone
         :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
-        self.put(self._maneuver_to, front, right, down, on_dimensions)
+        self.put(self._maneuver_to, front, right, down, on_dimensions, test_min)
 
-    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
-        totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
-
-        if totalDistance < self._min_follow_distance:
-            return await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
-        else:
-            return await self._maneuver_with_ned(front, right, down, on_dimensions)
+    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions=(True, True, True), test_min=False) -> None:
+        if test_min:
+            totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
+            if totalDistance < self._min_follow_distance:
+                return await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
+        return await self._maneuver_with_ned(front, right, down, on_dimensions)
 
     async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         # zero out dimensions that will not be moved
