@@ -4,11 +4,12 @@ from collections import deque
 import random
 import asyncio
 import atexit
-from math import atan, degrees, sqrt, pow, cos, sin, radians
+from math import atan2, degrees, sqrt, pow, cos, sin, radians
 from abc import abstractmethod, ABC
 from typing import Union, Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
+import inspect
 
 from mavsdk import System
 from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, OffboardError
@@ -17,6 +18,7 @@ import mavsdk.telemetry as telemetry
 
 from .sensor import Sensor
 from .sensor_data import SensorData
+from .telemetry import Telemetry
 
 
 class AbstractDrone(ABC):
@@ -56,24 +58,8 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # setup telemetry fields
-        # TODO, could link this up to the other telemetry through a dictionary where we use a method name
-        # acquired automatically as the key. Then the properties would return self._telemetry_dict[method_name]
-        self._telemetry_gps_info = None
-        self._telemetry_position_velocity_ned = None
-        self._telemetry_battery = None
-        self._telemetry_attitude_euler = None
-        self._telemetry_odometry = None
-
-        # setup the futures for telemetry
-        # TODO, I think there is a cleaner interface for handling these. Perhaps naming them all _get_telemetry to start
-        # and then using dir() to identify the methods and using ensure future on those. Lots more telemetry to add
-        # it would future proof the code a lot 
-        self._get_gps_info_task = asyncio.ensure_future(self._get_gps_info(), loop=self._loop)
-        self._get_position_velocity_ned_task = asyncio.ensure_future(self._get_position_velocity_ned(), loop=self._loop)
-        self._get_battery_task = asyncio.ensure_future(self._get_battery(), loop=self._loop)
-        self._get_attitude_euler_task = asyncio.ensure_future(self._get_attitude_euler(), loop=self._loop)
-        self._get_odometry_task = asyncio.ensure_future(self._get_odometry(), loop=self._loop)
+        # setup telemetry
+        self._telemetry = Telemetry(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
@@ -110,6 +96,13 @@ class AbstractDrone(ABC):
             handler.close()
 
     # properties for the class
+    @property
+    def telemetry(self) -> Telemetry:
+        """
+        :return: The Telemetry plugin class instances
+        """
+        return self._telemetry
+
     @property
     def logger(self) -> logging.Logger:
         """
@@ -217,13 +210,14 @@ class AbstractDrone(ABC):
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
-        # print(f"Printing in process_com:\n{args}\n{kwargs}\nDone printing in process_com")
-        if com is None:
-            pass  # just means it timed out without a new command
-        elif asyncio.iscoroutinefunction(com):  # if it is an async function
-            _ = asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
-        else:  # typical sync function
-            _ = com(*args, **kwargs)
+        if com is not None:
+            self._logger.info(f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}")
+            if asyncio.iscoroutinefunction(com):  # if it is an async function
+                _ = asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+            else:  # typical sync function
+                _ = com(*args, **kwargs)
+        else:
+            pass
 
     # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate. 
     def _process_command_loop(self) -> None:
@@ -305,7 +299,7 @@ class AbstractDrone(ABC):
         :param kwargs: The keyword arguments for the function/method
         :return: None
         """
-        # print(f"Printing in put:\n{args}\n{kwargs}\nDone printing in put")
+        self._logger.info(f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue")
         self._queue.append((obj, args, kwargs))
 
     def get_data_async(self, obj: Callable, *args: Any, **kwargs: Any) -> Any:
@@ -501,57 +495,6 @@ class AbstractDrone(ABC):
         self.put(self._drone.action.transition_to_multicopter)
 
     #########################################################
-    # methods for the mavsdk System telemetry 
-    #########################################################
-    def _get_telemetry(self, prop):
-        pass  # TODO, idea is to have this be a wrapper to check if a telemetry is null and execute some behavior
-
-    async def _get_gps_info(self) -> None:
-        async for gps_info in self._drone.telemetry.gps_info():
-            if gps_info != self._telemetry_gps_info:
-                self._telemetry_gps_info = gps_info
-
-    @property
-    def telemetry_gps_info(self) -> telemetry.GpsInfo:
-        return self._telemetry_gps_info
-
-    async def _get_position_velocity_ned(self):
-        async for position in self._drone.telemetry.position_velocity_ned():
-            if position != self._telemetry_position_velocity_ned:
-                self._telemetry_position_velocity_ned = position
-
-    @property
-    def telemetry_position_velocity_ned(self) -> telemetry.PositionVelocityNed:
-        return self._telemetry_position_velocity_ned
-
-    async def _get_battery(self):
-        async for battery in self._drone.telemetry.battery():
-            if battery != self._telemetry_battery:
-                self._telemetry_battery = battery
-
-    @property
-    def telemetry_battery(self) -> telemetry.Battery:
-        return self._telemetry_battery
-
-    async def _get_attitude_euler(self):
-        async for attitude in self._drone.telemetry.attitude_euler():
-            if attitude != self._telemetry_attitude_euler:
-                self._telemetry_attitude_euler = attitude
-
-    @property
-    def telemetry_attitude_euler(self) -> telemetry.EulerAngle:
-        return self._telemetry_attitude_euler
-
-    async def _get_odometry(self):
-        async for odom in self._drone.telemetry.odometry():
-            if odom != self._telemetry_odometry:
-                self._telemetry_odometry = odom
-    
-    @property
-    def telemetry_odometry(self) -> telemetry.Odometry:
-        return self._telemetry_odometry
-
-    #########################################################
     # methods for using offboard
     #########################################################
     def start_offboard(self) -> None:
@@ -596,16 +539,16 @@ class AbstractDrone(ABC):
 
     async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
         # zero out dimensions that will not be moved
-        front = 0.0 if not on_dimensions[0] else front
-        right = 0.0 if not on_dimensions[1] else right
+        front = 0.0 if not on_dimensions[0] else -1 * front
+        right = 0.0 if not on_dimensions[1] else -1 * right
         down = 0.0 if not on_dimensions[2] else down
 
         # get current position
-        task = self.telemetry_position_velocity_ned
+        task = self.telemetry.position_velocity_ned
         current_pos = task.position
 
         # get angle of rotation
-        task2 = self.telemetry_attitude_euler
+        task2 = self.telemetry.attitude_euler
         angle = task2.yaw_deg
         angle_of_rotation = radians(angle)
 
@@ -613,18 +556,13 @@ class AbstractDrone(ABC):
         north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
         east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
 
+        # get angle of yaw
+        yaw = degrees(atan2(east, north)) 
+
         # add offset to curent position
         north = north + current_pos.north_m
         east = east + current_pos.east_m
         down = down + current_pos.down_m
 
-        # get angle of yaw
-        if (north == 0) and (east > 0):
-            yaw = 90
-        elif (north == 0) and (east < 0):
-            yaw = -90
-        else:
-            yaw = degrees(atan(east / north))
-
-        new_pos = PositionNedYaw(north, east, down, yaw)
+        new_pos = PositionNedYaw(north, east, down, yaw)  # should probably be a more conrete yaw calc then something like this
         await self._drone.offboard.set_position_ned(new_pos)
