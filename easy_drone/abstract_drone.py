@@ -18,7 +18,7 @@ import mavsdk.telemetry as telemetry
 
 from .sensor import Sensor
 from .sensor_data import SensorData
-from .telemetry import Telemetry
+from .plugins import Telemetry, Geofence
 
 
 class AbstractDrone(ABC):
@@ -58,8 +58,9 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # setup telemetry
+        # setup all plugins
         self._telemetry = Telemetry(self._drone, self._loop, self._logger)
+        self._geofence = Geofence(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
@@ -95,14 +96,22 @@ class AbstractDrone(ABC):
             self._logger.removeHandler(handler)
             handler.close()
 
-    # properties for the class
+    # PLUGIN PROPERTIES
     @property
     def telemetry(self) -> Telemetry:
         """
-        :return: The Telemetry plugin class instances
+        :return: The Telemetry plugin class instance
         """
         return self._telemetry
 
+    @property
+    def geofence(self) -> Geofence:
+        """
+        :return: The Geofence plugin class instance
+        """
+        return self._geofence
+
+    # typical properties
     @property
     def logger(self) -> logging.Logger:
         """
