@@ -70,7 +70,7 @@ class Telemetry:
         if self._getter_data[func] is None:
             task = asyncio.ensure_future(getattr(self._system.telemetry, func)(), loop=self._loop)
             while not task.done():
-                sleep(0.0001)
+                sleep(0.000001)
             self._getter_data = task.result()
         return self._getter_data[func]
 

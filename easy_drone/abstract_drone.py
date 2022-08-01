@@ -18,7 +18,7 @@ import mavsdk.telemetry as telemetry
 
 from .sensor import Sensor
 from .sensor_data import SensorData
-from .plugins import Telemetry, Geofence
+from .plugins import Telemetry, Geofence, Param
 
 
 class AbstractDrone(ABC):
@@ -61,6 +61,8 @@ class AbstractDrone(ABC):
         # setup all plugins
         self._telemetry = Telemetry(self._drone, self._loop, self._logger)
         self._geofence = Geofence(self._drone, self._loop, self._logger)
+        self._param = Param(self._drone, self._loop, self._logger)
+        self._offboard = Offboard(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
@@ -110,6 +112,19 @@ class AbstractDrone(ABC):
         :return: The Geofence plugin class instance
         """
         return self._geofence
+
+    @property
+    def param(self) -> Param:
+        """
+        :return: The Param plugin class instance
+        """
+        return self._param
+
+    @property
+    def offboard(self) -> Offboard:
+        """
+        :return: The Offboard plugin class instance
+        """
 
     # typical properties
     @property
