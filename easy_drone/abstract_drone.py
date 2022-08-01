@@ -18,7 +18,7 @@ import mavsdk.telemetry as telemetry
 
 from .sensor import Sensor
 from .sensor_data import SensorData
-from .plugins import Telemetry, Geofence, Param
+from .plugins import Telemetry, Geofence, Param, Offboard
 
 
 class AbstractDrone(ABC):
