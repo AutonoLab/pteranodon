@@ -16,9 +16,8 @@ from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, Offb
 from mavsdk.action import ActionError, OrbitYawBehavior
 import mavsdk.telemetry as telemetry
 
-from .sensor import Sensor
-from .sensor_data import SensorData
-from .plugins import Telemetry, Geofence, Param, Offboard
+from .sensors import Sensor, SensorData
+from .plugins import Telemetry, Geofence, Param, Offboard, Calibration
 
 
 class AbstractDrone(ABC):
@@ -63,6 +62,7 @@ class AbstractDrone(ABC):
         self._geofence = Geofence(self._drone, self._loop, self._logger)
         self._param = Param(self._drone, self._loop, self._logger)
         self._offboard = Offboard(self._drone, self._loop, self._logger)
+        self._calibration = Calibration(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
@@ -125,6 +125,14 @@ class AbstractDrone(ABC):
         """
         :return: The Offboard plugin class instance
         """
+        return self._offboard
+
+    @property
+    def calibration(self) -> Calibration:
+        """
+        :return: The Calibration plugin class instance
+        """
+        return self._calibration
 
     # typical properties
     @property
@@ -519,27 +527,6 @@ class AbstractDrone(ABC):
         self.put(self._drone.action.transition_to_multicopter)
 
     #########################################################
-    # methods for using offboard
-    #########################################################
-    def start_offboard(self) -> None:
-        self.put(self._drone.offboard.set_attitude, Attitude(0.0, 0.0, 0.0, 0.0))
-        self.offboard_hold()
-        self.put(self._drone.offboard.start)
-
-    def stop_offboard(self) -> None:
-        self.offboard_hold()
-        self.put(self._drone.offboard.stop)
-
-    def offboard_hold(self) -> None:
-        self.put(self._drone.offboard.set_velocity_body, VelocityBodyYawspeed(0, 0, 0, 0))
-
-    def offboard_set_velocity_body(self, *args: VelocityBodyYawspeed, **kwargs: VelocityBodyYawspeed) -> None:
-        self.put(self._drone.offboard.set_velocity_body, *args, **kwargs)
-
-    def offboard_set_position_ned(self, *args: PositionNedYaw, **kwargs: PositionNedYaw) -> None:
-        self.put(self._drone.offboard.set_position_ned, *args, **kwargs)
-
-    #########################################################
     # methods for maneuvering
     #########################################################
     def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
@@ -577,16 +564,48 @@ class AbstractDrone(ABC):
         angle_of_rotation = radians(angle)
 
         # convert FRD to NED 
-        north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
-        east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
+        relative_north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
+        relative_east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
 
         # get angle of yaw
-        yaw = degrees(atan2(east, north)) 
+        yaw = degrees(atan2(relative_east, relative_north))
 
         # add offset to curent position
-        north = north + current_pos.north_m
-        east = east + current_pos.east_m
+        north = relative_north + current_pos.north_m
+        east = relative_east + current_pos.east_m
         down = down + current_pos.down_m
 
-        new_pos = PositionNedYaw(north, east, down, yaw)  # should probably be a more conrete yaw calc then something like this
+        new_pos = PositionNedYaw(north, east, down, yaw)
         await self._drone.offboard.set_position_ned(new_pos)
+
+    ####################
+    # method for creating a relative geofence
+    ######################
+    def create_geofence(self, distance: float) -> None:
+        """
+        Creates a relative inclusive geofence around the drones home coordinates. The geofence is defined as a square
+        where the distance parameter is equal to half the side length.
+        :param distance: The meters from home the drone can maneuver
+        :return: None
+        """
+        self.put(self._create_geofence, distance)
+
+    async def _create_geofence(self, distance: float) -> None:
+        latitude = self.telemetry.home.latitude_deg
+        longitude = self.telemetry.home.longitude_deg
+
+        # source for magic number
+        # https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of
+        # -meters
+        offset = distance * (1 / 111111)
+
+        # Define your geofence boundary
+        p1 = Point(latitude - offset, longitude - offset)
+        p2 = Point(latitude + offset, longitude - offset)
+        p3 = Point(latitude + offset, longitude + offset)
+        p4 = Point(latitude - offset, longitude + offset)
+
+        # Create a polygon object using your points
+        polygon = Polygon([p1, p2, p3, p4], Polygon.FenceType.INCLUSION)
+
+        await self._drone.geofence.upload_geofence([polygon])

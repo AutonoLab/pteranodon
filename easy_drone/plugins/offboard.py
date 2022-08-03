@@ -4,9 +4,7 @@ from logging import Logger
 from time import sleep
 from typing import Callable
 
-from mavsdk import System
-from mavsdk import offboard
-import mavsdk.offboard as offboard
+from mavsdk import System, offboard
 
 
 class Offboard:
@@ -52,7 +50,12 @@ class Offboard:
         asyncio.ensure_future(self._system.offboard.set_velocity_ned(vel_ned), loop=self._loop)
 
     def start(self) -> None:
+        asyncio.ensure_future(self._system.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.0)), loop=self._loop)
+        self.hold()
         asyncio.ensure_future(self._system.offboard.start(), loop=self._loop)
 
     def stop(self) -> None:
         asyncio.ensure_future(self._system.offboard.stop(), loop=self._loop)
+
+    def hold(self) -> None:
+        self.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
