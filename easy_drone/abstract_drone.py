@@ -17,7 +17,7 @@ from mavsdk.action import ActionError, OrbitYawBehavior
 import mavsdk.telemetry as telemetry
 
 from .sensors import Sensor, SensorData
-from .plugins import Telemetry, Geofence, Param, Offboard, Calibration
+from .plugins import *
 
 
 class AbstractDrone(ABC):
@@ -63,8 +63,11 @@ class AbstractDrone(ABC):
         self._param = Param(self._drone, self._loop, self._logger)
         self._offboard = Offboard(self._drone, self._loop, self._logger)
         self._calibration = Calibration(self._drone, self._loop, self._logger)
+        self._info = Info(self._drone, self._loop, self._logger)
+        self._transponder = Transponder(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
+        self._calibration.calibrate_all()  # run calibratiohn tasks before/during setup
         self.setup()
         self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
 
@@ -133,6 +136,20 @@ class AbstractDrone(ABC):
         :return: The Calibration plugin class instance
         """
         return self._calibration
+
+    @property
+    def info(self) -> Info:
+        """
+        :return: The Info plugin class instance
+        """
+        return self._info
+
+    @property
+    def transponder(self) -> Transponder:
+        """
+        :return: The Transponder plugin class instance
+        """
+        return self._transponder
 
     # typical properties
     @property

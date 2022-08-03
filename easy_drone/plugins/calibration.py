@@ -27,6 +27,10 @@ class Calibration:
         asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_accelerometer()),
                               loop=self._loop)
 
+    def calibrate_gimbal_accelerometer(self) -> None:
+        asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_gimbal_accelerometer()),
+                              loop=self._loop)
+
     def calibrate_magnetometer(self) -> None:
         asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_magnetometer()),
                               loop=self._loop)
@@ -35,8 +39,12 @@ class Calibration:
         asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_level_horizon()),
                               loop=self._loop)
 
+    def cancel(self) -> None:
+        asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.cancel()), loop=self._loop)
+
     def calibrate_all(self) -> None:
         self.calibrate_gyro()
         self.calibrate_accelerometer()
+        self.calibrate_gimbal_accelerometer()
         self.calibrate_magnetometer()
         self.calibrate_level_horizon()
