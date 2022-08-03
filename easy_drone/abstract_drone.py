@@ -58,6 +58,7 @@ class AbstractDrone(ABC):
         self._connect()
 
         # setup all plugins
+        self._core = Core(self._drone, self._loop, self._logger)
         self._telemetry = Telemetry(self._drone, self._loop, self._logger)
         self._geofence = Geofence(self._drone, self._loop, self._logger)
         self._param = Param(self._drone, self._loop, self._logger)
@@ -65,6 +66,7 @@ class AbstractDrone(ABC):
         self._calibration = Calibration(self._drone, self._loop, self._logger)
         self._info = Info(self._drone, self._loop, self._logger)
         self._transponder = Transponder(self._drone, self._loop, self._logger)
+        self._follow_me = FollowMe(self._drone, self._loop, self._logger)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self._calibration.calibrate_all()  # run calibratiohn tasks before/during setup
@@ -102,6 +104,13 @@ class AbstractDrone(ABC):
             handler.close()
 
     # PLUGIN PROPERTIES
+    @property
+    def core(self) -> Core:
+        """
+        :return: The Core plugin class instance
+        """
+        return self._core
+
     @property
     def telemetry(self) -> Telemetry:
         """
@@ -150,6 +159,13 @@ class AbstractDrone(ABC):
         :return: The Transponder plugin class instance
         """
         return self._transponder
+
+    @property
+    def follow_me(self) -> FollowMe:
+        """
+        :return: The FollowMe plugin class instance
+        """
+        return self._follow_me
 
     # typical properties
     @property
