@@ -4,15 +4,14 @@ from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
 
-from mavsdk import System
-from mavsdk import telemetry
+from mavsdk import System, telemetry
+
+from ..abstract_plugin import AbstractPlugin
 
 
-class Telemetry:
+class Telemetry(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
         self._all_methods = self._get_methods()
         self._rate_set_methods = self._get_set_methods(self._all_methods)

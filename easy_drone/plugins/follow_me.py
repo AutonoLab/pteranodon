@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, follow_me
 
+from ..abstract_plugin import AbstractPlugin
 
-class FollowMe:
+
+class FollowMe(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
         tasks = []

@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, info
 
+from ..abstract_plugin import AbstractPlugin
 
-class Info:
+
+class Info(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
         self._id = self._loop.run_until_complete(self._system.info.get_identification())
         self._product = self._loop.run_until_complete(self._system.info.get_product())

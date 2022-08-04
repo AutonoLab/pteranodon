@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, calibration
 
+from ..abstract_plugin import AbstractPlugin
 
-class Calibration:
+
+class Calibration(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
     async def _calibrate_wrapper(self, com: Callable) -> None:
         sensor_name = com.__name__.split("_")[1]

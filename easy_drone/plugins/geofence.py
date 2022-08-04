@@ -4,16 +4,15 @@ from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
 
-from mavsdk import System
-from mavsdk import geofence
+from mavsdk import System, geofence
 from mavsdk.geofence import Polygon
 
+from ..abstract_plugin import AbstractPlugin
 
-class Geofence:
+
+class Geofence(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
     def clear_geofence(self) -> None:
         """
