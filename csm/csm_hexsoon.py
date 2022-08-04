@@ -13,8 +13,11 @@ class CSM_Hexsoon(AbstractDrone):
         self.frame = None
         print("creating hlca instance...")
         self.fp = FrameProcessor(cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True)
+        self.cam.start()
 
-        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
+        # the intital call is present in __init__ vs setup so it can run before the call to super()
+        # the tensorflow threads have rendouvous errors when the AbstractDrone threads are already alive
         _ = self.fp.processFrame(self.frame, display=False)
 
         print("running Drone.__init__ ...")
@@ -28,13 +31,13 @@ class CSM_Hexsoon(AbstractDrone):
         pass
 
     def loop(self):
-        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
         motion_vector = self.fp.processFrame(self.frame, display=False)
 
         if motion_vector is not None:
             print("acquired a motion vector")
             x, y = motion_vector
-            cam_point = self.cam.deprojectPixelToPoint(depth_frame, cnn_x=x, cnn_y=y)
+            cam_point = self.cam.deproj_pixel_to_point(depth_frame, cnn_x=x, cnn_y=y)
             # transform the cam_point to the drone_point
             front, right, down = cam_point[2], cam_point[0], 0 - cam_point[1]
             print(f"DISPATCHING TO: {front}, {right}, {down}")
@@ -42,7 +45,7 @@ class CSM_Hexsoon(AbstractDrone):
 
     def teardown(self):
         try:
-            self.cam.close()
+            self.cam.stop()
         except RuntimeError:
             pass
         self.fp.close()

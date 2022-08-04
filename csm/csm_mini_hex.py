@@ -9,6 +9,7 @@ class CSM_Mini_Hexsoon(AbstractDrone):
     def __init__(self, min_follow_dist=5.0, time_slice=0.05) -> None:
         print("creating camera...")
         self.cam = RealSense()
+        self.cam.start()
         self.frame = None
 
         print("running Drone.__init__ ...")
@@ -19,13 +20,13 @@ class CSM_Mini_Hexsoon(AbstractDrone):
         self.put(self._drone.param.set_param_int, "COM_ARM_WO_GPS", 1)
 
     def setup(self):
-        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
 
     def loop(self):
-        self.frame, depth_image, color_frame, depth_frame = self.cam.get_data()
+        self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
 
     def teardown(self):
         try:
-            self.cam.close()
+            self.cam.stop()
         except RuntimeError:
             pass
