@@ -17,7 +17,9 @@ class Core(AbstractPlugin):
         self._connection_task = asyncio.ensure_future(self._update_connection_state(), loop=self._loop)
 
     def set_mavlink_timeout(self, delay_s: float) -> None:
-        asyncio.ensure_future(self._system.core.set_mavlink_timeout(delay_s), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.core.set_mavlink_timeout(delay_s), loop=self._loop)
+        )
 
     async def _update_connection_state(self) -> None:
         async for connection_state in self._system.core.connection_state():
