@@ -19,6 +19,9 @@ class Info(AbstractPlugin):
         self._flight_info = None
         self._speed_factor = None
 
+        self._flight_info_rate = 2.0
+        self._speed_factor_rate = 2.0
+
         self._flight_info_task = asyncio.ensure_future(self._make_async_gen(self._system.info.get_flight_information()),
                                                        loop=self._loop)
         self._speed_factor_task = asyncio.ensure_future(self._make_async_gen(self._system.info.get_speed_factor()),
@@ -27,12 +30,12 @@ class Info(AbstractPlugin):
     async def _flight_info_gen(self) -> None:
         while True:
             self._flight_info = await self._system.info.get_flight_information()
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(self._flight_info_rate)
 
     async def _speed_factor_gen(self) -> None:
         while True:
             self._speed_factor = await self._system.info.get_speed_factor()
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(self._speed_factor_rate)
 
     def get_identification(self) -> info.Identification:
         return self._id
@@ -48,3 +51,9 @@ class Info(AbstractPlugin):
 
     def get_speed_factor(self) -> float:
         return self._speed_factor
+
+    def set_flight_information_rate(self, rate: float) -> None:
+        self._flight_info_rate = rate
+
+    def set_speed_factor_rate(self, rate: float) -> None:
+        self._speed_factor_rate = rate

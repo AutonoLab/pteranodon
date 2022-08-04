@@ -17,7 +17,9 @@ class Transponder(AbstractPlugin):
         self._transponder_task = asyncio.ensure_future(self._system.transponder.transponder(), loop=self._loop)
 
     def set_rate_transponder(self, rate: float) -> None:
-        asyncio.ensure_future(self._system.transponder.set_rate_transponder(rate), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.transponder.set_rate_transponder(rate), loop=self._loop)
+        )
 
     async def _transponder_update(self) -> None:
         async for transponder in self._system.transponder.transponder():
