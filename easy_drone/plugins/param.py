@@ -4,15 +4,14 @@ from logging import Logger
 from time import sleep
 from typing import Callable
 
-from mavsdk import System
-from mavsdk import param
+from mavsdk import System, param
+
+from ..abstract_plugin import AbstractPlugin
 
 
-class Param:
+class Param(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
     def _get_async_data(self, com: Callable, *args, **kwargs) -> Any:
         task = asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
