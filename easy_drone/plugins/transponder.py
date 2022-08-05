@@ -6,18 +6,20 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, transponder
 
+from ..abstract_plugin import AbstractPlugin
 
-class Transponder:
+
+class Transponder(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
         self._transponder_data = None
         self._transponder_task = asyncio.ensure_future(self._system.transponder.transponder(), loop=self._loop)
 
     def set_rate_transponder(self, rate: float) -> None:
-        asyncio.ensure_future(self._system.transponder.set_rate_transponder(rate), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.transponder.set_rate_transponder(rate), loop=self._loop)
+        )
 
     async def _transponder_update(self) -> None:
         async for transponder in self._system.transponder.transponder():

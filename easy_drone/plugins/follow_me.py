@@ -3,28 +3,39 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any, Callable
+from functools import partial
 
 from mavsdk import System, follow_me
 
+from ..abstract_plugin import AbstractPlugin
 
-class FollowMe:
+
+class FollowMe(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
+        self._is_active = None
+        self._last_location = None
+        self._config = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
-        tasks = []
-        tasks.append(asyncio.ensure_future(self._system.follow_me.is_active(), loop=self._loop))
-        tasks.append(asyncio.ensure_future(self._system.follow_me.get_last_location(), loop=self._loop))
-        tasks.append(asyncio.ensure_future(self._system.follow_me.get_config(), loop=self._loop))
-        for task in tasks:
-            while not task.done():
-                sleep(0.000001)
+        self._is_active_task = asyncio.ensure_future(self._system.follow_me.is_active(), loop=self._loop)
+        self._is_active_task.add_done_callback(partial(self._is_active_callback))
+        self._last_location_task = asyncio.ensure_future(self._system.follow_me.get_last_location(), loop=self._loop)
+        self._last_location_task.add_done_callback(partial(self._last_location_callback))
+        self._config_task = asyncio.ensure_future(self._system.follow_me.get_config(), loop=self._loop)
+        self._config_task.add_done_callback(partial(self._config_callback))
 
-        self._is_active = tasks[0].result()
-        self._last_location = tasks[1].result()
-        self._config = tasks[2].result()
+    def _is_active_callback(self, task: Task) -> None:
+        self._is_active = task.result()
+        del self._is_active_task
+
+    def _last_location_callback(self, task: Task) -> None:
+        self._last_location = task.result()
+        del self._last_location_task
+
+    def _config_callback(self, task: Task) -> None:
+        self._config = task.result()
+        del self._config_task
 
     def get_config(self) -> follow_me.Config:
         return self._config
@@ -36,17 +47,25 @@ class FollowMe:
         return self._is_active
 
     def set_config(self, config: follow_me.Config) -> None:
-        asyncio.ensure_future(self._system.follow_me.set_config(config), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.follow_me.set_config(config), loop=self._loop)
+        )
         self._config = config
 
     def set_target_location(self, location: follow_me.TargetLocation) -> None:
-        asyncio.ensure_future(self._system.follow_me.set_target_location(location), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.follow_me.set_target_location(location), loop=self._loop)
+        )
         self._last_location = location
 
     def start(self) -> None:
-        asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
+        )
         self._is_active = True
 
     def stop(self) -> None:
-        asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
+        )
         self._is_active = False

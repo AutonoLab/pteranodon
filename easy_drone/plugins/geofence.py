@@ -4,23 +4,24 @@ from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
 
-from mavsdk import System
-from mavsdk import geofence
+from mavsdk import System, geofence
 from mavsdk.geofence import Polygon
 
+from ..abstract_plugin import AbstractPlugin
 
-class Geofence:
+
+class Geofence(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
 
     def clear_geofence(self) -> None:
         """
         Clears the current geofences present on the drone.
         """
         self._logger.info("Cleared all geofences onboard the system")
-        asyncio.ensure_future(self._system.geofence.clear_geofence(), loop=self._loop)
+        super().submit_task(
+            asyncio.ensure_future(self._system.geofence.clear_geofence(), loop=self._loop)
+        )
 
     def upload_geofence(self, polygons: List[Polygon]) -> None:
         """
@@ -28,4 +29,6 @@ class Geofence:
         :param polygons: A list of mavsdk.geofence.Polygon objects which form the geofence
         """
         self._logger.info(f"Uploading {len(polygons)} geofences to the drone")
-        asyncio.ensure_future(self._system.geofence.upload_geofence(polygons))
+        super().submit_task(
+            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons))
+        )

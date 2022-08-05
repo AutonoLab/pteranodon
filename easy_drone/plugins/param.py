@@ -1,42 +1,93 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
-from typing import Callable
+from typing import Callable, List, Union
+from functools import partial
 
-from mavsdk import System
-from mavsdk import param
+from mavsdk import System, param
+
+from ..abstract_plugin import AbstractPlugin
 
 
-class Param:
+class Param(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        self._system = system
-        self._loop = loop
-        self._logger = logger
+        super().__init__(system, loop, logger)
+        self._all_params = None
+        self._custom_params = None
+        self._float_params = None
+        self._int_params = None
+        self._param_task = None
+        self.refresh()
 
-    def _get_async_data(self, com: Callable, *args, **kwargs) -> Any:
-        task = asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
-        while not task.done():
-            sleep(0.000001)
-        return task.result()
+    def _update_params_callback(self, task: Task) -> None:
+        all_params = task.result()
+        self._all_params = all_params
+        self._custom_params = self._all_params.custom_params
+        self._float_params = self._all_params.float_params
+        self._int_params = self._all_params.int_params
+
+    def _set_param_callback(self, task: Union[Task, None]) -> None:
+        # can use a Union parameter for the callback since the task itself is not edited
+        self._param_task = asyncio.ensure_future(self._system.get_all_params(), loop=self._loop)
+        self._param_task.add_done_callback(partial(self._update_params_callback))
+
+    @staticmethod
+    def _find_param(name: str, param_list: List) -> Any:
+        for param in param_list:
+            if name == param.name:
+                return param.value
+        return None
+
+    def get_param(self, name: str, search_custom=False, search_float=False, search_int=False) -> Any:
+        """
+        Method which gets the value of a parameter found in any of the parameter lists. The order in which the parameter
+        value is returned is -> custom, float, int. Thus, if a parameter is found in custom that value will be returned
+        before the float or int parameters are searched
+        :param name: The name of the parameters in string form
+        :param search_custom: Boolean, true if the custom parameters should be searched
+        :param search_float: Boolean, true if the float parameters should be searched
+        :param search_int: Boolean, true if the int parameters should be searched
+        :returns: The value of the parameter if found, otherwise None
+        """
+        param_val = None
+        if search_custom:
+            param_val = Param._find_param(name, self._custom_params)
+        elif param_val is None and search_float:
+            param_val = Param._find_param(name, self._float_params)
+        elif param_val is None and search_int:
+            param_val = Param._find_param(name, self._int_params)
+        return param_val
+
+    def get_param_custom(self, name: str) -> Union[str, None]:
+        return self.get_param(name, True, False, False)
+
+    def get_param_float(self, name: str) -> Union[float, None]:
+        return self.get_param(name, False, True, False)
+
+    def get_param_int(self, name: str) -> Union[int, None]:
+        return self.get_param(name, False, False, True)
 
     def get_all_params(self) -> param.AllParams:
-        return self._get_async_data(self._system.param.get_all_params)
-
-    def get_param_custom(self, name: str) -> str:
-        return self._get_async_data(self._system.param.get_param_custom, name)
-
-    def get_param_float(self, name: str) -> float:
-        return self._get_async_data(self._system.param.get_param_float, name)
-
-    def get_param_int(self, name: str) -> int:
-        return self._get_async_data(self._system.param.get_param_int, name)
+        return self._all_params
 
     def set_param_custom(self, name: str, value: str) -> None:
-        asyncio.ensure_future(self._system.param.set_param_custom(name, value), loop=self._loop)
+        param_task = super().submit_task(
+            asyncio.ensure_future(self._system.param.set_param_custom(name, value), loop=self._loop)
+        )
+        param_task.add_done_callback(partial(self._set_param_callback))
 
-    def set_param_custom(self, name: str, value: float) -> None:
-        asyncio.ensure_future(self._system.param.set_param_float(name, value), loop=self._loop)
+    def set_param_float(self, name: str, value: float) -> None:
+        param_task = super().submit_task(
+            asyncio.ensure_future(self._system.param.set_param_float(name, value), loop=self._loop)
+        )
+        param_task.add_done_callback(partial(self._set_param_callback))
 
-    def set_param_custom(self, name: str, value: int) -> None:
-        asyncio.ensure_future(self._system.param.set_param_int(name, value), loop=self._loop)
+    def set_param_int(self, name: str, value: int) -> None:
+        param_task = super().submit_task(
+            asyncio.ensure_future(self._system.param.set_param_int(name, value), loop=self._loop)
+        )
+        param_task.add_done_callback(partial(self._set_param_callback))
+
+    def refresh(self) -> None:
+        self._set_param_callback(None)
