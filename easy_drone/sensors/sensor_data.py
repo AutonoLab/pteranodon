@@ -1,32 +1,32 @@
 import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 
 class SensorData:
-    def __init__(self, data: Optional[Any] = None):
+    def __init__(self, value: Optional[Any] = None):
         self._timestamp = datetime.datetime.now()
-        self._data = data
-        self._type = type(data)
+        self._value = value
+        self._type = type(value)
 
-    def __eq__(self, other: "SensorData") -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, SensorData):
-            return self.data == other.data and self.timestamp == other.timestamp
+            return self.value == other.value and self.timestamp == other.timestamp
         return False
 
     def __repr__(self) -> str:
-        return f"SensorData({self._timestamp},{self._type},{self._data})"
+        return f"SensorData({self._timestamp},{self._type},{self._value})"
 
     def __str__(self) -> str:
-        return f"({self._timestamp},{self._type},{self._data})"
+        return f"({self._timestamp},{self._type},{self._value})"
 
-    def update(self, data: Any):
+    def update(self, value: Any):
         self._timestamp = datetime.datetime.now()
-        self._data = data
-        self._type = type(data)
+        self._value = value
+        self._type = type(value)
 
     @property
-    def data(self) -> Any:
-        return self._data
+    def value(self) -> Any:
+        return self._value
 
     @property
     def timestamp(self) -> datetime.datetime:

@@ -6,12 +6,11 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
 from easy_drone import Sensor
-from easy_drone import SensorData
 
 
 # ALL CREDIT GOES TO 
 # https://github.com/bozkurthan/PX4-Gazebo-Opencv/blob/master/opencv-gazebo.py
-class Video():
+class Video(Sensor):
     """BlueRov video capture class constructor
     Attributes:
         port (int): Video UDP port
@@ -28,6 +27,11 @@ class Video():
         Args:
             port (int, optional): UDP port
         """
+
+        # TODO, look into if it is possible to transfer this to a non-callback based system
+        # right now the sensor abstract class is implemented with just memory transfer which is in-efficient
+        # while it wont be slow since python uses pointers for numpy arrays, there are better options.
+        super().__init__("Virtual-Camera", 30.0)
 
         Gst.init(None)
 
@@ -139,23 +143,8 @@ class Video():
 
         return Gst.FlowReturn.OK
 
-    def deprojectPixelToPoint(self, frame, cnn_x, cnn_y):
-        # TODO, probably present in another class or method thing
-        return 10.0, 2.0, 2.0
+    def update_data(self):
+        self.data.update(self._frame)
 
-
-if __name__ == '__main__':
-	# Create the video object
-	# Add port= if is necessary to use a different one
-	video = Video()
-	
-	while True:
-		# Wait for the next frame
-		if not video.frame_available():
-		        continue
-
-		frame = video.frame()
-		cv2.imshow('Golden Drone Monkey Cam', frame)
-		if cv2.waitKey(1) & 0xFF == ord('q'):
-			print("quit")
-			break
+    def teardown(self):
+        pass

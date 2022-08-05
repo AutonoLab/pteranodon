@@ -16,12 +16,13 @@ from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, Offb
 from mavsdk.action import ActionError, OrbitYawBehavior
 import mavsdk.telemetry as telemetry
 
-from .sensors import Sensor, SensorData
+from .sensors import Sensor, SensorData, SensorManager
 from .plugins import *
 
 
 class AbstractDrone(ABC):
-    def __init__(self, address: str, log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0):
+    def __init__(self, address: str, sensor_list: Optional[List[Sensor]] = None, 
+                 log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0):
         """
         :param address: Connection address for use with mavsdk.System.connect method
         :param time_slice: The interval to process commands in the queue
@@ -68,6 +69,9 @@ class AbstractDrone(ABC):
         self._transponder = Transponder(self._drone, self._loop, self._logger)
         self._follow_me = FollowMe(self._drone, self._loop, self._logger)
 
+        # setup the sensors
+        self._sensor_manager = SensorManager(sensor_list)
+
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self._calibration.calibrate_all()  # run calibratiohn tasks before/during setup
         self.setup()
@@ -76,7 +80,7 @@ class AbstractDrone(ABC):
         # finally, start the mavlink thread
         self._mavlink_thread.start()
         self._telemetry_thread.start()
-        sleep(0.002)  # short sleep to ensure thread is started
+        self._sensor_manager.start_all_sensors()
 
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
@@ -166,6 +170,10 @@ class AbstractDrone(ABC):
         :return: The FollowMe plugin class instance
         """
         return self._follow_me
+
+    @property
+    def sensors(self) -> SensorManager:
+        return self._sensor_manager
 
     # typical properties
     @property
