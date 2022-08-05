@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Any, Union, Optional
 from threading import Thread
 import time
 
@@ -14,7 +14,7 @@ class Sensor(ABC):
         """
         self._name = sensor_name
         # convert to ms for a direct sleep call
-        self._poll_rate = None if poll_rate is None else 1000.0 / poll_rate
+        self._poll_rate = None if poll_rate is None else 1.0 / poll_rate
         self._sensor_data = SensorData()
         self._stopped = False
         self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())
@@ -64,7 +64,7 @@ class Sensor(ABC):
 
     @poll_rate.setter
     def poll_rate(self, rate: float) -> None:
-        self._poll_rate = 1000.0 / rate
+        self._poll_rate = 1.0 / rate
 
     @property
     def data(self) -> SensorData:
