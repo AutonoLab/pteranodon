@@ -1,8 +1,8 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, AsyncGenerator
 
 from mavsdk import System, calibration
 
@@ -13,50 +13,74 @@ class Calibration(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__(system, loop, logger)
 
-    async def _calibrate_wrapper(self, com: Callable) -> None:
+    async def _calibrate_wrapper(self, com: AsyncGenerator) -> None:
         sensor_name = com.__name__.split("_")[1]
         self._logger.info(f"Beginning calibration of {sensor_name}")
-        async for data in com():
-            self._logger.info(data)
+        try:
+            async for data in com:
+                pass
+        except calibration.CalibrationError as e:
+            self._logger.error(f"{sensor_name} calibration {e}")
         self._logger.info(f"Finished calibration of {sensor_name}")
 
-    def calibrate_gyro(self) -> None:
-        super().submit_task(
+    def _calibrate_gyro(self) -> Task:
+        return super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_gyro()), loop=self._loop)
         )
+    
+    def calibrate_gyro(self) -> None:
+        self._calibrate_gyro()
 
-    def calibrate_accelerometer(self) -> None:
-        super().submit_task(
+    def _calibrate_accelerometer(self) -> Task:
+        return super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_accelerometer()),
                                   loop=self._loop)
         )
 
-    def calibrate_gimbal_accelerometer(self) -> None:
-        super().submit_task(
+    def calibrate_accelerometer(self) -> None:
+        self._calibrate_accelerometer()
+
+    def _calibrate_gimbal_accelerometer(self) -> Task:
+        return super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_gimbal_accelerometer()),
                                   loop=self._loop)
         )
+    
+    def calibrate_gimbal_accelerometer(self) -> None:
+        self._calibrate_gimbal_accelerometer()
 
-    def calibrate_magnetometer(self) -> None:
-        super().submit_task(
+    def _calibrate_magnetometer(self) -> Task:
+        return super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_magnetometer()),
                                   loop=self._loop)
         )
+    
+    def calibrate_magnetometer(self) -> None:
+        self._calibrate_magnetometer()
 
-    def calibrate_level_horizon(self) -> None:
-        super().submit_task(
+    def _calibrate_level_horizon(self) -> Task:
+        return super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_level_horizon()),
                                   loop=self._loop)
         )
+    
+    def calibrate_level_horizon(self) -> None:
+        self._calibrate_level_horizon()
 
     def cancel(self) -> None:
         super().submit_task(
             asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.cancel()), loop=self._loop)
         )
 
+    async def _calibrate_all(self) -> None:
+        tasks = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
+                 self._calibrate_magnetometer, self._calibrate_level_horizon]
+        for task in tasks:
+            task = asyncio.ensure_future(task(), loop=self._loop)
+            while not task.done():
+                await asyncio.sleep(0.05)
+
     def calibrate_all(self) -> None:
-        self.calibrate_gyro()
-        self.calibrate_accelerometer()
-        self.calibrate_gimbal_accelerometer()
-        self.calibrate_magnetometer()
-        self.calibrate_level_horizon()
+        super().submit_task(
+            asyncio.ensure_future(self._calibrate_all(), loop=self._loop)
+        )

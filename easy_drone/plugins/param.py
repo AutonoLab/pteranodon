@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Any
 from functools import partial
 
 from mavsdk import System, param
@@ -23,13 +23,16 @@ class Param(AbstractPlugin):
     def _update_params_callback(self, task: Task) -> None:
         all_params = task.result()
         self._all_params = all_params
-        self._custom_params = self._all_params.custom_params
+        try:
+            self._custom_params = self._all_params.custom_params
+        except AttributeError:
+            pass
         self._float_params = self._all_params.float_params
         self._int_params = self._all_params.int_params
 
     def _set_param_callback(self, task: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = asyncio.ensure_future(self._system.get_all_params(), loop=self._loop)
+        self._param_task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
         self._param_task.add_done_callback(partial(self._update_params_callback))
 
     @staticmethod
@@ -72,10 +75,13 @@ class Param(AbstractPlugin):
         return self._all_params
 
     def set_param_custom(self, name: str, value: str) -> None:
-        param_task = super().submit_task(
-            asyncio.ensure_future(self._system.param.set_param_custom(name, value), loop=self._loop)
-        )
-        param_task.add_done_callback(partial(self._set_param_callback))
+        try:
+            param_task = super().submit_task(
+                asyncio.ensure_future(self._system.param.set_param_custom(name, value), loop=self._loop)
+            )
+            param_task.add_done_callback(partial(self._set_param_callback))
+        except AttributeError:
+            self._logger.error(f"Unable to set param: {name} to {value}. No attribute set_param_custom")
 
     def set_param_float(self, name: str, value: float) -> None:
         param_task = super().submit_task(

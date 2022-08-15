@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any, Callable
@@ -14,7 +14,7 @@ class Transponder(AbstractPlugin):
         super().__init__(system, loop, logger)
 
         self._transponder_data = None
-        self._transponder_task = asyncio.ensure_future(self._system.transponder.transponder(), loop=self._loop)
+        self._transponder_task = asyncio.ensure_future(self._transponder_update(), loop=self._loop)
 
     def set_rate_transponder(self, rate: float) -> None:
         super().submit_task(

@@ -7,8 +7,10 @@ from .sensor_data import SensorData
 class SensorManager:
     def __init__(self, sensors: List[Sensor]) -> None:
         self._sensors = {}
-        for sensor in sensors:
-            self._sensors[sensor.name] = sensor
+        
+        if sensors is not None:
+            for sensor in sensors:
+                self._sensors[sensor.name] = sensor
 
     @property
     def sensors(self) -> List[Sensor]:

@@ -3,6 +3,7 @@ from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from collections import deque
 from functools import partial
+import platform
 
 from mavsdk import System
 
@@ -13,11 +14,16 @@ class AbstractPlugin(ABC):
         self._loop = loop
         self._logger = logger
 
+        self._use_coro_names = True
+        if int(platform.python_version().split(".")[1]) < 8:
+            self._use_coro_names = False
+
         self._task_cache = deque(maxlen=10)
         self._result_cache = deque(maxlen=10)
 
     def _task_callback(self, task: Task) -> None:
-        self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
+        if self._use_coro_names:
+            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
         self._result_cache.append(task.result())
 
     def submit_task(self, new_task: Task) -> Task:

@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any

@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
 from typing import Callable
@@ -30,7 +30,7 @@ class Offboard(AbstractPlugin):
             asyncio.ensure_future(self._system.offboard.set_acceleration_ned(accel_ned), loop=self._loop)
         )
 
-    def set_acuator_control(self, act_ctrl: offboard.AcuatorControl) -> None:
+    def set_acuator_control(self, act_ctrl: offboard.ActuatorControl) -> None:
         super().submit_task(
             asyncio.ensure_future(self._system.offboard.set_acuator_control(act_ctrl), loop=self._loop)
         )
@@ -60,7 +60,7 @@ class Offboard(AbstractPlugin):
             asyncio.ensure_future(self._system.offboard.set_position_velocity_ned(pos, vel), loop=self._loop)
         )
 
-    def set_velocity_body(self, vel_body: offboard.VelocityBodyYawSpeed) -> None:
+    def set_velocity_body(self, vel_body: offboard.VelocityBodyYawspeed) -> None:
         super().submit_task(
             asyncio.ensure_future(self._system.offboard.set_velocity_body(vel_body), loop=self._loop)
         )

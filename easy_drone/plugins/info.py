@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any, Callable
@@ -13,19 +13,44 @@ class Info(AbstractPlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__(system, loop, logger)
 
-        self._id = self._loop.run_until_complete(self._system.info.get_identification())
-        self._product = self._loop.run_until_complete(self._system.info.get_product())
-        self._version = self._loop.run_until_complete(self._system.info.get_version())
+        self._id = None
+        self._product = None
+        self._version = None
         self._flight_info = None
         self._speed_factor = None
 
         self._flight_info_rate = 2.0
         self._speed_factor_rate = 2.0
 
-        self._flight_info_task = asyncio.ensure_future(self._make_async_gen(self._system.info.get_flight_information()),
-                                                       loop=self._loop)
-        self._speed_factor_task = asyncio.ensure_future(self._make_async_gen(self._system.info.get_speed_factor()),
-                                                        loop=self._loop)
+        self._id_task = asyncio.ensure_future(self._get_id(), loop=self._loop)
+        self._product_task = asyncio.ensure_future(self._get_product(), loop=self._loop)
+        self._version_task = asyncio.ensure_future(self._get_version(), loop=self._loop)
+        self._flight_info_task = asyncio.ensure_future(self._flight_info_gen(), loop=self._loop)
+        self._speed_factor_task = asyncio.ensure_future(self._speed_factor_gen(), loop=self._loop)
+
+    async def _get_id(self) -> None:
+        while True:
+            try:
+                self._id = await self._system.info.get_identification()
+                break                
+            except info.InfoError:
+                pass
+    
+    async def _get_product(self) -> None:
+        while True:
+            try:
+                self._product = await self._system.info.get_product()
+                break                
+            except info.InfoError:
+                pass
+    
+    async def _get_version(self) -> None:
+        while True:
+            try:
+                self._version = await self._system.info.get_version()
+                break                
+            except info.InfoError:
+                pass
 
     async def _flight_info_gen(self) -> None:
         while True:
