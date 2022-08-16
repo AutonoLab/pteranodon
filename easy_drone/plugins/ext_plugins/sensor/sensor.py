@@ -77,8 +77,8 @@ class Sensor(ABC):
     @abstractmethod
     def update_data(self):
         """
-        A method which takes no parameters and has no return value. This handles updating the sensors data inside of the
-        data field. This method gets called repeatedly inside of the sensors update loop at the rate defined by
+        A method which takes no parameters and has no return value. This handles updating the sensor data inside of the
+        data field. This method gets called repeatedly inside of the sensor update loop at the rate defined by
         poll_rate.
         """
         pass
