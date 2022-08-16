@@ -9,7 +9,8 @@ from mavsdk import System
 
 
 class AbstractPlugin(ABC):
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+        self._name = name
         self._system = system
         self._loop = loop
         self._logger = logger
@@ -21,10 +22,17 @@ class AbstractPlugin(ABC):
         self._task_cache = deque(maxlen=10)
         self._result_cache = deque(maxlen=10)
 
+    @property
+    def name(self) -> str:
+        return self._name
+
     def _task_callback(self, task: Task) -> None:
         if self._use_coro_names:
             self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
-        self._result_cache.append(task.result())
+        try:
+            self._result_cache.append(task.result())
+        except Exception as e:
+            self._logging.error(e)
 
     def submit_task(self, new_task: Task) -> Task:
         """

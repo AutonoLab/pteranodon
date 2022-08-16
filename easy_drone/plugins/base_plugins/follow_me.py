@@ -7,12 +7,12 @@ from functools import partial
 
 from mavsdk import System, follow_me
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class FollowMe(AbstractPlugin):
+class FollowMe(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("follow_me", system, loop, logger)
         self._is_active = None
         self._last_location = None
         self._config = None

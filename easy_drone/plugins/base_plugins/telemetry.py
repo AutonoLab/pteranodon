@@ -6,12 +6,12 @@ from typing import List, Dict, Any
 
 from mavsdk import System, telemetry
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Telemetry(AbstractPlugin):
+class Telemetry(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("telemetry", system, loop, logger)
 
         self._all_methods = self._get_methods()
         self._rate_set_methods = self._get_set_methods(self._all_methods)

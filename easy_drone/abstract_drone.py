@@ -16,13 +16,15 @@ from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, Offb
 from mavsdk.action import ActionError, OrbitYawBehavior
 import mavsdk.telemetry as telemetry
 
-from .sensors import Sensor, SensorData, SensorManager
-from .plugins import *
+from .plugins import PluginManager
+from .plugins.base_plugins import *
+from .plugins.ext_plugins import *
+from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
-    def __init__(self, address: str, sensor_list: Optional[List[Sensor]] = None, 
-                 log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0):
+    def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
+                 log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
         """
         :param address: Connection address for use with mavsdk.System.connect method
         :param time_slice: The interval to process commands in the queue
@@ -40,9 +42,6 @@ class AbstractDrone(ABC):
         self._min_follow_distance = min_follow_distance
         self._address = address
 
-        # tracker variables for state
-        self._offboard_started = False
-
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
         self._queue = deque()
@@ -58,29 +57,22 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # setup all plugins
-        self._core = Core(self._drone, self._loop, self._logger)
-        self._telemetry = Telemetry(self._drone, self._loop, self._logger)
-        self._geofence = Geofence(self._drone, self._loop, self._logger)
-        self._param = Param(self._drone, self._loop, self._logger)
-        self._offboard = Offboard(self._drone, self._loop, self._logger)
-        self._calibration = Calibration(self._drone, self._loop, self._logger)
-        self._info = Info(self._drone, self._loop, self._logger)
-        self._transponder = Transponder(self._drone, self._loop, self._logger)
-        self._follow_me = FollowMe(self._drone, self._loop, self._logger)
+        # build arguments for the extension plugins
+        self._ext_args = {
+            "sensors": sensor_list
+        }
 
-        # setup the sensors
-        self._sensor_manager = SensorManager(sensor_list)
+        # setup all plugins
+        self._plugins = PluginManager(self._drone, self._loop, self._logger, self._ext_args, kwargs)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
-        self._calibration.calibrate_all()  # run calibratiohn tasks before/during setup
         self.setup()
         self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
 
         # finally, start the mavlink thread
         self._mavlink_thread.start()
         self._telemetry_thread.start()
-        self._sensor_manager.start_all_sensors()
+        self.sensor.start_all_sensors()
 
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
@@ -108,72 +100,90 @@ class AbstractDrone(ABC):
             handler.close()
 
     # PLUGIN PROPERTIES
+
+    @property
+    def plugins(self) -> Dict:
+        """
+        :return: The plugin manager instance
+        """
+        return self._plugins
+
     @property
     def core(self) -> Core:
         """
         :return: The Core plugin class instance
         """
-        return self._core
+        return self._plugins.base_plugins["core"]
 
     @property
     def telemetry(self) -> Telemetry:
         """
         :return: The Telemetry plugin class instance
         """
-        return self._telemetry
+        return self._plugins.base_plugins["telemetry"]
 
     @property
     def geofence(self) -> Geofence:
         """
         :return: The Geofence plugin class instance
         """
-        return self._geofence
+        return self._plugins.base_plugins["geofence"]
 
     @property
     def param(self) -> Param:
         """
         :return: The Param plugin class instance
         """
-        return self._param
+        return self._plugins.base_plugins["param"]
 
     @property
     def offboard(self) -> Offboard:
         """
         :return: The Offboard plugin class instance
         """
-        return self._offboard
+        return self._plugins.base_plugins["offboard"]
 
     @property
     def calibration(self) -> Calibration:
         """
         :return: The Calibration plugin class instance
         """
-        return self._calibration
+        return self._plugins.base_plugins["calibration"]
 
     @property
     def info(self) -> Info:
         """
         :return: The Info plugin class instance
         """
-        return self._info
+        return self._plugins.base_plugins["info"]
 
     @property
     def transponder(self) -> Transponder:
         """
         :return: The Transponder plugin class instance
         """
-        return self._transponder
+        return self._plugins.base_plugins["transponder"]
 
     @property
     def follow_me(self) -> FollowMe:
         """
         :return: The FollowMe plugin class instance
         """
-        return self._follow_me
+        return self._plugins.base_plugins["follow_me"]
 
     @property
-    def sensors(self) -> SensorManager:
-        return self._sensor_manager
+    def action(self) -> Action:
+        """
+        :return: The Action plugin class instance
+        """
+        return self._plugins.base_plugins["action"]
+
+    @property
+    def sensor(self) -> Sensor:
+        """
+        :return: The Sensor plugin class instance (actual type is SensorManager)
+        """
+        return self._plugins.ext_plugins["sensor"]
 
     # typical properties
     @property

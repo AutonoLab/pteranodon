@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, core
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Core(AbstractPlugin):
+class Core(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("core", system, loop, logger)
 
         self._connection_state = None
         self._connection_task = asyncio.ensure_future(self._update_connection_state(), loop=self._loop)

@@ -7,12 +7,12 @@ from typing import List, Dict, Any
 from mavsdk import System, geofence
 from mavsdk.geofence import Polygon
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Geofence(AbstractPlugin):
+class Geofence(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("geofence", system, loop, logger)
 
     def clear_geofence(self) -> None:
         """

@@ -7,12 +7,12 @@ from functools import partial
 
 from mavsdk import System, param
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Param(AbstractPlugin):
+class Param(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("param", system, loop, logger)
         self._all_params = None
         self._custom_params = None
         self._float_params = None

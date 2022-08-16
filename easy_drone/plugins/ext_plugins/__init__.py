@@ -1,1 +1,1 @@
-from .sensor import Sensor, SensorData, SensorManager
+from .sensor import Sensor

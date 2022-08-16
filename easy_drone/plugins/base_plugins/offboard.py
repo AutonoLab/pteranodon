@@ -7,12 +7,12 @@ from functools import partial
 
 from mavsdk import System, offboard
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Offboard(AbstractPlugin):
+class Offboard(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("offboard", system, loop, logger)
         self._is_active = False
 
         self._is_active_task = asyncio.ensure_future(self._system.offboard.is_active(), loop=self._loop)

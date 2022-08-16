@@ -1,91 +1,55 @@
-from abc import ABC, abstractmethod
-from typing import Any, Union, Optional
-from threading import Thread
-import time
+from asyncio import AbstractEventLoop
+from logging import Logger
+from typing import List, Dict
 
+from mavsdk import System
+
+from ..abstract_custom_plugin import AbstractCustomPlugin
+from .abstract_sensor import AbstractSensor
 from .sensor_data import SensorData
 
 
-class Sensor(ABC):
-    def __init__(self, sensor_name: str, poll_rate: Optional[float] = None):
-        """
-        :param name: A string to represent the sensor
-        :param poll_rate: The rate to poll the sensor at (in Hz)
-        """
-        self._name = sensor_name
-        # convert to ms for a direct sleep call
-        self._poll_rate = None if poll_rate is None else 1.0 / poll_rate
-        self._sensor_data = SensorData()
-        self._stopped = False
-        self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())
+class Sensor(AbstractCustomPlugin):
+    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, base_plugins: Dict, ext_args: Dict)\
+            -> None:
+        super().__init__("sensor", system, loop, logger, base_plugins, ext_args)
 
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Sensor):
-            return self.data == other.data and self.name == other.name and self._poll_rate == other._poll_rate and \
-                   self._update_thread == other._update_thread
-        return False
-
-    def _run_timed(self) -> None:
-        while not self._stopped:
-            start_time = time.perf_counter()
-            self.update_data()
-            elapsed_time = time.perf_counter() - start_time
-
-            if elapsed_time <= self._poll_rate:
-                time.sleep(self._poll_rate - elapsed_time)
-
-    def _run_untimed(self) -> None:
-        while not self._stopped:
-            self.update_data()
-
-    def _run(self) -> None:
-        try:
-            if self._poll_rate is None:
-                self._run_untimed()
-            else:
-                self._run_timed()
-        finally:
-            self.teardown()
-
-    def start(self) -> None:
-        self._update_thread.start()
-
-    def stop(self) -> None:
-        self._stopped = True
-        self._update_thread.join()
+        self._sensors = {}
+        
+        if self._ext_args["sensors"] is not None:
+            for sensor in self._ext_args["sensors"]:
+                self._sensors[sensor.name] = sensor
 
     @property
-    def name(self) -> str:
-        return self._name
+    def sensors(self) -> List[AbstractSensor]:
+        return self._sensors
 
-    @property
-    def poll_rate(self) -> Union[float, None]:
-        return self._poll_rate
+    def add_sensor(self, new_sensor: AbstractSensor) -> None:
+        if new_sensor.name not in self._sensors:
+            self._sensors[new_sensor.name] = new_sensor
+            self._sensors[new_sensor.name].start()
+        else:
+            raise KeyError(f"Sensor with name: {new_sensor.name} already present")
 
-    @poll_rate.setter
-    def poll_rate(self, rate: float) -> None:
-        self._poll_rate = 1.0 / rate
+    def remove_sensor(self, name: str) -> None:
+        del self._sensors[name]
 
-    @property
-    def data(self) -> SensorData:
-        return self._sensor_data
+    def get_data(self, name: str) -> SensorData:
+        return self._sensors[name].data
 
-    @data.setter
-    def data(self, new_data: Any) -> None:
-        self._sensor_data.update(new_data)
+    def get_sensor(self, name: str) -> AbstractSensor:
+        return self._sensors[name]
 
-    @abstractmethod
-    def update_data(self):
-        """
-        A method which takes no parameters and has no return value. This handles updating the sensor data inside of the
-        data field. This method gets called repeatedly inside of the sensor update loop at the rate defined by
-        poll_rate.
-        """
-        pass
+    def start_sensor(self, name: str) -> None:
+        self._sensors[name].start()
 
-    @abstractmethod
-    def teardown(self):
-        """
-        This method should define any final behavior of the sensor. This will mean closing sensor pipeline, file, etc..
-        """
-        pass
+    def stop_sensor(self, name: str) -> None:
+        self._sensors[name].stop()
+
+    def start_all_sensors(self) -> None:
+        for sensor in self._sensors:
+            sensor.start()
+
+    def stop_all_sensors(self) -> None:
+        for sensor in self._sensors:
+            sensor.stop()

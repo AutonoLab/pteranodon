@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Callable
 
 from mavsdk import System, info
 
-from ..abstract_plugin import AbstractPlugin
+from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Info(AbstractPlugin):
+class Info(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(system, loop, logger)
+        super().__init__("info", system, loop, logger)
 
         self._id = None
         self._product = None
@@ -53,14 +53,20 @@ class Info(AbstractPlugin):
                 pass
 
     async def _flight_info_gen(self) -> None:
-        while True:
-            self._flight_info = await self._system.info.get_flight_information()
-            await asyncio.sleep(self._flight_info_rate)
+        try:
+            while True:
+                self._flight_info = await self._system.info.get_flight_information()
+                await asyncio.sleep(self._flight_info_rate)
+        except info.InfoError as e:
+            self._logger.error(e)
 
     async def _speed_factor_gen(self) -> None:
-        while True:
-            self._speed_factor = await self._system.info.get_speed_factor()
-            await asyncio.sleep(self._speed_factor_rate)
+        try:
+            while True:
+                self._speed_factor = await self._system.info.get_speed_factor()
+                await asyncio.sleep(self._speed_factor_rate)
+        except info.InfoError as e:
+            self._logger.error(e)
 
     def get_identification(self) -> info.Identification:
         return self._id
