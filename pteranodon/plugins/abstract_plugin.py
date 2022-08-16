@@ -32,7 +32,7 @@ class AbstractPlugin(ABC):
         try:
             self._result_cache.append(task.result())
         except Exception as e:
-            self._logging.error(e)
+            self._logger.error(e)
 
     def submit_task(self, new_task: Task) -> Task:
         """
