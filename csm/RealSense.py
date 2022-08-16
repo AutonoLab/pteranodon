@@ -2,10 +2,10 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-from pteranodon import Sensor
+from pteranodon.plugins.ext_plugins.sensor import AbstractSensor
 
 
-class RealSense(Sensor):
+class RealSense(AbstractSensor):
     def __init__(self):
         # Configure depth and color streams
         super().__init__("RealSense-D435")
