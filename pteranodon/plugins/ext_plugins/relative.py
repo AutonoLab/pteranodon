@@ -16,6 +16,7 @@ class Relative(AbstractCustomPlugin):
             -> None:
         super().__init__("relative", system, loop, logger, base_plugins, ext_args)
 
+        self._min_follow_distance = 10.0
         if self._ext_args["relative"] is not None:
             self._min_follow_distance = self._ext_args["relative"]
 
