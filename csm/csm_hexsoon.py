@@ -1,6 +1,6 @@
 import time
 
-from easy_drone import AbstractDrone
+from pteranodon import AbstractDrone
 from RealSense import RealSense
 from hlca import FrameProcessor
 

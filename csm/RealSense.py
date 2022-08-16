@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-from easy_drone import Sensor
+from pteranodon import Sensor
 
 
 class RealSense(Sensor):

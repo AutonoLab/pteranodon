@@ -5,7 +5,7 @@ import numpy as np
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
-from easy_drone import Sensor
+from pteranodon import Sensor
 
 
 # ALL CREDIT GOES TO 

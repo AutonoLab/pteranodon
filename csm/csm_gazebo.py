@@ -1,6 +1,6 @@
 import time
 
-from easy_drone import AbstractDrone
+from pteranodon import AbstractDrone
 from VideoStreamGST import Video
 from hlca import FrameProcessor
 
