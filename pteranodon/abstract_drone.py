@@ -1,20 +1,16 @@
 from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
-import random
 import asyncio
 import atexit
-from math import atan2, degrees, sqrt, pow, cos, sin, radians
 from abc import abstractmethod, ABC
 from typing import Union, Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
-import inspect
 
 from mavsdk import System
-from mavsdk.offboard import PositionNedYaw, VelocityBodyYawspeed, Attitude, OffboardError
-from mavsdk.action import ActionError, OrbitYawBehavior
-import mavsdk.telemetry as telemetry
+from mavsdk.offboard import OffboardError
+from mavsdk.action import ActionError
 
 from .plugins import PluginManager
 from .plugins.base_plugins import *
@@ -23,6 +19,8 @@ from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
+    _port_num = 10000
+
     def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
                  log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
         """
@@ -39,12 +37,13 @@ class AbstractDrone(ABC):
         self._stopped_mavlink = False
         self._stopped_loop = False
         self._time_slice = time_slice
-        self._min_follow_distance = min_follow_distance
         self._address = address
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
-        self._drone = System(port=random.randint(1000, 65535))  # cursed garbage
+        self._drone = System(port=AbstractDrone._port_num)
+        AbstractDrone._port_num += 1
         self._queue = deque()
+        self._task_cache = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
         self._mavlink_thread = Thread(name="Mavlink-Command-Thread", target=self._process_command_loop)
 
@@ -59,7 +58,8 @@ class AbstractDrone(ABC):
 
         # build arguments for the extension plugins
         self._ext_args = {
-            "sensors": sensor_list
+            "sensors": sensor_list,
+            "relative": min_follow_distance
         }
 
         # setup all plugins
@@ -100,7 +100,6 @@ class AbstractDrone(ABC):
             handler.close()
 
     # PLUGIN PROPERTIES
-
     @property
     def plugins(self) -> Dict:
         """
@@ -181,9 +180,16 @@ class AbstractDrone(ABC):
     @property
     def sensor(self) -> Sensor:
         """
-        :return: The Sensor plugin class instance (actual type is SensorManager)
+        :return: The Sensor plugin class instance
         """
         return self._plugins.ext_plugins["sensor"]
+
+    @property
+    def relative(self) -> Relative:
+        """
+        :return: The Relative plugin class instance
+        """
+        return self._plugins.ext_plugins["relative"]
 
     # typical properties
     @property
@@ -296,9 +302,9 @@ class AbstractDrone(ABC):
         if com is not None:
             self._logger.info(f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}")
             if asyncio.iscoroutinefunction(com):  # if it is an async function
-                _ = asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+                self._task_cache.append(asyncio.ensure_future(com(*args, **kwargs), loop=self._loop))
             else:  # typical sync function
-                _ = com(*args, **kwargs)
+                com(*args, **kwargs)
         else:
             pass
 
@@ -319,11 +325,11 @@ class AbstractDrone(ABC):
                     # this exception is expected since we expect the deque to not have elements sometimes
                     if str(e) != "pop from an empty deque":
                         # if the exception makes it here, it is unexpected
-                        print(e)
+                        self._logger.error(e)
                 except ActionError as e:
-                    print(e)
+                    self._logger.error(e)
                 except OffboardError as e:
-                    print(e)
+                    self._logger.error(e)
                 finally:
                     end_time = perf_counter() - start_time
                     if end_time < self._time_slice:
@@ -385,22 +391,6 @@ class AbstractDrone(ABC):
         self._logger.info(f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue")
         self._queue.append((obj, args, kwargs))
 
-    def get_data_async(self, obj: Callable, *args: Any, **kwargs: Any) -> Any:
-        """
-        Used to acquire a return value that is generated through a coroutine.
-        Will wait for the coroutine to finish before returning the result.
-        :param obj: A callable function/method which will get executed in the event loop
-        :param args: The arguments for the function/method
-        :param kwargs: The keyword arguments for the function/method
-        :return: Any, the return value of the obj param
-        """
-        task = asyncio.ensure_future(obj(*args, **kwargs), loop=self._loop)
-        while not task.done():
-            sleep(0.0001)
-        return task.result()
-
-    ##################################################
-    # methods which implement the mavsdk System actions
     ##################################################
     # TODO, implement the flag for put in these methods
     def arm(self) -> None:
@@ -408,62 +398,14 @@ class AbstractDrone(ABC):
         Arms the drone.
         :return: None
         """
-        self.put(self._drone.action.arm)
+        self.put(self.action.arm)
 
     def disarm(self) -> None:
         """
         Disarms the drone.
         :return: None
         """
-        self.put(self._drone.action.disarm)
-
-    def do_orbit(self, *args: Union[float, OrbitYawBehavior], **kwargs: Union[float, OrbitYawBehavior]) -> None:
-        """
-        Performs an orbit in midair
-        :param radius_m: Radius of circle (in meters)
-        :param velocity_ms: Tangential velocity (in m/s)
-        :param yaw_behavior: An OrbitYawBehavior
-        :param latitude_deg: Optional: Center point in latitude in degrees, uses current point as default
-        :param longitude_deg: Optional: Center point in longitude in degrees, uses current point as default
-        :param absolute_altitude_m: Optional: Center point altitude in meters, uses current point as default
-        :return: None
-        """
-        self.put(self._drone.action.do_orbit, *args, **kwargs)
-
-    def get_maximum_speed(self) -> float:
-        """
-        Get the vehicle maximum speed (in metres/second).
-        :return: Maximum speed (in metres/second)
-        """
-        return self.get_data_async(self._drone.action.get_maximum_speed)
-
-    def get_return_to_launch_altitude(self) -> float:
-        """
-        Get the return to launch minimum return altitude (in meters).
-        :return: Return altitude relative to takeoff location (in meters)
-        """
-        return self.get_data_async(self._drone.action.get_return_to_launch_altitude)
-
-    def get_takeoff_altitude(self) -> float:
-        """
-        Get the takeoff altitude (in meters above ground).
-        :return: Takeoff altitude relative to ground/takeoff location (in meters)
-        """
-        return self.get_data_async(self._drone.action.get_takeoff_altitude)
-
-    def goto_location(self, *args: float, **kwargs: float) -> None:
-        """
-        Send command to move the vehicle to a specific global position.
-        The latitude and longitude are given in degrees (WGS84 frame) and the altitude in meters AMSL (above mean sea
-        level).
-        The yaw angle is in degrees (frame is NED, 0 is North, positive is clockwise).
-        :param latitude_deg: Latitude (in degrees)
-        :param longitude_deg: Longitude (in degrees)
-        :param absolute_altitude_m: Altitude AMSL (in meters)
-        :param yaw_deg: Yaw angle in degrees (0 is North, positive is clockwise)
-        :return: None
-        """
-        self.put(self._drone.action.goto_location, *args, **kwargs)
+        self.put(self.action.disarm)
 
     def hold(self) -> None:
         """
@@ -471,52 +413,21 @@ class AbstractDrone(ABC):
         Note: this command is specific to the PX4 Autopilot flight stack as it implies a change to a PX4-specific mode.
         :return: None
         """
-        self.put(self._drone.action.hold)
-
-    def kill(self) -> None:
-        """
-        Send command to kill the drone.
-        :return: None
-        """
-        self.put(self._drone.action.kill)
+        self.put(self.action.hold)
 
     def land(self) -> None:
         """
         Send command to land the drone
         :return: None
         """
-        self.put(self._drone.action.land)
-
-    def reboot(self) -> None:
-        """
-        Send command to reboot drone components
-        :return: None
-        """
-        self.put(self._drone.action.reboot)
+        self.put(self.action.land)
 
     def return_to_launch(self) -> None:
         """
         Send command to return to launch (takeoff) position and land.
         :return: None
         """
-        self.put(self._drone.action.return_to_launch)
-
-    def set_actuator(self, *args: Union[int, float], **kwargs: Union[int, float]) -> None:
-        """
-        Uses a value to set an acuator
-        :param index: Index of actuator (starting at 1)
-        :param value: Value to set the acuator to (normalized from [-1..1])
-        :return: None
-        """
-        self.put(self._drone.action.set_actuator, *args, **kwargs)
-
-    def set_current_speed(self, *args: float, **kwargs: float) -> None:
-        """
-        Set current speed
-        :param speed_m_s: Speed in m/s
-        :return: None
-        """
-        self.put(self._drone.action.set_current_speed, *args, **kwargs)
+        self.put(self.action.return_to_launch)
 
     def set_maximum_speed(self, *args: float, **kwargs: float) -> None:
         """
@@ -524,7 +435,7 @@ class AbstractDrone(ABC):
         :param speed: Maximum speed in m/s
         :return:None
         """
-        self.put(self._drone.action.set_maximum_speed, *args, **kwargs)
+        self.put(self.action.set_maximum_speed, *args, **kwargs)
 
     def set_return_to_launch_altitude(self, *args: float, **kwargs: float) -> None:
         """
@@ -532,7 +443,7 @@ class AbstractDrone(ABC):
         :param relative_altitude_m: Altitude relative to takeoff location
         :return: None
         """
-        self.put(self._drone.action.set_return_to_launch_altitude, *args, **kwargs)
+        self.put(self.action.set_return_to_launch_altitude, *args, **kwargs)
 
     def set_takeoff_altitude(self, *args: float, **kwargs: float) -> None:
         """
@@ -540,46 +451,22 @@ class AbstractDrone(ABC):
         :param altitude: Takeoff altitude relative to ground/takeoff location
         :return: None
         """
-        self.put(self._drone.action.set_takeoff_altitude, *args, **kwargs)
+        self.put(self.action.set_takeoff_altitude, *args, **kwargs)
 
     def shutdown(self) -> None:
         """
         Send command to shut down the drone components.
         :return: None
         """
-        self.put(self._drone.action.shutdown)
+        self.put(self.action.shutdown)
 
     def takeoff(self) -> None:
         """
         Send command to take off and hover.
         :return: None
         """
-        self.put(self._drone.action.takeoff)
+        self.put(self.action.takeoff)
 
-    def terminate(self) -> None:
-        """
-        Send command to terminate the drone.
-        :return: None
-        """
-        self.put(self._drone.action.terminate)
-
-    def transition_to_fixedwing(self) -> None:
-        """
-        Send command to transition the drone to fixedwing.
-        :return: None
-        """
-        self.put(self._drone.action.transition_to_fixedwing)
-
-    def transition_to_multicopter(self) -> None:
-        """
-        Send command to transition the drone to multicopter.
-        :return: None
-        """
-        self.put(self._drone.action.transition_to_multicopter)
-
-    #########################################################
-    # methods for maneuvering
-    #########################################################
     def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with 
@@ -590,48 +477,8 @@ class AbstractDrone(ABC):
         :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
-        self.put(self._maneuver_to, front, right, down, on_dimensions, test_min)
+        self.put(self.relative.maneuver_to, front, right, down, on_dimensions, test_min)
 
-    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions=(True, True, True), test_min=False) -> None:
-        if test_min:
-            totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
-            if totalDistance < self._min_follow_distance:
-                return await self._drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
-        return await self._maneuver_with_ned(front, right, down, on_dimensions)
-
-    async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
-        # zero out dimensions that will not be moved
-        front = 0.0 if not on_dimensions[0] else -1 * front
-        right = 0.0 if not on_dimensions[1] else -1 * right
-        down = 0.0 if not on_dimensions[2] else down
-
-        # get current position
-        task = self.telemetry.position_velocity_ned
-        current_pos = task.position
-
-        # get angle of rotation
-        task2 = self.telemetry.attitude_euler
-        angle = task2.yaw_deg
-        angle_of_rotation = radians(angle)
-
-        # convert FRD to NED 
-        relative_north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
-        relative_east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
-
-        # get angle of yaw
-        yaw = degrees(atan2(relative_east, relative_north))
-
-        # add offset to curent position
-        north = relative_north + current_pos.north_m
-        east = relative_east + current_pos.east_m
-        down = down + current_pos.down_m
-
-        new_pos = PositionNedYaw(north, east, down, yaw)
-        await self._drone.offboard.set_position_ned(new_pos)
-
-    ####################
-    # method for creating a relative geofence
-    ######################
     def create_geofence(self, distance: float) -> None:
         """
         Creates a relative inclusive geofence around the drones home coordinates. The geofence is defined as a square
@@ -639,24 +486,4 @@ class AbstractDrone(ABC):
         :param distance: The meters from home the drone can maneuver
         :return: None
         """
-        self.put(self._create_geofence, distance)
-
-    async def _create_geofence(self, distance: float) -> None:
-        latitude = self.telemetry.home.latitude_deg
-        longitude = self.telemetry.home.longitude_deg
-
-        # source for magic number
-        # https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of
-        # -meters
-        offset = distance * (1 / 111111)
-
-        # Define your geofence boundary
-        p1 = Point(latitude - offset, longitude - offset)
-        p2 = Point(latitude + offset, longitude - offset)
-        p3 = Point(latitude + offset, longitude + offset)
-        p4 = Point(latitude - offset, longitude + offset)
-
-        # Create a polygon object using your points
-        polygon = Polygon([p1, p2, p3, p4], Polygon.FenceType.INCLUSION)
-
-        await self._drone.geofence.upload_geofence([polygon])
+        self.put(self.relative.create_geofence, distance)

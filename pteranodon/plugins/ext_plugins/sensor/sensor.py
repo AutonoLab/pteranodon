@@ -16,8 +16,8 @@ class Sensor(AbstractCustomPlugin):
 
         self._sensors = {}
         
-        if self._ext_args["sensors"] is not None:
-            for sensor in self._ext_args["sensors"]:
+        if self._ext_args["sensor"] is not None:
+            for sensor in self._ext_args["sensor"]:
                 self._sensors[sensor.name] = sensor
 
     @property

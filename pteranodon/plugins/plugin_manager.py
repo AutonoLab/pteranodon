@@ -26,7 +26,7 @@ class PluginManager:
             plugin = plugin(self._system, self._loop, self._logger)
             self._base_plugins[plugin.name] = plugin
 
-        plugins = [Sensor]
+        plugins = [Sensor, Relative]
         self._ext_plugins = {}
         for plugin in plugins:
             plugin = plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)
