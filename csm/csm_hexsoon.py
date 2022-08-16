@@ -1,5 +1,7 @@
 import time
 
+import numpy as np
+
 from pteranodon import AbstractDrone
 from RealSense import RealSense
 from hlca import FrameProcessor
@@ -15,7 +17,7 @@ class CSM_Hexsoon(AbstractDrone):
         self.fp = FrameProcessor(cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True)
         self.cam.start()
 
-        self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
+        self.frame = np.round(np.random.rand(480, 640, 3) * 255).astype(np.uint8)
         # the intital call is present in __init__ vs setup so it can run before the call to super()
         # the tensorflow threads have rendouvous errors when the AbstractDrone threads are already alive
         _ = self.fp.processFrame(self.frame, display=False)
