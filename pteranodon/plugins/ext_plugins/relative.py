@@ -22,6 +22,20 @@ class Relative(AbstractCustomPlugin):
 
         self._telemetry = self._base_plugins["telemetry"]
 
+    @property
+    def min_follow_distance(self) -> float:
+        """
+        :return: The minimum following distance that is currently being used
+        """
+        return self._min_follow_distance
+
+    @min_follow_distance.setter
+    def min_follow_distance(self, dist: float):
+        """
+        :param dist: The new minimum distance that the drone should use in the maneuver_to method
+        """
+        self._min_follow_distance = dist
+
     def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with 

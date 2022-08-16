@@ -220,20 +220,6 @@ class AbstractDrone(ABC):
         """
         self._time_slice = val
 
-    @property
-    def min_follow_distance(self) -> float:
-        """
-        :return: The minimum following distance that is currently being used
-        """
-        return self._min_follow_distance
-
-    @min_follow_distance.setter
-    def min_follow_distance(self, dist: float):
-        """
-        :param dist: The new minimum distance that the drone should use in the maneuver_to method
-        """
-        self._min_follow_distance = dist
-
     # AREA TO OVERRIDE
     # abstract methods which over classes must override
     @abstractmethod
