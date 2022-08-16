@@ -5,12 +5,12 @@ import numpy as np
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
-from pteranodon import Sensor
+from pteranodon.plugins.ext_plugins.sensor import AbstractSensor
 
 
 # ALL CREDIT GOES TO 
 # https://github.com/bozkurthan/PX4-Gazebo-Opencv/blob/master/opencv-gazebo.py
-class Video(Sensor):
+class Video(AbstractSensor):
     """BlueRov video capture class constructor
     Attributes:
         port (int): Video UDP port
