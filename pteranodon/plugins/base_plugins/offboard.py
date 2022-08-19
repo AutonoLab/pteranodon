@@ -73,7 +73,7 @@ class Offboard(AbstractBasePlugin):
     def start(self) -> None:
         self._is_active = True
         super().submit_task(
-            asyncio.ensure_future(self._system.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.0)), loop=self._loop)
+            asyncio.ensure_future(self._system.offboard.set_attitude(offboard.Attitude(0.0, 0.0, 0.0, 0.0)), loop=self._loop)
         )
         self.hold()
         super().submit_task(
@@ -87,4 +87,4 @@ class Offboard(AbstractBasePlugin):
         )
 
     def hold(self) -> None:
-        self.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
+        self.set_velocity_body(offboard.VelocityBodyYawspeed(0, 0, 0, 0))

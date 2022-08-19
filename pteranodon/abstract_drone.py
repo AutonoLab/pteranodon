@@ -7,6 +7,7 @@ from abc import abstractmethod, ABC
 from typing import Union, Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
+import random
 
 from mavsdk import System
 from mavsdk.offboard import OffboardError
@@ -19,8 +20,6 @@ from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
-    _port_num = 10000
-
     def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
                  log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
         """
@@ -40,8 +39,7 @@ class AbstractDrone(ABC):
         self._address = address
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
-        self._drone = System(port=AbstractDrone._port_num)
-        AbstractDrone._port_num += 1
+        self._drone = System(port=random.randint(1000, 65535))
         self._queue = deque()
         self._task_cache = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
@@ -58,7 +56,7 @@ class AbstractDrone(ABC):
 
         # build arguments for the extension plugins
         self._ext_args = {
-            "sensors": sensor_list,
+            "sensor": sensor_list,
             "relative": min_follow_distance
         }
 
