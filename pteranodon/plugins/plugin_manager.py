@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, TypeVar, Type
+from typing import Dict, TypeVar, Type, Union
 
 from mavsdk import System
 
@@ -48,6 +48,14 @@ class PluginManager:
 
     T = TypeVar('T', bound=AbstractCustomPlugin)
 
-    def add_plugin(self, new_plugin_class: Type[T]) -> None:
-        new_plugin = new_plugin_class(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
+    def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[T]]) -> None:
+
+        new_plugin_obj : AbstractCustomPlugin = new_plugin
+        if isinstance(new_plugin, type):
+            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
+
+        if new_plugin_obj.name in self._custom_plugins:
+            print("Could not add plugin with name \"{}\"! A plugin with that name already exists!".format(new_plugin_obj.name))
+            return
+
         self._custom_plugins[new_plugin.name] = new_plugin
