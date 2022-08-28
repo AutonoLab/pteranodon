@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict
+from typing import Dict, TypeVar, Type, Union
 
 from mavsdk import System
 
@@ -32,7 +32,7 @@ class PluginManager:
             plugin = plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)
             self._ext_plugins[plugin.name] = plugin
 
-        self._custom_plugins = {}
+        self._custom_plugins : Dict[str, AbstractCustomPlugin] = {}
 
     @property
     def base_plugins(self) -> Dict:
@@ -46,6 +46,21 @@ class PluginManager:
     def custom_plugins(self) -> Dict:
         return self._custom_plugins
 
-    def add_plugin(self, new_plugin: AbstractCustomPlugin) -> None:
-        new_plugin = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
-        self._custom_plugins[new_plugin] = new_plugin
+    T = TypeVar('T', bound=AbstractCustomPlugin)
+
+    def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[T]]) -> None:
+        """
+        Adds a custom plugin to the plugin manager
+
+        :param new_plugin: Either the custom plugin class or the custom plugin instance to add
+        :type new_plugin: AbstractCustomPlugin sub-class type or instance.
+        """
+        new_plugin_obj : AbstractCustomPlugin = new_plugin
+        if isinstance(new_plugin, type):
+            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
+
+        if new_plugin_obj.name in self._custom_plugins:
+            self._logger.error("Could not add plugin with name \"{}\"! A plugin with that name already exists!".format(new_plugin_obj.name))
+            return
+
+        self._custom_plugins[new_plugin.name] = new_plugin
