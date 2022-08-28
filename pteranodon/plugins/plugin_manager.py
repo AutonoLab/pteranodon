@@ -60,7 +60,7 @@ class PluginManager:
             new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
 
         if new_plugin_obj.name in self._custom_plugins:
-            print("Could not add plugin with name \"{}\"! A plugin with that name already exists!".format(new_plugin_obj.name))
+            self._logger.error("Could not add plugin with name \"{}\"! A plugin with that name already exists!".format(new_plugin_obj.name))
             return
 
         self._custom_plugins[new_plugin.name] = new_plugin
