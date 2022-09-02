@@ -1,9 +1,9 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
 
-from mavsdk import System, info
+from mavsdk import System
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -29,7 +29,6 @@ class Shell(AbstractBasePlugin):
         Send a command. This command will be added to the cmd_history.
 
         :param command: The command to send
-        :type command: str
         """
         super().submit_task(
             asyncio.ensure_future(self._system.shell.send(command), loop=self._loop)
