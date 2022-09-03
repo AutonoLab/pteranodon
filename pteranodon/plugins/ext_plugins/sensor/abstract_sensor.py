@@ -20,7 +20,7 @@ class AbstractSensor(ABC):
         self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Sensor):
+        if isinstance(other, AbstractSensor):
             return self.data == other.data and self.name == other.name and self._poll_rate == other._poll_rate and \
                    self._update_thread == other._update_thread
         return False
