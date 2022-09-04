@@ -14,6 +14,7 @@ class Shell(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
 
+        self._receive_task = asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
         self._feedback_history : List[str] = []
         self._cmd_history : List[str] = []
 
@@ -33,10 +34,6 @@ class Shell(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.shell.send(command), loop=self._loop)
         )
-#         # For every command that is sent, a receive command should also be sent.
-#         super().submit_task(
-#             asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
-#         )
         self._cmd_history.append(command)
 
     def get_newest_feedback(self) -> str:
