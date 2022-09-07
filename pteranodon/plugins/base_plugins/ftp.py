@@ -81,3 +81,13 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.rename(remote_source_path, remote_dest_path))
         )
+
+    def reset(self) -> None:
+        """
+        Resets FTP server in case there are stale open sessions.
+        """
+        self._logger.info("Resetting the FTP server")
+
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.reset())
+        )
