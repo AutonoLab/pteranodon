@@ -66,3 +66,18 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path))
         )
+
+    def rename(self, remote_source_path : str, remote_dest_path : str) -> None:
+        """
+        Renames (moves) a remote file or directory from the given source path to the destination path.
+
+        :param remote_source_path: The path of the file to be renamed (moved)
+        :type remote_source_path: str
+        :param remote_dest_path: The path of the location to rename (move) the file to
+        :type remote_dest_path: str
+        """
+        self._logger.info("Moving a remote file/directory from \"{}\" to \"{}\" via FTP".format(remote_source_path,
+                                                                                                remote_dest_path))
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.rename(remote_source_path, remote_dest_path))
+        )
