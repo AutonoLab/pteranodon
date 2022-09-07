@@ -54,3 +54,15 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.remove_directory(remote_directory_path))
         )
+
+    def remove_file(self, remote_file_path : str) -> None:
+        """
+        Removes a file remotely via FTP.
+
+        :param remote_file_path: The remote path of the file to remove
+        :type remote_file_path: str
+        """
+        self._logger.info("Removing file at path \"{}\" via FTP".format(remote_file_path))
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path))
+        )
