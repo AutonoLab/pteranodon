@@ -91,3 +91,16 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.reset())
         )
+
+    def set_root_directory(self, root_directory : str) -> None:
+        """
+        Sets the root directory for MAVLink FTP server.
+
+        :param root_directory: The path to set for the root directory of the FTP server
+        :type root_directory: str
+        """
+        self._logger.info("Setting the root directory of the MAVLink FTP server to {}".format(root_directory))
+
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory))
+        )
