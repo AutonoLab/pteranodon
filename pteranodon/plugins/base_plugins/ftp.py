@@ -104,3 +104,16 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory))
         )
+
+    def set_target_component_id(self, comp_id : int) -> None:
+        """
+        Sets the target's component ID. By default, it is the autopilot.
+
+        :param comp_id: The component ID to set
+        :type comp_id: uint32
+        """
+        self._logger.info("Setting the target's component ID to {}".format(comp_id))
+
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id))
+        )
