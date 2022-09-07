@@ -30,3 +30,15 @@ class Ftp(AbstractBasePlugin):
         :rtype: uint32
         """
         return self._comp_id
+
+    def create_directory(self, remote_directory_path : str) -> None:
+        """
+        Creates a directory remotely via FTP.
+
+        :param remote_directory_path: The remote path of the directory to create
+        :type remote_directory_path: str
+        """
+        self._logger.info("Creating directory at path \"{}\" via FTP".format(remote_directory_path))
+        super().submit_task(
+            asyncio.ensure_future(self._system.ftp.create_directory(remote_directory_path))
+        )
