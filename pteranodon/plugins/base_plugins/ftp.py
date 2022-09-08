@@ -22,6 +22,14 @@ class Ftp(AbstractBasePlugin):
             self._id = await self._system.ftp.get_our_compid()
             break
 
+    async def _download_file(self, remote_file_path : str, local_dir : str) -> None:
+
+        async for data in self._system.ftp.download(remote_file_path, local_dir):
+            percent_downloaded : float = (data.bytes_transferred / data.total_bytes)
+            self._logger.info("\rFile at remote path \"{}\" downloading to directory \"{}\": {:.2f}%      ".format(
+                remote_file_path, local_dir, percent_downloaded
+            ))
+
     def get_our_component_id(self) -> int:
         """
         Get our own component ID.
@@ -30,6 +38,22 @@ class Ftp(AbstractBasePlugin):
         :rtype: uint32
         """
         return self._comp_id
+
+    def download_file(self, remote_file_path : str, local_dir : str) -> None:
+        """
+        Downloads a file remotely to a local directory while logging progress
+
+        :param remote_file_path: The path to the file to remotely download
+        :type remote_file_path: str
+        :param local_dir: The path to the local directory to download the file to
+        :type local_dir: str
+        """
+        self._logger.info("Downloading the file at \"{}\" to local directory \"{}\"".format(
+            remote_file_path, local_dir
+        ))
+        super().submit_task(
+            asyncio.ensure_future(self._download_file(remote_file_path, local_dir))
+        )
 
     def create_directory(self, remote_directory_path : str) -> None:
         """
