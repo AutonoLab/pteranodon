@@ -48,7 +48,7 @@ class Ftp(AbstractBasePlugin):
         """
         return self._comp_id
 
-    def download_file(self, remote_file_path : str, local_directory : str) -> None:
+    def download(self, remote_file_path : str, local_directory : str) -> None:
         """
         Downloads a file remotely to a local directory while logging progress
 
@@ -64,7 +64,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._download_file(remote_file_path, local_directory), loop=self._loop)
         )
 
-    def upload_file(self, local_file_path : str, remote_directory : str) -> None:
+    def upload(self, local_file_path : str, remote_directory : str) -> None:
         """
         Uploads a local file to a remote directory while logging progress
 
@@ -154,7 +154,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory), loop=self._loop)
         )
 
-    def set_target_component_id(self, comp_id : int) -> None:
+    def set_target_compid(self, comp_id : int) -> None:
         """
         Sets the target's component ID. By default, it is the autopilot.
 
