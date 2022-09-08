@@ -22,12 +22,20 @@ class Ftp(AbstractBasePlugin):
             self._id = await self._system.ftp.get_our_compid()
             break
 
-    async def _download_file(self, remote_file_path : str, local_dir : str) -> None:
+    async def _download_file(self, remote_file_path : str, local_directory : str) -> None:
 
-        async for data in self._system.ftp.download(remote_file_path, local_dir):
+        async for data in self._system.ftp.download(remote_file_path, local_directory):
             percent_downloaded : float = (data.bytes_transferred / data.total_bytes)
             self._logger.info("\rFile at remote path \"{}\" downloading to directory \"{}\": {:.2f}%      ".format(
-                remote_file_path, local_dir, percent_downloaded
+                remote_file_path, local_directory, percent_downloaded
+            ))
+
+    async def _upload_file(self, local_file_path : str, remote_directory : str) -> None:
+
+        async for data in self._system.ftp.upload(local_file_path, remote_directory):
+            percent_uploaded : float = (data.bytes_transferred / data.total_bytes)
+            self._logger.info("\rFile at local path \"{}\" uploading to directory \"{}\": {:.2f}%      ".format(
+                local_file_path, remote_directory, percent_uploaded
             ))
 
     def get_our_component_id(self) -> int:
@@ -39,20 +47,36 @@ class Ftp(AbstractBasePlugin):
         """
         return self._comp_id
 
-    def download_file(self, remote_file_path : str, local_dir : str) -> None:
+    def download_file(self, remote_file_path : str, local_directory : str) -> None:
         """
         Downloads a file remotely to a local directory while logging progress
 
         :param remote_file_path: The path to the file to remotely download
         :type remote_file_path: str
-        :param local_dir: The path to the local directory to download the file to
-        :type local_dir: str
+        :param local_directory: The path to the local directory to download the file to
+        :type local_directory: str
         """
         self._logger.info("Downloading the file at \"{}\" to local directory \"{}\"".format(
-            remote_file_path, local_dir
+            remote_file_path, local_directory
         ))
         super().submit_task(
-            asyncio.ensure_future(self._download_file(remote_file_path, local_dir))
+            asyncio.ensure_future(self._download_file(remote_file_path, local_directory))
+        )
+
+    def upload_file(self, local_file_path : str, remote_directory : str) -> None:
+        """
+        Uploads a local file to a remote directory while logging progress
+
+        :param local_file_path: The path to the file to uploaded
+        :type local_file_path: str
+        :param remote_directory: The path to the remote directory to upload the file to
+        :type remote_directory: str
+        """
+        self._logger.info("Uploading the file at \"{}\" to remote directory \"{}\"".format(
+            local_file_path, remote_directory
+        ))
+        super().submit_task(
+            asyncio.ensure_future(self._upload_file(local_file_path, remote_directory))
         )
 
     def create_directory(self, remote_directory_path : str) -> None:
