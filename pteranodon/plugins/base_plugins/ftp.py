@@ -117,3 +117,25 @@ class Ftp(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id))
         )
+
+    def are_files_identical(self, local_file_path : str, remote_file_path : str) -> bool:
+        """
+        Compares a local file to a remote file using a CRC32 checksum
+
+        :param local_file_path: The path of the local file
+        :type local_file_path: str
+        :param remote_file_path: The path of the remote file
+        :type remote_file_path: str
+        :return: If the files are identical, true, otherwise false
+        :rtype: bool
+        """
+        self._logger.info("Comparing a local file at path \"{}\" to a remote file at path \"{}\"".format(
+            local_file_path, remote_file_path
+        ))
+
+        # NOTE: @Justin, is this the best way to do this since the call is not run during initialization?
+        files_are_identical : bool = self._loop.run_until_complete(
+            self._system.ftp.are_files_identical(local_file_path, remote_file_path)
+        )
+
+        return files_are_identical
