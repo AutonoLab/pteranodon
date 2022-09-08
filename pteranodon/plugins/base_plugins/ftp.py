@@ -142,6 +142,8 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id))
         )
 
+        self._comp_id = comp_id
+
     def are_files_identical(self, local_file_path : str, remote_file_path : str) -> bool:
         """
         Compares a local file to a remote file using a CRC32 checksum
@@ -163,3 +165,21 @@ class Ftp(AbstractBasePlugin):
         )
 
         return files_are_identical
+
+    def list_directory(self, remote_directory : str) -> List[str]:
+        """
+        Lists items in the given remote directory
+
+        :param remote_directory: The path to the remote directory to list
+        :type remote_directory: str
+        :return: The list of directory contents
+        :rtype: List[str]
+        """
+
+        # NOTE: @Justin, is this the best way to do this since the call is not run during initialization?
+        directory_contents : List[str] = self._loop.run_until_complete(
+            self._system.ftp.list_directory(remote_directory)
+        )
+
+        return directory_contents
+
