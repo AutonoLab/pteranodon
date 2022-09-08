@@ -60,7 +60,7 @@ class Ftp(AbstractBasePlugin):
             remote_file_path, local_directory
         ))
         super().submit_task(
-            asyncio.ensure_future(self._download_file(remote_file_path, local_directory))
+            asyncio.ensure_future(self._download_file(remote_file_path, local_directory), loop=self._loop)
         )
 
     def upload_file(self, local_file_path : str, remote_directory : str) -> None:
@@ -76,7 +76,7 @@ class Ftp(AbstractBasePlugin):
             local_file_path, remote_directory
         ))
         super().submit_task(
-            asyncio.ensure_future(self._upload_file(local_file_path, remote_directory))
+            asyncio.ensure_future(self._upload_file(local_file_path, remote_directory), loop=self._loop)
         )
 
     def create_directory(self, remote_directory_path : str) -> None:
@@ -88,7 +88,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info("Creating directory at path \"{}\" via FTP".format(remote_directory_path))
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.create_directory(remote_directory_path))
+            asyncio.ensure_future(self._system.ftp.create_directory(remote_directory_path), loop=self._loop)
         )
 
     def remove_directory(self, remote_directory_path : str) -> None:
@@ -100,7 +100,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info("Removing directory at path \"{}\" via FTP".format(remote_directory_path))
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.remove_directory(remote_directory_path))
+            asyncio.ensure_future(self._system.ftp.remove_directory(remote_directory_path), loop=self._loop)
         )
 
     def remove_file(self, remote_file_path : str) -> None:
@@ -112,7 +112,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info("Removing file at path \"{}\" via FTP".format(remote_file_path))
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path))
+            asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path), loop=self._loop)
         )
 
     def rename(self, remote_source_path : str, remote_dest_path : str) -> None:
@@ -127,7 +127,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info("Moving a remote file/directory from \"{}\" to \"{}\" via FTP".format(remote_source_path,
                                                                                                 remote_dest_path))
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.rename(remote_source_path, remote_dest_path))
+            asyncio.ensure_future(self._system.ftp.rename(remote_source_path, remote_dest_path), loop=self._loop)
         )
 
     def reset(self) -> None:
@@ -137,7 +137,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info("Resetting the FTP server")
 
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.reset())
+            asyncio.ensure_future(self._system.ftp.reset(), loop=self._loop)
         )
 
     def set_root_directory(self, root_directory : str) -> None:
@@ -150,7 +150,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info("Setting the root directory of the MAVLink FTP server to {}".format(root_directory))
 
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory))
+            asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory), loop=self._loop)
         )
 
     def set_target_component_id(self, comp_id : int) -> None:
@@ -163,7 +163,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info("Setting the target's component ID to {}".format(comp_id))
 
         super().submit_task(
-            asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id))
+            asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id), loop=self._loop)
         )
 
         self._comp_id = comp_id
