@@ -1,9 +1,10 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from typing import List
 
-from mavsdk import System, ftp
+from mavsdk import System
+from functools import partial
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -15,12 +16,12 @@ class Ftp(AbstractBasePlugin):
         super().__init__("ftp", system, loop, logger)
         self._comp_id = None
 
-        self._comp_id_task = asyncio.ensure_future(self._get_our_compid(), loop=self._loop)
+        self._comp_id_task = asyncio.ensure_future(self._system.ftp.get_our_compid(), loop=self._loop)
+        self._comp_id_task.add_done_callback(partial(self._compid_callback))
 
-    async def _get_our_compid(self) -> None:
-        while True:
-            self._id = await self._system.ftp.get_our_compid()
-            break
+    def _compid_callback(self, task: Task) -> None:
+        self._comp_id = task.result()
+        del self._comp_id_task
 
     async def _download_file(self, remote_file_path : str, local_directory : str) -> None:
 
