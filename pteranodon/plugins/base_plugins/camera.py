@@ -192,6 +192,14 @@ class Camera(AbstractBasePlugin):
 
         return None
 
+    def prepare(self) -> None:
+        """
+        Prepare the camera plugin (e.g. download the camera definition, etc)
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.prepare(), loop=self._loop)
+        )
+
 
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:
