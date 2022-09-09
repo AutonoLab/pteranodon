@@ -12,7 +12,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 # TODO: Methods to implement
 '''
 list_photos
-take_photo
 '''
 
 
@@ -120,6 +119,14 @@ class Camera(AbstractBasePlugin):
         """
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_video_streaming(), loop=self._loop)
+        )
+
+    def take_photo(self) -> None:
+        """
+        Take one photo
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.take_photo(), loop=self._loop)
         )
 
     def select_camera(self, camera_id : int) -> None:
