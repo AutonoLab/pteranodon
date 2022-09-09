@@ -12,8 +12,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 # TODO: Methods to implement
 '''
 list_photos
-select_camera
-set_mode
 start_photo_interval
 start_video
 start_video_streaming
@@ -29,6 +27,8 @@ class Camera(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("camera", system, loop, logger)
 
+        self._current_camera_id: Optional[int] = None
+
         self._capture_info : Optional[camera.CaptureInfo] = None
         self._information : Optional[camera.Information] = None
         self._mode : Optional[camera.Mode] = None
@@ -36,6 +36,7 @@ class Camera(AbstractBasePlugin):
         self._video_stream_info : Optional[camera.VideoStreamInfo] = None
         self._current_settings : List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
+
 
         # Tasks of subscribed properties
         self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
@@ -53,57 +54,6 @@ class Camera(AbstractBasePlugin):
         )
 
         self._system.camera.possible_setting_options()
-
-
-    async def _update_capture_info(self) -> None:
-        async for info in self._system.camera.capture_info():
-            if info != self._capture_info:
-                self._capture_info = info
-
-    async def _update_information(self) -> None:
-        async for info in self._system.camera.information():
-            if info != self._information:
-                self._information = info
-
-    async def _update_mode(self) -> None:
-        async for mode in self._system.camera.mode():
-            if mode != self._mode:
-                self._mode = mode
-
-    async def _update_status(self) -> None:
-        async for status in self._system.camera.status():
-            if status != self._status:
-                self._status = status
-
-    async def _update_vstream_info(self) -> None:
-        async for vstream_info in self._system.camera.video_stream_info():
-            if vstream_info != self._video_stream_info:
-                self._video_stream_info = vstream_info
-
-    async def _update_current_settings(self) -> None:
-
-        # If any of the settings do not have an option set (empty data), do update
-        # If the size is different, then definitely update.
-        should_update_settings = any(setting.option is None for setting in self._current_settings)
-        async for settings in self._system.camera.current_settings():
-            if (len(settings) != len(self._current_settings)) or should_update_settings:
-                self._current_settings = settings
-                should_update_settings = False
-
-    async def _update_possible_setting_opts(self) -> None:
-
-        async for setting_options in self._system.camera.possible_setting_options():
-            if len(setting_options) != len(self._possible_setting_options):
-                self._possible_setting_options = setting_options
-
-                if len(self._current_settings) == 0:
-                    # If current settings have not been fetched yet, fill in setting data with "None" option
-                    #       in the case get_settings is called by the user before they are returned.
-                    # This is overwritten when current_settings returns
-                    self._current_settings = [
-                        camera.Setting(options.setting_id, options.setting_description, None, options.is_range)
-                        for options in self._possible_setting_options
-                    ]
 
     def format_storage(self) -> None:
         """
@@ -212,6 +162,19 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.select_camera(camera_id), loop=self._loop)
         )
+        self._current_camera_id = camera_id
+
+    def set_mode(self, mode : camera.Mode) -> None:
+        """
+        Set camera mode
+
+        :param mode: Camera mode to set
+        :type mode: camera.Mode
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.set_mode(mode), loop=self._loop)
+        )
+        self._mode = mode
 
 
     @property
@@ -270,6 +233,55 @@ class Camera(AbstractBasePlugin):
         """
         return self._current_settings
 
+    async def _update_capture_info(self) -> None:
+        async for info in self._system.camera.capture_info():
+            if info != self._capture_info:
+                self._capture_info = info
+
+    async def _update_information(self) -> None:
+        async for info in self._system.camera.information():
+            if info != self._information:
+                self._information = info
+
+    async def _update_mode(self) -> None:
+        async for mode in self._system.camera.mode():
+            if mode != self._mode:
+                self._mode = mode
+
+    async def _update_status(self) -> None:
+        async for status in self._system.camera.status():
+            if status != self._status:
+                self._status = status
+
+    async def _update_vstream_info(self) -> None:
+        async for vstream_info in self._system.camera.video_stream_info():
+            if vstream_info != self._video_stream_info:
+                self._video_stream_info = vstream_info
+
+    async def _update_current_settings(self) -> None:
+
+        # If any of the settings do not have an option set (empty data), do update
+        # If the size is different, then definitely update.
+        should_update_settings = any(setting.option is None for setting in self._current_settings)
+        async for settings in self._system.camera.current_settings():
+            if (len(settings) != len(self._current_settings)) or should_update_settings:
+                self._current_settings = settings
+                should_update_settings = False
+
+    async def _update_possible_setting_opts(self) -> None:
+
+        async for setting_options in self._system.camera.possible_setting_options():
+            if len(setting_options) != len(self._possible_setting_options):
+                self._possible_setting_options = setting_options
+
+                if len(self._current_settings) == 0:
+                    # If current settings have not been fetched yet, fill in setting data with "None" option
+                    #       in the case get_settings is called by the user before they are returned.
+                    # This is overwritten when current_settings returns
+                    self._current_settings = [
+                        camera.Setting(options.setting_id, options.setting_description, None, options.is_range)
+                        for options in self._possible_setting_options
+                    ]
 
 
 
