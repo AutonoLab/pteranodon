@@ -20,12 +20,10 @@ set_setting
 start_photo_interval
 start_video
 start_video_streaming
-status
 stop_photo_interval
 stop_video
 stop_video_streaming
 take_photo
-video_stream_info
 '''
 
 
@@ -38,12 +36,14 @@ class Camera(AbstractBasePlugin):
         self._information = None
         self._mode = None
         self._status = None
+        self._video_stream_info = None
 
         # Tasks of subscribed properties
         self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
         self._information_task = asyncio.ensure_future(self._update_information(), loop=self._loop)
         self._mode_task = asyncio.ensure_future(self._update_mode(), loop=self._loop)
         self._status_task = asyncio.ensure_future(self._update_status(), loop=self._loop)
+        self._video_stream_info_task = asyncio.ensure_future(self._update_vstream_info(), loop=self._loop)
 
     async def _update_capture_info(self) -> None:
         async for info in self._system.camera.capture_info():
@@ -64,6 +64,11 @@ class Camera(AbstractBasePlugin):
         async for status in self._system.camera.status():
             if status != self._status:
                 self._status = status
+
+    async def _update_vstream_info(self) -> None:
+        async for vstream_info in self._system.camera.video_stream_info():
+            if vstream_info != self._video_stream_info:
+                self._video_stream_info = vstream_info
 
     def format_storage(self) -> None:
         """
@@ -106,5 +111,13 @@ class Camera(AbstractBasePlugin):
         :rtype: camera.Status
         """
         return self._status
+
+    @property
+    def video_stream_info(self) -> Optional[camera.VideoStreamInfo]:
+        """
+        :return: The current video stream information
+        :rtype: camera.VideoStreamInfo
+        """
+        return self._video_stream_info
 
 
