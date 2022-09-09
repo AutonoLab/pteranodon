@@ -12,7 +12,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 current_settings
 get_setting
 list_photos
-mode
 possible_setting_options
 prepare
 select_camera
@@ -38,10 +37,13 @@ class Camera(AbstractBasePlugin):
         self._capture_info = None
         self._information = None
         self._mode = None
+        self._status = None
 
+        # Tasks of subscribed properties
         self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
         self._information_task = asyncio.ensure_future(self._update_information(), loop=self._loop)
         self._mode_task = asyncio.ensure_future(self._update_mode(), loop=self._loop)
+        self._status_task = asyncio.ensure_future(self._update_status(), loop=self._loop)
 
     async def _update_capture_info(self) -> None:
         async for info in self._system.camera.capture_info():
@@ -57,6 +59,11 @@ class Camera(AbstractBasePlugin):
         async for mode in self._system.camera.mode():
             if mode != self._mode:
                 self._mode = mode
+
+    async def _update_status(self) -> None:
+        async for status in self._system.camera.status():
+            if status != self._status:
+                self._status = status
 
     def format_storage(self) -> None:
         """
@@ -82,7 +89,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera information
         :rtype: camera.Information
         """
-        return self._capture_info
+        return self._information
 
     @property
     def mode(self) -> Optional[camera.Mode]:
@@ -90,6 +97,14 @@ class Camera(AbstractBasePlugin):
         :return: The current camera mode
         :rtype: camera.Mode
         """
-        return self._capture_info
+        return self._mode
+
+    @property
+    def status(self) -> Optional[camera.Status]:
+        """
+        :return: The current camera status
+        :rtype: camera.Status
+        """
+        return self._status
 
 
