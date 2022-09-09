@@ -11,7 +11,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 '''
 current_settings
 get_setting
-information
 list_photos
 mode
 possible_setting_options
@@ -30,19 +29,27 @@ take_photo
 video_stream_info
 '''
 
+
 class Camera(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("camera", system, loop, logger)
 
         self._capture_info = None
+        self._information = None
 
         self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
+        self._information_task = asyncio.ensure_future(self._update_information(), loop=self._loop)
 
     async def _update_capture_info(self) -> None:
         async for info in self._system.camera.capture_info():
             if info != self._capture_info:
                 self._capture_info = info
+
+    async def _update_information(self) -> None:
+        async for info in self._system.camera.information():
+            if info != self._information:
+                self._information = info
 
     def format_storage(self) -> None:
         """
@@ -57,8 +64,16 @@ class Camera(AbstractBasePlugin):
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:
         """
-        :return: The existing capture info
+        :return: The current capture information
         :rtype: CaptureInfo
+        """
+        return self._capture_info
+
+    @property
+    def information(self) -> Optional[camera.Information]:
+        """
+        :return: The current camera information
+        :rtype: Information
         """
         return self._capture_info
 
