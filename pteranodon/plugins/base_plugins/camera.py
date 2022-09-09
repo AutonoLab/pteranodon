@@ -12,10 +12,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 # TODO: Methods to implement
 '''
 list_photos
-start_video
-start_video_streaming
-stop_video
-stop_video_streaming
 take_photo
 '''
 
@@ -109,6 +105,22 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
         )
         self._status.video_on = False
+
+    def start_video_streaming(self) -> None:
+        """
+        Start video streaming
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.start_video_streaming(), loop=self._loop)
+        )
+
+    def stop_video_streaming(self) -> None:
+        """
+        Stop current video streaming
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.stop_video_streaming(), loop=self._loop)
+        )
 
     def select_camera(self, camera_id : int) -> None:
         """
