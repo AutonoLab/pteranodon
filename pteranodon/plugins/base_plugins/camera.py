@@ -37,9 +37,11 @@ class Camera(AbstractBasePlugin):
 
         self._capture_info = None
         self._information = None
+        self._mode = None
 
         self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
         self._information_task = asyncio.ensure_future(self._update_information(), loop=self._loop)
+        self._mode_task = asyncio.ensure_future(self._update_mode(), loop=self._loop)
 
     async def _update_capture_info(self) -> None:
         async for info in self._system.camera.capture_info():
@@ -50,6 +52,11 @@ class Camera(AbstractBasePlugin):
         async for info in self._system.camera.information():
             if info != self._information:
                 self._information = info
+
+    async def _update_mode(self) -> None:
+        async for mode in self._system.camera.mode():
+            if mode != self._mode:
+                self._mode = mode
 
     def format_storage(self) -> None:
         """
@@ -65,7 +72,7 @@ class Camera(AbstractBasePlugin):
     def capture_info(self) -> Optional[camera.CaptureInfo]:
         """
         :return: The current capture information
-        :rtype: CaptureInfo
+        :rtype: camera.CaptureInfo
         """
         return self._capture_info
 
@@ -73,7 +80,15 @@ class Camera(AbstractBasePlugin):
     def information(self) -> Optional[camera.Information]:
         """
         :return: The current camera information
-        :rtype: Information
+        :rtype: camera.Information
+        """
+        return self._capture_info
+
+    @property
+    def mode(self) -> Optional[camera.Mode]:
+        """
+        :return: The current camera mode
+        :rtype: camera.Mode
         """
         return self._capture_info
 
