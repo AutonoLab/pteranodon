@@ -12,7 +12,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 # TODO: Methods to implement
 '''
 list_photos
-prepare
 select_camera
 set_mode
 start_photo_interval
@@ -198,6 +197,20 @@ class Camera(AbstractBasePlugin):
         """
         super().submit_task(
             asyncio.ensure_future(self._system.camera.prepare(), loop=self._loop)
+        )
+
+
+    def select_camera(self, camera_id : int) -> None:
+        """
+        Select current camera.
+
+        Bind the plugin instance to a specific camera_id
+
+        :param camera_id: The ID of the camera to select
+        :type camera_id: int32
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.select_camera(camera_id), loop=self._loop)
         )
 
 
