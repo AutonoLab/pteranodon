@@ -12,10 +12,8 @@ from .abstract_base_plugin import AbstractBasePlugin
 # TODO: Methods to implement
 '''
 list_photos
-start_photo_interval
 start_video
 start_video_streaming
-stop_photo_interval
 stop_video
 stop_video_streaming
 take_photo
@@ -55,6 +53,14 @@ class Camera(AbstractBasePlugin):
 
         self._system.camera.possible_setting_options()
 
+    def prepare(self) -> None:
+        """
+        Prepare the camera plugin (e.g. download the camera definition, etc)
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.prepare(), loop=self._loop)
+        )
+
     def format_storage(self) -> None:
         """
         Formats the storage (e.g. SD card) in the camera.
@@ -64,6 +70,71 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.format_storage(), loop=self._loop)
         )
+
+    def start_photo_interval(self, interval_s : float) -> None:
+        """
+        Start photo timelapse with a given interval
+
+        :param interval_s: Interval between photos (in seconds)
+        :type interval_s: float
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.start_photo_interval(interval_s), loop=self._loop)
+        )
+        self._status.photo_interval_on = True
+
+    def stop_photo_interval(self) -> None:
+        """
+        Stop a running photo timelapse
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.stop_photo_interval(), loop=self._loop)
+        )
+        self._status.photo_interval_on = False
+
+    def start_video(self) -> None:
+        """
+        Start a video recording
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.start_video(), loop=self._loop)
+        )
+        self._status.video_on = True
+
+    def stop_video(self) -> None:
+        """
+        Stop a running video recording
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
+        )
+        self._status.video_on = False
+
+    def select_camera(self, camera_id : int) -> None:
+        """
+        Select current camera.
+
+        Bind the plugin instance to a specific camera_id
+
+        :param camera_id: The ID of the camera to select
+        :type camera_id: int32
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.select_camera(camera_id), loop=self._loop)
+        )
+        self._current_camera_id = camera_id
+
+    def set_mode(self, mode : camera.Mode) -> None:
+        """
+        Set camera mode
+
+        :param mode: Camera mode to set
+        :type mode: camera.Mode
+        """
+        super().submit_task(
+            asyncio.ensure_future(self._system.camera.set_mode(mode), loop=self._loop)
+        )
+        self._mode = mode
 
     def set_setting(self, setting : Union[camera.Setting, int], option : Optional[Union[camera.Option, int]] = None) -> None:
         """
@@ -140,42 +211,6 @@ class Camera(AbstractBasePlugin):
                 return cam_setting
 
         return None
-
-    def prepare(self) -> None:
-        """
-        Prepare the camera plugin (e.g. download the camera definition, etc)
-        """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.prepare(), loop=self._loop)
-        )
-
-
-    def select_camera(self, camera_id : int) -> None:
-        """
-        Select current camera.
-
-        Bind the plugin instance to a specific camera_id
-
-        :param camera_id: The ID of the camera to select
-        :type camera_id: int32
-        """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.select_camera(camera_id), loop=self._loop)
-        )
-        self._current_camera_id = camera_id
-
-    def set_mode(self, mode : camera.Mode) -> None:
-        """
-        Set camera mode
-
-        :param mode: Camera mode to set
-        :type mode: camera.Mode
-        """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.set_mode(mode), loop=self._loop)
-        )
-        self._mode = mode
-
 
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:
