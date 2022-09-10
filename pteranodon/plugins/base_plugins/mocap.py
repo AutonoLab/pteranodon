@@ -35,7 +35,6 @@ class Mocap(AbstractBasePlugin):
         :type odemetry: Odometry
         """
 
-        self._logger.info(f"Sent odometry information.")
         super().submit_task(
             asyncio.ensure_future(self._system.mocap.set_odometry(odometry))
         )
@@ -48,7 +47,6 @@ class Mocap(AbstractBasePlugin):
         :type vision_position_estimate: VisionPositionEstimate
         """
 
-        self._logger.info(f"Sent global position/attitude vision-based estimate.")
         super().submit_task(
             asyncio.ensure_future(self._system.mocap.set_vision_position_estimate(vision_position_estimate))
         )
