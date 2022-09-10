@@ -22,3 +22,7 @@ class Tune(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
         )
+
+    def play_note_c(self) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_C], 100))), loop=self._loop)
