@@ -5,6 +5,7 @@ from logging import Logger
 from mavsdk import System
 from mavsdk.log_files import Entry
 from mavsdk.log_files import Entry
+from mavsdk.log_files import ProgressData
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -15,7 +16,7 @@ class LogFiles(AbstractBasePlugin):
         super().__init__("LogFiles", system, loop, logger)
 
 
-    def download_log_file(self, entry : Entry, path : str) -> None:
+    def download_log_file(self, entry : Entry, path : str) -> ProgressData:
         """
         Download log file synchronously.
 
@@ -39,7 +40,7 @@ class LogFiles(AbstractBasePlugin):
             asyncio.ensure_future(self._system.log_files.erase_all_log_files(), loop=self._loop)
         )
 
-    def get_entries(self) -> None:
+    def get_entries(self) -> Entry:
         """
         Get List of log files.
         """
@@ -47,4 +48,3 @@ class LogFiles(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         )
-        
