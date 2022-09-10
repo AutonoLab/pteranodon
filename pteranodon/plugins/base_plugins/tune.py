@@ -1,0 +1,26 @@
+import asyncio
+from asyncio import AbstractEventLoop, Task
+from logging import Logger
+from time import sleep
+from typing import List, Dict, Any
+
+from mavsdk import System, tune
+from mavsdk.tune import TuneDescription
+
+from .abstract_base_plugin import AbstractBasePlugin
+
+class Tune(AbstractBasePlugin):
+    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+        super().__init__("tune", system, loop, logger)
+
+    def play_tune(self, tune_desc : TuneDescription) -> None:
+        """
+        Send a tune to be played by the system
+
+        :param tune_desc: The tune to be played
+        :type tune_desc: TuneDescription        
+        """
+        
+        super().submit_task(
+            asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
+        )
