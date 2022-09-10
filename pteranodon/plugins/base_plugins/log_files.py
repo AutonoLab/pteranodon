@@ -6,9 +6,7 @@ from mavsdk import System
 from mavsdk.log_files import Entry
 from mavsdk.log_files import Entry
 
-
 from .abstract_base_plugin import AbstractBasePlugin
-
 
 
 class LogFiles(AbstractBasePlugin):
@@ -49,4 +47,3 @@ class LogFiles(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         )
-        
