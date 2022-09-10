@@ -47,3 +47,4 @@ class LogFiles(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         )
+        
