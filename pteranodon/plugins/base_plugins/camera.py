@@ -1,18 +1,13 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Optional, Union
 
-from functools import partial
+from threading import Condition
 
 from mavsdk import System, camera
 
 from .abstract_base_plugin import AbstractBasePlugin
-
-# TODO: Methods to implement
-'''
-list_photos
-'''
 
 
 class Camera(AbstractBasePlugin):
@@ -45,8 +40,6 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._update_possible_setting_opts(), loop=self._loop)
         )
-
-        self._system.camera.possible_setting_options()
 
     def prepare(self) -> None:
         """
@@ -231,6 +224,34 @@ class Camera(AbstractBasePlugin):
 
         return None
 
+    def list_photos(self, photos_range : camera.PhotosRange) -> List[camera.CaptureInfo]:
+        """
+        List photos available on the camera.
+
+        :param photos_range: Which photos should be listed (all or since connection)
+        :type photos_range: camera.PhotosRange
+        :return: List of capture infos (representing the photos)
+        :rtype: List[camera.CaptureInfo]
+        """
+        list_photos_task = asyncio.ensure_future(self._system.camera.list_photos(photos_range), loop=self._loop)
+
+        done_condition = Condition()
+
+        # When task is done, stop waiting
+        list_photos_task.add_done_callback(lambda _: done_condition.notify())
+
+        # Wait with a timeout of 1 second
+        done_condition.wait(1.0)
+
+        try:
+            return list_photos_task.result()
+        except asyncio.InvalidStateError:
+            # If the result is not available yet,
+            #       it can be assumed that the wait call timed out before the callback was done
+            self._logger.error("Could not return photos list! Request timed out!")
+            return []
+
+
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:
         """
@@ -336,6 +357,3 @@ class Camera(AbstractBasePlugin):
                         camera.Setting(options.setting_id, options.setting_description, None, options.is_range)
                         for options in self._possible_setting_options
                     ]
-
-
-
