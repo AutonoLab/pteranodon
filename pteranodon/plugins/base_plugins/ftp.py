@@ -1,10 +1,12 @@
 import asyncio
+import typing
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from typing import List
 
 from mavsdk import System
 from functools import partial
+from threading import Condition
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -169,7 +171,7 @@ class Ftp(AbstractBasePlugin):
 
         self._comp_id = comp_id
 
-    def are_files_identical(self, local_file_path : str, remote_file_path : str) -> bool:
+    def are_files_identical(self, local_file_path : str, remote_file_path : str) -> typing.Optional[bool]:
         """
         Compares a local file to a remote file using a CRC32 checksum
 
@@ -177,19 +179,30 @@ class Ftp(AbstractBasePlugin):
         :type local_file_path: str
         :param remote_file_path: The path of the remote file
         :type remote_file_path: str
-        :return: If the files are identical, true, otherwise false
-        :rtype: bool
+        :return: If the files are identical, true, otherwise false. If the request times out, returns None.
+        :rtype: Optional[bool]
         """
-        self._logger.info("Comparing a local file at path \"{}\" to a remote file at path \"{}\"".format(
-            local_file_path, remote_file_path
-        ))
 
-        # NOTE: @Justin, is this the best way to do this since the call is not run during initialization?
-        files_are_identical : bool = self._loop.run_until_complete(
-            self._system.ftp.are_files_identical(local_file_path, remote_file_path)
+        files_identical_task = asyncio.ensure_future(
+            self._system.ftp.are_files_identical(local_file_path, remote_file_path),
+            loop=self._loop
         )
 
-        return files_are_identical
+        done_condition = Condition()
+
+        # When task is done, stop waiting
+        files_identical_task.add_done_callback(lambda _: done_condition.notify())
+
+        # Wait with a timeout of 1 second
+        done_condition.wait(1.0)
+
+        try:
+            return files_identical_task.result()
+        except asyncio.InvalidStateError:
+            # If the result is not available yet,
+            #       it can be assumed that the wait call timed out before the callback was done
+            self._logger.error("Could not return are_files_identical result! Request timed out!")
+            return None
 
     def list_directory(self, remote_directory : str) -> List[str]:
         """
@@ -201,10 +214,20 @@ class Ftp(AbstractBasePlugin):
         :rtype: List[str]
         """
 
-        # NOTE: @Justin, is this the best way to do this since the call is not run during initialization?
-        directory_contents : List[str] = self._loop.run_until_complete(
-            self._system.ftp.list_directory(remote_directory)
-        )
+        list_directory_task = asyncio.ensure_future(self._system.ftp.list_directory(remote_directory), loop=self._loop)
 
-        return directory_contents
+        done_condition = Condition()
 
+        # When task is done, stop waiting
+        list_directory_task.add_done_callback(lambda _: done_condition.notify())
+
+        # Wait with a timeout of 1 second
+        done_condition.wait(1.0)
+
+        try:
+            return list_directory_task.result()
+        except asyncio.InvalidStateError:
+            # If the result is not available yet,
+            #       it can be assumed that the wait call timed out before the callback was done
+            self._logger.error("Could not return list of directory contents! Request timed out!")
+            return []
