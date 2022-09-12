@@ -17,6 +17,7 @@ class Ftp(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("ftp", system, loop, logger)
         self._comp_id = None
+        self._root_directory = "/"
 
         self._comp_id_task = asyncio.ensure_future(self._system.ftp.get_our_compid(), loop=self._loop)
         self._comp_id_task.add_done_callback(partial(self._compid_callback))
@@ -156,6 +157,8 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory), loop=self._loop)
         )
 
+        self._root_directory = root_directory
+
     def set_target_compid(self, comp_id : int) -> None:
         """
         Sets the target's component ID. By default, it is the autopilot.
@@ -231,3 +234,7 @@ class Ftp(AbstractBasePlugin):
             #       it can be assumed that the wait call timed out before the callback was done
             self._logger.error("Could not return list of directory contents! Request timed out!")
             return []
+
+    @property
+    def root_directory(self) -> str:
+        return self._root_directory
