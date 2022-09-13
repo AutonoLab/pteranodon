@@ -5,7 +5,8 @@ from logging import Logger
 from mavsdk import System
 from .abstract_base_plugin import AbstractBasePlugin
 
-from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth, Position, Imu, Odometry, VelocityNed, Heading, PositionVelocityNed, RawGps, GpsInfo, StatusText
+from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth, Position, Imu, Odometry, VelocityNed, \
+    Heading, PositionVelocityNed, RawGps, GpsInfo, StatusText
 
 
 class TelemetryServer(AbstractBasePlugin):
@@ -84,7 +85,7 @@ class TelemetryServer(AbstractBasePlugin):
                                   loop=self._loop)
         )
 
-    #not sure if this is int or u_int64 on line 88 as param
+    # not sure if this is int or u_int64 on line 88 as param
     def publish_unix_epoch_time(self, time_us: int) -> None:
         super().submit_task(
             asyncio.ensure_future(self._system.telemetry_server.publish_unix_epoch_time(time_us), loop=self._loop)
