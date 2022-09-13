@@ -5,7 +5,7 @@ from logging import Logger
 from mavsdk import System
 from .abstract_base_plugin import AbstractBasePlugin
 
-from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth, Position, Imu, Odometry, VelocityNed, Heading
+from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth, Position, Imu, Odometry, VelocityNed, Heading, PositionVelocityNed
 
 
 class TelemetryServer(AbstractBasePlugin):
@@ -46,5 +46,11 @@ class TelemetryServer(AbstractBasePlugin):
     def publish_position(self, position: Position, velocity_ned: VelocityNed, heading: Heading) -> None:
         super().submit_task(
             asyncio.ensure_future(self._system.telemetry_server.publish_position(position, velocity_ned, heading),
+                                  loop=self._loop)
+        )
+
+    def publish_position_velocity_ned(self, position_velocity_ned: PositionVelocityNed) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.telemetry_server.publish_position_velocity_ned(position_velocity_ned),
                                   loop=self._loop)
         )
