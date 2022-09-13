@@ -33,7 +33,7 @@ jobs:
         # Trailing whitespace
         # Too many blank lines
         
-        flake8 ./pteranodon --count --select=E9,F63,F7,F82,F401,E203,W292,E275 --extend-ignore=W293, W291, E303 --show-source --statistics
+        flake8 ./pteranodon --count --select=E9,F63,F7,F82,F401,E203,W292,E275 --extend-ignore=W293,W291,E303 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 ./pteranodon --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
 
@@ -48,7 +48,7 @@ jobs:
         # Too many public methods
         # Multiple trailing newlines
         
-        pylint ./pteranodon --disable=C0303, C0114, W0401, R0902, R0904, C0305
+        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305
 
 #    - name: Lint with black
 #      run: |
