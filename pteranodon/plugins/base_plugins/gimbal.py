@@ -28,7 +28,7 @@ class Gimbal(AbstractBasePlugin):
             if ctrl_status != self._control_status:
                 self._control_status = ctrl_status
 
-    def control_status(self) -> ControlStatus:
+    def control(self) -> ControlStatus:
         """
         The current control status.
 
