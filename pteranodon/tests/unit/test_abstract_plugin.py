@@ -21,7 +21,7 @@ def test_submit_task(mock_system : System, mock_logger : Logger):
 
     condition = Condition()
 
-    sum_of_five = (5 + 4 + 3 + 2 + 1)
+    sum_of_five = (5 + 4 + 3 + 2 + 1 + 0)
 
     counting_task = asyncio.ensure_future(counting_function(5), loop=loop)
     counting_task.add_done_callback(lambda _: condition.notify())
