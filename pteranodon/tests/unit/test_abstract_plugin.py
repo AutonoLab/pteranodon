@@ -4,16 +4,7 @@ from logging import Logger
 import pytest
 import asyncio
 from threading import Condition
-
-
-@pytest.fixture
-def mock_logger() -> Logger:
-    return Logger("mock")
-
-
-@pytest.fixture
-def mock_system() -> System:
-    return System()
+from .mocks import mock_system, mock_logger
 
 
 async def counting_function(num : int) -> int:
