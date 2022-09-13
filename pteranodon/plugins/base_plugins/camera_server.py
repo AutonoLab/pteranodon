@@ -9,31 +9,6 @@ from mavsdk.camera_server import TakePhotoFeedback, CaptureInfo
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-def _default_photo_request_callback(index : int) -> Tuple[TakePhotoFeedback, CaptureInfo]:
-    """
-    The default implementation of the method which takes an index and returns CaptureInfo and feedback.
-    Called when a `take_photo` request is received, result is passed to `respond_take_photo`
-
-    :param index: take_photo index
-    :type index: int32
-    :return: The parameters of respond_take_photo, the feedback and the capture information
-    :rtype: Tuple[TakePhotoFeedback, CaptureInfo]
-    """
-    position = camera_server.Position(0, 0, 0, 0)
-    quat = camera_server.Quaternion(0, 0, 0, 0)
-
-    capture_info = CaptureInfo(
-        position=position,
-        attitude_quaternion=quat,
-        time_utc_us=0,
-        is_success=False,
-        index=index,
-        file_url="/"
-    )
-
-    return TakePhotoFeedback.FAILED, capture_info
-
-
 class CameraServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info : camera_server.Information) -> None:
@@ -43,7 +18,7 @@ class CameraServer(AbstractBasePlugin):
         self.set_information(cam_info)
 
         # Sets the request callback to the default since some behavior is required
-        self._photo_request_callback = _default_photo_request_callback
+        self._photo_request_callback = CameraServer._default_photo_request_callback
 
         self._take_photo_sub_task = asyncio.ensure_future(self._take_photo(), loop=self._loop)
 
@@ -56,6 +31,31 @@ class CameraServer(AbstractBasePlugin):
         :type callback: Callable[[int], Tuple[camera.TakePhotoFeedback, camera.CaptureInfo]]
         """
         self._photo_request_callback = callback
+
+    @staticmethod
+    def _default_photo_request_callback(index: int) -> Tuple[TakePhotoFeedback, CaptureInfo]:
+        """
+        The default implementation of the method which takes an index and returns CaptureInfo and feedback.
+        Called when a `take_photo` request is received, result is passed to `respond_take_photo`
+
+        :param index: take_photo index
+        :type index: int32
+        :return: The parameters of respond_take_photo, the feedback and the capture information
+        :rtype: Tuple[TakePhotoFeedback, CaptureInfo]
+        """
+        position = camera_server.Position(0, 0, 0, 0)
+        quat = camera_server.Quaternion(0, 0, 0, 0)
+
+        capture_info = CaptureInfo(
+            position=position,
+            attitude_quaternion=quat,
+            time_utc_us=0,
+            is_success=False,
+            index=index,
+            file_url="/"
+        )
+
+        return TakePhotoFeedback.FAILED, capture_info
 
     async def _take_photo(self) -> None:
 
