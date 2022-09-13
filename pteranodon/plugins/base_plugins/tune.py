@@ -33,29 +33,29 @@ class Tune(AbstractBasePlugin):
 
         if(note.upper() == 'C'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_C], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_C], 100)), loop=self._loop))
                 
         elif(note.upper() == 'D'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_D], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_D], 100)), loop=self._loop))
                 
         elif(note.upper() == 'E'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_E], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_E], 100)), loop=self._loop))
                 
         elif(note.upper() == 'F'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_F], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_F], 100)), loop=self._loop))
                 
         elif(note.upper() == 'G'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_G], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_G], 100)), loop=self._loop))
                 
         elif(note.upper() == 'A'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_A], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_A], 100)), loop=self._loop))
                 
         elif(note.upper() == 'B'):
             super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_B], 100))), loop=self._loop)
+                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_B], 100)), loop=self._loop))
             
