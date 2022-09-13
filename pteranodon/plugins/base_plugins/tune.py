@@ -23,7 +23,7 @@ class Tune(AbstractBasePlugin):
             asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
         )
 
-    def play_note_c(self, note : str) -> None:
+    def play_single_note(self, note : str) -> None:
         """
         Send a single note to be played by the system
 
