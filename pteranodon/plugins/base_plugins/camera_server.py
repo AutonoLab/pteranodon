@@ -77,7 +77,7 @@ class CameraServer(AbstractBasePlugin):
         :type in_progress: bool
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera_server.set_in_progress(in_progress))
+            asyncio.ensure_future(self._system.camera_server.set_in_progress(in_progress), loop=self._loop)
         )
 
     def _respond_take_photo(self, take_photo_feedback : camera_server.TakePhotoFeedback, capture_info : camera_server.CaptureInfo):
