@@ -3,9 +3,8 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 
 from mavsdk import System
-#from mavsdk.manual_control
-
 from .abstract_base_plugin import AbstractBasePlugin
+
 
 class ManualControl(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
