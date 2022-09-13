@@ -75,3 +75,7 @@ class TelemetryServer(AbstractBasePlugin):
             asyncio.ensure_future(self._system.telemetry_server.publish_status_text(status_text), loop=self._loop)
         )
 
+    def publish_sys_status(self, battery: Battery, rc_receiver_status: bool, gyro_status: bool, accel_status: bool, mag_status: bool, gps_status: bool) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.telemetry_server.publish_sys_status(battery, rc_receiver_status, gyro_status, accel_status, mag_status, gps_status), loop=self._loop)
+        )
