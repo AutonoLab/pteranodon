@@ -40,9 +40,6 @@ class AbstractPlugin(ABC):
         value analysis
         :param new_task: An asyncio.Task
         :return: The submitted task, if plugin specific callbacks are added
-
-        Returns:
-            object:
         """
         new_task.add_done_callback(partial(self._task_callback))
         self._task_cache.append(new_task)
