@@ -47,8 +47,9 @@ jobs:
         # Too many instance attributes
         # Too many public methods
         # Multiple trailing newlines
+        # Too broad of an exception
         
-        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305
+        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703
 
 #    - name: Lint with black
 #      run: |
