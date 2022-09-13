@@ -1,10 +1,6 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from this import d
-from time import sleep
-from tokenize import Double
-from typing import List, Dict, Any
 
 from mavsdk import System
 from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
