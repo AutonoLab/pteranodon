@@ -59,3 +59,15 @@ class TelemetryServer(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.telemetry_server.publish_raw_gps(raw_gps, gps_info), loop=self._loop)
         )
+
+    def publish_raw_imu(self, imu: Imu) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.telemetry_server.publish_raw_imu(imu), loop=self._loop)
+        )
+
+    def publish_scaled_imu(self, imu: Imu) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.telemetry_server.publish_scaled_imu(imu), loop=self._loop)
+        )
+
+    def
