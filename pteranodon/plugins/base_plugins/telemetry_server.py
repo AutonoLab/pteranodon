@@ -5,7 +5,7 @@ from logging import Logger
 from mavsdk import System
 from .abstract_base_plugin import AbstractBasePlugin
 
-from mavsdk.telemetry_server import Battery, VtolState, LandedState
+from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth
 
 class TelemetryServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
@@ -22,4 +22,7 @@ class TelemetryServer(AbstractBasePlugin):
                                   loop=self._loop)
         )
 
-
+    def publish_ground_truth(self, ground_truth: GroundTruth) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.telemetry_server.publish_ground_truth(ground_truth), loop=self._loop)
+        )
