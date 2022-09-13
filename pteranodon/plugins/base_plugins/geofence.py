@@ -30,5 +30,5 @@ class Geofence(AbstractBasePlugin):
         """
         self._logger.info(f"Uploading {len(polygons)} geofences to the drone")
         super().submit_task(
-            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons))
+            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons), loop=self._loop)
         )
