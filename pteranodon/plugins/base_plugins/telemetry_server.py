@@ -13,5 +13,6 @@ class TelemetryServer(AbstractBasePlugin):
 
     def publish_battery(self, battery: Battery) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry_server.publish_battery(battery), loop=)
+            asyncio.ensure_future(self._system.telemetry_server.publish_battery(battery), loop=self._loop)
         )
+
