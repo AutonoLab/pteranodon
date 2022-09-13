@@ -37,22 +37,22 @@ jobs:
 #        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 #        flake8 ./pteranodon --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
 
-    - name: Lint with pylint
-      run: |
-        pip install pylint
-        # Ignore...
-        # Wildcard import,
-        # Trailing whitespace
-        # Missing module docstring
-        # Too many instance attributes
-        # Too many public methods
-        # Multiple trailing newlines
-        # Too broad of an exception
-        # consider-using-enumerate
-        # Too many arguments
-        # Too many local variables
-        
-        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914
+#    - name: Lint with pylint
+#      run: |
+#        pip install pylint
+#        # Ignore...
+#        # Wildcard import,
+#        # Trailing whitespace
+#        # Missing module docstring
+#        # Too many instance attributes
+#        # Too many public methods
+#        # Multiple trailing newlines
+#        # Too broad of an exception
+#        # consider-using-enumerate
+#        # Too many arguments
+#        # Too many local variables
+#
+#        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914
 
 #    - name: Lint with black
 #      run: |
