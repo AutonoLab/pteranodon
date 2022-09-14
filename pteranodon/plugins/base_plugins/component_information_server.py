@@ -3,8 +3,10 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 
 from mavsdk import System
-from .abstract_base_plugin import AbstractBasePlugin
 from mavsdk.component_information_server import FloatParamUpdate
+from mavsdk.component_information_server import FloatParam
+
+from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ComponentInformationServer(AbstractBasePlugin):
@@ -16,7 +18,7 @@ class ComponentInformationServer(AbstractBasePlugin):
         self._float_param_update_task = asyncio.ensure_future(self._update_float_param(), loop=self._loop)
 
     async def _update_float_param(self) -> None:
-        for curr_param_update in self._system.component_information_server.float_param():
+        async for curr_param_update in self._system.component_information_server.float_param():
             if curr_param_update != self._float_param_update:
                 self._float_param_update = curr_param_update
 
@@ -30,12 +32,12 @@ class ComponentInformationServer(AbstractBasePlugin):
 
         return self._float_param_update
 
-    def provide_float_param(self, param : FloatParamUpdate) -> None:
+    def provide_float_param(self, param : FloatParam) -> None:
         """
         Provide a param of type float.
 
         :param param: Float param definition
-        :type: FloatParamUpdate
+        :type: FloatParam
         """
 
         super().submit_task(

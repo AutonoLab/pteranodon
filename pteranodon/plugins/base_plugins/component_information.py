@@ -2,10 +2,13 @@ import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from functools import partial
+from typing import List
 
 from mavsdk import System
-from .abstract_base_plugin import AbstractBasePlugin
 from mavsdk.component_information_server import FloatParam
+from mavsdk.component_information_server import FloatParamUpdate
+
+from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ComponentInformation(AbstractBasePlugin):
@@ -26,11 +29,13 @@ class ComponentInformation(AbstractBasePlugin):
 
 
     async def _update_float_param(self) -> None:
-        for curr_param_update in self._system.component_information_server.float_param():
+        
+
+        async for curr_param_update in self._system.component_information_server.float_param():
             if curr_param_update != self._float_param_update:
                 self._float_param_update = curr_param_update
 
-    def float_param(self) -> None:
+    def float_param(self) -> FloatParamUpdate:
         """
         Subscribe to float param changes/updates.
 
@@ -40,7 +45,7 @@ class ComponentInformation(AbstractBasePlugin):
 
         return self._float_param_update
 
-    def access_float_params(self) -> FloatParam:
+    def access_float_params(self) -> List[FloatParam]:
         """
         List available float params.
 
