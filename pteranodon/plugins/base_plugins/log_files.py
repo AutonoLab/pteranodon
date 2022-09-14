@@ -54,11 +54,6 @@ class LogFiles(AbstractBasePlugin):
             self._logger.error("Could not return log file download progress! Request timed out!")
             return None
 
-
-        super().submit_task(
-            asyncio.ensure_future(self._system.log_files.download_log_file(entry, path), loop=self._loop)
-        )
-
     def get_download_progess(self) -> ProgressData:
         """
         Get the progress of a download
@@ -66,7 +61,7 @@ class LogFiles(AbstractBasePlugin):
         :return: Download progress
         :rtype: ProgressData
         """
-        return self._download_progress_task
+        return self._download_progress
 
     def erase_all_log_files(self) -> None:
         """
