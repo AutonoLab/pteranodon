@@ -148,7 +148,7 @@ class Camera(AbstractBasePlugin):
         )
         self._mode = mode
 
-    def set_setting(self, setting : Union[camera.Setting, int], option : Optional[Union[camera.Option, int]] = None) -> None:
+    def set_setting(self, setting: Union[camera.Setting, int], option: Optional[Union[camera.Option, int]] = None) -> None:
         """
         Set a setting to some value.
 
@@ -168,7 +168,7 @@ class Camera(AbstractBasePlugin):
         Must be set if the Setting object does not in include the option_id.
         :type option: camera.Option or uint32
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             # Setting ID was passed instead of Setting object
             setting_obj = camera.Setting(setting, "", None, False)
@@ -201,7 +201,7 @@ class Camera(AbstractBasePlugin):
                 self._current_settings[setting_idx].option = setting_obj.option
                 break
 
-    def get_setting(self, setting : Union[camera.Setting, int]) -> Optional[camera.Setting]:
+    def get_setting(self, setting: Union[camera.Setting, int]) -> Optional[camera.Setting]:
         """
         Fetches a setting for the given setting ID (either directly given or set in the Setting object)
 
@@ -210,7 +210,7 @@ class Camera(AbstractBasePlugin):
         :return: The requested camera.Setting object if found, None otherwise.
         :rtype: Optional[camera.Setting]
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             setting_obj = camera.Setting(setting, "", None, False)
 
@@ -224,7 +224,7 @@ class Camera(AbstractBasePlugin):
 
         return None
 
-    def list_photos(self, photos_range : camera.PhotosRange) -> List[camera.CaptureInfo]:
+    def list_photos(self, photos_range: camera.PhotosRange) -> List[camera.CaptureInfo]:
         """
         List photos available on the camera.
 

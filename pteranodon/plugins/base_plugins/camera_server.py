@@ -96,7 +96,7 @@ class CameraServer(AbstractBasePlugin):
             )
         )
 
-    def set_information(self, cam_info : camera_server.Information) -> None:
+    def set_information(self, cam_info: camera_server.Information) -> None:
         """
         Sets the camera information. This must be called as soon as the camera server is created.
 

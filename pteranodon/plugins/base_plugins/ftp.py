@@ -67,7 +67,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._download_file(remote_file_path, local_directory), loop=self._loop)
         )
 
-    def upload(self, local_file_path : str, remote_directory : str) -> None:
+    def upload(self, local_file_path: str, remote_directory: str) -> None:
         """
         Uploads a local file to a remote directory while logging progress
 
@@ -83,7 +83,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._upload_file(local_file_path, remote_directory), loop=self._loop)
         )
 
-    def create_directory(self, remote_directory_path : str) -> None:
+    def create_directory(self, remote_directory_path: str) -> None:
         """
         Creates a directory remotely via FTP.
 
@@ -95,7 +95,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.create_directory(remote_directory_path), loop=self._loop)
         )
 
-    def remove_directory(self, remote_directory_path : str) -> None:
+    def remove_directory(self, remote_directory_path: str) -> None:
         """
         Removes a directory remotely via FTP.
 
@@ -107,7 +107,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.remove_directory(remote_directory_path), loop=self._loop)
         )
 
-    def remove_file(self, remote_file_path : str) -> None:
+    def remove_file(self, remote_file_path: str) -> None:
         """
         Removes a file remotely via FTP.
 
@@ -119,7 +119,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path), loop=self._loop)
         )
 
-    def rename(self, remote_source_path : str, remote_dest_path : str) -> None:
+    def rename(self, remote_source_path: str, remote_dest_path: str) -> None:
         """
         Renames (moves) a remote file or directory from the given source path to the destination path.
 
@@ -144,7 +144,7 @@ class Ftp(AbstractBasePlugin):
             asyncio.ensure_future(self._system.ftp.reset(), loop=self._loop)
         )
 
-    def set_root_directory(self, root_directory : str) -> None:
+    def set_root_directory(self, root_directory: str) -> None:
         """
         Sets the root directory for MAVLink FTP server.
 
@@ -159,7 +159,7 @@ class Ftp(AbstractBasePlugin):
 
         self._root_directory = root_directory
 
-    def set_target_compid(self, comp_id : int) -> None:
+    def set_target_compid(self, comp_id: int) -> None:
         """
         Sets the target's component ID. By default, it is the autopilot.
 
@@ -174,7 +174,7 @@ class Ftp(AbstractBasePlugin):
 
         self._comp_id = comp_id
 
-    def are_files_identical(self, local_file_path : str, remote_file_path : str) -> typing.Optional[bool]:
+    def are_files_identical(self, local_file_path: str, remote_file_path: str) -> typing.Optional[bool]:
         """
         Compares a local file to a remote file using a CRC32 checksum
 
@@ -207,7 +207,7 @@ class Ftp(AbstractBasePlugin):
             self._logger.error("Could not return are_files_identical result! Request timed out!")
             return None
 
-    def list_directory(self, remote_directory : str) -> List[str]:
+    def list_directory(self, remote_directory: str) -> List[str]:
         """
         Lists items in the given remote directory
 

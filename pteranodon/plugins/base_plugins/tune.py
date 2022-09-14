@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
-from mavsdk import System, tune
+from mavsdk import System
 from mavsdk.tune import TuneDescription, SongElement
 
 from .abstract_base_plugin import AbstractBasePlugin
@@ -54,4 +54,4 @@ class Tune(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.tune.play_tune(tune_description), loop=self._loop)
         )
-            
+
