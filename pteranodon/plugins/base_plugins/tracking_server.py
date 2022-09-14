@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
-from mavsdk import System, tracking_server
+from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
 
 from .abstract_base_plugin import AbstractBasePlugin
