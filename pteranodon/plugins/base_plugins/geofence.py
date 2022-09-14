@@ -1,10 +1,9 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any
+from typing import List
 
-from mavsdk import System, geofence
+from mavsdk import System
 from mavsdk.geofence import Polygon
 
 from .abstract_base_plugin import AbstractBasePlugin

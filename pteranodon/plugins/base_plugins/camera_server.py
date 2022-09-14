@@ -1,7 +1,7 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any, Callable, Tuple
+from typing import Callable, Tuple
 
 from mavsdk import System, camera_server
 from mavsdk.camera_server import TakePhotoFeedback, CaptureInfo

@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Tuple, Dict
 from math import atan2, degrees, sqrt, pow, cos, sin, radians

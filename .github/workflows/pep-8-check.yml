@@ -1,9 +1,6 @@
 name: PEP-8 Check
 
-on:
-  pull_request:
-    branches:
-      - main
+on: push
 
 jobs:
   test_formatting:

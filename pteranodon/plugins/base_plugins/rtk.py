@@ -1,7 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List
 
 from mavsdk import System
 from mavsdk.rtk import RtcmData

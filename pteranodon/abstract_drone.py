@@ -4,7 +4,7 @@ from collections import deque
 import asyncio
 import atexit
 from abc import abstractmethod, ABC
-from typing import Union, Any, List, Tuple, Callable, Dict, Optional
+from typing import Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
 import random

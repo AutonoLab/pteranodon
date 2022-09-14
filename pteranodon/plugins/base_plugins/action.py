@@ -1,8 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any, Callable, AsyncGenerator
 from functools import partial
 
 from mavsdk import System, action

@@ -4,8 +4,6 @@ from typing import Dict, TypeVar, Type, Union
 
 from mavsdk import System
 
-from .abstract_plugin import AbstractPlugin
-from .base_plugins.abstract_base_plugin import AbstractBasePlugin
 from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
 from .base_plugins import *
 from .ext_plugins import *
