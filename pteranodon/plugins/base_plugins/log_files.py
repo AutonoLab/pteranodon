@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from typing import List
+from typing import List, Union
 
 from mavsdk import System
 from mavsdk.log_files import Entry
@@ -60,7 +60,7 @@ class LogFiles(AbstractBasePlugin):
         self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
-    def get_download_progess(self) -> ProgressData:
+    def get_download_progess(self) -> Union(ProgressData, None):
         """
         Get the progress of a download
 
