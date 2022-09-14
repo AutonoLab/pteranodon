@@ -12,7 +12,7 @@ class Tune(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tune", system, loop, logger)
 
-    def play_tune(self, tune_desc : TuneDescription) -> None:
+    def play_tune(self, tune_desc: TuneDescription) -> None:
         """
         Send a tune to be played by the system
 
@@ -26,7 +26,7 @@ class Tune(AbstractBasePlugin):
             asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
         )
 
-    def play_note(self, note : str) -> None:
+    def play_note(self, note: str) -> None:
         """
         Send a single note to be played by the system
 

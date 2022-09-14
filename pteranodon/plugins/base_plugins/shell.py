@@ -15,8 +15,8 @@ class Shell(AbstractBasePlugin):
         super().__init__("shell", system, loop, logger)
 
         self._receive_task = asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
-        self._feedback_history : List[str] = []
-        self._cmd_history : List[str] = []
+        self._feedback_history: List[str] = []
+        self._cmd_history: List[str] = []
 
     async def _receive_feedback(self) -> None:
         """
@@ -25,7 +25,7 @@ class Shell(AbstractBasePlugin):
         async for data in self._system.shell.receive():
             self._feedback_history.append(data)
 
-    def send(self, command : str) -> None:
+    def send(self, command: str) -> None:
         """
         Send a command. This command will be added to the cmd_history.
 

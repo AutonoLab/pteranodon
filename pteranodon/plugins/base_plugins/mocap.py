@@ -24,7 +24,7 @@ class Mocap(AbstractBasePlugin):
             asyncio.ensure_future(self._system.mocap.set_attitude_position_mocap(attitude_position_mocap), loop=self._loop)
         )
 
-    def set_odometry(self, odometry : mocap.Odometry) -> None:
+    def set_odometry(self, odometry: mocap.Odometry) -> None:
         """
         Send odometry information with an external interface.
 
@@ -36,7 +36,7 @@ class Mocap(AbstractBasePlugin):
             asyncio.ensure_future(self._system.mocap.set_odometry(odometry))
         )
 
-    def set_vision_position_estimate(self, vision_position_estimate : mocap.VisionPositionEstimate) -> None:
+    def set_vision_position_estimate(self, vision_position_estimate: mocap.VisionPositionEstimate) -> None:
         """
         Send Global position/attitude estimate from a vision source.
 

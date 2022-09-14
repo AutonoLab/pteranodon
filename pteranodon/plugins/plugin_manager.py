@@ -30,7 +30,7 @@ class PluginManager:
             plugin = plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)
             self._ext_plugins[plugin.name] = plugin
 
-        self._custom_plugins : Dict[str, AbstractCustomPlugin] = {}
+        self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
 
     @property
     def base_plugins(self) -> Dict:
@@ -53,7 +53,7 @@ class PluginManager:
         :param new_plugin: Either the custom plugin class or the custom plugin instance to add
         :type new_plugin: AbstractCustomPlugin sub-class type or instance.
         """
-        new_plugin_obj : AbstractCustomPlugin = new_plugin
+        new_plugin_obj: AbstractCustomPlugin = new_plugin
         if isinstance(new_plugin, type):
             new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
 

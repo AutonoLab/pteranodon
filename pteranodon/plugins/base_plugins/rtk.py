@@ -16,7 +16,7 @@ class Rtk(AbstractBasePlugin):
         super().__init__("rtk", system, loop, logger)
 
 
-    def send_rtcm_data(self, string_data : str) -> None:
+    def send_rtcm_data(self, string_data: str) -> None:
         """
         Send RTCM data
 

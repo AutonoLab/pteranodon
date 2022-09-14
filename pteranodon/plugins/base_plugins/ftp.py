@@ -26,18 +26,18 @@ class Ftp(AbstractBasePlugin):
         self._comp_id = task.result()
         del self._comp_id_task
 
-    async def _download_file(self, remote_file_path : str, local_directory : str) -> None:
+    async def _download_file(self, remote_file_path: str, local_directory: str) -> None:
 
         async for data in self._system.ftp.download(remote_file_path, local_directory):
-            percent_downloaded : float = (data.bytes_transferred / data.total_bytes)
+            percent_downloaded: float = (data.bytes_transferred / data.total_bytes)
             self._logger.info("\rFile at remote path \"{}\" downloading to directory \"{}\": {:.2f}%      ".format(
                 remote_file_path, local_directory, percent_downloaded
             ))
 
-    async def _upload_file(self, local_file_path : str, remote_directory : str) -> None:
+    async def _upload_file(self, local_file_path: str, remote_directory: str) -> None:
 
         async for data in self._system.ftp.upload(local_file_path, remote_directory):
-            percent_uploaded : float = (data.bytes_transferred / data.total_bytes)
+            percent_uploaded: float = (data.bytes_transferred / data.total_bytes)
             self._logger.info("\rFile at local path \"{}\" uploading to directory \"{}\": {:.2f}%      ".format(
                 local_file_path, remote_directory, percent_uploaded
             ))
@@ -51,7 +51,7 @@ class Ftp(AbstractBasePlugin):
         """
         return self._comp_id
 
-    def download(self, remote_file_path : str, local_directory : str) -> None:
+    def download(self, remote_file_path: str, local_directory: str) -> None:
         """
         Downloads a file remotely to a local directory while logging progress
 

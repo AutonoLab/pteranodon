@@ -17,12 +17,12 @@ class Camera(AbstractBasePlugin):
 
         self._current_camera_id: Optional[int] = None
 
-        self._capture_info : Optional[camera.CaptureInfo] = None
-        self._information : Optional[camera.Information] = None
-        self._mode : Optional[camera.Mode] = None
-        self._status : Optional[camera.Status] = None
-        self._video_stream_info : Optional[camera.VideoStreamInfo] = None
-        self._current_settings : List[camera.Setting] = []
+        self._capture_info: Optional[camera.CaptureInfo] = None
+        self._information: Optional[camera.Information] = None
+        self._mode: Optional[camera.Mode] = None
+        self._status: Optional[camera.Status] = None
+        self._video_stream_info: Optional[camera.VideoStreamInfo] = None
+        self._current_settings: List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
 
 
@@ -59,7 +59,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.format_storage(), loop=self._loop)
         )
 
-    def start_photo_interval(self, interval_s : float) -> None:
+    def start_photo_interval(self, interval_s: float) -> None:
         """
         Start photo timelapse with a given interval
 
@@ -122,7 +122,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.take_photo(), loop=self._loop)
         )
 
-    def select_camera(self, camera_id : int) -> None:
+    def select_camera(self, camera_id: int) -> None:
         """
         Select current camera.
 
@@ -136,7 +136,7 @@ class Camera(AbstractBasePlugin):
         )
         self._current_camera_id = camera_id
 
-    def set_mode(self, mode : camera.Mode) -> None:
+    def set_mode(self, mode: camera.Mode) -> None:
         """
         Set camera mode
 
