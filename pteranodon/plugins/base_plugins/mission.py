@@ -66,9 +66,11 @@ class Mission(AbstractBasePlugin):
         async for progress in self._system.mission.download_mission_with_progress():
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
+                return progress.mission_plan
             elif progress.has_progress:
-                self._logger.info(f"Mission Download at {progress * 100}%")
+                self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
+
 
     # OPTIONAL METHOD DEFINITION TO ADD A TIMEOUT PERIOD WITH A 1 SECOND DEFAULT VALUE
     # def download_mission_with_progress(self, timeout_period: float = 1.0)
