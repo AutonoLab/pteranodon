@@ -18,3 +18,15 @@ class TrackingServer(AbstractBasePlugin):
                                   loop=self._loop)
         )
 
+    def respond_tracking_point_command(self, command_answer: CommandAnswer) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.tracking_server.respond_tracking_point_command(command_answer),
+                                  loop=self._loop)
+        )
+
+    def respond_tracking_rectangle_command(self, command_answer: CommandAnswer) -> None:
+        super().submit_task(
+            asyncio.ensure_future(self._system.tracking_server.respond_tracking_rectangle_command(command_answer),
+                                  loop=self._loop)
+        )
+
