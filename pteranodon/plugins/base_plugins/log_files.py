@@ -1,7 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from pkgutil import extend_path
 from typing import List
 
 from mavsdk import System
