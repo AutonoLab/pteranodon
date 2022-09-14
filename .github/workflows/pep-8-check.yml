@@ -75,4 +75,4 @@ jobs:
     - name: Lint with mypy
       run: |
         pip install mypy 
-        mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --show-error-context --disable-error-code import
+        mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --disable-error-code import
