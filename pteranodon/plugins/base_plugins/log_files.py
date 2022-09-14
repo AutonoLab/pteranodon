@@ -73,6 +73,8 @@ class LogFiles(AbstractBasePlugin):
         Erase all log files.
         """
 
+        self._logger.info("Erased all log files!")
+
         super().submit_task(
             asyncio.ensure_future(self._system.log_files.erase_all_log_files(), loop=self._loop)
         )
