@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
-from mavsdk import System
+from mavsdk import System, tracking_server
 from .abstract_base_plugin import AbstractBasePlugin
 
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -11,6 +11,8 @@ from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
 class TrackingServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tracking_server", system, loop, logger)
+        self._track_rectangle = None
+        self._track_point = None
 
     def respond_tracking_off_command(self, command_answer: CommandAnswer) -> None:
         super().submit_task(
@@ -46,3 +48,11 @@ class TrackingServer(AbstractBasePlugin):
             asyncio.ensure_future(self._system.tracking_server.set_tracking_rectangle_status(tracked_rectangle),
                                   loop=self._loop)
         )
+
+    # def tracking_off_command(self) -> tracking_server.tra:
+
+    def tracking_point_command(self) -> tracking_server.TrackPoint:
+        return self._track_point
+
+    def tracking_rectangle_command(self) -> tracking_server.TrackRectangle:
+        return self._track_rectangle
