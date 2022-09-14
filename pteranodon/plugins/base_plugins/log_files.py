@@ -47,12 +47,18 @@ class LogFiles(AbstractBasePlugin):
         self._logger.info("Downloading log file with id: {}".format(entry.id))
 
         try:
+            self._download_progress = download_progress_task.result()
             return download_progress_task.result()
         except asyncio.InvalidStateError:
             # If the result is not available yet,
             #       it can be assumed that the wait call timed out before the callback was done
+            self._download_progress = None
             self._logger.error("Could not return log file download progress! Request timed out!")
             return None
+
+    def update_entries(self):
+        self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
+        self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
     def get_download_progess(self) -> ProgressData:
         """
@@ -75,6 +81,7 @@ class LogFiles(AbstractBasePlugin):
         )
 
     def _get_entries_callback(self, task : Task) -> None:
+        #once task is completed, store the result
         self._entry_list = task.result()
         del self._entry_list_task
 
