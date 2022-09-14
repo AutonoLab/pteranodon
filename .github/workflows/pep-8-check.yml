@@ -1,9 +1,13 @@
 name: PEP-8 Check
 
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  test_formatting:
+    name: "Test Python Formatting"
 
     runs-on: ubuntu-latest
 
@@ -17,60 +21,42 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-#    - name: Lint with flake8
-#      run: |
-#        pip install flake8
-#        # stop the build if there are...
-#        # Python syntax errors or undefined names
-#        # Unused imports
-#        # Whitespace before ':'
-#        # No new line
-#        # No whitespace after keyword
-#
-#
-#        # Ignore...
-#        # Whitespace in new line
-#        # Trailing whitespace
-#        # Too many blank lines
-#
-#        flake8 ./pteranodon --count --select=E9,F63,F7,F82,F401,E203,W292,E275 --extend-ignore=W293,W291,E303 --show-source --statistics
-#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#        flake8 ./pteranodon --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # stop the build if there are...
+        # Python syntax errors or undefined names
+        # Unused imports
+        # Whitespace before ':'
+        # No new line
+        # No whitespace after keyword
 
-#    - name: Lint with pylint
-#      run: |
-#        pip install pylint
-#        # Ignore...
-#        # Wildcard import,
-#        # Trailing whitespace
-#        # Missing module docstring
-#        # Too many instance attributes
-#        # Too many public methods
-#        # Multiple trailing newlines
-#        # Too broad of an exception
-#        # consider-using-enumerate
-#        # Too many arguments
-#        # Too many local variables
-#
-#        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914
 
-#    - name: Lint with black
-#      run: |
-#        pip install black
-#        black .
-#        ...
-#
-#    - name: Lint with isort
-#      run: |
-#        pip install isort
-#        isort .
-#        ...
-#
-#    - name: Lint with pycodestyle
-#      run: |
-#        pip install pycodestyle
-#        pycodestyle .
-#        ...
+        # Ignore...
+        # Whitespace in new line
+        # Trailing whitespace
+        # Too many blank lines
+
+        flake8 ./pteranodon --count --select=E9,F63,F7,F82,F401,E203,W292,E275 --extend-ignore=W293,W291,E303 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 ./pteranodon --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
+
+    - name: Lint with pylint
+      run: |
+        pip install pylint
+        # Ignore...
+        # Wildcard import,
+        # Trailing whitespace
+        # Missing module docstring
+        # Too many instance attributes
+        # Too many public methods
+        # Multiple trailing newlines
+        # Too broad of an exception
+        # consider-using-enumerate
+        # Too many arguments
+        # Too many local variables
+
+        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914
 
     - name: Lint with mypy
       run: |
