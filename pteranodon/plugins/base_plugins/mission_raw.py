@@ -8,12 +8,14 @@ from threading import Condition
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Mission(AbstractBasePlugin):
+class MissionRaw(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw", system, loop, logger)
         self._mission_progress = None
         self.has_mission_changed = False
+        self._mission_changed_task = asyncio.ensure_future(self._update_mission_changed(), loop=self._loop)
+        self._mission_progress_task = asyncio.ensure_future(self._update_mission_progress(), loop=self._loop)
 
     def cancel_mission_download(self):
         """
