@@ -1,8 +1,6 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from time import sleep
-from typing import Callable
 from functools import partial
 
 from mavsdk import System, offboard
@@ -11,6 +9,15 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Offboard(AbstractBasePlugin):
+    """
+    Control a drone with position, velocity, attitude or motor commands.
+
+    The module is called offboard because the commands can be sent from external sources as opposed to onboard
+    control right inside the autopilot “board”.
+
+    Client code must specify a setpoint before starting offboard mode. Mavsdk automatically sends setpoints at 20Hz
+    (PX4 Offboard mode requires that setpoints are minimally sent at 2Hz).
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("offboard", system, loop, logger)
         self._is_active = False

@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 
 class SensorData:

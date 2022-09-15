@@ -3,10 +3,10 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 
 from mavsdk import System
-from .abstract_base_plugin import AbstractBasePlugin
-
 from mavsdk.telemetry_server import Battery, VtolState, LandedState, GroundTruth, Position, Imu, Odometry, VelocityNed, \
     Heading, PositionVelocityNed, RawGps, GpsInfo, StatusText
+
+from .abstract_base_plugin import AbstractBasePlugin
 
 
 class TelemetryServer(AbstractBasePlugin):

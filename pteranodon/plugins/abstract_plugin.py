@@ -19,8 +19,8 @@ class AbstractPlugin(ABC):
         if int(platform.python_version().split(".")[1]) < 8:
             self._use_coro_names = False
 
-        self._task_cache = deque(maxlen=10)
-        self._result_cache = deque(maxlen=10)
+        self._task_cache: deque = deque(maxlen=10)
+        self._result_cache: deque = deque(maxlen=10)
 
     @property
     def name(self) -> str:
@@ -28,7 +28,7 @@ class AbstractPlugin(ABC):
 
     def _task_callback(self, task: Task) -> None:
         if self._use_coro_names:
-            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
+            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")  # type: ignore
         try:
             self._result_cache.append(task.result())
         except Exception as e:
@@ -40,9 +40,6 @@ class AbstractPlugin(ABC):
         value analysis
         :param new_task: An asyncio.Task
         :return: The submitted task, if plugin specific callbacks are added
-
-        Returns:
-            object:
         """
         new_task.add_done_callback(partial(self._task_callback))
         self._task_cache.append(new_task)
