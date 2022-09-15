@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Optional
 
 from mavsdk import System, mission
 from threading import Condition
@@ -57,7 +58,7 @@ class Mission(AbstractBasePlugin):
 
     # OPTIONAL METHOD DEFINITION TO ADD A TIMEOUT PERIOD WITH A 1 SECOND DEFAULT VALUE
     # def download_mission(self, timeout_period: float = 1) -> mission.MissionPlan:
-    def download_mission(self) -> mission.MissionPlan:
+    def download_mission(self) -> Optional[mission.MissionPlan]:
         """
         Returns the current mission plan
         :return: mission.MissionPlan
@@ -80,7 +81,7 @@ class Mission(AbstractBasePlugin):
             # If the result is not available yet,
             #       it can be assumed that the wait call timed out before the callback was done
             self._logger.error("Could not download mission file! Request timed out!")
-            return []
+            return None
 
     async def _download_mission_with_progress(self) -> mission.MissionPlan:
         """
@@ -95,7 +96,7 @@ class Mission(AbstractBasePlugin):
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
-    def download_mission_with_progress(self) -> mission.MissionPlan:
+    def download_mission_with_progress(self) -> Optional[mission.MissionPlan]:
         """
         Starts a download of the Mission plan which updates self._mission_progress with the downloads
         progress
@@ -116,9 +117,9 @@ class Mission(AbstractBasePlugin):
             return x
         except asyncio.InvalidStateError:
             self._logger.error("Could not download mission file! Request timed out!")
-            return []
+            return None
 
-    def get_return_to_launch_after_mission(self) -> bool:
+    def get_return_to_launch_after_mission(self) -> Optional[bool]:
         """
         retrieves the boolean that determines if it returns to the launch location or stays at current location
         :return: boolean
@@ -138,9 +139,9 @@ class Mission(AbstractBasePlugin):
             return x
         except asyncio.InvalidStateError:
             self._logger.error("Could not retrieve RTL information! Request timed out!")
-            return []
+            return None
 
-    def is_mission_finished(self) -> bool:
+    def is_mission_finished(self) -> Optional[bool]:
         """
         retrieves the boolean that states the current status of the mission
         :return: boolean
@@ -160,7 +161,7 @@ class Mission(AbstractBasePlugin):
             return x
         except asyncio.InvalidStateError:
             self._logger.error("is_mission_finished request timed out!")
-            return []
+            return None
 
     def mission_progress(self) -> mission.MissionProgress:
         """
