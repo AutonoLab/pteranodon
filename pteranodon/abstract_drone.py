@@ -40,8 +40,8 @@ class AbstractDrone(ABC):
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))
-        self._queue = deque()
-        self._task_cache = deque(maxlen=10)
+        self._queue: deque = deque()
+        self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
         self._mavlink_thread = Thread(name="Mavlink-Command-Thread", target=self._process_command_loop)
 
@@ -99,7 +99,7 @@ class AbstractDrone(ABC):
 
     # PLUGIN PROPERTIES
     @property
-    def plugins(self) -> Dict:
+    def plugins(self) -> PluginManager:
         """
         :return: The plugin manager instance
         """

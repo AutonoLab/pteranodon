@@ -1,15 +1,17 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, TypeVar, Type, Union
+from typing import Dict, TypeVar, Type, Union, List
 
 from mavsdk import System
 
 from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
 from .base_plugins import *
+from .base_plugins.abstract_base_plugin import AbstractBasePlugin
 from .ext_plugins import *
 
 
 class PluginManager:
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, ext_args: Dict, custom_args: Dict)\
             -> None:
         self._system = system
@@ -18,15 +20,16 @@ class PluginManager:
         self._ext_args = ext_args
         self._custom_args = custom_args
 
-        plugins = [Action, Calibration, Core, FollowMe, Geofence, Info, Offboard, Param, Telemetry, Transponder]
+        base_plugin_types: List[Type[AbstractBasePlugin]] = [Action, Calibration, Core, FollowMe,
+                                                             Geofence, Info, Offboard, Param, Telemetry, Transponder]
         self._base_plugins = {}
-        for plugin in plugins:
+        for plugin in base_plugin_types:
             plugin = plugin(self._system, self._loop, self._logger)
             self._base_plugins[plugin.name] = plugin
 
-        plugins = [Sensor, Relative]
+        ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
         self._ext_plugins = {}
-        for plugin in plugins:
+        for plugin in ext_plugin_types:
             plugin = plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)
             self._ext_plugins[plugin.name] = plugin
 
@@ -44,9 +47,7 @@ class PluginManager:
     def custom_plugins(self) -> Dict:
         return self._custom_plugins
 
-    T = TypeVar('T', bound=AbstractCustomPlugin)
-
-    def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[T]]) -> None:
+    def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]) -> None:
         """
         Adds a custom plugin to the plugin manager
 
@@ -55,10 +56,10 @@ class PluginManager:
         """
         new_plugin_obj: AbstractCustomPlugin = new_plugin
         if isinstance(new_plugin, type):
-            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)
+            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)  # type: ignore
 
         if new_plugin_obj.name in self._custom_plugins:
             self._logger.error(f"Could not add plugin with name \"{new_plugin_obj.name}\"! A plugin with that name already exists!")
             return
 
-        self._custom_plugins[new_plugin.name] = new_plugin
+        self._custom_plugins[new_plugin_obj.name] = new_plugin_obj

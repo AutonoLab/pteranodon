@@ -53,11 +53,11 @@ class Param(AbstractBasePlugin):
         :returns: The value of the parameter if found, otherwise None
         """
         param_val = None
-        if search_custom:
+        if search_custom and self._custom_params is not None:
             param_val = Param._find_param(name, self._custom_params)
-        elif param_val is None and search_float:
+        elif search_float and self._float_params is not None:
             param_val = Param._find_param(name, self._float_params)
-        elif param_val is None and search_int:
+        elif search_int and self._int_params is not None:
             param_val = Param._find_param(name, self._int_params)
         return param_val
 
