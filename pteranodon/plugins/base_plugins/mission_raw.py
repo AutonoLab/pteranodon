@@ -122,8 +122,8 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         async for mission_progress in self._system.mission_raw.mission_progress():
-            if mission_progress != self.mission_progress:
-                self.mission_progress = mission_progress
+            if mission_progress != self._mission_progress:
+                self._mission_progress = mission_progress
 
     def mission_progress(self) -> mission_raw.MissionProgress:
         """
