@@ -9,7 +9,10 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class MissionRawServer(AbstractBasePlugin):
-
+    """
+    Acts as a vehicle and receives incoming missions from GCS (in raw MAVLINK format). Provides current mission item
+    state, so the server can progress through missions.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
         self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
