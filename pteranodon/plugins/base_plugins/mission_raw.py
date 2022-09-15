@@ -11,7 +11,7 @@ from .abstract_base_plugin import AbstractBasePlugin
 class Mission(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__("mission", system, loop, logger)
+        super().__init__("mission_raw", system, loop, logger)
         self._mission_progress = None
         self.has_mission_changed = False
 
