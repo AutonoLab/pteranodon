@@ -1,8 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from time import sleep
-from typing import Callable, List, Union, Any
+from typing import List, Union, Any, Optional
 from functools import partial
 
 from mavsdk import System, param
@@ -11,13 +10,16 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Param(AbstractBasePlugin):
+    """
+    Provide raw access to get and set parameters.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
-        self._all_params = None
-        self._custom_params = None
-        self._float_params = None
-        self._int_params = None
-        self._param_task = None
+        self._all_params: Optional[param.AllParams] = None
+        self._custom_params: Optional[List[param.CustomParam]] = None
+        self._float_params: Optional[List[param.FloatParam]] = None
+        self._int_params: Optional[List[param.IntParam]] = None
+        self._param_task: Optional[Task] = None
         self.refresh()
 
     def _update_params_callback(self, task: Task) -> None:
@@ -30,16 +32,16 @@ class Param(AbstractBasePlugin):
         self._float_params = self._all_params.float_params
         self._int_params = self._all_params.int_params
 
-    def _set_param_callback(self, task: Union[Task, None]) -> None:
+    def _set_param_callback(self, _: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
         self._param_task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
-        self._param_task.add_done_callback(partial(self._update_params_callback))
+        self._param_task.add_done_callback(partial(self._update_params_callback))  # type: ignore
 
     @staticmethod
     def _find_param(name: str, param_list: List) -> Any:
-        for param in param_list:
-            if name == param.name:
-                return param.value
+        for parameter in param_list:
+            if name == parameter.name:
+                return parameter.value
         return None
 
     def get_param(self, name: str, search_custom=False, search_float=False, search_int=False) -> Any:
@@ -54,11 +56,11 @@ class Param(AbstractBasePlugin):
         :returns: The value of the parameter if found, otherwise None
         """
         param_val = None
-        if search_custom:
+        if search_custom and self._custom_params is not None:
             param_val = Param._find_param(name, self._custom_params)
-        elif param_val is None and search_float:
+        elif search_float and self._float_params is not None:
             param_val = Param._find_param(name, self._float_params)
-        elif param_val is None and search_int:
+        elif search_int and self._int_params is not None:
             param_val = Param._find_param(name, self._int_params)
         return param_val
 
