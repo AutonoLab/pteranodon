@@ -9,13 +9,21 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Mission(AbstractBasePlugin):
-
+    """
+    Enable waypoint missions.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
         self._download_progress = None
         self._enable_RTL = None
         self._mission_plan = None
         self._mission_progress = None
+        self._download_mission_with_progress_task = asyncio.ensure_future(
+            self._download_mission_with_progress(), loop=self._loop
+        )
+        self._update_mission_progress_task = asyncio.ensure_future(
+            self._update_mission_progress(), loop=self._loop
+        )
 
     def cancel_mission_download(self):
         """
