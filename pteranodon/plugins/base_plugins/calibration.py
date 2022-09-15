@@ -16,7 +16,7 @@ class Calibration(AbstractBasePlugin):
         sensor_name = com.__name__.split("_")[1]
         self._logger.info(f"Beginning calibration of {sensor_name}")
         try:
-            async for data in com:
+            async for _ in com:
                 pass
         except calibration.CalibrationError as e:
             self._logger.error(f"{sensor_name} calibration {e}")

@@ -90,7 +90,7 @@ class Ftp(AbstractBasePlugin):
         :param remote_directory_path: The remote path of the directory to create
         :type remote_directory_path: str
         """
-        self._logger.info("Creating directory at path \"{}\" via FTP".format(remote_directory_path))
+        self._logger.info(f"Creating directory at path \"{remote_directory_path}\" via FTP")
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.create_directory(remote_directory_path), loop=self._loop)
         )
@@ -102,7 +102,7 @@ class Ftp(AbstractBasePlugin):
         :param remote_directory_path: The remote path of the directory to remove
         :type remote_directory_path: str
         """
-        self._logger.info("Removing directory at path \"{}\" via FTP".format(remote_directory_path))
+        self._logger.info(f"Removing directory at path \"{remote_directory_path}\" via FTP")
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.remove_directory(remote_directory_path), loop=self._loop)
         )
@@ -114,7 +114,7 @@ class Ftp(AbstractBasePlugin):
         :param remote_file_path: The remote path of the file to remove
         :type remote_file_path: str
         """
-        self._logger.info("Removing file at path \"{}\" via FTP".format(remote_file_path))
+        self._logger.info(f"Removing file at path \"{remote_file_path}\" via FTP")
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.remove_file(remote_file_path), loop=self._loop)
         )
@@ -128,8 +128,7 @@ class Ftp(AbstractBasePlugin):
         :param remote_dest_path: The path of the location to rename (move) the file to
         :type remote_dest_path: str
         """
-        self._logger.info("Moving a remote file/directory from \"{}\" to \"{}\" via FTP".format(remote_source_path,
-                                                                                                remote_dest_path))
+        self._logger.info(f"Moving a remote file/directory from \"{remote_source_path}\" to \"{remote_dest_path}\" via FTP")
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.rename(remote_source_path, remote_dest_path), loop=self._loop)
         )
@@ -151,7 +150,7 @@ class Ftp(AbstractBasePlugin):
         :param root_directory: The path to set for the root directory of the FTP server
         :type root_directory: str
         """
-        self._logger.info("Setting the root directory of the MAVLink FTP server to {}".format(root_directory))
+        self._logger.info(f"Setting the root directory of the MAVLink FTP server to {root_directory}")
 
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.set_root_directory(root_directory), loop=self._loop)
@@ -166,7 +165,7 @@ class Ftp(AbstractBasePlugin):
         :param comp_id: The component ID to set
         :type comp_id: uint32
         """
-        self._logger.info("Setting the target's component ID to {}".format(comp_id))
+        self._logger.info(f"Setting the target's component ID to {comp_id}")
 
         super().submit_task(
             asyncio.ensure_future(self._system.ftp.set_target_compid(comp_id), loop=self._loop)
@@ -207,7 +206,7 @@ class Ftp(AbstractBasePlugin):
             self._logger.error("Could not return are_files_identical result! Request timed out!")
             return None
 
-    def list_directory(self, remote_directory: str) -> List[str]:
+    def list_directory(self, remote_directory : str) -> List[str]:
         """
         Lists items in the given remote directory
 

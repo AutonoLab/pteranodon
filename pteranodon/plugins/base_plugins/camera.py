@@ -183,13 +183,11 @@ class Camera(AbstractBasePlugin):
 
         if setting_obj.setting_id is None:
             self._logger.error("Could not set setting! No setting ID provided in object or function!")
-            return None
+            return
 
         if setting_obj.option is None:
-            self._logger.error("Could not set setting with ID {}! No option provided in object or function!".format(
-                setting_obj.setting_id
-            ))
-            return None
+            self._logger.error(f"Could not set setting with ID {setting_obj.setting_id}! No option provided in object or function!")
+            return
 
         super().submit_task(
             asyncio.ensure_future(self._system.camera.set_setting(setting_obj), loop=self._loop)

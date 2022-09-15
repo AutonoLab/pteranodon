@@ -60,7 +60,7 @@ class CameraServer(AbstractBasePlugin):
     async def _take_photo(self) -> None:
 
         async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info("Received image capture request with index {}".format(capture_req_idx))
+            self._logger.info(f"Received image capture request with index {capture_req_idx}")
 
             # Uses the photo request callback to get the arguments for the response_take_photo method.
             self.set_in_progress(True)

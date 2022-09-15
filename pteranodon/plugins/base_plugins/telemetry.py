@@ -24,7 +24,8 @@ class Telemetry(AbstractBasePlugin):
         self._getter_data = self._init_getter_data()
 
     def _get_methods(self) -> List:
-        return [func for func in dir(self._system.telemetry) if callable(getattr(self._system.telemetry, func)) and not func.startswith("_")]
+        return [func for func in dir(self._system.telemetry)
+                if callable(getattr(self._system.telemetry, func)) and not func.startswith("_")]
 
     def _get_methods_startswith(self, methods: List, starts_with: str) -> List:
         return [func for func in methods if func.startswith(starts_with)]

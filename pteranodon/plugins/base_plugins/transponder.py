@@ -20,9 +20,9 @@ class Transponder(AbstractBasePlugin):
         )
 
     async def _transponder_update(self) -> None:
-        async for transponder in self._system.transponder.transponder():
-            if transponder != self._transponder_data:
-                self._transponder_data = transponder
+        async for transponder_val in self._system.transponder.transponder():
+            if transponder_val != self._transponder_data:
+                self._transponder_data = transponder_val
 
     def transponder(self) -> transponder.AdsbVehicle:
         return self._transponder_data

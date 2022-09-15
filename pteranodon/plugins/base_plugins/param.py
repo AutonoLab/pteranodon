@@ -29,16 +29,16 @@ class Param(AbstractBasePlugin):
         self._float_params = self._all_params.float_params
         self._int_params = self._all_params.int_params
 
-    def _set_param_callback(self, task: Union[Task, None]) -> None:
+    def _set_param_callback(self, _: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
         self._param_task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
         self._param_task.add_done_callback(partial(self._update_params_callback))
 
     @staticmethod
     def _find_param(name: str, param_list: List) -> Any:
-        for param in param_list:
-            if name == param.name:
-                return param.value
+        for parameter in param_list:
+            if name == parameter.name:
+                return parameter.value
         return None
 
     def get_param(self, name: str, search_custom=False, search_float=False, search_int=False) -> Any:

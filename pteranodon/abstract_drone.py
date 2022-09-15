@@ -266,9 +266,9 @@ class AbstractDrone(ABC):
     def _connect(self) -> None:
         try:
             self._loop.run_until_complete(self._drone.connect(system_address=self.address))
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             self._cleanup()
-            raise KeyboardInterrupt
+            raise KeyboardInterrupt from e
         finally:
             self._loop.run_until_complete(self._async_connect())
 
@@ -279,7 +279,6 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
