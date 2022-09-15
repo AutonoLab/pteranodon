@@ -59,7 +59,7 @@ class ActionSever(AbstractBasePlugin):
         Returns the flight modes allowed
         :return: action_server.AllowableFlightModes ; all allowed flight modes
         """
-        self._logger.info(f"Pulling allowable flight modes")
+        self._logger.info("Pulling allowable flight modes")
 
         get_flight_modes_task = asyncio.ensure_future(
             self._system.action_server.get_allowable_flight_modes(), loop=self._loop
@@ -117,7 +117,7 @@ class ActionSever(AbstractBasePlugin):
         :param flight_modes: action_server.AllowableFlightModes ; a list of allowable flight modes
         :return: None
         """
-        self._logger.info(f"Setting allowable flight modes to inputted flight modes")
+        self._logger.info("Setting allowable flight modes to inputted flight modes")
         super().submit_task(
             asyncio.ensure_future(self._system.action_server.set_allowable_flight_modes(flight_modes))
         )
