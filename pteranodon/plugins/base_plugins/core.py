@@ -1,8 +1,6 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any, Callable
 
 from mavsdk import System, core
 
@@ -10,6 +8,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Core(AbstractBasePlugin):
+    """
+    Access to the connection state and core configurations
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("core", system, loop, logger)
 

@@ -1,13 +1,14 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from typing import List, Union
+from typing import List, Optional
+from functools import partial
+from threading import Condition
 
 from mavsdk import System
 from mavsdk.log_files import Entry
 from mavsdk.log_files import ProgressData
-from functools import partial
-from threading import Condition
+
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -17,12 +18,12 @@ class LogFiles(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("LogFiles", system, loop, logger)
 
-        self._download_progress = None
-        self._entry_list = None
+        self._download_progress: Optional[ProgressData] = None
+        self._entry_list: List[Entry] = []
         self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
-    def download_log_file(self, entry : Entry, path : str) -> ProgressData:
+    def download_log_file(self, entry: Entry, path: str) -> ProgressData:
         """
         Download log file synchronously.
 
@@ -44,7 +45,7 @@ class LogFiles(AbstractBasePlugin):
         # Wait with a timeout of 1 second
         done_condition.wait(1.0)
 
-        self._logger.info("Downloading log file with id: {}".format(entry.id))
+        self._logger.info(f"Downloading log file with id: {entry.id}")
 
         try:
             self._download_progress = download_progress_task.result()
@@ -60,7 +61,7 @@ class LogFiles(AbstractBasePlugin):
         self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
-    def get_download_progess(self) -> Union(ProgressData, None):
+    def get_download_progress(self) -> Optional[ProgressData]:
         """
         Get the progress of a download
 
@@ -80,8 +81,8 @@ class LogFiles(AbstractBasePlugin):
             asyncio.ensure_future(self._system.log_files.erase_all_log_files(), loop=self._loop)
         )
 
-    def _get_entries_callback(self, task : Task) -> None:
-        #once task is completed, store the result
+    def _get_entries_callback(self, task: Task) -> None:
+        # once task is completed, store the result
         self._entry_list = task.result()
         del self._entry_list_task
 

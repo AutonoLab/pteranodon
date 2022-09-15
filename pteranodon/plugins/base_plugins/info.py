@@ -1,8 +1,7 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any, Callable
+from typing import Optional
 
 from mavsdk import System, info
 
@@ -10,14 +9,17 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Info(AbstractBasePlugin):
+    """
+    Provide information about the hardware and/or software of a system.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("info", system, loop, logger)
 
-        self._id = None
-        self._product = None
-        self._version = None
-        self._flight_info = None
-        self._speed_factor = None
+        self._id: Optional[info.Identification] = None
+        self._product: Optional[info.Product] = None
+        self._version: Optional[info.Version] = None
+        self._flight_info: Optional[info.FlightInfo] = None
+        self._speed_factor: Optional[float] = None
 
         self._flight_info_rate = 2.0
         self._speed_factor_rate = 2.0
@@ -68,19 +70,19 @@ class Info(AbstractBasePlugin):
         except info.InfoError as e:
             self._logger.error(e)
 
-    def get_identification(self) -> info.Identification:
+    def get_identification(self) -> Optional[info.Identification]:
         return self._id
 
-    def get_product(self) -> info.Product:
+    def get_product(self) -> Optional[info.Product]:
         return self._product
 
-    def get_version(self) -> info.Version:
+    def get_version(self) -> Optional[info.Version]:
         return self._version
 
-    def get_flight_information(self) -> info.FlightInfo:
+    def get_flight_information(self) -> Optional[info.FlightInfo]:
         return self._flight_info
 
-    def get_speed_factor(self) -> float:
+    def get_speed_factor(self) -> Optional[float]:
         return self._speed_factor
 
     def set_flight_information_rate(self, rate: float) -> None:
