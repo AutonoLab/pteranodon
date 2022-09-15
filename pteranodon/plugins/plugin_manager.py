@@ -20,20 +20,23 @@ class PluginManager:
         self._ext_args = ext_args
         self._custom_args = custom_args
 
+        self._base_plugins: Dict[str, AbstractBasePlugin] = {}
+        self._ext_plugins: Dict[str, AbstractCustomPlugin] = {}
+        self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
+
         base_plugin_types: List[Type[AbstractBasePlugin]] = [Action, Calibration, Core, FollowMe,
                                                              Geofence, Info, Offboard, Param, Telemetry, Transponder]
-        self._base_plugins = {}
-        for plugin in base_plugin_types:
-            plugin = plugin(self._system, self._loop, self._logger)  # type: ignore
-            self._base_plugins[plugin.name] = plugin
-
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
-        self._ext_plugins = {}
-        for plugin in ext_plugin_types:
-            plugin = plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
-            self._ext_plugins[plugin.name] = plugin
 
-        self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
+        for base_type in base_plugin_types:
+            base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
+            self._base_plugins[base_plugin.name] = base_plugin
+
+        for ext_type in ext_plugin_types:
+            ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
+            self._ext_plugins[ext_plugin.name] = ext_plugin
+
+
 
     @property
     def base_plugins(self) -> Dict:

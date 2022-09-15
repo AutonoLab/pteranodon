@@ -13,7 +13,7 @@ class Calibration(AbstractBasePlugin):
         super().__init__("calibration", system, loop, logger)
 
     async def _calibrate_wrapper(self, com: AsyncGenerator) -> None:
-        sensor_name = com.__name__.split("_")[1]
+        sensor_name = com.__name__.split("_")[1]  # type: ignore
         self._logger.info(f"Beginning calibration of {sensor_name}")
         try:
             async for _ in com:

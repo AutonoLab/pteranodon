@@ -26,6 +26,10 @@ class AbstractSensor(ABC):
         return False
 
     def _run_timed(self) -> None:
+        # Should never happen but this is for mypy
+        if self._poll_rate is None:
+            return
+
         while not self._stopped:
             start_time = time.perf_counter()
             self.update_data()
