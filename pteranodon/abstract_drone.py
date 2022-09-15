@@ -279,6 +279,7 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
+        self._drone.__del__()
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
