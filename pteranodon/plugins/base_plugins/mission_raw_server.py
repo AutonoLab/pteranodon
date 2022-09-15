@@ -1,21 +1,25 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Optional
 
 from mavsdk import System, mission_raw_server
 
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-class Mission(AbstractBasePlugin):
+class MissionRawServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
-        self.mission_plan = None
-        self.clear_type = None
-        self.mission_item = None
+        self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
+        self.clear_type: Optional[int] = None
+        self.mission_item: Optional[mission_raw_server.MissionItem] = None
+        self._clear_all_task = asyncio.ensure_future(self._clear_all(), loop=self._loop)
+        self._current_item_changed_task = asyncio.ensure_future(self._current_item_changed(), loop=self._loop)
+        self._incoming_mission_task = asyncio.ensure_future(self._incoming_mission, loop=self._loop)
 
-    async def clear_all(self):
+    async def _clear_all(self):
         """
         updates the clear_type
         :return: None
@@ -24,7 +28,7 @@ class Mission(AbstractBasePlugin):
             if x != self.clear_type:
                 self.clear_type = x
 
-    async def current_item_changed(self):
+    async def _current_item_changed(self):
         """
         updates the current mission item
         :return: None
@@ -33,7 +37,7 @@ class Mission(AbstractBasePlugin):
             if x != self.mission_item:
                 self.mission_item = x
 
-    async def incoming_mission(self):
+    async def _incoming_mission(self):
         """
         sets new mission_item
         :return: None
