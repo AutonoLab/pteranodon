@@ -206,7 +206,7 @@ class Ftp(AbstractBasePlugin):
             self._logger.error("Could not return are_files_identical result! Request timed out!")
             return None
 
-    def list_directory(self, remote_directory : str) -> List[str]:
+    def list_directory(self, remote_directory: str) -> List[str]:
         """
         Lists items in the given remote directory
 
