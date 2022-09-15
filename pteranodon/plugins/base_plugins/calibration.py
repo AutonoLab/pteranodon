@@ -1,8 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any, Callable, AsyncGenerator
+from typing import AsyncGenerator
 
 from mavsdk import System, calibration
 
@@ -10,14 +9,17 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Calibration(AbstractBasePlugin):
+    """
+    Enable to calibrate sensors of a drone such as gyro, accelerometer, and magnetometer.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("calibration", system, loop, logger)
 
     async def _calibrate_wrapper(self, com: AsyncGenerator) -> None:
-        sensor_name = com.__name__.split("_")[1]
+        sensor_name = com.__name__.split("_")[1]  # type: ignore
         self._logger.info(f"Beginning calibration of {sensor_name}")
         try:
-            async for data in com:
+            async for _ in com:
                 pass
         except calibration.CalibrationError as e:
             self._logger.error(f"{sensor_name} calibration {e}")
@@ -73,10 +75,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     async def _calibrate_all(self) -> None:
-        tasks = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
+        task_funcs = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
                  self._calibrate_magnetometer, self._calibrate_level_horizon]
-        for task in tasks:
-            task = asyncio.ensure_future(task(), loop=self._loop)
+        for func in task_funcs:
+            task = asyncio.ensure_future(func(), loop=self._loop)
             while not task.done():
                 await asyncio.sleep(0.05)
 

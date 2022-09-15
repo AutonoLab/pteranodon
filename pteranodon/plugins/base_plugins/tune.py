@@ -2,28 +2,34 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
-from mavsdk import System, tune
-from mavsdk.tune import TuneDescription
+from mavsdk import System
+from mavsdk.tune import TuneDescription, SongElement
 
 from .abstract_base_plugin import AbstractBasePlugin
 
+
 class Tune(AbstractBasePlugin):
+    """
+    Enable creating and sending a tune to be played on the system.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tune", system, loop, logger)
 
-    def play_tune(self, tune_desc : TuneDescription) -> None:
+    def play_tune(self, tune_desc: TuneDescription) -> None:
         """
         Send a tune to be played by the system
 
         :param tune_desc: The tune to be played
-        :type tune_desc: TuneDescription        
+        :type tune_desc: TuneDescription
         """
+
+
         
         super().submit_task(
             asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
         )
 
-    def play_note_c(self, note : str) -> None:
+    def play_note(self, note: str) -> None:
         """
         Send a single note to be played by the system
 
@@ -31,31 +37,24 @@ class Tune(AbstractBasePlugin):
         :type note: str
         """
 
-        if(note.upper() == 'C'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_C], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'D'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_D], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'E'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_E], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'F'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_F], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'G'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_G], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'A'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_A], 100)), loop=self._loop))
-                
-        elif(note.upper() == 'B'):
-            super().submit_task(
-                asyncio.ensure_future(self._system.tune.play_tune(TuneDescription([tune.STYLE_LEGATTO, tune.DURATION_2, tune.NOTE_B], 100)), loop=self._loop))
-            
+        tune_description = TuneDescription([SongElement.STYLE_LEGATO, SongElement.DURATION_2], 100)
+
+        if note.upper() == 'C':
+            tune_description.song_elements.append(SongElement.NOTE_C)
+        elif note.upper() == 'D':
+            tune_description.song_elements.append(SongElement.NOTE_D)
+        elif note.upper() == 'E':
+            tune_description.song_elements.append(SongElement.NOTE_E)
+        elif note.upper() == 'F':
+            tune_description.song_elements.append(SongElement.NOTE_F)
+        elif note.upper() == 'G':
+            tune_description.song_elements.append(SongElement.NOTE_G)
+        elif note.upper() == 'A':
+            tune_description.song_elements.append(SongElement.NOTE_A)
+        elif note.upper() == 'B':
+            tune_description.song_elements.append(SongElement.NOTE_B)
+
+        super().submit_task(
+            asyncio.ensure_future(self._system.tune.play_tune(tune_description), loop=self._loop)
+        )
+

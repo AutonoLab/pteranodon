@@ -1,7 +1,7 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any, Callable, Tuple
+from typing import Callable, Tuple
 
 from mavsdk import System, camera_server
 from mavsdk.camera_server import TakePhotoFeedback, CaptureInfo
@@ -10,19 +10,24 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class CameraServer(AbstractBasePlugin):
+    """
+    Provides handling of camera trigger commands.
+    """
 
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info : camera_server.Information) -> None:
+    PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
+
+    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info: camera_server.Information) -> None:
         super().__init__("camera_server", system, loop, logger)
 
         # Must be called as soon as the camera server is created
         self.set_information(cam_info)
 
         # Sets the request callback to the default since some behavior is required
-        self._photo_request_callback = CameraServer._default_photo_request_callback
+        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = CameraServer._default_photo_request_callback
 
         self._take_photo_sub_task = asyncio.ensure_future(self._take_photo(), loop=self._loop)
 
-    def set_photo_request_callback(self, callback : Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]):
+    def set_photo_request_callback(self, callback: PhotoRequestCallbackType):
         """
         If image capture requests must be processed in a way that is different from the default, pass that
         function in here
@@ -60,7 +65,7 @@ class CameraServer(AbstractBasePlugin):
     async def _take_photo(self) -> None:
 
         async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info("Received image capture request with index {}".format(capture_req_idx))
+            self._logger.info(f"Received image capture request with index {capture_req_idx}")
 
             # Uses the photo request callback to get the arguments for the response_take_photo method.
             self.set_in_progress(True)
@@ -68,7 +73,7 @@ class CameraServer(AbstractBasePlugin):
             self.set_in_progress(False)
             self._respond_take_photo(*feedback_capture_tuple)
 
-    def set_in_progress(self, in_progress : bool) -> None:
+    def set_in_progress(self, in_progress: bool) -> None:
         """
         Sets image capture in progress status flags. This should be set to true when the camera is busy taking a photo
         and false when it is done.
@@ -80,7 +85,7 @@ class CameraServer(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera_server.set_in_progress(in_progress))
         )
 
-    def _respond_take_photo(self, take_photo_feedback : camera_server.TakePhotoFeedback, capture_info : camera_server.CaptureInfo):
+    def _respond_take_photo(self, take_photo_feedback: camera_server.TakePhotoFeedback, capture_info: camera_server.CaptureInfo):
         """
         Respond to an image capture request from SubscribeTakePhoto (_take_photo).
 
@@ -96,7 +101,7 @@ class CameraServer(AbstractBasePlugin):
             )
         )
 
-    def set_information(self, cam_info : camera_server.Information) -> None:
+    def set_information(self, cam_info: camera_server.Information) -> None:
         """
         Sets the camera information. This must be called as soon as the camera server is created.
 

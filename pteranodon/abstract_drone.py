@@ -4,7 +4,7 @@ from collections import deque
 import asyncio
 import atexit
 from abc import abstractmethod, ABC
-from typing import Union, Any, List, Tuple, Callable, Dict, Optional
+from typing import Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
 import random
@@ -40,8 +40,8 @@ class AbstractDrone(ABC):
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))
-        self._queue = deque()
-        self._task_cache = deque(maxlen=10)
+        self._queue: deque = deque()
+        self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
         self._mavlink_thread = Thread(name="Mavlink-Command-Thread", target=self._process_command_loop)
 
@@ -99,7 +99,7 @@ class AbstractDrone(ABC):
 
     # PLUGIN PROPERTIES
     @property
-    def plugins(self) -> Dict:
+    def plugins(self) -> PluginManager:
         """
         :return: The plugin manager instance
         """
@@ -266,9 +266,9 @@ class AbstractDrone(ABC):
     def _connect(self) -> None:
         try:
             self._loop.run_until_complete(self._drone.connect(system_address=self.address))
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             self._cleanup()
-            raise KeyboardInterrupt
+            raise KeyboardInterrupt from e
         finally:
             self._loop.run_until_complete(self._async_connect())
 
@@ -279,7 +279,7 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()
+        self._drone.__del__()  # type: ignore
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:

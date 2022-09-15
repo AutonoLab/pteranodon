@@ -41,6 +41,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 ./pteranodon --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
 
+    - name: Lint with mypy
+      run: |
+        pip install mypy 
+        mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --disable-error-code import
+
     - name: Lint with pylint
       run: |
         pip install pylint
@@ -55,10 +60,8 @@ jobs:
         # consider-using-enumerate
         # Too many arguments
         # Too many local variables
+        # Unnecessary pass statement
+        # Logging fstring interpolation
+        # Useless parent or super() delegation 
 
-        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914
-
-    - name: Lint with mypy
-      run: |
-        pip install mypy 
-        mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --disable-error-code import
+        pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914,W0107,W1203,W0246

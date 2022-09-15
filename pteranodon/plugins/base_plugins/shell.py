@@ -10,13 +10,16 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Shell(AbstractBasePlugin):
+    """
+    Allow to communicate with the vehicle’s system shell.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
 
         self._receive_task = asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
-        self._feedback_history : List[str] = []
-        self._cmd_history : List[str] = []
+        self._feedback_history: List[str] = []
+        self._cmd_history: List[str] = []
 
     async def _receive_feedback(self) -> None:
         """
@@ -25,7 +28,7 @@ class Shell(AbstractBasePlugin):
         async for data in self._system.shell.receive():
             self._feedback_history.append(data)
 
-    def send(self, command : str) -> None:
+    def send(self, command: str) -> None:
         """
         Send a command. This command will be added to the cmd_history.
 
