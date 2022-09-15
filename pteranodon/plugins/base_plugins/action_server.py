@@ -19,7 +19,6 @@ class ActionSever(AbstractBasePlugin):
         self._arm_disarm_value: Optional[action_server.ArmDisarm] = None
         self._flight_mode_change_task = asyncio.ensure_future(self._flight_mode_change(), loop=self._loop)
         self._flight_mode_change_value: Optional[action_server.FlightMode] = None
-        self._flight_mode_change_value: Optional[action_server.FlightMode] = None
         self._land_task = asyncio.ensure_future(self._land(), loop=self._loop)
         self._land_value: Optional[bool] = None
         self._reboot_task = asyncio.ensure_future(self._reboot(), loop=self._loop)
