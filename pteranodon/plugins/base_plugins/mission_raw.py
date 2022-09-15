@@ -1,9 +1,9 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
+from threading import Condition
 
 from mavsdk import System, mission_raw
-from threading import Condition
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -130,7 +130,7 @@ class MissionRaw(AbstractBasePlugin):
         Get the current mission progress
         :return: mission_raw.MissionProgress ; returns the current mission progress
         """
-        return self.mission_progress
+        return self._mission_progress
 
     def pause_mission(self):
         """
