@@ -2,9 +2,9 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from threading import Condition
 
 from mavsdk import System, mission
-from threading import Condition
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -16,7 +16,7 @@ class Mission(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
         self._download_progress = None
-        self._enable_RTL = None
+        self._enable_return_to_land = None
         self._mission_plan = None
         self._mission_progress = None
         self._download_mission_with_progress_task = asyncio.ensure_future(
@@ -92,7 +92,7 @@ class Mission(AbstractBasePlugin):
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
                 return progress.mission_plan
-            elif progress.has_progress:
+            if progress.has_progress:
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
