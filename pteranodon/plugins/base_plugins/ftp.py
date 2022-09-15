@@ -14,7 +14,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Ftp(AbstractBasePlugin):
-
+    """
+    Implements file transfer functionality using MAVLink FTP.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("ftp", system, loop, logger)
         self._comp_id: typing.Optional[int] = None

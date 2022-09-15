@@ -10,6 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class FollowMe(AbstractBasePlugin):
+    """
+    Allow users to command the vehicle to follow a specific target. The target is provided as a GPS coordinate and altitude.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("follow_me", system, loop, logger)
         self._is_active: Optional[bool] = None

@@ -10,6 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Shell(AbstractBasePlugin):
+    """
+    Allow to communicate with the vehicle’s system shell.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)

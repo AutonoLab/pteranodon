@@ -8,6 +8,10 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Mocap(AbstractBasePlugin):
+    """
+    Allows interfacing a vehicle with a motion capture system in order to allow navigation without
+    global positioning sources available (e.g. indoors, or when flying under a bridge. etc.).
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mocap", system, loop, logger)
 

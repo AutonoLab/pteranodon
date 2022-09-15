@@ -9,6 +9,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Failure(AbstractBasePlugin):
+    """
+    Inject failures into system to test failsafes.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("failure", system, loop, logger)
 

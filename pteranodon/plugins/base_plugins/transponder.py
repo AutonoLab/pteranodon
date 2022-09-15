@@ -8,6 +8,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Transponder(AbstractBasePlugin):
+    """
+    Allow users to get ADS-B information and set ADS-B update rates.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("transponder", system, loop, logger)
 

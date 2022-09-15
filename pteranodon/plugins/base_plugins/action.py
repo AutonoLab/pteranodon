@@ -10,6 +10,10 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Action(AbstractBasePlugin):
+    """
+    Enable simple actions such as arming, taking off, and landing.
+    """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action", system, loop, logger)
 

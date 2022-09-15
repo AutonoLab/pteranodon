@@ -9,6 +9,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Calibration(AbstractBasePlugin):
+    """
+    Enable to calibrate sensors of a drone such as gyro, accelerometer, and magnetometer.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("calibration", system, loop, logger)
 

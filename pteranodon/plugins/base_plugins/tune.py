@@ -9,6 +9,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Tune(AbstractBasePlugin):
+    """
+    Enable creating and sending a tune to be played on the system.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tune", system, loop, logger)
 

@@ -10,6 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Param(AbstractBasePlugin):
+    """
+    Provide raw access to get and set parameters.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
         self._all_params: Optional[param.AllParams] = None

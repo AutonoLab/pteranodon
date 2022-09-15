@@ -11,6 +11,12 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Camera(AbstractBasePlugin):
+    """
+    Can be used to manage cameras that implement the MAVLink Camera Protocol: https://mavlink.io/en/protocol/camera.html.
+
+    Currently only a single camera is supported. When multiple cameras are supported the plugin will need to be
+    instantiated separately for every camera and the camera selected using select_camera.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("camera", system, loop, logger)

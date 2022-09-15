@@ -10,6 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Geofence(AbstractBasePlugin):
+    """
+    Enable setting a geofence.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("geofence", system, loop, logger)
 

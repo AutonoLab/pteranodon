@@ -9,6 +9,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Info(AbstractBasePlugin):
+    """
+    Provide information about the hardware and/or software of a system.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("info", system, loop, logger)
 

@@ -8,6 +8,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Core(AbstractBasePlugin):
+    """
+    Access to the connection state and core configurations
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("core", system, loop, logger)
 

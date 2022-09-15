@@ -10,6 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class CameraServer(AbstractBasePlugin):
+    """
+    Provides handling of camera trigger commands.
+    """
 
     PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
 
