@@ -1,8 +1,8 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Tuple, Dict
-from math import atan2, degrees, sqrt, pow, cos, sin, radians
+from math import atan2, degrees, sqrt, cos, sin, radians
 
 from mavsdk import System
 from mavsdk.geofence import Point, Polygon
@@ -52,8 +52,8 @@ class Relative(AbstractCustomPlugin):
 
     async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions=(True, True, True), test_min=False) -> None:
         if test_min:
-            totalDistance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
-            if totalDistance < self._min_follow_distance:
+            total_distance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
+            if total_distance < self._min_follow_distance:
                 await self._system.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
         await self._maneuver_with_ned(front, right, down, on_dimensions)
 
