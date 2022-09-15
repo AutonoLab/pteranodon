@@ -10,12 +10,15 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ParamServer(AbstractBasePlugin):
+    """
+    Provide raw access to retrieve and provide server parameters.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param_server", system, loop, logger)
 
-    def provide_param_custom(self, name, value):
+    def provide_param_custom(self, name: str, value: str):
         """
-        Creates a custom parameter and appends it to the _custom_params list, updates the existing AllParams item
+        provides a custom parameter created from the name and value
         :param name: name of the custom parameter you wish to add
         :param value: String value of the parameter you wish to add
         """
@@ -24,9 +27,9 @@ class ParamServer(AbstractBasePlugin):
             asyncio.ensure_future(self._system.param_server.provide_param_custom(name, value), loop=self._loop)
         )
 
-    def provide_param_float(self, name, value):
+    def provide_param_float(self, name: str, value: float):
         """
-        Creates a float parameter and appends it to the _float_params list, updates the existing AllParams item
+        provides a float parameter created from the name and value provided
         :param name: name of the float parameter you wish to add
         :param value: float value of the parameter you wish to add
         """
@@ -35,9 +38,9 @@ class ParamServer(AbstractBasePlugin):
             asyncio.ensure_future(self._system.param_server.provide_param_float(name, value), loop=self._loop)
         )
 
-    def provide_param_int(self, name, value):
+    def provide_param_int(self, name: str, value: int):
         """
-        Creates an integer parameter and appends it to the _int_params list, updates the existing AllParams item
+        Provide an integer parameter created from the name and value provided
         :param name: name of the integer parameter you wish to add
         :param value: Integer value of the parameter you wish to add
         """
@@ -49,7 +52,8 @@ class ParamServer(AbstractBasePlugin):
     def retrieve_all_params(self) -> Optional[param_server.AllParams]:
         """
         retrieves the all parameters item
-        :return: param_server.AllParams ; details on all parameters
+        :return: param_server.AllParams or None ; If result is not none, it is the AllParams object, otherwise,
+         the request timed out
         """
         self._logger.info("Waiting for response to retrieve_all_params")
 
@@ -72,7 +76,8 @@ class ParamServer(AbstractBasePlugin):
         """
         Retrieve the value of a custom parameter.
         :param name: Name of the custom parameter you want to retrieve.
-        :return: returns the string value of the parameter.
+        :return: str or None ; If the result is not None, it is the value of the requested parameter, otherwise,
+         the request timed out
         """
         self._logger.info("Waiting for response to retrieve_param_custom")
 
@@ -95,7 +100,8 @@ class ParamServer(AbstractBasePlugin):
         """
         Retrieve the value of float parameter.
         :param name: Name of the float parameter you want to retrieve.
-        :return: returns the float value of the parameter.
+        :return: float or None ; If the result is not None, it is the value of the requested parameter, otherwise,
+         the request timed out
         """
         self._logger.info("Waiting for response to retrieve_param_float")
 
@@ -118,7 +124,8 @@ class ParamServer(AbstractBasePlugin):
         """
         Retrieve the value of an integer parameter.
         :param name: Name of the integer parameter you want to retrieve.
-        :return: returns the integer value of the parameter.
+        :return: int or None ; If the result is not None, it is the value of the requested parameter, otherwise,
+         the request timed out
         """
         self._logger.info("Waiting for response to retrieve_param_int")
 
