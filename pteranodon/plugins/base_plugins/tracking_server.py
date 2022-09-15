@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Optional
 
 from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -11,9 +12,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 class TrackingServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tracking_server", system, loop, logger)
-        self._track_rectangle = None
-        self._track_point = None
-        self._dummy = None
+        self._track_rectangle: Optional[TrackRectangle] = None
+        self._track_point: Optional[TrackPoint] = None
+        self._dummy: Optional[int] = None
         self._tracking_off_task = asyncio.ensure_future(self._update_tracking_off_command(), loop=self._loop)
         self._tracking_point_task = asyncio.ensure_future(self._update_tracking_point_command(), loop=self._loop)
         self._tracking_rectangle_task = asyncio.ensure_future(self._update_tracking_rectangle_command(),
@@ -95,7 +96,7 @@ class TrackingServer(AbstractBasePlugin):
             if dummy != self._dummy:
                 self._dummy = dummy
 
-    def tracking_off_command(self) -> int:
+    def tracking_off_command(self) -> Optional[int]:
         """
         Abstracting tracking_off_command for user
         """
@@ -111,7 +112,7 @@ class TrackingServer(AbstractBasePlugin):
             if track_point != self._track_point:
                 self._track_point = track_point
 
-    def tracking_point_command(self) -> TrackPoint:
+    def tracking_point_command(self) -> Optional[TrackPoint]:
         """
         Abstracting tracking_point_command for user
         """
@@ -127,7 +128,7 @@ class TrackingServer(AbstractBasePlugin):
             if track_rectangle != self._track_rectangle:
                 self._track_rectangle = track_rectangle
 
-    def tracking_rectangle_command(self) -> TrackRectangle:
+    def tracking_rectangle_command(self) -> Optional[TrackRectangle]:
         """
         Abstracting tracking_rectangle_command for user
         """
