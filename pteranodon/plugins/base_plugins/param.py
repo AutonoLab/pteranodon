@@ -31,7 +31,7 @@ class Param(AbstractBasePlugin):
 
     def _set_param_callback(self, _: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
+        self._param_task: Task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
         self._param_task.add_done_callback(partial(self._update_params_callback))
 
     @staticmethod

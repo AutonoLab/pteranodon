@@ -47,9 +47,9 @@ class Sensor(AbstractCustomPlugin):
         self._sensors[name].stop()
 
     def start_all_sensors(self) -> None:
-        for sensor in self._sensors:
+        for _, sensor in self._sensors.items():
             sensor.start()
 
     def stop_all_sensors(self) -> None:
-        for sensor in self._sensors:
+        for _, sensor in self._sensors.items():
             sensor.stop()

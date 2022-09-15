@@ -69,7 +69,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.start_photo_interval(interval_s), loop=self._loop)
         )
-        self._status.photo_interval_on = True
+        if self._status is not None:
+            self._status.photo_interval_on = True
 
     def stop_photo_interval(self) -> None:
         """
@@ -78,7 +79,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_photo_interval(), loop=self._loop)
         )
-        self._status.photo_interval_on = False
+        if self._status is not None:
+            self._status.photo_interval_on = False
 
     def start_video(self) -> None:
         """
@@ -87,7 +89,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.start_video(), loop=self._loop)
         )
-        self._status.video_on = True
+        if self._status is not None:
+            self._status.video_on = True
 
     def stop_video(self) -> None:
         """
@@ -96,7 +99,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
         )
-        self._status.video_on = False
+        if self._status is not None:
+            self._status.video_on = False
 
     def start_video_streaming(self) -> None:
         """

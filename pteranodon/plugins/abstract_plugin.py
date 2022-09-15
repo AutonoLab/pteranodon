@@ -28,7 +28,7 @@ class AbstractPlugin(ABC):
 
     def _task_callback(self, task: Task) -> None:
         if self._use_coro_names:
-            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
+            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")  # type: ignore
         try:
             self._result_cache.append(task.result())
         except Exception as e:
