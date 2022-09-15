@@ -237,4 +237,9 @@ class Ftp(AbstractBasePlugin):
 
     @property
     def root_directory(self) -> str:
+        """
+        Root directory of MAVLink FTP Server
+        :return: root directory
+        :rtype: str
+        """
         return self._root_directory
