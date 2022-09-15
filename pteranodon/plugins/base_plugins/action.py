@@ -78,11 +78,6 @@ class Action(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.action.hold(), loop=self._loop)
         )
-        
-    def land(self) -> None:
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.land(), loop=self._loop)
-        )
 
     def kill(self) -> None:
         super().submit_task(

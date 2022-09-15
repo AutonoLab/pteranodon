@@ -17,7 +17,8 @@ class Gimbal(AbstractBasePlugin):
 
     async def _update_control_state(self) -> None:
         """
-        Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
+        Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
+         over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
         """
 
         async for ctrl_status in self._system.gimbal.receive():
@@ -41,7 +42,7 @@ class Gimbal(AbstractBasePlugin):
             asyncio.ensure_future(self._system.gimbal.release_control())
         )
 
-    def set_mode(self, gimbal_mode : GimbalMode) -> None:
+    def set_mode(self, gimbal_mode: GimbalMode) -> None:
         """
         Sets the desired yaw mode of a gimbal.
 
@@ -53,7 +54,7 @@ class Gimbal(AbstractBasePlugin):
             asyncio.ensure_future(self._system.gimbal.set_mode(gimbal_mode))
         )
 
-    def set_pitch_and_yaw(self, pitch_deg : float, yaw_deg : float) -> None:
+    def set_pitch_and_yaw(self, pitch_deg: float, yaw_deg: float) -> None:
         """
         Set gimbal pitch and yaw angles.
 
@@ -68,7 +69,7 @@ class Gimbal(AbstractBasePlugin):
             asyncio.ensure_future(self._system.gimbal.set_pitch_and_yaw(pitch_deg, yaw_deg))
         )
 
-    def set_pitch_rate_and_yaw_rate(self, pitch_rate_deg_s : float, yaw_rate_deg_s : float) -> None:
+    def set_pitch_rate_and_yaw_rate(self, pitch_rate_deg_s: float, yaw_rate_deg_s: float) -> None:
         """
         Set gimbal angular rates around pitch and yaw axes.
 
@@ -83,7 +84,7 @@ class Gimbal(AbstractBasePlugin):
             asyncio.ensure_future(self._system.gimbal.set_pitch_rate_and_yaw_rate(pitch_rate_deg_s, yaw_rate_deg_s))
         )
 
-    def set_roi_location(self, latitude_deg : float, longitude_deg : float, altitude_m : float) -> None:
+    def set_roi_location(self, latitude_deg: float, longitude_deg: float, altitude_m: float) -> None:
         """
         Set gimbal region of interest (ROI).
 
@@ -102,7 +103,7 @@ class Gimbal(AbstractBasePlugin):
         )
 
 
-    def take_control(self, control_mode : ControlMode) -> None:
+    def take_control(self, control_mode: ControlMode) -> None:
         """
         Take control. There can be only two components in control of a gimbal at any given time.
 

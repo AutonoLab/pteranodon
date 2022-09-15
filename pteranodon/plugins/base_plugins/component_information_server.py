@@ -32,7 +32,7 @@ class ComponentInformationServer(AbstractBasePlugin):
 
         return self._float_param_update
 
-    def provide_float_param(self, param : FloatParam) -> None:
+    def provide_float_param(self, param: FloatParam) -> None:
         """
         Provide a param of type float.
 

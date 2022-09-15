@@ -279,7 +279,7 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()  # type: ignore
+        self._drone.__del__()  # mypy: ignore
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
