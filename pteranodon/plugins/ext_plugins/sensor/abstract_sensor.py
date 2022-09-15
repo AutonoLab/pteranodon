@@ -14,7 +14,7 @@ class AbstractSensor(ABC):
         """
         self._name = sensor_name
         # convert to ms for a direct sleep call
-        self._poll_rate = None if poll_rate is None else 1.0 / poll_rate
+        self._poll_rate: Optional[float] = None if poll_rate is None else 1.0 / poll_rate
         self._sensor_data = SensorData()
         self._stopped = False
         self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())
@@ -26,6 +26,10 @@ class AbstractSensor(ABC):
         return False
 
     def _run_timed(self) -> None:
+        # Should never happen but this is for mypy
+        if self._poll_rate is None:
+            return
+
         while not self._stopped:
             start_time = time.perf_counter()
             self.update_data()

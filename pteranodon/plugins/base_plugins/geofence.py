@@ -1,16 +1,18 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any
+from typing import List
 
-from mavsdk import System, geofence
+from mavsdk import System
 from mavsdk.geofence import Polygon
 
 from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Geofence(AbstractBasePlugin):
+    """
+    Enable setting a geofence.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("geofence", system, loop, logger)
 
@@ -30,5 +32,5 @@ class Geofence(AbstractBasePlugin):
         """
         self._logger.info(f"Uploading {len(polygons)} geofences to the drone")
         super().submit_task(
-            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons))
+            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons), loop=self._loop)
         )

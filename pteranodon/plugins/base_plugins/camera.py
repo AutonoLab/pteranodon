@@ -11,18 +11,24 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Camera(AbstractBasePlugin):
+    """
+    Can be used to manage cameras that implement the MAVLink Camera Protocol: https://mavlink.io/en/protocol/camera.html.
+
+    Currently only a single camera is supported. When multiple cameras are supported the plugin will need to be
+    instantiated separately for every camera and the camera selected using select_camera.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("camera", system, loop, logger)
 
         self._current_camera_id: Optional[int] = None
 
-        self._capture_info : Optional[camera.CaptureInfo] = None
-        self._information : Optional[camera.Information] = None
-        self._mode : Optional[camera.Mode] = None
-        self._status : Optional[camera.Status] = None
-        self._video_stream_info : Optional[camera.VideoStreamInfo] = None
-        self._current_settings : List[camera.Setting] = []
+        self._capture_info: Optional[camera.CaptureInfo] = None
+        self._information: Optional[camera.Information] = None
+        self._mode: Optional[camera.Mode] = None
+        self._status: Optional[camera.Status] = None
+        self._video_stream_info: Optional[camera.VideoStreamInfo] = None
+        self._current_settings: List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
 
 
@@ -59,7 +65,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.format_storage(), loop=self._loop)
         )
 
-    def start_photo_interval(self, interval_s : float) -> None:
+    def start_photo_interval(self, interval_s: float) -> None:
         """
         Start photo timelapse with a given interval
 
@@ -69,7 +75,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.start_photo_interval(interval_s), loop=self._loop)
         )
-        self._status.photo_interval_on = True
+        if self._status is not None:
+            self._status.photo_interval_on = True
 
     def stop_photo_interval(self) -> None:
         """
@@ -78,7 +85,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_photo_interval(), loop=self._loop)
         )
-        self._status.photo_interval_on = False
+        if self._status is not None:
+            self._status.photo_interval_on = False
 
     def start_video(self) -> None:
         """
@@ -87,7 +95,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.start_video(), loop=self._loop)
         )
-        self._status.video_on = True
+        if self._status is not None:
+            self._status.video_on = True
 
     def stop_video(self) -> None:
         """
@@ -96,7 +105,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
         )
-        self._status.video_on = False
+        if self._status is not None:
+            self._status.video_on = False
 
     def start_video_streaming(self) -> None:
         """
@@ -122,7 +132,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.take_photo(), loop=self._loop)
         )
 
-    def select_camera(self, camera_id : int) -> None:
+    def select_camera(self, camera_id: int) -> None:
         """
         Select current camera.
 
@@ -136,7 +146,7 @@ class Camera(AbstractBasePlugin):
         )
         self._current_camera_id = camera_id
 
-    def set_mode(self, mode : camera.Mode) -> None:
+    def set_mode(self, mode: camera.Mode) -> None:
         """
         Set camera mode
 
@@ -148,7 +158,7 @@ class Camera(AbstractBasePlugin):
         )
         self._mode = mode
 
-    def set_setting(self, setting : Union[camera.Setting, int], option : Optional[Union[camera.Option, int]] = None) -> None:
+    def set_setting(self, setting: Union[camera.Setting, int], option: Optional[Union[camera.Option, int]] = None) -> None:
         """
         Set a setting to some value.
 
@@ -168,7 +178,7 @@ class Camera(AbstractBasePlugin):
         Must be set if the Setting object does not in include the option_id.
         :type option: camera.Option or uint32
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             # Setting ID was passed instead of Setting object
             setting_obj = camera.Setting(setting, "", None, False)
@@ -183,13 +193,11 @@ class Camera(AbstractBasePlugin):
 
         if setting_obj.setting_id is None:
             self._logger.error("Could not set setting! No setting ID provided in object or function!")
-            return None
+            return
 
         if setting_obj.option is None:
-            self._logger.error("Could not set setting with ID {}! No option provided in object or function!".format(
-                setting_obj.setting_id
-            ))
-            return None
+            self._logger.error(f"Could not set setting with ID {setting_obj.setting_id}! No option provided in object or function!")
+            return
 
         super().submit_task(
             asyncio.ensure_future(self._system.camera.set_setting(setting_obj), loop=self._loop)
@@ -201,7 +209,7 @@ class Camera(AbstractBasePlugin):
                 self._current_settings[setting_idx].option = setting_obj.option
                 break
 
-    def get_setting(self, setting : Union[camera.Setting, int]) -> Optional[camera.Setting]:
+    def get_setting(self, setting: Union[camera.Setting, int]) -> Optional[camera.Setting]:
         """
         Fetches a setting for the given setting ID (either directly given or set in the Setting object)
 
@@ -210,7 +218,7 @@ class Camera(AbstractBasePlugin):
         :return: The requested camera.Setting object if found, None otherwise.
         :rtype: Optional[camera.Setting]
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             setting_obj = camera.Setting(setting, "", None, False)
 
@@ -224,7 +232,7 @@ class Camera(AbstractBasePlugin):
 
         return None
 
-    def list_photos(self, photos_range : camera.PhotosRange) -> List[camera.CaptureInfo]:
+    def list_photos(self, photos_range: camera.PhotosRange) -> List[camera.CaptureInfo]:
         """
         List photos available on the camera.
 
