@@ -9,7 +9,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class MissionRaw(AbstractBasePlugin):
-
+    """
+    Enable raw missions as exposed by MAVLink.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw", system, loop, logger)
         self._mission_progress = None
