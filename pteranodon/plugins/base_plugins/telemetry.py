@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
@@ -10,6 +10,11 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Telemetry(AbstractBasePlugin):
+    """
+    Allow users to get vehicle telemetry and state information (e.g. battery, GPS, RC connection, flight mode etc.)
+     and set telemetry update rates.
+    """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("telemetry", system, loop, logger)
 
@@ -24,7 +29,8 @@ class Telemetry(AbstractBasePlugin):
         self._getter_data = self._init_getter_data()
 
     def _get_methods(self) -> List:
-        return [func for func in dir(self._system.telemetry) if callable(getattr(self._system.telemetry, func)) and not func.startswith("_")]
+        return [func for func in dir(self._system.telemetry)
+                if callable(getattr(self._system.telemetry, func)) and not func.startswith("_")]
 
     def _get_methods_startswith(self, methods: List, starts_with: str) -> List:
         return [func for func in methods if func.startswith(starts_with)]
@@ -43,7 +49,7 @@ class Telemetry(AbstractBasePlugin):
         return methods
 
     def _make_async_gen_data(self) -> Dict:
-        data = {}
+        data: Dict[str, Any] = {}
         for func in self._async_gen_methods:
             data[func] = None
         return data
@@ -60,7 +66,7 @@ class Telemetry(AbstractBasePlugin):
         return tasks
 
     def _init_getter_data(self) -> Dict:
-        data = {}
+        data: Dict[str, Any] = {}
         for func in self._getter_methods:
             data[func] = None
         return data

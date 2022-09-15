@@ -1,8 +1,6 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
-from typing import List, Dict, Any, Callable
 
 from mavsdk import System, transponder
 
@@ -10,6 +8,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Transponder(AbstractBasePlugin):
+    """
+    Allow users to get ADS-B information and set ADS-B update rates.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("transponder", system, loop, logger)
 
@@ -22,9 +23,9 @@ class Transponder(AbstractBasePlugin):
         )
 
     async def _transponder_update(self) -> None:
-        async for transponder in self._system.transponder.transponder():
-            if transponder != self._transponder_data:
-                self._transponder_data = transponder
+        async for transponder_val in self._system.transponder.transponder():
+            if transponder_val != self._transponder_data:
+                self._transponder_data = transponder_val
 
     def transponder(self) -> transponder.AdsbVehicle:
         return self._transponder_data
