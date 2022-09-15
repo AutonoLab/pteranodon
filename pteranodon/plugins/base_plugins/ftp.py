@@ -3,10 +3,11 @@ import typing
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from typing import List
-
-from mavsdk import System
 from functools import partial
 from threading import Condition
+
+from mavsdk import System
+
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -30,16 +31,18 @@ class Ftp(AbstractBasePlugin):
 
         async for data in self._system.ftp.download(remote_file_path, local_directory):
             percent_downloaded: float = (data.bytes_transferred / data.total_bytes)
-            self._logger.info("\rFile at remote path \"{}\" downloading to directory \"{}\": {:.2f}%      ".format(
-                remote_file_path, local_directory, percent_downloaded
+            self._logger.info((
+                f"\rFile at remote path \"{remote_file_path}\"",
+                f" downloading to directory \"{local_directory}\": {percent_downloaded:.2f}%      "
             ))
 
     async def _upload_file(self, local_file_path: str, remote_directory: str) -> None:
 
         async for data in self._system.ftp.upload(local_file_path, remote_directory):
             percent_uploaded: float = (data.bytes_transferred / data.total_bytes)
-            self._logger.info("\rFile at local path \"{}\" uploading to directory \"{}\": {:.2f}%      ".format(
-                local_file_path, remote_directory, percent_uploaded
+            self._logger.info((
+                f"\rFile at local path \"{local_file_path}\"",
+                f" uploading to directory \"{remote_directory}\": {percent_uploaded:.2f}%      "
             ))
 
     def get_our_component_id(self) -> int:
@@ -60,9 +63,7 @@ class Ftp(AbstractBasePlugin):
         :param local_directory: The path to the local directory to download the file to
         :type local_directory: str
         """
-        self._logger.info("Downloading the file at \"{}\" to local directory \"{}\"".format(
-            remote_file_path, local_directory
-        ))
+        self._logger.info(f"Downloading the file at \"{remote_file_path}\" to local directory \"{local_directory}\"")
         super().submit_task(
             asyncio.ensure_future(self._download_file(remote_file_path, local_directory), loop=self._loop)
         )
@@ -76,9 +77,7 @@ class Ftp(AbstractBasePlugin):
         :param remote_directory: The path to the remote directory to upload the file to
         :type remote_directory: str
         """
-        self._logger.info("Uploading the file at \"{}\" to remote directory \"{}\"".format(
-            local_file_path, remote_directory
-        ))
+        self._logger.info(f"Uploading the file at \"{local_file_path}\" to remote directory \"{remote_directory}\"")
         super().submit_task(
             asyncio.ensure_future(self._upload_file(local_file_path, remote_directory), loop=self._loop)
         )
