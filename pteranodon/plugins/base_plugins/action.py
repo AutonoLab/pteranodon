@@ -2,6 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from functools import partial
+from typing import Optional
 
 from mavsdk import System, action
 
@@ -12,16 +13,16 @@ class Action(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action", system, loop, logger)
 
-        self._maximum_speed = None
+        self._maximum_speed: Optional[float] = None
         self._maximum_speed_task = asyncio.ensure_future(self._system.action.get_maximum_speed(), loop=self._loop)
         self._maximum_speed_task.add_done_callback(partial(self._maximum_speed_callback))
 
-        self._launch_altitude = None
+        self._launch_altitude: Optional[float] = None
         self._launch_altitude_task = asyncio.ensure_future(self._system.action.get_return_to_launch_altitude(),
                                                            loop=self._loop)
         self._launch_altitude_task.add_done_callback(partial(self._launch_altitude_callback))
 
-        self._takeoff_altitude = None
+        self._takeoff_altitude: Optional[float] = None
         self._takeoff_altitude_task = asyncio.ensure_future(self._system.action.get_takeoff_altitude(), loop=self._loop)
         self._takeoff_altitude_task.add_done_callback(partial(self._takeoff_altitude_callback))
 
@@ -54,13 +55,13 @@ class Action(AbstractBasePlugin):
                                                                longitude_deg, absolute_altitude_m), loop=self._loop)
         )
 
-    def get_maximum_speed(self) -> float:
+    def get_maximum_speed(self) -> Optional[float]:
         return self._maximum_speed
 
-    def get_return_to_launch_altitude(self) -> float:
+    def get_return_to_launch_altitude(self) -> Optional[float]:
         return self._launch_altitude
 
-    def get_takeoff_altitude(self) -> float:
+    def get_takeoff_altitude(self) -> Optional[float]:
         return self._takeoff_altitude
 
     def goto_location(self, latitude_deg: float, longitude_deg: float, absolute_altitude_m: float, yaw: float) -> None:

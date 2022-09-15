@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict
+from typing import Dict
 
 from mavsdk import System
 
@@ -14,14 +14,14 @@ class Sensor(AbstractCustomPlugin):
             -> None:
         super().__init__("sensor", system, loop, logger, base_plugins, ext_args)
 
-        self._sensors = {}
+        self._sensors: Dict[str, AbstractSensor] = {}
         
         if self._ext_args["sensor"] is not None:
             for sensor in self._ext_args["sensor"]:
                 self._sensors[sensor.name] = sensor
 
     @property
-    def sensors(self) -> List[AbstractSensor]:
+    def sensors(self) -> Dict[str, AbstractSensor]:
         return self._sensors
 
     def add_sensor(self, new_sensor: AbstractSensor) -> None:

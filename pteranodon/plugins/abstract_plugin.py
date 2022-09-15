@@ -19,8 +19,8 @@ class AbstractPlugin(ABC):
         if int(platform.python_version().split(".")[1]) < 8:
             self._use_coro_names = False
 
-        self._task_cache = deque(maxlen=10)
-        self._result_cache = deque(maxlen=10)
+        self._task_cache: deque = deque(maxlen=10)
+        self._result_cache: deque = deque(maxlen=10)
 
     @property
     def name(self) -> str:

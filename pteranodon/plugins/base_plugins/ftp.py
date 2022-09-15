@@ -17,7 +17,7 @@ class Ftp(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("ftp", system, loop, logger)
-        self._comp_id = None
+        self._comp_id: typing.Optional[int] = None
         self._root_directory = "/"
 
         self._comp_id_task = asyncio.ensure_future(self._system.ftp.get_our_compid(), loop=self._loop)
@@ -45,7 +45,7 @@ class Ftp(AbstractBasePlugin):
                 f" uploading to directory \"{remote_directory}\": {percent_uploaded:.2f}%      "
             ))
 
-    def get_our_component_id(self) -> int:
+    def get_our_component_id(self) -> typing.Optional[int]:
         """
         Get our own component ID.
 

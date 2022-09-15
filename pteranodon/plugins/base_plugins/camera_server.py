@@ -11,6 +11,8 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 class CameraServer(AbstractBasePlugin):
 
+    PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info: camera_server.Information) -> None:
         super().__init__("camera_server", system, loop, logger)
 
@@ -18,11 +20,11 @@ class CameraServer(AbstractBasePlugin):
         self.set_information(cam_info)
 
         # Sets the request callback to the default since some behavior is required
-        self._photo_request_callback = CameraServer._default_photo_request_callback
+        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = CameraServer._default_photo_request_callback
 
         self._take_photo_sub_task = asyncio.ensure_future(self._take_photo(), loop=self._loop)
 
-    def set_photo_request_callback(self, callback: Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]):
+    def set_photo_request_callback(self, callback: PhotoRequestCallbackType):
         """
         If image capture requests must be processed in a way that is different from the default, pass that
         function in here

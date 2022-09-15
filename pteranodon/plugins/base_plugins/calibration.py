@@ -72,10 +72,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     async def _calibrate_all(self) -> None:
-        tasks = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
+        task_funcs = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
                  self._calibrate_magnetometer, self._calibrate_level_horizon]
-        for task in tasks:
-            task = asyncio.ensure_future(task(), loop=self._loop)
+        for func in task_funcs:
+            task = asyncio.ensure_future(func(), loop=self._loop)
             while not task.done():
                 await asyncio.sleep(0.05)
 

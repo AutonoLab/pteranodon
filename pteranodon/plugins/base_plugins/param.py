@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 from functools import partial
 
 from mavsdk import System, param
@@ -12,11 +12,11 @@ from .abstract_base_plugin import AbstractBasePlugin
 class Param(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
-        self._all_params = None
-        self._custom_params = None
-        self._float_params = None
-        self._int_params = None
-        self._param_task = None
+        self._all_params: Optional[param.AllParams] = None
+        self._custom_params: Optional[List[param.CustomParam]] = None
+        self._float_params: Optional[List[param.FloatParam]] = None
+        self._int_params: Optional[List[param.IntParam]] = None
+        self._param_task: Optional[Task] = None
         self.refresh()
 
     def _update_params_callback(self, task: Task) -> None:

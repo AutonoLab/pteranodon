@@ -2,6 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from functools import partial
+from typing import Optional
 
 from mavsdk import System, follow_me
 
@@ -11,9 +12,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 class FollowMe(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("follow_me", system, loop, logger)
-        self._is_active = None
-        self._last_location = None
-        self._config = None
+        self._is_active: Optional[bool] = None
+        self._last_location: Optional[follow_me.TargetLocation] = None
+        self._config: Optional[follow_me.Config] = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
         self._is_active_task = asyncio.ensure_future(self._system.follow_me.is_active(), loop=self._loop)
@@ -35,13 +36,13 @@ class FollowMe(AbstractBasePlugin):
         self._config = task.result()
         del self._config_task
 
-    def get_config(self) -> follow_me.Config:
+    def get_config(self) -> Optional[follow_me.Config]:
         return self._config
 
-    def get_last_location(self) -> follow_me.TargetLocation:
+    def get_last_location(self) -> Optional[follow_me.TargetLocation]:
         return self._last_location
 
-    def is_active(self) -> bool:
+    def is_active(self) -> Optional[bool]:
         return self._is_active
 
     def set_config(self, config: follow_me.Config) -> None:

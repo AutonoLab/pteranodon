@@ -14,7 +14,7 @@ class AbstractSensor(ABC):
         """
         self._name = sensor_name
         # convert to ms for a direct sleep call
-        self._poll_rate = None if poll_rate is None else 1.0 / poll_rate
+        self._poll_rate: float = None if poll_rate is None else 1.0 / poll_rate
         self._sensor_data = SensorData()
         self._stopped = False
         self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())

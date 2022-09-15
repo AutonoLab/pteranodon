@@ -44,7 +44,7 @@ class Telemetry(AbstractBasePlugin):
         return methods
 
     def _make_async_gen_data(self) -> Dict:
-        data = {}
+        data: Dict[str, Any] = {}
         for func in self._async_gen_methods:
             data[func] = None
         return data
@@ -61,7 +61,7 @@ class Telemetry(AbstractBasePlugin):
         return tasks
 
     def _init_getter_data(self) -> Dict:
-        data = {}
+        data: Dict[str, Any] = {}
         for func in self._getter_methods:
             data[func] = None
         return data
