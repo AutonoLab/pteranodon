@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, TypeVar, Type, Union, List
+from typing import Dict, Type, Union, List
 
 from mavsdk import System
 
