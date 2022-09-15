@@ -1,0 +1,11 @@
+[BASIC]
+good-names=
+    i,
+    e,
+    logger,
+
+good-names-rgxs=^[_a-z][_a-z0-9]?$
+no-docstring-rgx=^_
+
+[FORMAT]
+max-line-length=140
