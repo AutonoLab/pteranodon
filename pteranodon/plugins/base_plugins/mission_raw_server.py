@@ -17,7 +17,7 @@ class MissionRawServer(AbstractBasePlugin):
         self.mission_item: Optional[mission_raw_server.MissionItem] = None
         self._clear_all_task = asyncio.ensure_future(self._clear_all(), loop=self._loop)
         self._current_item_changed_task = asyncio.ensure_future(self._current_item_changed(), loop=self._loop)
-        self._incoming_mission_task = asyncio.ensure_future(self._incoming_mission, loop=self._loop)
+        self._incoming_mission_task = asyncio.ensure_future(self._incoming_mission(), loop=self._loop)
 
     async def _clear_all(self):
         """
