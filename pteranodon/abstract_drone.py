@@ -20,6 +20,9 @@ from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
+    """
+    An abstract class with base functionality, some methods must be overridden for usage
+    """
     def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
                  log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
         """
@@ -73,6 +76,7 @@ class AbstractDrone(ABC):
         self.sensor.start_all_sensors()
 
     # setup the logger
+    @staticmethod
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
@@ -279,7 +283,9 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
+        # pyLint: disable=no-member
         self._drone.__del__()  # mypy: ignore
+        # pyLint: enable=no-member
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
