@@ -76,7 +76,6 @@ class AbstractDrone(ABC):
         self.sensor.start_all_sensors()
 
     # setup the logger
-    @staticmethod
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
