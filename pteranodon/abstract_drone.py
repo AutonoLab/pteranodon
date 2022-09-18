@@ -282,9 +282,7 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        # pyLint: disable=unnecessary-dunder-call
-        self._drone.__del__()  # mypy: ignore
-        # pyLint: enable=unnecessary-dunder-call
+        self._drone.__del__()  # mypy: ignore # pyLint: disable=C2801
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
