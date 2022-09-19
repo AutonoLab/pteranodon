@@ -10,7 +10,9 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ComponentInformationServer(AbstractBasePlugin):
-
+    """
+    Provide component information such as parameters.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("component_information_server", system, loop, logger)
 
