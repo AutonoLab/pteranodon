@@ -21,6 +21,7 @@ class TrackingServer(AbstractBasePlugin):
         self._track_rectangle: Optional[TrackRectangle] = None
         self._track_point: Optional[TrackPoint] = None
         self._dummy: Optional[int] = None
+        self._tracking_active: Optional[bool] = None
         self._tracking_off_task = asyncio.ensure_future(self._update_tracking_off_command(), loop=self._loop)
         self._tracking_point_task = asyncio.ensure_future(self._update_tracking_point_command(), loop=self._loop)
         self._tracking_rectangle_task = asyncio.ensure_future(self._update_tracking_rectangle_command(),
@@ -66,7 +67,7 @@ class TrackingServer(AbstractBasePlugin):
         """
         Set the current tracking status to off.
         """
-
+        self._tracking_active = True
         super().submit_task(
             asyncio.ensure_future(self._system.tracking_server.set_tracking_off_status(), loop=self._loop)
         )
@@ -77,7 +78,7 @@ class TrackingServer(AbstractBasePlugin):
         Args:
             tracked_point: The tracked point
         """
-
+        self._tracking_active = True
         super().submit_task(
             asyncio.ensure_future(self._system.tracking_server.set_tracking_point_status(tracked_point),
                                   loop=self._loop)
@@ -87,7 +88,7 @@ class TrackingServer(AbstractBasePlugin):
         """
         Set/update the current rectangle tracking status.
         """
-
+        self._tracking_active = True
         super().submit_task(
             asyncio.ensure_future(self._system.tracking_server.set_tracking_rectangle_status(tracked_rectangle),
                                   loop=self._loop)
@@ -99,8 +100,12 @@ class TrackingServer(AbstractBasePlugin):
         """
 
         async for dummy in self._system.tracking_server.tracking_off_command():
+            self._tracking_active = False
             if dummy != self._dummy:
                 self._dummy = dummy
+                self._tracking_active = False
+            else:
+                self._tracking_active = True
 
     def tracking_off_command(self) -> Optional[int]:
         """
@@ -141,4 +146,7 @@ class TrackingServer(AbstractBasePlugin):
 
         return self._track_rectangle
 
+    @property
+    def tracking_active(self) -> bool:
+        return self._tracking_active
 
