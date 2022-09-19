@@ -14,7 +14,10 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class LogFiles(AbstractBasePlugin):
-
+    """
+    Allow to download log files from the vehicle after a flight is complete. For log streaming during flight check the
+     logging plugin.
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("LogFiles", system, loop, logger)
 
@@ -58,6 +61,10 @@ class LogFiles(AbstractBasePlugin):
             return None
 
     def update_entries(self):
+        """
+        Updates the log entries of the drone
+        :return: None
+        """
         self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
