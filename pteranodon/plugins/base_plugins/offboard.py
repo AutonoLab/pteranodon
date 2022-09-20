@@ -82,7 +82,6 @@ class Offboard(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.offboard.set_attitude(offboard.Attitude(0.0, 0.0, 0.0, 0.0)), loop=self._loop)
         )
-        self.hold()
         super().submit_task(
             asyncio.ensure_future(self._system.offboard.start(), loop=self._loop)
         )

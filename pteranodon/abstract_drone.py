@@ -358,6 +358,7 @@ class AbstractDrone(ABC):
         # finally join the mavlink thread and stop it
         self._stopped_mavlink = True
         self._mavlink_thread.join()
+        self._telemetry_thread.join()
 
         # close logging
         self._close_logger()
