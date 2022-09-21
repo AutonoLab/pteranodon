@@ -11,6 +11,12 @@ def mock_logger() -> Logger:
 
 
 @pytest.fixture
-def mock_system() -> System:
+def mock_system():
+    # Setup
     sys = System()
-    return sys
+
+    yield sys
+
+    # Teardown
+    sys.__del__()
+    del sys
