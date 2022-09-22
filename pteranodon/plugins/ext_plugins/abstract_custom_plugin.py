@@ -8,8 +8,15 @@ from ..abstract_plugin import AbstractPlugin
 
 
 class AbstractCustomPlugin(AbstractPlugin):
-    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger, base_plugins: Dict,
-                 ext_args: Dict) -> None:
+    def __init__(
+        self,
+        name: str,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        base_plugins: Dict,
+        ext_args: Dict,
+    ) -> None:
         super().__init__(name, system, loop, logger)
         self._base_plugins = base_plugins
         self._ext_args = ext_args

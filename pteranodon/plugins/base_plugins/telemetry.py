@@ -21,7 +21,9 @@ class Telemetry(AbstractBasePlugin):
         self._all_methods = self._get_methods()
         self._rate_set_methods = self._get_set_methods(self._all_methods)
         self._getter_methods = self._get_get_methods(self._all_methods)
-        self._async_gen_methods = self._remove_set_get_methods(self._all_methods, self._rate_set_methods, self._getter_methods)
+        self._async_gen_methods = self._remove_set_get_methods(
+            self._all_methods, self._rate_set_methods, self._getter_methods
+        )
 
         self._async_gen_data = self._make_async_gen_data()
         self._async_gen_tasks = self._start_async_gen_telemetry()
@@ -29,19 +31,25 @@ class Telemetry(AbstractBasePlugin):
         self._getter_data = self._init_getter_data()
 
     def _get_methods(self) -> List:
-        return [func for func in dir(self._system.telemetry)
-                if callable(getattr(self._system.telemetry, func)) and not func.startswith("_")]
+        return [
+            func
+            for func in dir(self._system.telemetry)
+            if callable(getattr(self._system.telemetry, func))
+            and not func.startswith("_")
+        ]
 
     def _get_methods_startswith(self, methods: List, starts_with: str) -> List:
         return [func for func in methods if func.startswith(starts_with)]
 
     def _get_set_methods(self, methods: List) -> List:
         return self._get_methods_startswith(methods, "set")
-    
+
     def _get_get_methods(self, methods: List) -> List:
         return self._get_methods_startswith(methods, "get")
 
-    def _remove_set_get_methods(self, methods: List, rate_methods, getter_methods) -> List:
+    def _remove_set_get_methods(
+        self, methods: List, rate_methods, getter_methods
+    ) -> List:
         for method in rate_methods:
             methods.remove(method)
         for method in getter_methods:
@@ -62,7 +70,9 @@ class Telemetry(AbstractBasePlugin):
     def _start_async_gen_telemetry(self) -> Dict:
         tasks = {}
         for func in self._async_gen_methods:
-            tasks[func] = asyncio.ensure_future(self._async_gen_wrapper(func), loop=self._loop)
+            tasks[func] = asyncio.ensure_future(
+                self._async_gen_wrapper(func), loop=self._loop
+            )
         return tasks
 
     def _init_getter_data(self) -> Dict:
@@ -73,7 +83,9 @@ class Telemetry(AbstractBasePlugin):
 
     def _get_getter_data(self, func: str) -> Any:
         if self._getter_data[func] is None:
-            task = asyncio.ensure_future(getattr(self._system.telemetry, func)(), loop=self._loop)
+            task = asyncio.ensure_future(
+                getattr(self._system.telemetry, func)(), loop=self._loop
+            )
             while not task.done():
                 sleep(0.000001)
             self._getter_data = task.result()
@@ -138,7 +150,7 @@ class Telemetry(AbstractBasePlugin):
     @property
     def gps_info(self) -> telemetry.GpsInfo:
         return self._async_gen_data["gps_info"]
-    
+
     @property
     def ground_truth(self) -> telemetry.GroundTruth:
         return self._async_gen_data["ground_truth"]
@@ -206,7 +218,7 @@ class Telemetry(AbstractBasePlugin):
     @property
     def status_text(self) -> telemetry.StatusText:
         return self._async_gen_data["status_text"]
-    
+
     @property
     def unix_epoch_time(self) -> int:
         return self._async_gen_data["unix_epoch_time"]
@@ -223,110 +235,157 @@ class Telemetry(AbstractBasePlugin):
     # ==========================================================================================
     def set_rate_actuator_target(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_actuator_control_target(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_actuator_control_target(rate),
+                loop=self._loop,
+            )
         )
 
     def set_rate_actuator_output_status(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_actuator_output_status(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_actuator_output_status(rate),
+                loop=self._loop,
+            )
         )
-    
+
     def set_rate_attitude(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_attitude(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_attitude(rate), loop=self._loop
+            )
         )
-    
+
     def set_rate_battery(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_battery(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_battery(rate), loop=self._loop
+            )
         )
-    
+
     def set_rate_camera_attitude(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_camera_attitude(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_camera_attitude(rate), loop=self._loop
+            )
         )
-    
+
     def set_rate_distance_sensor(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_distance_sensor(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_distance_sensor(rate), loop=self._loop
+            )
         )
 
     def set_rate_fixedwing_metrics(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_fixedwing_metrics(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_fixedwing_metrics(rate), loop=self._loop
+            )
         )
-    
+
     def set_rate_gps_info(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_gps_info(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_gps_info(rate), loop=self._loop
+            )
         )
 
     def set_rate_ground_truth(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_ground_truth(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_ground_truth(rate), loop=self._loop
+            )
         )
 
     def set_rate_home(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_home(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_home(rate), loop=self._loop
+            )
         )
 
     def set_rate_imu(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_imu(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_imu(rate), loop=self._loop
+            )
         )
 
     def set_rate_in_air(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_in_air(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_in_air(rate), loop=self._loop
+            )
         )
 
     def set_rate_landed_state(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_landed_state(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_landed_state(rate), loop=self._loop
+            )
         )
 
     def set_rate_odometry(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_odometry(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_odometry(rate), loop=self._loop
+            )
         )
 
     def set_rate_position(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_position(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_position(rate), loop=self._loop
+            )
         )
 
     def set_rate_position_velocity_ned(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_position_velocity_ned(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_position_velocity_ned(rate),
+                loop=self._loop,
+            )
         )
 
     def set_rate_raw_imu(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_raw_imu(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_raw_imu(rate), loop=self._loop
+            )
         )
 
     def set_rate_rc_status(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_rc_status(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_rc_status(rate), loop=self._loop
+            )
         )
 
     def set_rate_scaled_imu(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_scaled_imu(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_scaled_imu(rate), loop=self._loop
+            )
         )
 
     def set_rate_unix_epoch_time(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_unix_epoch_time(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_unix_epoch_time(rate), loop=self._loop
+            )
         )
 
     def set_rate_velocity_ned(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_velocity_ned(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_velocity_ned(rate), loop=self._loop
+            )
         )
 
     def set_rate_vtol_state(self, rate: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.telemetry.set_rate_vtol_state(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.telemetry.set_rate_vtol_state(rate), loop=self._loop
+            )
         )

@@ -23,7 +23,10 @@ class ManualControl(AbstractBasePlugin):
             (towards the right)
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.manual_control.set_manual_control_input(x, y, z, r), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.manual_control.set_manual_control_input(x, y, z, r),
+                loop=self._loop,
+            )
         )
 
     def start_altitude_control(self):
@@ -32,7 +35,9 @@ class ManualControl(AbstractBasePlugin):
         Requires manual control input to be sent regularly already. Does not require a valid position ex: GPS
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.manual_control.start_altitude_control(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.manual_control.start_altitude_control(), loop=self._loop
+            )
         )
 
     def start_position_control(self):
@@ -41,5 +46,7 @@ class ManualControl(AbstractBasePlugin):
         Requires a valid position using e.g. GPS, external vision, or optical flow
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.manual_control.start_position_control(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.manual_control.start_position_control(), loop=self._loop
+            )
         )

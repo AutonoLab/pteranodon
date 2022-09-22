@@ -13,6 +13,7 @@ class Param(AbstractBasePlugin):
     """
     Provide raw access to get and set parameters.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
         self._all_params: Optional[param.AllParams] = None
@@ -34,7 +35,9 @@ class Param(AbstractBasePlugin):
 
     def _set_param_callback(self, _: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = asyncio.ensure_future(self._system.param.get_all_params(), loop=self._loop)
+        self._param_task = asyncio.ensure_future(
+            self._system.param.get_all_params(), loop=self._loop
+        )
         self._param_task.add_done_callback(partial(self._update_params_callback))  # type: ignore
 
     @staticmethod
@@ -44,7 +47,9 @@ class Param(AbstractBasePlugin):
                 return parameter.value
         return None
 
-    def get_param(self, name: str, search_custom=False, search_float=False, search_int=False) -> Any:
+    def get_param(
+        self, name: str, search_custom=False, search_float=False, search_int=False
+    ) -> Any:
         """
         Method which gets the value of a parameter found in any of the parameter lists. The order in which the parameter
         value is returned is -> custom, float, int. Thus, if a parameter is found in custom that value will be returned
@@ -79,21 +84,29 @@ class Param(AbstractBasePlugin):
     def set_param_custom(self, name: str, value: str) -> None:
         try:
             param_task = super().submit_task(
-                asyncio.ensure_future(self._system.param.set_param_custom(name, value), loop=self._loop)
+                asyncio.ensure_future(
+                    self._system.param.set_param_custom(name, value), loop=self._loop
+                )
             )
             param_task.add_done_callback(partial(self._set_param_callback))
         except AttributeError:
-            self._logger.error(f"Unable to set param: {name} to {value}. No attribute set_param_custom")
+            self._logger.error(
+                f"Unable to set param: {name} to {value}. No attribute set_param_custom"
+            )
 
     def set_param_float(self, name: str, value: float) -> None:
         param_task = super().submit_task(
-            asyncio.ensure_future(self._system.param.set_param_float(name, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.param.set_param_float(name, value), loop=self._loop
+            )
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 
     def set_param_int(self, name: str, value: int) -> None:
         param_task = super().submit_task(
-            asyncio.ensure_future(self._system.param.set_param_int(name, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.param.set_param_int(name, value), loop=self._loop
+            )
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 

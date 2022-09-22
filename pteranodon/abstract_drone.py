@@ -20,8 +20,15 @@ from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
-    def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
-                 log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
+    def __init__(
+        self,
+        address: str,
+        sensor_list: Optional[List[AbstractSensor]] = None,
+        log_file_name: Optional[str] = None,
+        time_slice=0.050,
+        min_follow_distance=5.0,
+        **kwargs,
+    ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
         :param time_slice: The interval to process commands in the queue
@@ -43,10 +50,14 @@ class AbstractDrone(ABC):
         self._queue: deque = deque()
         self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
-        self._mavlink_thread = Thread(name="Mavlink-Command-Thread", target=self._process_command_loop)
+        self._mavlink_thread = Thread(
+            name="Mavlink-Command-Thread", target=self._process_command_loop
+        )
 
         # make stuff for telemetry
-        self._telemetry_thread = Thread(name="Mavlink-Telemetry-Thread", target=self._run_telemetry_loop)
+        self._telemetry_thread = Thread(
+            name="Mavlink-Telemetry-Thread", target=self._run_telemetry_loop
+        )
 
         # register the stop method so everything cleans up
         atexit.register(self.stop)
@@ -55,13 +66,12 @@ class AbstractDrone(ABC):
         self._connect()
 
         # build arguments for the extension plugins
-        self._ext_args = {
-            "sensor": sensor_list,
-            "relative": min_follow_distance
-        }
+        self._ext_args = {"sensor": sensor_list, "relative": min_follow_distance}
 
         # setup all plugins
-        self._plugins = PluginManager(self._drone, self._loop, self._logger, self._ext_args, kwargs)
+        self._plugins = PluginManager(
+            self._drone, self._loop, self._logger, self._ext_args, kwargs
+        )
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
@@ -76,7 +86,7 @@ class AbstractDrone(ABC):
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
 
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setLevel(logging.DEBUG)
@@ -265,7 +275,9 @@ class AbstractDrone(ABC):
     ###############################################################################
     def _connect(self) -> None:
         try:
-            self._loop.run_until_complete(self._drone.connect(system_address=self.address))
+            self._loop.run_until_complete(
+                self._drone.connect(system_address=self.address)
+            )
         except KeyboardInterrupt as e:
             self._cleanup()
             raise KeyboardInterrupt from e
@@ -284,15 +296,19 @@ class AbstractDrone(ABC):
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
         if com is not None:
-            self._logger.info(f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}")
+            self._logger.info(
+                f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
+            )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
-                self._task_cache.append(asyncio.ensure_future(com(*args, **kwargs), loop=self._loop))
+                self._task_cache.append(
+                    asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+                )
             else:  # typical sync function
                 com(*args, **kwargs)
         else:
             pass
 
-    # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate. 
+    # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate.
     def _process_command_loop(self) -> None:
         try:
             while not self._stopped_mavlink:
@@ -352,9 +368,11 @@ class AbstractDrone(ABC):
 
         # run teardown (queue should be clean from the clear before disarm)
         self.teardown()
-        while len(self._queue) > 0:  # simple spin wait to ensure any mavlink commands from teardown are run
+        while (
+            len(self._queue) > 0
+        ):  # simple spin wait to ensure any mavlink commands from teardown are run
             sleep(self._time_slice + 0.01)
-        
+
         # finally join the mavlink thread and stop it
         self._stopped_mavlink = True
         self._mavlink_thread.join()
@@ -372,7 +390,9 @@ class AbstractDrone(ABC):
         :param kwargs: The keyword arguments for the function/method
         :return: None
         """
-        self._logger.info(f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue")
+        self._logger.info(
+            f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue"
+        )
         self._queue.append((obj, args, kwargs))
 
     ##################################################
@@ -451,9 +471,16 @@ class AbstractDrone(ABC):
         """
         self.put(self.action.takeoff)
 
-    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
+    def maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+        test_min: bool = False,
+    ):
         """
-        A movement command for moving relative to the drones current position. The front direction is aligned directly with 
+        A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
