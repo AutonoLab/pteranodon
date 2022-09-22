@@ -71,9 +71,9 @@ class LogFiles(AbstractBasePlugin):
 
         """
         Updates the log entries of the drone
-        
+
         """
-        
+
         self._entry_list_task = asyncio.ensure_future(
             self._system.log_files.get_entries(), loop=self._loop
         )
