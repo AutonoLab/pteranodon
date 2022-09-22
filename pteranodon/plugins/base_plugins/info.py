@@ -71,22 +71,45 @@ class Info(AbstractBasePlugin):
             self._logger.error(e)
 
     def get_identification(self) -> Optional[info.Identification]:
+        """
+        :return: info.Identification ; Returns the uuid or identification of the hardware system
+        """
         return self._id
 
     def get_product(self) -> Optional[info.Product]:
+        """
+        :return: info.Product ; returns system product information
+        """
         return self._product
 
     def get_version(self) -> Optional[info.Version]:
+        """
+        :return: info.Version ; returns system software information
+        """
         return self._version
 
     def get_flight_information(self) -> Optional[info.FlightInfo]:
+        """
+        :return: info.FlightInfo ; returns system flight information
+        """
         return self._flight_info
 
     def get_speed_factor(self) -> Optional[float]:
+        """
+        :return: float ; Returns the speed factor of simulation
+        """
         return self._speed_factor
 
     def set_flight_information_rate(self, rate: float) -> None:
+        """
+        :param rate: float ; The desired rate of information updates
+        :return: None
+        """
         self._flight_info_rate = rate
 
     def set_speed_factor_rate(self, rate: float) -> None:
+        """
+        :param rate: float ; Sets the speed factor of simulation, simulations can run tasks faster than real time
+        :return: None
+        """
         self._speed_factor_rate = rate

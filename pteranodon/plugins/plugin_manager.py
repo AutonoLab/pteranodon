@@ -11,7 +11,9 @@ from .ext_plugins import *
 
 
 class PluginManager:
-
+    """
+    Manages plugins for use by the vehicle
+    """
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, ext_args: Dict, custom_args: Dict)\
             -> None:
         self._system = system
@@ -36,18 +38,25 @@ class PluginManager:
             ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
             self._ext_plugins[ext_plugin.name] = ext_plugin
 
-
-
     @property
     def base_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of the base plugins
+        """
         return self._base_plugins
 
     @property
     def ext_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of external plugins
+        """
         return self._ext_plugins
 
     @property
     def custom_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of custom plugins
+        """
         return self._custom_plugins
 
     def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]) -> None:
