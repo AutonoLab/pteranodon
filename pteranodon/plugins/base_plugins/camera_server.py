@@ -16,16 +16,26 @@ class CameraServer(AbstractBasePlugin):
 
     PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
 
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info: camera_server.Information) -> None:
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        cam_info: camera_server.Information,
+    ) -> None:
         super().__init__("camera_server", system, loop, logger)
 
         # Must be called as soon as the camera server is created
         self.set_information(cam_info)
 
         # Sets the request callback to the default since some behavior is required
-        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = CameraServer._default_photo_request_callback
+        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = (
+            CameraServer._default_photo_request_callback
+        )
 
-        self._take_photo_sub_task = asyncio.ensure_future(self._take_photo(), loop=self._loop)
+        self._take_photo_sub_task = asyncio.ensure_future(
+            self._take_photo(), loop=self._loop
+        )
 
     def set_photo_request_callback(self, callback: PhotoRequestCallbackType):
         """
@@ -38,7 +48,9 @@ class CameraServer(AbstractBasePlugin):
         self._photo_request_callback = callback
 
     @staticmethod
-    def _default_photo_request_callback(index: int) -> Tuple[TakePhotoFeedback, CaptureInfo]:
+    def _default_photo_request_callback(
+        index: int,
+    ) -> Tuple[TakePhotoFeedback, CaptureInfo]:
         """
         The default implementation of the method which takes an index and returns CaptureInfo and feedback.
         Called when a `take_photo` request is received, result is passed to `respond_take_photo`
@@ -57,7 +69,7 @@ class CameraServer(AbstractBasePlugin):
             time_utc_us=0,
             is_success=False,
             index=index,
-            file_url="/"
+            file_url="/",
         )
 
         return TakePhotoFeedback.FAILED, capture_info
@@ -65,7 +77,9 @@ class CameraServer(AbstractBasePlugin):
     async def _take_photo(self) -> None:
 
         async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info(f"Received image capture request with index {capture_req_idx}")
+            self._logger.info(
+                f"Received image capture request with index {capture_req_idx}"
+            )
 
             # Uses the photo request callback to get the arguments for the response_take_photo method.
             self.set_in_progress(True)
@@ -82,10 +96,16 @@ class CameraServer(AbstractBasePlugin):
         :type in_progress: bool
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera_server.set_in_progress(in_progress), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera_server.set_in_progress(in_progress), loop=self._loop
+            )
         )
 
-    def _respond_take_photo(self, take_photo_feedback: camera_server.TakePhotoFeedback, capture_info: camera_server.CaptureInfo):
+    def _respond_take_photo(
+        self,
+        take_photo_feedback: camera_server.TakePhotoFeedback,
+        capture_info: camera_server.CaptureInfo,
+    ):
         """
         Respond to an image capture request from SubscribeTakePhoto (_take_photo).
 
@@ -96,8 +116,10 @@ class CameraServer(AbstractBasePlugin):
         """
         super().submit_task(
             asyncio.ensure_future(
-                self._system.camera_server.respond_take_photo(take_photo_feedback, capture_info),
-                loop=self._loop
+                self._system.camera_server.respond_take_photo(
+                    take_photo_feedback, capture_info
+                ),
+                loop=self._loop,
             )
         )
 
@@ -109,5 +131,7 @@ class CameraServer(AbstractBasePlugin):
         :type cam_info: camera.Information
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera_server.set_information(cam_info), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera_server.set_information(cam_info), loop=self._loop
+            )
         )

@@ -14,15 +14,23 @@ class AbstractSensor(ABC):
         """
         self._name = sensor_name
         # convert to ms for a direct sleep call
-        self._poll_rate: Optional[float] = None if poll_rate is None else 1.0 / poll_rate
+        self._poll_rate: Optional[float] = (
+            None if poll_rate is None else 1.0 / poll_rate
+        )
         self._sensor_data = SensorData()
         self._stopped = False
-        self._update_thread = Thread(name=f"{self._name}_update_thread", target=self._run, args=())
+        self._update_thread = Thread(
+            name=f"{self._name}_update_thread", target=self._run, args=()
+        )
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, AbstractSensor):
-            return self.data == other.data and self.name == other.name and self._poll_rate == other._poll_rate and \
-                   self._update_thread == other._update_thread
+            return (
+                self.data == other.data
+                and self.name == other.name
+                and self._poll_rate == other._poll_rate
+                and self._update_thread == other._update_thread
+            )
         return False
 
     def _run_timed(self) -> None:

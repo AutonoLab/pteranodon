@@ -10,12 +10,13 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ComponentInformationServer(AbstractBasePlugin):
-
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._float_param_update_task = asyncio.ensure_future(self._update_float_param(), loop=self._loop)
+        self._float_param_update_task = asyncio.ensure_future(
+            self._update_float_param(), loop=self._loop
+        )
 
     async def _update_float_param(self) -> None:
         async for curr_param_update in self._system.component_information_server.float_param():
@@ -41,5 +42,8 @@ class ComponentInformationServer(AbstractBasePlugin):
         """
 
         super().submit_task(
-            asyncio.ensure_future(self._system.component_information_server.provide_float_param(param), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.component_information_server.provide_float_param(param),
+                loop=self._loop,
+            )
         )

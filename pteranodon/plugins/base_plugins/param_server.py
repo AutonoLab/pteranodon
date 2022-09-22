@@ -13,6 +13,7 @@ class ParamServer(AbstractBasePlugin):
     """
     Provide raw access to retrieve and provide server parameters.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param_server", system, loop, logger)
 
@@ -22,9 +23,14 @@ class ParamServer(AbstractBasePlugin):
         :param name: name of the custom parameter you wish to add
         :param value: String value of the parameter you wish to add
         """
-        self._logger.info(f"Provided a custom parameter with the name {name} and a value of {value}")
+        self._logger.info(
+            f"Provided a custom parameter with the name {name} and a value of {value}"
+        )
         super().submit_task(
-            asyncio.ensure_future(self._system.param_server.provide_param_custom(name, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.param_server.provide_param_custom(name, value),
+                loop=self._loop,
+            )
         )
 
     def provide_param_float(self, name: str, value: float):
@@ -33,9 +39,14 @@ class ParamServer(AbstractBasePlugin):
         :param name: name of the float parameter you wish to add
         :param value: float value of the parameter you wish to add
         """
-        self._logger.info(f"Provided a float parameter with the name {name} and a value of {value}")
+        self._logger.info(
+            f"Provided a float parameter with the name {name} and a value of {value}"
+        )
         super().submit_task(
-            asyncio.ensure_future(self._system.param_server.provide_param_float(name, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.param_server.provide_param_float(name, value),
+                loop=self._loop,
+            )
         )
 
     def provide_param_int(self, name: str, value: int):
@@ -44,9 +55,14 @@ class ParamServer(AbstractBasePlugin):
         :param name: name of the integer parameter you wish to add
         :param value: Integer value of the parameter you wish to add
         """
-        self._logger.info(f"Provided an integer parameter with the name {name} and a value of {value}")
+        self._logger.info(
+            f"Provided an integer parameter with the name {name} and a value of {value}"
+        )
         super().submit_task(
-            asyncio.ensure_future(self._system.param_server.provide_param_int(name, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.param_server.provide_param_int(name, value),
+                loop=self._loop,
+            )
         )
 
     def retrieve_all_params(self) -> Optional[param_server.AllParams]:
@@ -93,7 +109,9 @@ class ParamServer(AbstractBasePlugin):
             self._logger.info("Response to retrieve_param_custom received")
             return x
         except asyncio.InvalidStateError:
-            self._logger.error("Could not retrieve custom parameter! Request timed out!")
+            self._logger.error(
+                "Could not retrieve custom parameter! Request timed out!"
+            )
             return None
 
     def retrieve_param_float(self, name) -> Optional[float]:

@@ -11,15 +11,20 @@ class Core(AbstractBasePlugin):
     """
     Access to the connection state and core configurations
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("core", system, loop, logger)
 
         self._connection_state = None
-        self._connection_task = asyncio.ensure_future(self._update_connection_state(), loop=self._loop)
+        self._connection_task = asyncio.ensure_future(
+            self._update_connection_state(), loop=self._loop
+        )
 
     def set_mavlink_timeout(self, delay_s: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.core.set_mavlink_timeout(delay_s), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.core.set_mavlink_timeout(delay_s), loop=self._loop
+            )
         )
 
     async def _update_connection_state(self) -> None:

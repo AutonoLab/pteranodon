@@ -13,6 +13,7 @@ class Mission(AbstractBasePlugin):
     """
     Enable waypoint missions.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
         self._download_progress = None
@@ -33,7 +34,9 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Canceled Mission Download")
         super().submit_task(
-            asyncio.ensure_future(self._system.mission.cancel_mission_download(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mission.cancel_mission_download(), loop=self._loop
+            )
         )
 
     def cancel_mission_upload(self):
@@ -43,7 +46,9 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Canceled Mission Upload")
         super().submit_task(
-            asyncio.ensure_future(self._system.mission.cancel_mission_upload(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mission.cancel_mission_upload(), loop=self._loop
+            )
         )
 
     def clear_mission(self):
@@ -65,7 +70,9 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Downloading mission file")
 
-        download_mission_task = asyncio.ensure_future(self._system.mission.download_mission(), loop=self._loop)
+        download_mission_task = asyncio.ensure_future(
+            self._system.mission.download_mission(), loop=self._loop
+        )
         done_condition = Condition()
         download_mission_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)
@@ -105,7 +112,9 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file with progress information")
 
         # Block a thread and allow it to run for 1 second before timing out
-        download_mission_task = asyncio.ensure_future(self._download_mission_with_progress(), loop=self._loop)
+        download_mission_task = asyncio.ensure_future(
+            self._download_mission_with_progress(), loop=self._loop
+        )
         done_condition = Condition()
         download_mission_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)
@@ -124,10 +133,14 @@ class Mission(AbstractBasePlugin):
         retrieves the boolean that determines if it returns to the launch location or stays at current location
         :return: boolean
         """
-        self._logger.info("Waiting for response to get_return_to_launch_after_mission()")
+        self._logger.info(
+            "Waiting for response to get_return_to_launch_after_mission()"
+        )
 
         # Block a thread and allow it to run for 1 second before timing out
-        get_rtl_task = asyncio.ensure_future(self._system.mission.get_return_to_launch_after_mission(), loop=self._loop)
+        get_rtl_task = asyncio.ensure_future(
+            self._system.mission.get_return_to_launch_after_mission(), loop=self._loop
+        )
         done_condition = Condition()
         get_rtl_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)
@@ -135,7 +148,9 @@ class Mission(AbstractBasePlugin):
         # Test if any information was returned or the function timed out
         try:
             x = get_rtl_task.result()
-            self._logger.info("Response to get_return_to_launch_after_mission() received")
+            self._logger.info(
+                "Response to get_return_to_launch_after_mission() received"
+            )
             return x
         except asyncio.InvalidStateError:
             self._logger.error("Could not retrieve RTL information! Request timed out!")
@@ -149,7 +164,9 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Waiting for response to is_mission_finished()")
 
         # Block a thread and allow it to run for 1 second before timing out
-        get_imf_task = asyncio.ensure_future(self._system.mission.is_mission_finished(), loop=self._loop)
+        get_imf_task = asyncio.ensure_future(
+            self._system.mission.is_mission_finished(), loop=self._loop
+        )
         done_condition = Condition()
         get_imf_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)

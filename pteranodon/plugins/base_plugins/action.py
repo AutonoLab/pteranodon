@@ -18,17 +18,28 @@ class Action(AbstractBasePlugin):
         super().__init__("action", system, loop, logger)
 
         self._maximum_speed: Optional[float] = None
-        self._maximum_speed_task = asyncio.ensure_future(self._system.action.get_maximum_speed(), loop=self._loop)
-        self._maximum_speed_task.add_done_callback(partial(self._maximum_speed_callback))
+        self._maximum_speed_task = asyncio.ensure_future(
+            self._system.action.get_maximum_speed(), loop=self._loop
+        )
+        self._maximum_speed_task.add_done_callback(
+            partial(self._maximum_speed_callback)
+        )
 
         self._launch_altitude: Optional[float] = None
-        self._launch_altitude_task = asyncio.ensure_future(self._system.action.get_return_to_launch_altitude(),
-                                                           loop=self._loop)
-        self._launch_altitude_task.add_done_callback(partial(self._launch_altitude_callback))
+        self._launch_altitude_task = asyncio.ensure_future(
+            self._system.action.get_return_to_launch_altitude(), loop=self._loop
+        )
+        self._launch_altitude_task.add_done_callback(
+            partial(self._launch_altitude_callback)
+        )
 
         self._takeoff_altitude: Optional[float] = None
-        self._takeoff_altitude_task = asyncio.ensure_future(self._system.action.get_takeoff_altitude(), loop=self._loop)
-        self._takeoff_altitude_task.add_done_callback(partial(self._takeoff_altitude_callback))
+        self._takeoff_altitude_task = asyncio.ensure_future(
+            self._system.action.get_takeoff_altitude(), loop=self._loop
+        )
+        self._takeoff_altitude_task.add_done_callback(
+            partial(self._takeoff_altitude_callback)
+        )
 
     def _maximum_speed_callback(self, task: Task) -> None:
         self._maximum_speed = task.result()
@@ -52,11 +63,27 @@ class Action(AbstractBasePlugin):
             asyncio.ensure_future(self._system.action.disarm(), loop=self._loop)
         )
 
-    def do_orbit(self, radius_m: float, velocity_ms: float, yaw_behavior: action.OrbitYawBehavior, latitude_deg: float,
-                 longitude_deg: float, absolute_altitude_m: float) -> None:
+    def do_orbit(
+        self,
+        radius_m: float,
+        velocity_ms: float,
+        yaw_behavior: action.OrbitYawBehavior,
+        latitude_deg: float,
+        longitude_deg: float,
+        absolute_altitude_m: float,
+    ) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.do_orbit(radius_m, velocity_ms, yaw_behavior, latitude_deg,
-                                                               longitude_deg, absolute_altitude_m), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.do_orbit(
+                    radius_m,
+                    velocity_ms,
+                    yaw_behavior,
+                    latitude_deg,
+                    longitude_deg,
+                    absolute_altitude_m,
+                ),
+                loop=self._loop,
+            )
         )
 
     def get_maximum_speed(self) -> Optional[float]:
@@ -68,10 +95,20 @@ class Action(AbstractBasePlugin):
     def get_takeoff_altitude(self) -> Optional[float]:
         return self._takeoff_altitude
 
-    def goto_location(self, latitude_deg: float, longitude_deg: float, absolute_altitude_m: float, yaw: float) -> None:
+    def goto_location(
+        self,
+        latitude_deg: float,
+        longitude_deg: float,
+        absolute_altitude_m: float,
+        yaw: float,
+    ) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.goto_location(latitude_deg, longitude_deg,
-                                                                    absolute_altitude_m, yaw), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.goto_location(
+                    latitude_deg, longitude_deg, absolute_altitude_m, yaw
+                ),
+                loop=self._loop,
+            )
         )
 
     def hold(self) -> None:
@@ -88,7 +125,7 @@ class Action(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.action.land(), loop=self._loop)
         )
-        
+
     def reboot(self) -> None:
         super().submit_task(
             asyncio.ensure_future(self._system.action.reboot(), loop=self._loop)
@@ -96,35 +133,48 @@ class Action(AbstractBasePlugin):
 
     def return_to_launch(self) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.return_to_launch(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.return_to_launch(), loop=self._loop
+            )
         )
 
     def set_acuator(self, index: int, value: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.set_acuator(index, value), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.set_acuator(index, value), loop=self._loop
+            )
         )
 
     def set_current_speed(self, speed_m_s: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.set_current_speed(speed_m_s), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.set_current_speed(speed_m_s), loop=self._loop
+            )
         )
 
     def set_maximum_speed(self, speed_m_s: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.set_maximum_speed(speed_m_s), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.set_maximum_speed(speed_m_s), loop=self._loop
+            )
         )
         self._maximum_speed = speed_m_s
 
     def set_return_to_launch_altitude(self, relative_altitude_m: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.set_return_to_launch_altitude(relative_altitude_m),
-                                  loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.set_return_to_launch_altitude(relative_altitude_m),
+                loop=self._loop,
+            )
         )
         self._launch_altitude = relative_altitude_m
 
     def set_takeoff_altitude(self, relative_altitude_m: float) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.set_takeoff_altitude(relative_altitude_m), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.set_takeoff_altitude(relative_altitude_m),
+                loop=self._loop,
+            )
         )
         self._takeoff_altitude = relative_altitude_m
 
@@ -145,10 +195,14 @@ class Action(AbstractBasePlugin):
 
     def transition_to_fixedwing(self) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.transition_to_fixedwing(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.transition_to_fixedwing(), loop=self._loop
+            )
         )
 
     def transition_to_multicopter(self) -> None:
         super().submit_task(
-            asyncio.ensure_future(self._system.action.transition_to_multicopter(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.action.transition_to_multicopter(), loop=self._loop
+            )
         )

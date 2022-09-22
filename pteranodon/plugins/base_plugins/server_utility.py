@@ -8,7 +8,6 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ServerUtility(AbstractBasePlugin):
-
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("server_utility", system, loop, logger)
 
@@ -19,7 +18,11 @@ class ServerUtility(AbstractBasePlugin):
         :param text: a string object as a description or note
         :return: None
         """
-        self._logger.info("Sent a \"{typ}\" status to the server with the message \"{text}\"")
+        self._logger.info(
+            'Sent a "{typ}" status to the server with the message "{text}"'
+        )
         super().submit_task(
-            asyncio.ensure_future(self._system.server_utility.send_status_text(typ, text))
+            asyncio.ensure_future(
+                self._system.server_utility.send_status_text(typ, text)
+            )
         )
