@@ -145,7 +145,7 @@ class TrackingServer(AbstractBasePlugin):
         return self._track_rectangle
 
     @property
-    def tracking_active(self) -> bool:
+    def tracking_active(self) -> Optional[bool]:
         """
         Returns the current tracking status
         """
