@@ -1,7 +1,7 @@
 name: PEP-8 Check
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
