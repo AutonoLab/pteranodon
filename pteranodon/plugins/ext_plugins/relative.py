@@ -12,8 +12,14 @@ from .abstract_custom_plugin import AbstractCustomPlugin
 
 
 class Relative(AbstractCustomPlugin):
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, base_plugins: Dict, ext_args: Dict)\
-            -> None:
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        base_plugins: Dict,
+        ext_args: Dict,
+    ) -> None:
         super().__init__("relative", system, loop, logger, base_plugins, ext_args)
 
         self._min_follow_distance = 10.0
@@ -36,9 +42,16 @@ class Relative(AbstractCustomPlugin):
         """
         self._min_follow_distance = dist
 
-    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
+    def maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+        test_min: bool = False,
+    ):
         """
-        A movement command for moving relative to the drones current position. The front direction is aligned directly with 
+        A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
@@ -47,17 +60,35 @@ class Relative(AbstractCustomPlugin):
         (front, right, down). If set to False the drone will not move in that direction
         """
         super().submit_task(
-            asyncio.ensure_future(self._maneuver_to(front, right, down, on_dimensions, test_min), loop=self._loop)
+            asyncio.ensure_future(
+                self._maneuver_to(front, right, down, on_dimensions, test_min),
+                loop=self._loop,
+            )
         )
 
-    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions=(True, True, True), test_min=False) -> None:
+    async def _maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions=(True, True, True),
+        test_min=False,
+    ) -> None:
         if test_min:
             total_distance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
             if total_distance < self._min_follow_distance:
-                await self._system.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
+                await self._system.offboard.set_velocity_body(
+                    VelocityBodyYawspeed(0, 0, 0, 0)
+                )
         await self._maneuver_with_ned(front, right, down, on_dimensions)
 
-    async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
+    async def _maneuver_with_ned(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+    ) -> None:
         # zero out dimensions that will not be moved
         front = 0.0 if not on_dimensions[0] else front
         right = 0.0 if not on_dimensions[1] else right
@@ -72,7 +103,7 @@ class Relative(AbstractCustomPlugin):
         angle = task2.yaw_deg
         angle_of_rotation = radians(angle)
 
-        # convert FRD to NED 
+        # convert FRD to NED
         relative_north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
         relative_east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
 

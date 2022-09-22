@@ -12,10 +12,13 @@ class Mocap(AbstractBasePlugin):
     Allows interfacing a vehicle with a motion capture system in order to allow navigation without
     global positioning sources available (e.g. indoors, or when flying under a bridge. etc.).
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mocap", system, loop, logger)
 
-    def set_attitude_position_mocap(self, attitude_position_mocap: mocap.AttitudePositionMocap) -> None:
+    def set_attitude_position_mocap(
+        self, attitude_position_mocap: mocap.AttitudePositionMocap
+    ) -> None:
         """
         Send motion capture attitude and position
 
@@ -25,7 +28,10 @@ class Mocap(AbstractBasePlugin):
 
         self._logger.info("Set Mocap attitude and position")
         super().submit_task(
-            asyncio.ensure_future(self._system.mocap.set_attitude_position_mocap(attitude_position_mocap), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mocap.set_attitude_position_mocap(attitude_position_mocap),
+                loop=self._loop,
+            )
         )
 
     def set_odometry(self, odometry: mocap.Odometry) -> None:
@@ -37,10 +43,14 @@ class Mocap(AbstractBasePlugin):
         """
 
         super().submit_task(
-            asyncio.ensure_future(self._system.mocap.set_odometry(odometry), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mocap.set_odometry(odometry), loop=self._loop
+            )
         )
 
-    def set_vision_position_estimate(self, vision_position_estimate: mocap.VisionPositionEstimate) -> None:
+    def set_vision_position_estimate(
+        self, vision_position_estimate: mocap.VisionPositionEstimate
+    ) -> None:
         """
         Send Global position/attitude estimate from a vision source.
 
@@ -49,5 +59,10 @@ class Mocap(AbstractBasePlugin):
         """
 
         super().submit_task(
-            asyncio.ensure_future(self._system.mocap.set_vision_position_estimate(vision_position_estimate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mocap.set_vision_position_estimate(
+                    vision_position_estimate
+                ),
+                loop=self._loop,
+            )
         )

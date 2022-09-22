@@ -13,14 +13,19 @@ class MissionRawServer(AbstractBasePlugin):
     Acts as a vehicle and receives incoming missions from GCS (in raw MAVLINK format). Provides current mission item
     state, so the server can progress through missions.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
         self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
         self.clear_type: Optional[int] = None
         self.mission_item: Optional[mission_raw_server.MissionItem] = None
         self._clear_all_task = asyncio.ensure_future(self._clear_all(), loop=self._loop)
-        self._current_item_changed_task = asyncio.ensure_future(self._current_item_changed(), loop=self._loop)
-        self._incoming_mission_task = asyncio.ensure_future(self._incoming_mission(), loop=self._loop)
+        self._current_item_changed_task = asyncio.ensure_future(
+            self._current_item_changed(), loop=self._loop
+        )
+        self._incoming_mission_task = asyncio.ensure_future(
+            self._incoming_mission(), loop=self._loop
+        )
 
     async def _clear_all(self):
         """
@@ -56,5 +61,8 @@ class MissionRawServer(AbstractBasePlugin):
         """
         self._logger.info("Task item set to complete")
         super().submit_task(
-            asyncio.ensure_future(self._system.mission_raw_server.set_current_item_complete(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.mission_raw_server.set_current_item_complete(),
+                loop=self._loop,
+            )
         )

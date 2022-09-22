@@ -18,12 +18,15 @@ class LogFiles(AbstractBasePlugin):
     Allow to download log files from the vehicle after a flight is complete. For log streaming during flight check the
      logging plugin.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("LogFiles", system, loop, logger)
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
-        self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
+        self._entry_list_task = asyncio.ensure_future(
+            self._system.log_files.get_entries(), loop=self._loop
+        )
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
     def download_log_file(self, entry: Entry, path: str) -> ProgressData:
@@ -31,14 +34,16 @@ class LogFiles(AbstractBasePlugin):
         Download log file synchronously.
 
         :param entry: Entry of the log file to download.
-        :type entry: Entry        
+        :type entry: Entry
         :param path: Path of where to download log file to.
         :type path: str
         :return: Download progress
         :rtype: ProgressData
         """
 
-        download_progress_task = asyncio.ensure_future(self._system.log_files.download_log_file(entry, path), loop=self._loop)
+        download_progress_task = asyncio.ensure_future(
+            self._system.log_files.download_log_file(entry, path), loop=self._loop
+        )
 
         done_condition = Condition()
 
@@ -57,7 +62,9 @@ class LogFiles(AbstractBasePlugin):
             # If the result is not available yet,
             #       it can be assumed that the wait call timed out before the callback was done
             self._download_progress = None
-            self._logger.error("Could not return log file download progress! Request timed out!")
+            self._logger.error(
+                "Could not return log file download progress! Request timed out!"
+            )
             return None
 
     def update_entries(self):
@@ -65,7 +72,9 @@ class LogFiles(AbstractBasePlugin):
         Updates the log entries of the drone
         :return: None
         """
-        self._entry_list_task = asyncio.ensure_future(self._system.log_files.get_entries(), loop=self._loop)
+        self._entry_list_task = asyncio.ensure_future(
+            self._system.log_files.get_entries(), loop=self._loop
+        )
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
     def get_download_progress(self) -> Optional[ProgressData]:
@@ -85,7 +94,9 @@ class LogFiles(AbstractBasePlugin):
         self._logger.info("Erased all log files!")
 
         super().submit_task(
-            asyncio.ensure_future(self._system.log_files.erase_all_log_files(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.log_files.erase_all_log_files(), loop=self._loop
+            )
         )
 
     def _get_entries_callback(self, task: Task) -> None:

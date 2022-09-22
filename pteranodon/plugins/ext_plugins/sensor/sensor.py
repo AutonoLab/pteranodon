@@ -10,12 +10,18 @@ from .sensor_data import SensorData
 
 
 class Sensor(AbstractCustomPlugin):
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, base_plugins: Dict, ext_args: Dict)\
-            -> None:
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        base_plugins: Dict,
+        ext_args: Dict,
+    ) -> None:
         super().__init__("sensor", system, loop, logger, base_plugins, ext_args)
 
         self._sensors: Dict[str, AbstractSensor] = {}
-        
+
         if self._ext_args["sensor"] is not None:
             for sensor in self._ext_args["sensor"]:
                 self._sensors[sensor.name] = sensor

@@ -8,7 +8,6 @@ from mavsdk import System
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-
 class Shell(AbstractBasePlugin):
     """
     Allow to communicate with the vehicle’s system shell.
@@ -17,7 +16,9 @@ class Shell(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
 
-        self._receive_task = asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
+        self._receive_task = asyncio.ensure_future(
+            self._receive_feedback(), loop=self._loop
+        )
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
 
@@ -72,5 +73,3 @@ class Shell(AbstractBasePlugin):
         :return: a list of command strings
         """
         return self._cmd_history
-
-

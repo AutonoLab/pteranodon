@@ -14,8 +14,15 @@ class PluginManager:
     """
     Manages plugins for use by the vehicle
     """
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, ext_args: Dict, custom_args: Dict)\
-            -> None:
+
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        ext_args: Dict,
+        custom_args: Dict,
+    ) -> None:
         self._system = system
         self._loop = loop
         self._logger = logger
@@ -26,8 +33,18 @@ class PluginManager:
         self._ext_plugins: Dict[str, AbstractCustomPlugin] = {}
         self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
 
-        base_plugin_types: List[Type[AbstractBasePlugin]] = [Action, Calibration, Core, FollowMe,
-                                                             Geofence, Info, Offboard, Param, Telemetry, Transponder]
+        base_plugin_types: List[Type[AbstractBasePlugin]] = [
+            Action,
+            Calibration,
+            Core,
+            FollowMe,
+            Geofence,
+            Info,
+            Offboard,
+            Param,
+            Telemetry,
+            Transponder,
+        ]
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
@@ -59,7 +76,9 @@ class PluginManager:
         """
         return self._custom_plugins
 
-    def add_plugin(self, new_plugin: Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]) -> None:
+    def add_plugin(
+        self, new_plugin: Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]
+    ) -> None:
         """
         Adds a custom plugin to the plugin manager
 
@@ -73,7 +92,9 @@ class PluginManager:
             new_plugin_obj = new_plugin
 
         if new_plugin_obj.name in self._custom_plugins:
-            self._logger.error(f"Could not add plugin with name \"{new_plugin_obj.name}\"! A plugin with that name already exists!")
+            self._logger.error(
+                f'Could not add plugin with name "{new_plugin_obj.name}"! A plugin with that name already exists!'
+            )
             return
 
         self._custom_plugins[new_plugin_obj.name] = new_plugin_obj

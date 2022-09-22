@@ -12,7 +12,10 @@ class AbstractPlugin(ABC):
     """
     Base plugin functionality, no methods required to overwrite
     """
-    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+
+    def __init__(
+        self, name: str, system: System, loop: AbstractEventLoop, logger: Logger
+    ) -> None:
         self._name = name
         self._system = system
         self._loop = loop

@@ -12,6 +12,7 @@ class Info(AbstractBasePlugin):
     """
     Provide information about the hardware and/or software of a system.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("info", system, loop, logger)
 
@@ -27,30 +28,34 @@ class Info(AbstractBasePlugin):
         self._id_task = asyncio.ensure_future(self._get_id(), loop=self._loop)
         self._product_task = asyncio.ensure_future(self._get_product(), loop=self._loop)
         self._version_task = asyncio.ensure_future(self._get_version(), loop=self._loop)
-        self._flight_info_task = asyncio.ensure_future(self._flight_info_gen(), loop=self._loop)
-        self._speed_factor_task = asyncio.ensure_future(self._speed_factor_gen(), loop=self._loop)
+        self._flight_info_task = asyncio.ensure_future(
+            self._flight_info_gen(), loop=self._loop
+        )
+        self._speed_factor_task = asyncio.ensure_future(
+            self._speed_factor_gen(), loop=self._loop
+        )
 
     async def _get_id(self) -> None:
         while True:
             try:
                 self._id = await self._system.info.get_identification()
-                break                
+                break
             except info.InfoError:
                 pass
-    
+
     async def _get_product(self) -> None:
         while True:
             try:
                 self._product = await self._system.info.get_product()
-                break                
+                break
             except info.InfoError:
                 pass
-    
+
     async def _get_version(self) -> None:
         while True:
             try:
                 self._version = await self._system.info.get_version()
-                break                
+                break
             except info.InfoError:
                 pass
 
