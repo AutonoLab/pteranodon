@@ -67,11 +67,13 @@ class LogFiles(AbstractBasePlugin):
             )
             return None
 
-    def update_entries(self):
+    def update_entries(self) -> None:
+
         """
         Updates the log entries of the drone
-        :return: None
+        
         """
+        
         self._entry_list_task = asyncio.ensure_future(
             self._system.log_files.get_entries(), loop=self._loop
         )

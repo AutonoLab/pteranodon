@@ -18,6 +18,7 @@ class TrackingServer(AbstractBasePlugin):
         super().__init__("tracking_server", system, loop, logger)
         self._track_rectangle: Optional[TrackRectangle] = None
         self._track_point: Optional[TrackPoint] = None
+
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
 

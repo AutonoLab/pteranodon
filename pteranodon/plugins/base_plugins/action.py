@@ -78,6 +78,7 @@ class Action(AbstractBasePlugin):
         longitude_deg: float,
         absolute_altitude_m: float,
     ) -> None:
+
         """
         Send command do orbit to the drone.
 
@@ -133,6 +134,7 @@ class Action(AbstractBasePlugin):
         absolute_altitude_m: float,
         yaw: float,
     ) -> None:
+
         """
         Send command to move the vehicle to a specific global position.
 
