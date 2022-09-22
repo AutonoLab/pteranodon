@@ -19,6 +19,7 @@ class TrackingServer(AbstractBasePlugin):
         self._track_point: Optional[TrackPoint] = None
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
+        
         self._tracking_off_task = asyncio.ensure_future(self._update_tracking_off_command(), loop=self._loop)
         self._tracking_point_task = asyncio.ensure_future(self._update_tracking_point_command(), loop=self._loop)
         self._tracking_rectangle_task = asyncio.ensure_future(self._update_tracking_rectangle_command(),
@@ -145,5 +146,8 @@ class TrackingServer(AbstractBasePlugin):
 
     @property
     def tracking_active(self) -> bool:
+        """
+        Returns the current tracking status
+        """
         return self._tracking_active
 
