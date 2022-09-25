@@ -14,8 +14,7 @@ from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
 
 from .plugins import PluginManager
-from .plugins.base_plugins import Core, Telemetry, Geofence, Param, Offboard, Calibration, Info, Transponder, FollowMe,\
-     Action
+from .plugins.base_plugins import Core, Telemetry, Geofence, Param, Offboard, Calibration, Info, Transponder, FollowMe, Action
 from .plugins.ext_plugins import Sensor, Relative
 from .plugins.ext_plugins.sensor import AbstractSensor
 
