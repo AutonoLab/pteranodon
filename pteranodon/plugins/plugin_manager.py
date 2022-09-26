@@ -4,10 +4,21 @@ from typing import Dict, Type, Union, List
 
 from mavsdk import System
 
+from .base_plugins import (
+    Action,
+    Calibration,
+    Core,
+    FollowMe,
+    Geofence,
+    Info,
+    Offboard,
+    Param,
+    Telemetry,
+    Transponder,
+)
+from .ext_plugins import Sensor, Relative
 from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
-from .base_plugins import *
 from .base_plugins.abstract_base_plugin import AbstractBasePlugin
-from .ext_plugins import *
 
 
 class PluginManager:
