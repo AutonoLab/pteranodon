@@ -1,0 +1,3 @@
+pytest
+pytest-depends
+pytest-helpers-namespace

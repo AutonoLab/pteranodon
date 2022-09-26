@@ -56,7 +56,8 @@ jobs:
 
     - name: Lint with pylint
       run: |
-        pip install pylint pytest
+        pip install pylint
+        pip install -r tests/test-requirements.txt
         # Ignore...
         # Wildcard import,
         # Trailing whitespace

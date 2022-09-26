@@ -10,12 +10,6 @@ from pteranodon.plugins.base_plugins import Offboard
 # docker run --rm -it jonasvautherin/px4-gazebo-headless:1.13.0
 
 
-# Current testing libraries
-# pytest
-# pytest-depends
-# pytest-helpers-namespace
-
-
 @pytest.fixture(scope="session")
 def test_drone() -> SimpleDrone:
     # Setup
