@@ -71,9 +71,9 @@ class Mission(AbstractBasePlugin):
         download_mission_task = asyncio.ensure_future(
             self._system.mission.download_mission(), loop=self._loop
         )
-        done_condition = Condition()
-        download_mission_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
+        download_done_condition = Condition()
+        download_mission_task.add_done_callback(lambda _: download_done_condition.notify())
+        download_done_condition.wait(1.0)
 
         try:
             x = download_mission_task.result()
@@ -107,16 +107,16 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file with progress information")
 
         # Block a thread and allow it to run for 1 second before timing out
-        download_mission_task = asyncio.ensure_future(
+        download_progress_mission_task = asyncio.ensure_future(
             self._download_mission_with_progress(), loop=self._loop
         )
-        done_condition = Condition()
-        download_mission_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
+        download_progress_done_condition = Condition()
+        download_progress_mission_task.add_done_callback(lambda _: download_progress_done_condition.notify())
+        download_progress_done_condition.wait(1.0)
 
         # Test if any information was returned or the function timed out
         try:
-            x = download_mission_task.result()
+            x = download_progress_mission_task.result()
             self._logger.info("Mission file downloaded successfully")
             return x
         except asyncio.InvalidStateError:

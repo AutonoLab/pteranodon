@@ -98,9 +98,9 @@ class MissionRaw(AbstractBasePlugin):
             self._system.mission_raw.import_qgroundcontrol_mission(qgc_plan_path),
             loop=self._loop,
         )
-        done_condition = Condition()
-        import_mission_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
+        import_done_condition = Condition()
+        import_mission_task.add_done_callback(lambda _: import_done_condition.notify())
+        import_done_condition.wait(1.0)
 
         try:
             x = import_mission_task.result()
