@@ -25,7 +25,7 @@ class CameraServer(AbstractBasePlugin):
         super().__init__("camera_server", system, loop, logger)
 
         # Must be called as soon as the camera server is created
-        self._cam_info : Optional[camera_server.Information] = None
+        self._cam_info: Optional[camera_server.Information] = None
 
         # Sets the request callback to the default since some behavior is required
         self._photo_request_callback: CameraServer.PhotoRequestCallbackType = (
@@ -36,7 +36,7 @@ class CameraServer(AbstractBasePlugin):
             self._take_photo(), loop=self._loop
         )
 
-    def _check_cam_info_set(self, action_name : str) -> bool:
+    def _check_cam_info_set(self, action_name: str) -> bool:
         """
         Since the camera info must be set before any actions can be taken, this method checks for existence and
         prints an error message if it has not been set
@@ -47,7 +47,9 @@ class CameraServer(AbstractBasePlugin):
         :rtype: bool
         """
         if self._cam_info is None:
-            self._logger.error(f"Cannot execute action \"{action_name}\"! Camera info has not been set!")
+            self._logger.error(
+                f'Cannot execute action "{action_name}"! Camera info has not been set!'
+            )
             return False
         return True
 
