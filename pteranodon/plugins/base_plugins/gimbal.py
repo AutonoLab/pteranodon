@@ -12,6 +12,7 @@ class Gimbal(AbstractBasePlugin):
     """
     Provide control over a gimbal.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 

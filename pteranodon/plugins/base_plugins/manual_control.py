@@ -10,6 +10,7 @@ class ManualControl(AbstractBasePlugin):
     """
     Enable manual control using e.g. a joystick or gamepad.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("manual_control", system, loop, logger)
 

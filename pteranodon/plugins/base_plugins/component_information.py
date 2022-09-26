@@ -15,6 +15,7 @@ class ComponentInformation(AbstractBasePlugin):
     """
     Access component information such as parameters.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("component_information", system, loop, logger)
 
