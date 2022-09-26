@@ -4,13 +4,28 @@ from typing import Dict, Type, Union, List
 
 from mavsdk import System
 
+from .base_plugins import (
+    Action,
+    Calibration,
+    Core,
+    FollowMe,
+    Geofence,
+    Info,
+    Offboard,
+    Param,
+    Telemetry,
+    Transponder,
+)
+from .ext_plugins import Sensor, Relative
 from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
-from .base_plugins import *
 from .base_plugins.abstract_base_plugin import AbstractBasePlugin
-from .ext_plugins import *
 
 
 class PluginManager:
+    """
+    Manages plugins for use by the vehicle
+    """
+
     def __init__(
         self,
         system: System,
@@ -53,14 +68,23 @@ class PluginManager:
 
     @property
     def base_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of the base plugins
+        """
         return self._base_plugins
 
     @property
     def ext_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of external plugins
+        """
         return self._ext_plugins
 
     @property
     def custom_plugins(self) -> Dict:
+        """
+        :return: Dict ; Returns a dictionary of custom plugins
+        """
         return self._custom_plugins
 
     def add_plugin(

@@ -70,18 +70,43 @@ class Param(AbstractBasePlugin):
         return param_val
 
     def get_param_custom(self, name: str) -> Union[str, None]:
+        """
+        Get a custom parameter
+        :param name: str ; name of the parameter you wish to retrieve
+        :return: str ; string value of the parameter requested. None if value is not found
+        """
         return self.get_param(name, True, False, False)
 
     def get_param_float(self, name: str) -> Union[float, None]:
+        """
+        Get a float parameter
+        :param name: str ; name of the parameter you wish to retrieve
+        :return: float ; float value of the parameter requested. None if value is not found
+        """
         return self.get_param(name, False, True, False)
 
     def get_param_int(self, name: str) -> Union[int, None]:
+        """
+        Get an integer parameter
+        :param name: str ; name of the parameter you wish to retrieve
+        :return: int ; integer value of the parameter requested. None if value is not found
+        """
         return self.get_param(name, False, False, True)
 
     def get_all_params(self) -> param.AllParams:
+        """
+        Get all parameters
+        :return: param.AllParams ; a collection of all parameters
+        """
         return self._all_params
 
     def set_param_custom(self, name: str, value: str) -> None:
+        """
+        Set a custom parameter
+        :param name: str ; name of the parameter to be set
+        :param value: str ; value of the parameter to be set
+        :return: None
+        """
         try:
             param_task = super().submit_task(
                 asyncio.ensure_future(
@@ -95,6 +120,12 @@ class Param(AbstractBasePlugin):
             )
 
     def set_param_float(self, name: str, value: float) -> None:
+        """
+        Set a float parameter
+        :param name: str ; Name of the parameter to set
+        :param value: float ; Value of the parameter to be set
+        :return: None
+        """
         param_task = super().submit_task(
             asyncio.ensure_future(
                 self._system.param.set_param_float(name, value), loop=self._loop
@@ -103,6 +134,12 @@ class Param(AbstractBasePlugin):
         param_task.add_done_callback(partial(self._set_param_callback))
 
     def set_param_int(self, name: str, value: int) -> None:
+        """
+        Set an integer parameter
+        :param name: str ; Name of the parameter to set
+        :param value: int ; Value of the parameter to be set
+        :return: None
+        """
         param_task = super().submit_task(
             asyncio.ensure_future(
                 self._system.param.set_param_int(name, value), loop=self._loop
@@ -111,4 +148,8 @@ class Param(AbstractBasePlugin):
         param_task.add_done_callback(partial(self._set_param_callback))
 
     def refresh(self) -> None:
+        """
+        Refresh parameters
+        :return: None
+        """
         self._set_param_callback(None)

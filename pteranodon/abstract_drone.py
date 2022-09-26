@@ -14,12 +14,27 @@ from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
 
 from .plugins import PluginManager
-from .plugins.base_plugins import *
-from .plugins.ext_plugins import *
+from .plugins.base_plugins import (
+    Core,
+    Telemetry,
+    Geofence,
+    Param,
+    Offboard,
+    Calibration,
+    Info,
+    Transponder,
+    FollowMe,
+    Action,
+)
+from .plugins.ext_plugins import Sensor, Relative
 from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
+    """
+    An abstract class with base functionality, some methods must be overridden for usage
+    """
+
     def __init__(
         self,
         address: str,
@@ -291,7 +306,7 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()  # mypy: ignore
+        self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
         del self._drone
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
