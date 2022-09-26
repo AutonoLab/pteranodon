@@ -7,6 +7,10 @@ from .sensor_data import SensorData
 
 
 class AbstractSensor(ABC):
+    """
+    An abstracted sensor for general functionality, data update and teardown functions need to be overwritten.
+    """
+
     def __init__(self, sensor_name: str, poll_rate: Optional[float] = None):
         """
         :param name: A string to represent the sensor
@@ -60,30 +64,60 @@ class AbstractSensor(ABC):
             self.teardown()
 
     def start(self) -> None:
+        """
+        Starts the thread used for updating
+        :return: None
+        """
         self._update_thread.start()
 
     def stop(self) -> None:
+        """
+        Terminate the thread used for updating
+        :return: None
+        """
         self._stopped = True
         self._update_thread.join()
 
     @property
     def name(self) -> str:
+        """
+        The name of the sensor
+        :return: str ; String representation of the name
+        """
         return self._name
 
     @property
     def poll_rate(self) -> Union[float, None]:
+        """
+        The poll rate of the sensor
+        :return: float ; poll rate of the sensor as a float or none if not set
+        """
         return self._poll_rate
 
     @poll_rate.setter
     def poll_rate(self, rate: float) -> None:
+        """
+        Set the poll rate of the sensor
+        :param rate: float ; desired poll rate in Hz
+        :return: None
+        """
         self._poll_rate = 1.0 / rate
 
     @property
     def data(self) -> SensorData:
+        """
+        The data held by the sensor
+        :return: SensorData ; The data held by the sensor
+        """
         return self._sensor_data
 
     @data.setter
     def data(self, new_data: Any) -> None:
+        """
+        Set the held data by the sensor
+        :param new_data: Any ; The data to be set
+        :return: None
+        """
         self._sensor_data.update(new_data)
 
     @abstractmethod
