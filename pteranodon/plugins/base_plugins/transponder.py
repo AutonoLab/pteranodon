@@ -21,6 +21,11 @@ class Transponder(AbstractBasePlugin):
         )
 
     def set_rate_transponder(self, rate: float) -> None:
+        """
+        Set rate of transponder updates
+        :param rate: Requested rate in Hz
+        :return: None
+        """
         super().submit_task(
             asyncio.ensure_future(
                 self._system.transponder.set_rate_transponder(rate), loop=self._loop
@@ -33,4 +38,8 @@ class Transponder(AbstractBasePlugin):
                 self._transponder_data = transponder_val
 
     def transponder(self) -> transponder.AdsbVehicle:
+        """
+        Subscribe to transponder updates
+        :return: transponder.AdsbVehicle ; The next transponder detection
+        """
         return self._transponder_data
