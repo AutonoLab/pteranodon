@@ -11,6 +11,7 @@ class ServerUtility(AbstractBasePlugin):
     """
     Utility for onboard MAVSDK instances for common “server” tasks.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("server_utility", system, loop, logger)
 
