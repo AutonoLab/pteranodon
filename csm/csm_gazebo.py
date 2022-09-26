@@ -12,11 +12,17 @@ class CSM_Gazebo(AbstractDrone):
         self.cam = Video()
         self.frame = None
         print("creating hlca instance...")
-        self.fp = FrameProcessor(cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True)
+        self.fp = FrameProcessor(
+            cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True
+        )
         self.cam.start()
 
         print("running Drone.__init__ ...")
-        super().__init__(address="udp://:14540", time_slice=time_slice, min_follow_distance=min_follow_dist)
+        super().__init__(
+            address="udp://:14540",
+            time_slice=time_slice,
+            min_follow_distance=min_follow_dist,
+        )
 
         print("done init")
 
@@ -25,7 +31,9 @@ class CSM_Gazebo(AbstractDrone):
     def setup(self):
         self.frame = self.cam.data.value
         if self.frame is None:
-            print("Frame is given as none, retrying until success. Disconnect QGroundControl video")
+            print(
+                "Frame is given as none, retrying until success. Disconnect QGroundControl video"
+            )
         while self.frame is None:
             self.frame = self.cam.data.value
             time.sleep(0.1)
@@ -53,7 +61,9 @@ if __name__ == "__main__":
     drone.arm()
     drone.takeoff()
 
-    key = input("press l to start autonomous flight loop, press any other key to stop flight")
+    key = input(
+        "press l to start autonomous flight loop, press any other key to stop flight"
+    )
     if key == "l":
         drone.start_loop()
         _ = input("press any key to end autonomous flight")

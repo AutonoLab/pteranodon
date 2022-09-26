@@ -14,7 +14,9 @@ class CSM_Hexsoon(AbstractDrone):
         self.cam = RealSense()
         self.frame = None
         print("creating hlca instance...")
-        self.fp = FrameProcessor(cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True)
+        self.fp = FrameProcessor(
+            cnn_score_min=0.90, output_path="algo_output.mp4", save_output=True
+        )
         self.cam.start()
 
         self.frame = np.round(np.random.rand(480, 640, 3) * 255).astype(np.uint8)
@@ -23,7 +25,11 @@ class CSM_Hexsoon(AbstractDrone):
         _ = self.fp.processFrame(self.frame, display=False)
 
         print("running Drone.__init__ ...")
-        super().__init__(address="serial:///dev/ttyACM0",time_slice=time_slice, min_follow_distance=min_follow_dist)
+        super().__init__(
+            address="serial:///dev/ttyACM0",
+            time_slice=time_slice,
+            min_follow_distance=min_follow_dist,
+        )
 
         print("done init")
 
@@ -59,7 +65,9 @@ if __name__ == "__main__":
     drone.arm()
     drone.takeoff()
 
-    key = input("press l to start autonomous flight loop, press any other key to stop flight")
+    key = input(
+        "press l to start autonomous flight loop, press any other key to stop flight"
+    )
     if key == "l":
         drone.start_offboard()
         drone.start_loop()

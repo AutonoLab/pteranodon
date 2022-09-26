@@ -11,27 +11,40 @@ from .abstract_base_plugin import AbstractBasePlugin
 
 
 class Camera(AbstractBasePlugin):
+    """
+    Can be used to manage cameras that implement the MAVLink Camera Protocol: https://mavlink.io/en/protocol/camera.html.
+
+    Currently only a single camera is supported. When multiple cameras are supported the plugin will need to be
+    instantiated separately for every camera and the camera selected using select_camera.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("camera", system, loop, logger)
 
         self._current_camera_id: Optional[int] = None
 
-        self._capture_info : Optional[camera.CaptureInfo] = None
-        self._information : Optional[camera.Information] = None
-        self._mode : Optional[camera.Mode] = None
-        self._status : Optional[camera.Status] = None
-        self._video_stream_info : Optional[camera.VideoStreamInfo] = None
-        self._current_settings : List[camera.Setting] = []
+        self._capture_info: Optional[camera.CaptureInfo] = None
+        self._information: Optional[camera.Information] = None
+        self._mode: Optional[camera.Mode] = None
+        self._status: Optional[camera.Status] = None
+        self._video_stream_info: Optional[camera.VideoStreamInfo] = None
+        self._current_settings: List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
 
-
         # Tasks of subscribed properties
-        self._capture_info_task = asyncio.ensure_future(self._update_capture_info(), loop=self._loop)
-        self._information_task = asyncio.ensure_future(self._update_information(), loop=self._loop)
+        self._capture_info_task = asyncio.ensure_future(
+            self._update_capture_info(), loop=self._loop
+        )
+        self._information_task = asyncio.ensure_future(
+            self._update_information(), loop=self._loop
+        )
         self._mode_task = asyncio.ensure_future(self._update_mode(), loop=self._loop)
-        self._status_task = asyncio.ensure_future(self._update_status(), loop=self._loop)
-        self._video_stream_info_task = asyncio.ensure_future(self._update_vstream_info(), loop=self._loop)
+        self._status_task = asyncio.ensure_future(
+            self._update_status(), loop=self._loop
+        )
+        self._video_stream_info_task = asyncio.ensure_future(
+            self._update_vstream_info(), loop=self._loop
+        )
 
         # Only want to fetch the current settings and options once on init
         super().submit_task(
@@ -59,7 +72,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.format_storage(), loop=self._loop)
         )
 
-    def start_photo_interval(self, interval_s : float) -> None:
+    def start_photo_interval(self, interval_s: float) -> None:
         """
         Start photo timelapse with a given interval
 
@@ -67,18 +80,24 @@ class Camera(AbstractBasePlugin):
         :type interval_s: float
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.start_photo_interval(interval_s), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.start_photo_interval(interval_s), loop=self._loop
+            )
         )
-        self._status.photo_interval_on = True
+        if self._status is not None:
+            self._status.photo_interval_on = True
 
     def stop_photo_interval(self) -> None:
         """
         Stop a running photo timelapse
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.stop_photo_interval(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.stop_photo_interval(), loop=self._loop
+            )
         )
-        self._status.photo_interval_on = False
+        if self._status is not None:
+            self._status.photo_interval_on = False
 
     def start_video(self) -> None:
         """
@@ -87,7 +106,8 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.start_video(), loop=self._loop)
         )
-        self._status.video_on = True
+        if self._status is not None:
+            self._status.video_on = True
 
     def stop_video(self) -> None:
         """
@@ -96,14 +116,17 @@ class Camera(AbstractBasePlugin):
         super().submit_task(
             asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
         )
-        self._status.video_on = False
+        if self._status is not None:
+            self._status.video_on = False
 
     def start_video_streaming(self) -> None:
         """
         Start video streaming
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.start_video_streaming(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.start_video_streaming(), loop=self._loop
+            )
         )
 
     def stop_video_streaming(self) -> None:
@@ -111,7 +134,9 @@ class Camera(AbstractBasePlugin):
         Stop current video streaming
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.stop_video_streaming(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.stop_video_streaming(), loop=self._loop
+            )
         )
 
     def take_photo(self) -> None:
@@ -122,7 +147,7 @@ class Camera(AbstractBasePlugin):
             asyncio.ensure_future(self._system.camera.take_photo(), loop=self._loop)
         )
 
-    def select_camera(self, camera_id : int) -> None:
+    def select_camera(self, camera_id: int) -> None:
         """
         Select current camera.
 
@@ -132,11 +157,13 @@ class Camera(AbstractBasePlugin):
         :type camera_id: int32
         """
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.select_camera(camera_id), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.select_camera(camera_id), loop=self._loop
+            )
         )
         self._current_camera_id = camera_id
 
-    def set_mode(self, mode : camera.Mode) -> None:
+    def set_mode(self, mode: camera.Mode) -> None:
         """
         Set camera mode
 
@@ -148,7 +175,11 @@ class Camera(AbstractBasePlugin):
         )
         self._mode = mode
 
-    def set_setting(self, setting : Union[camera.Setting, int], option : Optional[Union[camera.Option, int]] = None) -> None:
+    def set_setting(
+        self,
+        setting: Union[camera.Setting, int],
+        option: Optional[Union[camera.Option, int]] = None,
+    ) -> None:
         """
         Set a setting to some value.
 
@@ -168,7 +199,7 @@ class Camera(AbstractBasePlugin):
         Must be set if the Setting object does not in include the option_id.
         :type option: camera.Option or uint32
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             # Setting ID was passed instead of Setting object
             setting_obj = camera.Setting(setting, "", None, False)
@@ -182,17 +213,21 @@ class Camera(AbstractBasePlugin):
             setting_obj.option = option_obj
 
         if setting_obj.setting_id is None:
-            self._logger.error("Could not set setting! No setting ID provided in object or function!")
-            return None
+            self._logger.error(
+                "Could not set setting! No setting ID provided in object or function!"
+            )
+            return
 
         if setting_obj.option is None:
-            self._logger.error("Could not set setting with ID {}! No option provided in object or function!".format(
-                setting_obj.setting_id
-            ))
-            return None
+            self._logger.error(
+                f"Could not set setting with ID {setting_obj.setting_id}! No option provided in object or function!"
+            )
+            return
 
         super().submit_task(
-            asyncio.ensure_future(self._system.camera.set_setting(setting_obj), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.camera.set_setting(setting_obj), loop=self._loop
+            )
         )
 
         # Update local setting object
@@ -201,7 +236,9 @@ class Camera(AbstractBasePlugin):
                 self._current_settings[setting_idx].option = setting_obj.option
                 break
 
-    def get_setting(self, setting : Union[camera.Setting, int]) -> Optional[camera.Setting]:
+    def get_setting(
+        self, setting: Union[camera.Setting, int]
+    ) -> Optional[camera.Setting]:
         """
         Fetches a setting for the given setting ID (either directly given or set in the Setting object)
 
@@ -210,12 +247,14 @@ class Camera(AbstractBasePlugin):
         :return: The requested camera.Setting object if found, None otherwise.
         :rtype: Optional[camera.Setting]
         """
-        setting_obj : camera.Setting = setting
+        setting_obj: camera.Setting = setting
         if isinstance(setting, int):
             setting_obj = camera.Setting(setting, "", None, False)
 
         if setting_obj.setting_id is None:
-            self._logger.error("Could not get setting! No setting ID provided in object or function!")
+            self._logger.error(
+                "Could not get setting! No setting ID provided in object or function!"
+            )
             return None
 
         for cam_setting in self._current_settings:
@@ -224,7 +263,7 @@ class Camera(AbstractBasePlugin):
 
         return None
 
-    def list_photos(self, photos_range : camera.PhotosRange) -> List[camera.CaptureInfo]:
+    def list_photos(self, photos_range: camera.PhotosRange) -> List[camera.CaptureInfo]:
         """
         List photos available on the camera.
 
@@ -233,7 +272,9 @@ class Camera(AbstractBasePlugin):
         :return: List of capture infos (representing the photos)
         :rtype: List[camera.CaptureInfo]
         """
-        list_photos_task = asyncio.ensure_future(self._system.camera.list_photos(photos_range), loop=self._loop)
+        list_photos_task = asyncio.ensure_future(
+            self._system.camera.list_photos(photos_range), loop=self._loop
+        )
 
         done_condition = Condition()
 
@@ -250,7 +291,6 @@ class Camera(AbstractBasePlugin):
             #       it can be assumed that the wait call timed out before the callback was done
             self._logger.error("Could not return photos list! Request timed out!")
             return []
-
 
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:
@@ -337,7 +377,9 @@ class Camera(AbstractBasePlugin):
 
         # If any of the settings do not have an option set (empty data), do update
         # If the size is different, then definitely update.
-        should_update_settings = any(setting.option is None for setting in self._current_settings)
+        should_update_settings = any(
+            setting.option is None for setting in self._current_settings
+        )
         async for settings in self._system.camera.current_settings():
             if (len(settings) != len(self._current_settings)) or should_update_settings:
                 self._current_settings = settings
@@ -354,6 +396,11 @@ class Camera(AbstractBasePlugin):
                     #       in the case get_settings is called by the user before they are returned.
                     # This is overwritten when current_settings returns
                     self._current_settings = [
-                        camera.Setting(options.setting_id, options.setting_description, None, options.is_range)
+                        camera.Setting(
+                            options.setting_id,
+                            options.setting_description,
+                            None,
+                            options.is_range,
+                        )
                         for options in self._possible_setting_options
                     ]

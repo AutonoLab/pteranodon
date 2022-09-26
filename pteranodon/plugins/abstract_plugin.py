@@ -9,7 +9,13 @@ from mavsdk import System
 
 
 class AbstractPlugin(ABC):
-    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+    """
+    Base plugin functionality, no methods required to overwrite
+    """
+
+    def __init__(
+        self, name: str, system: System, loop: AbstractEventLoop, logger: Logger
+    ) -> None:
         self._name = name
         self._system = system
         self._loop = loop
@@ -19,16 +25,19 @@ class AbstractPlugin(ABC):
         if int(platform.python_version().split(".")[1]) < 8:
             self._use_coro_names = False
 
-        self._task_cache = deque(maxlen=10)
-        self._result_cache = deque(maxlen=10)
+        self._task_cache: deque = deque(maxlen=10)
+        self._result_cache: deque = deque(maxlen=10)
 
     @property
     def name(self) -> str:
+        """
+        :return: str ; returns the name of the plugin as a string
+        """
         return self._name
 
     def _task_callback(self, task: Task) -> None:
         if self._use_coro_names:
-            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")
+            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")  # type: ignore
         try:
             self._result_cache.append(task.result())
         except Exception as e:
