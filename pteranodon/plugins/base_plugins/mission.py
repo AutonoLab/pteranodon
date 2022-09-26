@@ -61,8 +61,6 @@ class Mission(AbstractBasePlugin):
             asyncio.ensure_future(self._system.mission.clear_mission(), loop=self._loop)
         )
 
-    # OPTIONAL METHOD DEFINITION TO ADD A TIMEOUT PERIOD WITH A 1 SECOND DEFAULT VALUE
-    # def download_mission(self, timeout_period: float = 1) -> mission.MissionPlan:
     def download_mission(self) -> Optional[mission.MissionPlan]:
         """
         Returns the current mission plan
@@ -77,16 +75,13 @@ class Mission(AbstractBasePlugin):
         download_mission_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)
 
-        # OPTIONAL TO ADD A TIMEOUT PARAM TO REDUCE TIMEOUT ERRORS WHILE INCREASING BLOCKED THREAD TIME
-        # done_condition.wait(timeout_period)
-
         try:
             x = download_mission_task.result()
             self._logger.info("Mission file downloaded successfully")
             return x
         except asyncio.InvalidStateError:
             # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
+            # it can be assumed that the wait call timed out before the callback was done
             self._logger.error("Could not download mission file! Request timed out!")
             return None
 

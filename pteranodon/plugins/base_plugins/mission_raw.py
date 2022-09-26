@@ -60,8 +60,6 @@ class MissionRaw(AbstractBasePlugin):
             )
         )
 
-    # OPTIONAL METHOD DEFINITION TO ADD A TIMEOUT PERIOD WITH A 1 SECOND DEFAULT VALUE
-    # def download_mission(self, timeout_period: float = 1) -> mission.MissionPlan:
     def download_mission(self) -> list[mission_raw.MissionItem]:
         """
         Returns the current mission plan
@@ -75,9 +73,6 @@ class MissionRaw(AbstractBasePlugin):
         done_condition = Condition()
         download_mission_task.add_done_callback(lambda _: done_condition.notify())
         done_condition.wait(1.0)
-
-        # OPTIONAL TO ADD A TIMEOUT PARAM TO REDUCE TIMEOUT ERRORS WHILE INCREASING BLOCKED THREAD TIME
-        # done_condition.wait(timeout_period)
 
         try:
             x = download_mission_task.result()
