@@ -2,8 +2,8 @@ from asyncio import Task
 
 import pytest
 
+from ..helpers import condition_notify_result
 from pteranodon.simple_drone import SimpleDrone
-from .helpers import condition_notify_result
 from pteranodon.plugins.base_plugins import Offboard
 
 # To run docker container:
