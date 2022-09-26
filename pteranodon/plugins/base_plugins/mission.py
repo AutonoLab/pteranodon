@@ -72,7 +72,9 @@ class Mission(AbstractBasePlugin):
             self._system.mission.download_mission(), loop=self._loop
         )
         download_done_condition = Condition()
-        download_mission_task.add_done_callback(lambda _: download_done_condition.notify())
+        download_mission_task.add_done_callback(
+            lambda _: download_done_condition.notify()
+        )
         download_done_condition.wait(1.0)
 
         try:
@@ -111,7 +113,9 @@ class Mission(AbstractBasePlugin):
             self._download_mission_with_progress(), loop=self._loop
         )
         download_progress_done_condition = Condition()
-        download_progress_mission_task.add_done_callback(lambda _: download_progress_done_condition.notify())
+        download_progress_mission_task.add_done_callback(
+            lambda _: download_progress_done_condition.notify()
+        )
         download_progress_done_condition.wait(1.0)
 
         # Test if any information was returned or the function timed out
