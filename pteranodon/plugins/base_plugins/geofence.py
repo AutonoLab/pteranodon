@@ -13,6 +13,7 @@ class Geofence(AbstractBasePlugin):
     """
     Enable setting a geofence.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("geofence", system, loop, logger)
 
@@ -22,7 +23,9 @@ class Geofence(AbstractBasePlugin):
         """
         self._logger.info("Cleared all geofences onboard the system")
         super().submit_task(
-            asyncio.ensure_future(self._system.geofence.clear_geofence(), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.geofence.clear_geofence(), loop=self._loop
+            )
         )
 
     def upload_geofence(self, polygons: List[Polygon]) -> None:
@@ -32,5 +35,7 @@ class Geofence(AbstractBasePlugin):
         """
         self._logger.info(f"Uploading {len(polygons)} geofences to the drone")
         super().submit_task(
-            asyncio.ensure_future(self._system.geofence.upload_geofence(polygons), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.geofence.upload_geofence(polygons), loop=self._loop
+            )
         )

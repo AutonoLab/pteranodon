@@ -9,7 +9,13 @@ from mavsdk import System
 
 
 class AbstractPlugin(ABC):
-    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
+    """
+    Base plugin functionality, no methods required to overwrite
+    """
+
+    def __init__(
+        self, name: str, system: System, loop: AbstractEventLoop, logger: Logger
+    ) -> None:
         self._name = name
         self._system = system
         self._loop = loop
@@ -24,6 +30,9 @@ class AbstractPlugin(ABC):
 
     @property
     def name(self) -> str:
+        """
+        :return: str ; returns the name of the plugin as a string
+        """
         return self._name
 
     def _task_callback(self, task: Task) -> None:

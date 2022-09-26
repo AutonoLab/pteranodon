@@ -11,15 +11,25 @@ class Transponder(AbstractBasePlugin):
     """
     Allow users to get ADS-B information and set ADS-B update rates.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("transponder", system, loop, logger)
 
         self._transponder_data = None
-        self._transponder_task = asyncio.ensure_future(self._transponder_update(), loop=self._loop)
+        self._transponder_task = asyncio.ensure_future(
+            self._transponder_update(), loop=self._loop
+        )
 
     def set_rate_transponder(self, rate: float) -> None:
+        """
+        Set rate of transponder updates
+        :param rate: Requested rate in Hz
+        :return: None
+        """
         super().submit_task(
-            asyncio.ensure_future(self._system.transponder.set_rate_transponder(rate), loop=self._loop)
+            asyncio.ensure_future(
+                self._system.transponder.set_rate_transponder(rate), loop=self._loop
+            )
         )
 
     async def _transponder_update(self) -> None:
@@ -28,4 +38,8 @@ class Transponder(AbstractBasePlugin):
                 self._transponder_data = transponder_val
 
     def transponder(self) -> transponder.AdsbVehicle:
+        """
+        Subscribe to transponder updates
+        :return: transponder.AdsbVehicle ; The next transponder detection
+        """
         return self._transponder_data

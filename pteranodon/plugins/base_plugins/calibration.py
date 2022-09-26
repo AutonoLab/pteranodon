@@ -12,6 +12,7 @@ class Calibration(AbstractBasePlugin):
     """
     Enable to calibrate sensors of a drone such as gyro, accelerometer, and magnetometer.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("calibration", system, loop, logger)
 
@@ -27,62 +28,117 @@ class Calibration(AbstractBasePlugin):
 
     def _calibrate_gyro(self) -> Task:
         return super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_gyro()), loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(self._system.calibration.calibrate_gyro()),
+                loop=self._loop,
+            )
         )
-    
+
     def calibrate_gyro(self) -> None:
+        """
+        Perform gyro calibration
+        :return: None
+        """
         self._calibrate_gyro()
 
     def _calibrate_accelerometer(self) -> Task:
         return super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_accelerometer()),
-                                  loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(
+                    self._system.calibration.calibrate_accelerometer()
+                ),
+                loop=self._loop,
+            )
         )
 
     def calibrate_accelerometer(self) -> None:
+        """
+        Perform accelerometer calibration
+        :return: None
+        """
         self._calibrate_accelerometer()
 
     def _calibrate_gimbal_accelerometer(self) -> Task:
         return super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_gimbal_accelerometer()),
-                                  loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(
+                    self._system.calibration.calibrate_gimbal_accelerometer()
+                ),
+                loop=self._loop,
+            )
         )
-    
+
     def calibrate_gimbal_accelerometer(self) -> None:
+        """
+        Perform gimbal accelerometer calibration.
+        :return: None
+        """
         self._calibrate_gimbal_accelerometer()
 
     def _calibrate_magnetometer(self) -> Task:
         return super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_magnetometer()),
-                                  loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(
+                    self._system.calibration.calibrate_magnetometer()
+                ),
+                loop=self._loop,
+            )
         )
-    
+
     def calibrate_magnetometer(self) -> None:
+        """
+        Perform magnetometer calibration.
+        :return: None
+        """
         self._calibrate_magnetometer()
 
     def _calibrate_level_horizon(self) -> Task:
         return super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.calibrate_level_horizon()),
-                                  loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(
+                    self._system.calibration.calibrate_level_horizon()
+                ),
+                loop=self._loop,
+            )
         )
-    
+
     def calibrate_level_horizon(self) -> None:
+        """
+        Perform board level horizon calibration.
+        :return:
+        """
         self._calibrate_level_horizon()
 
     def cancel(self) -> None:
+        """
+        Cancel ongoing calibration process.
+        :return:
+        """
         super().submit_task(
-            asyncio.ensure_future(self._calibrate_wrapper(self._system.calibration.cancel()), loop=self._loop)
+            asyncio.ensure_future(
+                self._calibrate_wrapper(self._system.calibration.cancel()),
+                loop=self._loop,
+            )
         )
 
     async def _calibrate_all(self) -> None:
-        task_funcs = [self._calibrate_gyro, self._calibrate_accelerometer, self._calibrate_gimbal_accelerometer,
-                 self._calibrate_magnetometer, self._calibrate_level_horizon]
+        task_funcs = [
+            self._calibrate_gyro,
+            self._calibrate_accelerometer,
+            self._calibrate_gimbal_accelerometer,
+            self._calibrate_magnetometer,
+            self._calibrate_level_horizon,
+        ]
         for func in task_funcs:
             task = asyncio.ensure_future(func(), loop=self._loop)
             while not task.done():
                 await asyncio.sleep(0.05)
 
     def calibrate_all(self) -> None:
+        """
+        Perform calibrations on all available types of sensor.
+        :return: None
+        """
         super().submit_task(
             asyncio.ensure_future(self._calibrate_all(), loop=self._loop)
         )
