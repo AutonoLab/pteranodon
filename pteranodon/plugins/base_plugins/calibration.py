@@ -35,6 +35,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     def calibrate_gyro(self) -> None:
+        """
+        Perform gyro calibration
+        :return: None
+        """
         self._calibrate_gyro()
 
     def _calibrate_accelerometer(self) -> Task:
@@ -48,6 +52,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     def calibrate_accelerometer(self) -> None:
+        """
+        Perform accelerometer calibration
+        :return: None
+        """
         self._calibrate_accelerometer()
 
     def _calibrate_gimbal_accelerometer(self) -> Task:
@@ -61,6 +69,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     def calibrate_gimbal_accelerometer(self) -> None:
+        """
+        Perform gimbal accelerometer calibration.
+        :return: None
+        """
         self._calibrate_gimbal_accelerometer()
 
     def _calibrate_magnetometer(self) -> Task:
@@ -74,6 +86,10 @@ class Calibration(AbstractBasePlugin):
         )
 
     def calibrate_magnetometer(self) -> None:
+        """
+        Perform magnetometer calibration.
+        :return: None
+        """
         self._calibrate_magnetometer()
 
     def _calibrate_level_horizon(self) -> Task:
@@ -87,9 +103,17 @@ class Calibration(AbstractBasePlugin):
         )
 
     def calibrate_level_horizon(self) -> None:
+        """
+        Perform board level horizon calibration.
+        :return:
+        """
         self._calibrate_level_horizon()
 
     def cancel(self) -> None:
+        """
+        Cancel ongoing calibration process.
+        :return:
+        """
         super().submit_task(
             asyncio.ensure_future(
                 self._calibrate_wrapper(self._system.calibration.cancel()),
@@ -111,6 +135,10 @@ class Calibration(AbstractBasePlugin):
                 await asyncio.sleep(0.05)
 
     def calibrate_all(self) -> None:
+        """
+        Perform calibrations on all available types of sensor.
+        :return: None
+        """
         super().submit_task(
             asyncio.ensure_future(self._calibrate_all(), loop=self._loop)
         )
