@@ -7,6 +7,7 @@ A framework to built on top of MAVSDK which provides physical/virtual drone abst
 gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative cordinate systems.
 
 ![Formatting/Documentation Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/pep-8-check.yaml/badge.svg?branch=main)
+
 ![Unit Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/unit-tests.yaml/badge.svg?branch=main)
 
 ## Contributing
