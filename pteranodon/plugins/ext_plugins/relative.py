@@ -12,6 +12,9 @@ from .abstract_custom_plugin import AbstractCustomPlugin
 
 
 class Relative(AbstractCustomPlugin):
+    """
+    Enables movement relative to the drone compared to absolute movement.
+    """
     def __init__(
         self,
         system: System,

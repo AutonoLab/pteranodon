@@ -13,7 +13,6 @@ class Action(AbstractBasePlugin):
     """
     Enable simple actions such as arming, taking off, and landing.
     """
-
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action", system, loop, logger)
 
@@ -54,16 +53,22 @@ class Action(AbstractBasePlugin):
         del self._takeoff_altitude_task
 
     def arm(self) -> None:
+        """
+        Send command to arm the drone.
+        Arming a drone normally causes motors to spin at idle. Before arming take all safety precautions and stand clear
+        of the drone
+        :return: None
+        """
         super().submit_task(
             asyncio.ensure_future(self._system.action.arm(), loop=self._loop)
         )
 
     def disarm(self) -> None:
         """
-        Send command to arm the drone.
+        Send command to disarm the drone.
 
-        Arming a drone normally causes motors to spin at idle. Before arming take all safety precautions and stand clear of the
-        drone!
+        This will disarm a drone that considers itself landed. If flying, the drone should reject the disarm command.
+        Disarming means that all motors will stop.
         """
         super().submit_task(
             asyncio.ensure_future(self._system.action.disarm(), loop=self._loop)
