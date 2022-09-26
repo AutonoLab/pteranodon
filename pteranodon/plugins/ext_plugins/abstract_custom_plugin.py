@@ -8,6 +8,10 @@ from ..abstract_plugin import AbstractPlugin
 
 
 class AbstractCustomPlugin(AbstractPlugin):
+    """
+    Base plugin functionality, no methods required to overwrite
+    """
+
     def __init__(
         self,
         name: str,
