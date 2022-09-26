@@ -5,16 +5,37 @@ from typing import Dict, Type, Union, List
 from mavsdk import System
 
 from .base_plugins import (
+    ActionServer,
     Action,
     Calibration,
+    CameraServer,
+    Camera,
+    ComponentInformationServer,
+    ComponentInformation,
     Core,
+    Failure,
     FollowMe,
+    Ftp,
     Geofence,
+    Gimbal,
     Info,
+    LogFiles,
+    ManualControl,
+    MissionRawServer,
+    MissionRaw,
+    Mission,
+    Mocap,
     Offboard,
+    ParamServer,
     Param,
+    Rtk,
+    ServerUtility,
+    Shell,
+    TelemetryServer,
     Telemetry,
+    TrackingServer,
     Transponder,
+    Tune,
 )
 from .ext_plugins import Sensor, Relative
 from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
@@ -45,26 +66,51 @@ class PluginManager:
         self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
 
         base_plugin_types: List[Type[AbstractBasePlugin]] = [
+            ActionServer,
             Action,
             Calibration,
+            CameraServer,
+            Camera,
+            ComponentInformationServer,
+            ComponentInformation,
             Core,
+            Failure,
             FollowMe,
+            Ftp,
             Geofence,
+            Gimbal,
             Info,
+            LogFiles,
+            ManualControl,
+            MissionRawServer,
+            MissionRaw,
+            Mission,
+            Mocap,
             Offboard,
+            ParamServer,
             Param,
+            Rtk,
+            ServerUtility,
+            Shell,
+            TelemetryServer,
             Telemetry,
+            TrackingServer,
             Transponder,
+            Tune,
         ]
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
-            self._base_plugins[base_plugin.name] = base_plugin
+            if not self._test_valid_plugin_name(base_plugin.name):
+                self._base_plugins[base_plugin.name] = base_plugin
+                setattr(self, base_plugin.name, base_plugin)
 
         for ext_type in ext_plugin_types:
             ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
-            self._ext_plugins[ext_plugin.name] = ext_plugin
+            if not self._test_valid_plugin_name(ext_plugin.name):
+                self._ext_plugins[ext_plugin.name] = ext_plugin
+                setattr(self, ext_plugin.name, ext_plugin)
 
     @property
     def base_plugins(self) -> Dict:
@@ -102,10 +148,13 @@ class PluginManager:
         else:
             new_plugin_obj = new_plugin
 
-        if new_plugin_obj.name in self._custom_plugins:
-            self._logger.error(
-                f'Could not add plugin with name "{new_plugin_obj.name}"! A plugin with that name already exists!'
-            )
-            return
+        if not self._test_valid_plugin_name(new_plugin_obj.name):
+            self._custom_plugins[new_plugin_obj.name] = new_plugin_obj
 
-        self._custom_plugins[new_plugin_obj.name] = new_plugin_obj
+    def _test_valid_plugin_name(self, plugin_name: str) -> bool:
+        if hasattr(self, plugin_name):
+            self._logger.error(
+                f'Could not add plugin with name "{plugin_name}"! A plugin with that name already exists!'
+            )
+            return True
+        return False

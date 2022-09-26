@@ -15,16 +15,37 @@ from mavsdk.action import ActionError
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
-    Core,
-    Telemetry,
-    Geofence,
-    Param,
-    Offboard,
-    Calibration,
-    Info,
-    Transponder,
-    FollowMe,
+    ActionServer,
     Action,
+    Calibration,
+    CameraServer,
+    Camera,
+    ComponentInformationServer,
+    ComponentInformation,
+    Core,
+    Failure,
+    FollowMe,
+    Ftp,
+    Geofence,
+    Gimbal,
+    Info,
+    LogFiles,
+    ManualControl,
+    MissionRawServer,
+    MissionRaw,
+    Mission,
+    Mocap,
+    Offboard,
+    ParamServer,
+    Param,
+    Rtk,
+    ServerUtility,
+    Shell,
+    TelemetryServer,
+    Telemetry,
+    TrackingServer,
+    Transponder,
+    Tune,
 )
 from .plugins.ext_plugins import Sensor, Relative
 from .plugins.ext_plugins.sensor import AbstractSensor
@@ -126,79 +147,226 @@ class AbstractDrone(ABC):
     @property
     def plugins(self) -> PluginManager:
         """
-        :return: The plugin manager instance
+        The plugin manager instance
         """
         return self._plugins
 
     @property
-    def core(self) -> Core:
+    def action_server(self) -> ActionServer:
         """
-        :return: The Core plugin class instance
+        The ActionServer plugin instance
         """
-        return self._plugins.base_plugins["core"]
-
-    @property
-    def telemetry(self) -> Telemetry:
-        """
-        :return: The Telemetry plugin class instance
-        """
-        return self._plugins.base_plugins["telemetry"]
-
-    @property
-    def geofence(self) -> Geofence:
-        """
-        :return: The Geofence plugin class instance
-        """
-        return self._plugins.base_plugins["geofence"]
-
-    @property
-    def param(self) -> Param:
-        """
-        :return: The Param plugin class instance
-        """
-        return self._plugins.base_plugins["param"]
-
-    @property
-    def offboard(self) -> Offboard:
-        """
-        :return: The Offboard plugin class instance
-        """
-        return self._plugins.base_plugins["offboard"]
-
-    @property
-    def calibration(self) -> Calibration:
-        """
-        :return: The Calibration plugin class instance
-        """
-        return self._plugins.base_plugins["calibration"]
-
-    @property
-    def info(self) -> Info:
-        """
-        :return: The Info plugin class instance
-        """
-        return self._plugins.base_plugins["info"]
-
-    @property
-    def transponder(self) -> Transponder:
-        """
-        :return: The Transponder plugin class instance
-        """
-        return self._plugins.base_plugins["transponder"]
-
-    @property
-    def follow_me(self) -> FollowMe:
-        """
-        :return: The FollowMe plugin class instance
-        """
-        return self._plugins.base_plugins["follow_me"]
+        return self._plugins.base_plugins["action_server"]
 
     @property
     def action(self) -> Action:
         """
-        :return: The Action plugin class instance
+        The Action plugin instance
         """
         return self._plugins.base_plugins["action"]
+
+    @property
+    def calibration(self) -> Calibration:
+        """
+        The Calibration plugin instance
+        """
+        return self._plugins.base_plugins["calibration"]
+
+    @property
+    def camera_server(self) -> CameraServer:
+        """
+        The CameraServer plugin instance
+        """
+        return self._plugins.base_plugins["camera_server"]
+
+    @property
+    def camera(self) -> Camera:
+        """
+        The Camera plugin instance
+        """
+        return self._plugins.base_plugins["camera"]
+
+    @property
+    def component_information_server(self) -> ComponentInformationServer:
+        """
+        The ComponentInformationServer plugin instance
+        """
+        return self._plugins.base_plugins["component_information_server"]
+
+    @property
+    def component_information(self) -> ComponentInformation:
+        """
+        The ComponentInformation plugin instance
+        """
+        return self._plugins.base_plugins["component_information"]
+
+    @property
+    def core(self) -> Core:
+        """
+        The Core plugin instance
+        """
+        return self._plugins.base_plugins["core"]
+
+    @property
+    def failure(self) -> Failure:
+        """
+        The Failure plugin instance
+        """
+        return self._plugins.base_plugins["failure"]
+
+    @property
+    def follow_me(self) -> FollowMe:
+        """
+        The FollowMe plugin instance
+        """
+        return self._plugins.base_plugins["follow_me"]
+
+    @property
+    def ftp(self) -> Ftp:
+        """
+        The Ftp plugin instance
+        """
+        return self._plugins.base_plugins["ftp"]
+
+    @property
+    def geofence(self) -> Geofence:
+        """
+        The Geofence plugin instance
+        """
+        return self._plugins.base_plugins["geofence"]
+
+    @property
+    def gimbal(self) -> Gimbal:
+        """
+        The  plugin instance
+        """
+        return self._plugins.base_plugins["gimbal"]
+
+    @property
+    def info(self) -> Info:
+        """
+        The Info plugin instance
+        """
+        return self._plugins.base_plugins["info"]
+
+    @property
+    def log_files(self) -> LogFiles:
+        """
+        The LogFiles plugin instance
+        """
+        return self._plugins.base_plugins["log_files"]
+
+    @property
+    def manual_control(self) -> ManualControl:
+        """
+        The ManualControl plugin instance
+        """
+        return self._plugins.base_plugins["manual_control"]
+
+    @property
+    def mission_raw_server(self) -> MissionRawServer:
+        """
+        The MissionRawServer plugin instance
+        """
+        return self._plugins.base_plugins["mission_raw_server"]
+
+    @property
+    def mission_raw(self) -> MissionRaw:
+        """
+        The MissionRaw plugin instance
+        """
+        return self._plugins.base_plugins["mission_raw"]
+
+    @property
+    def mission(self) -> Mission:
+        """
+        The Mission plugin instance
+        """
+        return self._plugins.base_plugins["mission"]
+
+    @property
+    def mocap(self) -> Mocap:
+        """
+        The Mocap plugin instance
+        """
+        return self._plugins.base_plugins["mocap"]
+
+    @property
+    def offboard(self) -> Offboard:
+        """
+        The Offboard plugin instance
+        """
+        return self._plugins.base_plugins["offboard"]
+
+    @property
+    def param_server(self) -> ParamServer:
+        """
+        The ParamServer plugin instance
+        """
+        return self._plugins.base_plugins["param_server"]
+
+    @property
+    def param(self) -> Param:
+        """
+        The Param plugin instance
+        """
+        return self._plugins.base_plugins["param"]
+
+    @property
+    def rtk(self) -> Rtk:
+        """
+        The Rtk plugin instance
+        """
+        return self._plugins.base_plugins["rtk"]
+
+    @property
+    def server_utility(self) -> ServerUtility:
+        """
+        The ServerUtility plugin instance
+        """
+        return self._plugins.base_plugins["server_utility"]
+
+    @property
+    def shell(self) -> Shell:
+        """
+        The Shell plugin instance
+        """
+        return self._plugins.base_plugins["shell"]
+
+    @property
+    def telemetry_server(self) -> TelemetryServer:
+        """
+        The TelemetryServer plugin instance
+        """
+        return self._plugins.base_plugins["telemetry_server"]
+
+    @property
+    def telemetry(self) -> Telemetry:
+        """
+        The Telemetry plugin instance
+        """
+        return self._plugins.base_plugins["telemetry"]
+
+    @property
+    def tracking_server(self) -> TrackingServer:
+        """
+        The TrackingServer plugin instance
+        """
+        return self._plugins.base_plugins["tracking_server"]
+
+    @property
+    def transponder(self) -> Transponder:
+        """
+        The Transponder plugin instance
+        """
+        return self._plugins.base_plugins["transponder"]
+
+    @property
+    def tune(self) -> Tune:
+        """
+        The Tune plugin instance
+        """
+        return self._plugins.base_plugins["tune"]
 
     @property
     def sensor(self) -> Sensor:
@@ -214,7 +382,7 @@ class AbstractDrone(ABC):
         """
         return self._plugins.ext_plugins["relative"]
 
-    # typical properties
+    # NON-PLUGIN PROPERTIES
     @property
     def logger(self) -> logging.Logger:
         """

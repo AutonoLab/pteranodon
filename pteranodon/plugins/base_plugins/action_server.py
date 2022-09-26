@@ -9,7 +9,7 @@ from mavsdk import System, action_server
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-class ActionSever(AbstractBasePlugin):
+class ActionServer(AbstractBasePlugin):
     """
     Provide vehicle actions (as a server) such as arming, taking off, and landing.
     """
