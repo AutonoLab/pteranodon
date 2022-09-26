@@ -5,7 +5,7 @@ from logging import Logger
 from mavsdk import System
 import pytest
 
-from ...plugins.abstract_plugin import AbstractPlugin
+from pteranodon.plugins.abstract_plugin import AbstractPlugin
 from .mocks import (  # noqa: F401 # pylint: disable=unused-import # (Needed for fixtures)
     mock_system,
     mock_logger,

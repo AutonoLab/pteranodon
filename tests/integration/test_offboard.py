@@ -2,9 +2,9 @@ from asyncio import Task
 
 import pytest
 
-from ...simple_drone import SimpleDrone
+from pteranodon.simple_drone import SimpleDrone
 from .helpers import condition_notify_result
-from ...plugins.base_plugins import Offboard
+from pteranodon.plugins.base_plugins import Offboard
 
 # To run docker container:
 # docker run --rm -it jonasvautherin/px4-gazebo-headless:1.13.0
@@ -16,11 +16,10 @@ from ...plugins.base_plugins import Offboard
 # pytest-helpers-namespace
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def test_drone() -> SimpleDrone:
     # Setup
     test_drone = SimpleDrone("udp://:14540")
-
 
     yield test_drone
 
@@ -38,13 +37,12 @@ def test_start(test_drone):
 
     start_task: Task = offboard_plugin._task_cache[-1]
 
-
     result = pytest.helpers.condition_notify_result(start_task, 1.0)
 
     assert result is None
 
 
-@pytest.mark.depends(on=['test_start'])
+@pytest.mark.depends(on=["test_start"])
 def test_hold(test_drone):
     offboard_plugin: Offboard = test_drone.offboard
 
@@ -57,12 +55,6 @@ def test_hold(test_drone):
 
     hold_task: Task = offboard_plugin._task_cache[-1]
 
-
     result = pytest.helpers.condition_notify_result(hold_task, 1.0)
 
-
     assert result is None
-
-
-
-

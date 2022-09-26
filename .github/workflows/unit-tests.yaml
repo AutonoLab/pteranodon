@@ -27,4 +27,4 @@ jobs:
 
     - name: Test Abstract Plugin
       run: |
-        pytest pteranodon/tests/unit/test_abstract_plugin.py
+        pytest tests/unit/test_abstract_plugin.py

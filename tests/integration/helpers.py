@@ -6,7 +6,7 @@ from asyncio import Task
 
 
 @pytest.helpers.register
-def condition_notify_result(task : Task, timeout : float) -> typing.Optional[typing.Any]:
+def condition_notify_result(task: Task, timeout: float) -> typing.Optional[typing.Any]:
     condition = Condition()
 
     def func():
