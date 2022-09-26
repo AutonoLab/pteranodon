@@ -23,7 +23,7 @@ class RealSense(AbstractSensor):
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-        
+
         # updates sensordata
         # sensor.update(data)
         return color_image, depth_image, color_frame, depth_frame
