@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from threading import Condition
-from typing import Optional
+from typing import Optional, List
 
 from mavsdk import System, mission_raw
 
@@ -61,7 +61,7 @@ class MissionRaw(AbstractBasePlugin):
             )
         )
 
-    def download_mission(self) -> list[mission_raw.MissionItem]:
+    def download_mission(self) -> List[mission_raw.MissionItem]:
         """
         Returns the current mission plan
         :return: mission.MissionPlan
@@ -182,7 +182,7 @@ class MissionRaw(AbstractBasePlugin):
             )
         )
 
-    def upload_mission(self, items: list[mission_raw.MissionItem]):
+    def upload_mission(self, items: List[mission_raw.MissionItem]):
         """
         Uploads a list of mission items to the vehicle as a mission
         :param items: list[mission_raw.MissionItem] ; List of mission items
