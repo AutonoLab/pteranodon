@@ -25,7 +25,7 @@ class ComponentInformation(AbstractBasePlugin):
         )
         self._param_list_task.add_done_callback(partial(self._param_list_callback))
 
-        self._float_param_update: FloatParamUpdate = None
+        self._float_param_update: Optional[FloatParamUpdate] = None
         self._float_param_update_task = asyncio.ensure_future(
             self._update_float_param(), loop=self._loop
         )
