@@ -27,7 +27,7 @@ class Gimbal(AbstractBasePlugin):
          over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
         """
 
-        async for ctrl_status in self._system.gimbal.receive():
+        async for ctrl_status in self._system.gimbal.control():
             if ctrl_status != self._control_status:
                 self._control_status = ctrl_status
 

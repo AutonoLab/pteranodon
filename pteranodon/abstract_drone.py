@@ -57,13 +57,13 @@ class AbstractDrone(ABC):
     """
 
     def __init__(
-        self,
-        address: str,
-        sensor_list: Optional[List[AbstractSensor]] = None,
-        log_file_name: Optional[str] = None,
-        time_slice=0.050,
-        min_follow_distance=5.0,
-        **kwargs,
+            self,
+            address: str,
+            sensor_list: Optional[List[AbstractSensor]] = None,
+            log_file_name: Optional[str] = None,
+            time_slice=0.050,
+            min_follow_distance=5.0,
+            **kwargs,
     ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
@@ -498,6 +498,7 @@ class AbstractDrone(ABC):
                 start_time = perf_counter()
                 try:
                     com, args, kwargs = self._queue.popleft()
+                    print("Com:", com)
                     if args is None:
                         args = []
                     if kwargs is None:
@@ -518,11 +519,17 @@ class AbstractDrone(ABC):
                     if end_time < self._time_slice:
                         sleep(self._time_slice - end_time)
         finally:
-            self._cleanup()
+            #self._cleanup()
+            pass
 
     # method for running telemetry data
     def _run_telemetry_loop(self):
         self._loop.run_forever()
+
+    async def _teardown(self):
+        while tup := self._queue.popleft():
+            com, args, kwargs = tup
+            com(*args, **kwargs)
 
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
@@ -534,35 +541,29 @@ class AbstractDrone(ABC):
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
 
-        try:
-            self.disarm()
-        except AttributeError:  # means that _cleanup has already occurred
-            pass
 
-        # shutdown the any asyncgens that have been opened
+        def _quit():
+            self._stopped_mavlink = True
+            self._mavlink_thread.join()
+
+            # stop execution of the loop
+            self._stopped_loop = True
+            try:
+                self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
+            except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
+                pass
+
+            self.action.disarm()
+
+            # close logging
+            self._close_logger()
+
+            self._cleanup()
+
+        self._loop.call_soon(_quit)
         self._loop.stop()
 
-        # stop execution of the loop
-        self._stopped_loop = True
-        try:
-            self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
-        except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
-            pass
 
-        # run teardown (queue should be clean from the clear before disarm)
-        self.teardown()
-        while (
-            len(self._queue) > 0
-        ):  # simple spin wait to ensure any mavlink commands from teardown are run
-            sleep(self._time_slice + 0.01)
-
-        # finally join the mavlink thread and stop it
-        self._stopped_mavlink = True
-        self._mavlink_thread.join()
-        self._telemetry_thread.join()
-
-        # close logging
-        self._close_logger()
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
@@ -656,12 +657,12 @@ class AbstractDrone(ABC):
         self.put(self.action.takeoff)
 
     def maneuver_to(
-        self,
-        front: float,
-        right: float,
-        down: float,
-        on_dimensions: Tuple = (True, True, True),
-        test_min: bool = False,
+            self,
+            front: float,
+            right: float,
+            down: float,
+            on_dimensions: Tuple = (True, True, True),
+            test_min: bool = False,
     ):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with
