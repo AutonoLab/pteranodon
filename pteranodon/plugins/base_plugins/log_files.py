@@ -29,7 +29,7 @@ class LogFiles(AbstractBasePlugin):
         )
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
-    def download_log_file(self, entry: Entry, path: str) -> ProgressData:
+    def download_log_file(self, entry: Entry, path: str) -> Optional[ProgressData]:
         """
         Download log file synchronously.
 

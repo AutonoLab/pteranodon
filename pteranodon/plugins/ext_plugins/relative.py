@@ -2,11 +2,11 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Tuple, Dict
-from math import atan2, degrees, sqrt, cos, sin, radians
 
 from mavsdk import System
 from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
+from numpy import arctan2, degrees, sqrt, cos, sin, radians
 
 from .abstract_custom_plugin import AbstractCustomPlugin
 
@@ -112,7 +112,7 @@ class Relative(AbstractCustomPlugin):
         relative_east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
 
         # get angle of yaw
-        yaw = degrees(atan2(relative_east, relative_north))
+        yaw = degrees(arctan2(relative_east, relative_north))
 
         # add offset to curent position
         north = relative_north + current_pos.north_m

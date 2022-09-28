@@ -2,6 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from threading import Condition
+from typing import Optional, List
 
 from mavsdk import System, mission_raw
 
@@ -60,7 +61,7 @@ class MissionRaw(AbstractBasePlugin):
             )
         )
 
-    def download_mission(self) -> list[mission_raw.MissionItem]:
+    def download_mission(self) -> List[mission_raw.MissionItem]:
         """
         Returns the current mission plan
         :return: mission.MissionPlan
@@ -86,7 +87,7 @@ class MissionRaw(AbstractBasePlugin):
 
     def import_qgroundcontrol_mission(
         self, qgc_plan_path
-    ) -> mission_raw.MissionImportData:
+    ) -> Optional[mission_raw.MissionImportData]:
         """
         Imports the contents from a JSON .plan format file as a mission
         :param qgc_plan_path: string ; path to a JSON .plan file
@@ -108,7 +109,7 @@ class MissionRaw(AbstractBasePlugin):
             return x
         except asyncio.InvalidStateError:
             self._logger.error("Import was not completed! Request timed out!")
-            return []
+            return None
 
     async def _update_mission_changed(self):
         """
@@ -181,7 +182,7 @@ class MissionRaw(AbstractBasePlugin):
             )
         )
 
-    def upload_mission(self, items: list[mission_raw.MissionItem]):
+    def upload_mission(self, items: List[mission_raw.MissionItem]):
         """
         Uploads a list of mission items to the vehicle as a mission
         :param items: list[mission_raw.MissionItem] ; List of mission items
