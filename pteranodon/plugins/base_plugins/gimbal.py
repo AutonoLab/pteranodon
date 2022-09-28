@@ -18,16 +18,16 @@ class Gimbal(AbstractBasePlugin):
 
         self._control_status = None
         self._control_task = asyncio.ensure_future(
-            self._update_control_state(), loop=self._loop
+            self._update_control_status(), loop=self._loop
         )
 
-    async def _update_control_state(self) -> None:
+    async def _update_control_status(self) -> None:
         """
         Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
          over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
         """
 
-        async for ctrl_status in self._system.gimbal.receive():
+        async for ctrl_status in self._system.gimbal.control():
             if ctrl_status != self._control_status:
                 self._control_status = ctrl_status
 
@@ -131,5 +131,5 @@ class Gimbal(AbstractBasePlugin):
         """
 
         super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.set_roi_location(control_mode))
+            asyncio.ensure_future(self._system.gimbal.take_control(control_mode))
         )

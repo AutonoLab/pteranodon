@@ -116,7 +116,7 @@ class Calibration(AbstractBasePlugin):
         """
         super().submit_task(
             asyncio.ensure_future(
-                self._calibrate_wrapper(self._system.calibration.cancel()),
+                self._system.calibration.cancel(),
                 loop=self._loop,
             )
         )
