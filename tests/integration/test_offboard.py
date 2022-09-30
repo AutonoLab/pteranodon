@@ -1,3 +1,4 @@
+import typing
 from asyncio import Task
 
 import pytest
@@ -5,6 +6,7 @@ import pytest
 from ..helpers import condition_notify_result
 from pteranodon.simple_drone import SimpleDrone
 from pteranodon.plugins.base_plugins import Offboard
+from threading import Condition
 
 # To run docker container:
 # docker run --rm -it jonasvautherin/px4-gazebo-headless:1.13.0
@@ -29,16 +31,31 @@ def test_drone() -> SimpleDrone:
 def test_start(test_drone):
     offboard_plugin: Offboard = test_drone.offboard
 
-    test_drone.arm()
+    test_drone.put(test_drone.action.arm)
 
     # Running on offboard plugin so that the task cache is updated in real time.
-    offboard_plugin.start()
 
-    start_task: Task = offboard_plugin._task_cache[-1]
+    condition = Condition()
+
+    start_task: Task
+
+    def _end():
+        start_task = offboard_plugin._task_cache[-1]
+
+        with condition:
+            condition.notify()
+
+
+    test_drone.put((offboard_plugin.start, _end))
+
+
+    with condition:
+        condition.wait(2)
 
     result = pytest.helpers.condition_notify_result(start_task, 1.0)
 
     assert result is None
+
 
 
 @pytest.mark.depends(on=["test_start"])

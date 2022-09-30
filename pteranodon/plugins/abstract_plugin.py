@@ -1,9 +1,12 @@
+import asyncio
+import typing
 from abc import ABC
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop, Task, Future
 from logging import Logger
 from collections import deque
 from functools import partial
 import platform
+from typing import Callable
 
 from mavsdk import System
 
@@ -35,21 +38,29 @@ class AbstractPlugin(ABC):
         """
         return self._name
 
-    def _task_callback(self, task: Task) -> None:
+    def _task_callback(self, coroutine_name, task: Future) -> None:
         if self._use_coro_names:
-            self._logger.info(f"Task completed: {task.get_coro().__qualname__} ")  # type: ignore
+            self._logger.info(f"Task completed: {coroutine_name} ")  # type: ignore
         try:
             self._result_cache.append(task.result())
         except Exception as e:
             self._logger.error(e)
 
-    def submit_task(self, new_task: Task) -> Task:
+
+    def submit_coroutine(self, new_coroutine : typing.Coroutine) -> Future:
+        future = self.submit_task(
+            asyncio.run_coroutine_threadsafe(new_coroutine, self._loop),
+            coroutine_name=new_coroutine.__qualname__
+        )
+        return future
+
+    def submit_task(self, new_task: Future, coroutine_name : str = "Unknown Coroutine") -> Future:
         """
         Puts a task returned by asyncio.ensure_future to the task_cache to prevent garbage collection and allow return
         value analysis
         :param new_task: An asyncio.Task
         :return: The submitted task, if plugin specific callbacks are added
         """
-        new_task.add_done_callback(partial(self._task_callback))
+        new_task.add_done_callback(partial(self._task_callback, coroutine_name))
         self._task_cache.append(new_task)
         return new_task

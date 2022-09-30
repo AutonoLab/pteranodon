@@ -4,7 +4,7 @@ from collections import deque
 import asyncio
 import atexit
 from abc import abstractmethod, ABC
-from typing import Any, List, Tuple, Callable, Dict, Optional
+from typing import Any, List, Tuple, Callable, Dict, Optional, Union
 import logging
 import sys
 import random
@@ -477,17 +477,21 @@ class AbstractDrone(ABC):
         self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
         del self._drone
 
-    def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
+    def _process_command(self, com: Callable, handler: Optional[Callable], args: List, kwargs: Dict) -> None:
         if com is not None:
             self._logger.info(
                 f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
             )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
                 self._task_cache.append(
-                    asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+                    asyncio.run_coroutine_threadsafe(com(*args, **kwargs), loop=self._loop)
                 )
             else:  # typical sync function
                 com(*args, **kwargs)
+
+            # If a handler is present, call it when the command has been processed
+            if handler is not None:
+                handler()
         else:
             pass
 
@@ -497,13 +501,13 @@ class AbstractDrone(ABC):
             while not self._stopped_mavlink:
                 start_time = perf_counter()
                 try:
-                    com, args, kwargs = self._queue.popleft()
+                    com, handler, args, kwargs = self._queue.popleft()
                     print("Com:", com)
                     if args is None:
                         args = []
                     if kwargs is None:
                         kwargs = {}
-                    self._process_command(com, args, kwargs)
+                    self._process_command(com, handler, args, kwargs)
                 # TODO, perform logging on these exceptions
                 except IndexError as e:
                     # this exception is expected since we expect the deque to not have elements sometimes
@@ -519,17 +523,12 @@ class AbstractDrone(ABC):
                     if end_time < self._time_slice:
                         sleep(self._time_slice - end_time)
         finally:
-            #self._cleanup()
+            # self._cleanup()
             pass
 
     # method for running telemetry data
     def _run_telemetry_loop(self):
         self._loop.run_forever()
-
-    async def _teardown(self):
-        while tup := self._queue.popleft():
-            com, args, kwargs = tup
-            com(*args, **kwargs)
 
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
@@ -540,34 +539,30 @@ class AbstractDrone(ABC):
         """
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
+        self._stopped_mavlink = True
+        self._mavlink_thread.join()
 
+        # stop execution of the loop
+        self._stopped_loop = True
+        try:
+            self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
+        except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
+            pass
 
-        def _quit():
-            self._stopped_mavlink = True
-            self._mavlink_thread.join()
+        self.action.disarm()
 
-            # stop execution of the loop
-            self._stopped_loop = True
-            try:
-                self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
-            except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
-                pass
-
-            self.action.disarm()
-
-            # close logging
-            self._close_logger()
-
-            self._cleanup()
-
-        self._loop.call_soon(_quit)
         self._loop.stop()
 
+        # close logging
+        self._close_logger()
 
+        self._cleanup()
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
-    def put(self, obj: Callable, *args: Any, **kwargs: Any) -> None:
+
+    # Can be either a function, or a function and a handler
+    def put(self, obj: Union[Callable, Tuple[Callable, Callable]], *args: Any, **kwargs: Any) -> None:
         """
         Used to put functions/methods in a queue for execution in a separate thread asynchronously or otherwise
         :param obj: A callable function/method which will get executed in the mavlink command loop thread
@@ -575,10 +570,19 @@ class AbstractDrone(ABC):
         :param kwargs: The keyword arguments for the function/method
         :return: None
         """
+
+        command : Callable
+        handler : Optional[Callable] = None
+        if isinstance(obj, Tuple):
+            command, handler = obj
+        else:
+            command = obj
+
+
         self._logger.info(
-            f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue"
+            f"User called: {command.__module__}.{command.__qualname__}, putting call in queue"
         )
-        self._queue.append((obj, args, kwargs))
+        self._queue.append((obj, handler, args, kwargs))
 
     ##################################################
     # TODO, implement the flag for put in these methods

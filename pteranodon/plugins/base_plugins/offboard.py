@@ -120,12 +120,8 @@ class Offboard(AbstractBasePlugin):
         :param vel: offboard.VelocityNedYaw ; Velocity and yaw
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.offboard.set_position_velocity_ned(pos, vel),
-                loop=self._loop,
-            )
-        )
+
+        super().submit_coroutine(self._system.offboard.set_position_velocity_ned(pos, vel))
 
     def set_velocity_body(self, vel_body: offboard.VelocityBodyYawspeed) -> None:
         """
@@ -133,11 +129,7 @@ class Offboard(AbstractBasePlugin):
         :param vel_body: offboard.VelocityBodyYawspeed ; Velocity and yaw angular rate
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.offboard.set_velocity_body(vel_body), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.offboard.set_velocity_body(vel_body))
 
     def set_velocity_ned(self, vel_ned: offboard.VelocityNedYaw) -> None:
         """
@@ -145,11 +137,7 @@ class Offboard(AbstractBasePlugin):
         :param vel_ned: offboard.VelocityNedYaw ; Velocity and yaw
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.offboard.set_velocity_ned(vel_ned), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.offboard.set_velocity_ned(vel_ned))
 
     def start(self) -> None:
         """
@@ -157,17 +145,12 @@ class Offboard(AbstractBasePlugin):
         :return: None
         """
         self._is_active = True
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.offboard.set_attitude(
+        super().submit_coroutine(
+            self._system.offboard.set_attitude(
                     offboard.Attitude(0.0, 0.0, 0.0, 0.0)
-                ),
-                loop=self._loop,
             )
         )
-        super().submit_task(
-            asyncio.ensure_future(self._system.offboard.start(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.offboard.start())
 
     def stop(self) -> None:
         """
@@ -175,9 +158,7 @@ class Offboard(AbstractBasePlugin):
         :return: None
         """
         self._is_active = False
-        super().submit_task(
-            asyncio.ensure_future(self._system.offboard.stop(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.offboard.stop())
 
     def hold(self) -> None:
         """

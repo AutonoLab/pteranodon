@@ -60,9 +60,8 @@ class Action(AbstractBasePlugin):
         of the drone
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.arm(), loop=self._loop)
-        )
+
+        super().submit_coroutine(self._system.action.arm())
 
     def disarm(self) -> None:
         """
@@ -71,9 +70,7 @@ class Action(AbstractBasePlugin):
         This will disarm a drone that considers itself landed. If flying, the drone should reject the disarm command.
         Disarming means that all motors will stop.
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.disarm(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.action.disarm())
 
     def do_orbit(
         self,
