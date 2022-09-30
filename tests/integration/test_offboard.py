@@ -1,9 +1,9 @@
-import typing
+from typing import Optional
 from asyncio import Task
 
 import pytest
 
-from ..helpers import condition_notify_result
+from ..helpers import PluginTaskFetcher
 from pteranodon.simple_drone import SimpleDrone
 from pteranodon.plugins.base_plugins import Offboard
 from threading import Condition
@@ -33,44 +33,36 @@ def test_start(test_drone):
 
     test_drone.put(test_drone.action.arm)
 
-    # Running on offboard plugin so that the task cache is updated in real time.
+    task_fetcher = PluginTaskFetcher(offboard_plugin)
 
-    condition = Condition()
+    test_drone.put((offboard_plugin.start, task_fetcher.trigger))
 
-    start_task: Task
+    start_task = task_fetcher.fetch(20.0)
 
-    def _end():
-        start_task = offboard_plugin._task_cache[-1]
+    assert start_task is not None, "Start task was not fetched!"
 
-        with condition:
-            condition.notify()
+    result = task_fetcher.fetch_result(1.0)
 
-
-    test_drone.put((offboard_plugin.start, _end))
-
-
-    with condition:
-        condition.wait(2)
-
-    result = pytest.helpers.condition_notify_result(start_task, 1.0)
-
-    assert result is None
-
+    assert result is None, "Start Task returned an exception (not None)"
 
 
 @pytest.mark.depends(on=["test_start"])
 def test_hold(test_drone):
     offboard_plugin: Offboard = test_drone.offboard
 
-    test_drone.arm()
+    test_drone.put(test_drone.action.arm)
 
     # Running on offboard plugin so that the task cache is updated in real time.
-    offboard_plugin.start()
+    test_drone.put(offboard_plugin.start)
 
-    offboard_plugin.hold()
+    task_fetcher = PluginTaskFetcher(offboard_plugin)
 
-    hold_task: Task = offboard_plugin._task_cache[-1]
+    test_drone.put((offboard_plugin.hold, task_fetcher.trigger))
 
-    result = pytest.helpers.condition_notify_result(hold_task, 1.0)
+    hold_task = task_fetcher.fetch(20.0)
 
-    assert result is None
+    assert hold_task is not None, "Hold task was not fetched!"
+
+    result = task_fetcher.fetch_result(1.0)
+
+    assert result is None, "Hold Task returned an exception (not None)"

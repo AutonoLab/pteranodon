@@ -57,13 +57,13 @@ class AbstractDrone(ABC):
     """
 
     def __init__(
-            self,
-            address: str,
-            sensor_list: Optional[List[AbstractSensor]] = None,
-            log_file_name: Optional[str] = None,
-            time_slice=0.050,
-            min_follow_distance=5.0,
-            **kwargs,
+        self,
+        address: str,
+        sensor_list: Optional[List[AbstractSensor]] = None,
+        log_file_name: Optional[str] = None,
+        time_slice=0.050,
+        min_follow_distance=5.0,
+        **kwargs,
     ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
@@ -477,14 +477,18 @@ class AbstractDrone(ABC):
         self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
         del self._drone
 
-    def _process_command(self, com: Callable, handler: Optional[Callable], args: List, kwargs: Dict) -> None:
+    def _process_command(
+        self, com: Callable, handler: Optional[Callable], args: List, kwargs: Dict
+    ) -> None:
         if com is not None:
             self._logger.info(
                 f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
             )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
                 self._task_cache.append(
-                    asyncio.run_coroutine_threadsafe(com(*args, **kwargs), loop=self._loop)
+                    asyncio.run_coroutine_threadsafe(
+                        com(*args, **kwargs), loop=self._loop
+                    )
                 )
             else:  # typical sync function
                 com(*args, **kwargs)
@@ -562,7 +566,9 @@ class AbstractDrone(ABC):
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
 
     # Can be either a function, or a function and a handler
-    def put(self, obj: Union[Callable, Tuple[Callable, Callable]], *args: Any, **kwargs: Any) -> None:
+    def put(
+        self, obj: Union[Callable, Tuple[Callable, Callable]], *args: Any, **kwargs: Any
+    ) -> None:
         """
         Used to put functions/methods in a queue for execution in a separate thread asynchronously or otherwise
         :param obj: A callable function/method which will get executed in the mavlink command loop thread
@@ -571,18 +577,17 @@ class AbstractDrone(ABC):
         :return: None
         """
 
-        command : Callable
-        handler : Optional[Callable] = None
+        command: Callable
+        handler: Optional[Callable] = None
         if isinstance(obj, Tuple):
             command, handler = obj
         else:
             command = obj
 
-
         self._logger.info(
             f"User called: {command.__module__}.{command.__qualname__}, putting call in queue"
         )
-        self._queue.append((obj, handler, args, kwargs))
+        self._queue.append((command, handler, args, kwargs))
 
     ##################################################
     # TODO, implement the flag for put in these methods
@@ -661,12 +666,12 @@ class AbstractDrone(ABC):
         self.put(self.action.takeoff)
 
     def maneuver_to(
-            self,
-            front: float,
-            right: float,
-            down: float,
-            on_dimensions: Tuple = (True, True, True),
-            test_min: bool = False,
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+        test_min: bool = False,
     ):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with

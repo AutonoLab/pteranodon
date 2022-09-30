@@ -121,7 +121,9 @@ class Offboard(AbstractBasePlugin):
         :return: None
         """
 
-        super().submit_coroutine(self._system.offboard.set_position_velocity_ned(pos, vel))
+        super().submit_coroutine(
+            self._system.offboard.set_position_velocity_ned(pos, vel)
+        )
 
     def set_velocity_body(self, vel_body: offboard.VelocityBodyYawspeed) -> None:
         """
@@ -146,9 +148,7 @@ class Offboard(AbstractBasePlugin):
         """
         self._is_active = True
         super().submit_coroutine(
-            self._system.offboard.set_attitude(
-                    offboard.Attitude(0.0, 0.0, 0.0, 0.0)
-            )
+            self._system.offboard.set_attitude(offboard.Attitude(0.0, 0.0, 0.0, 0.0))
         )
         super().submit_coroutine(self._system.offboard.start())
 

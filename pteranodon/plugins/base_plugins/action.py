@@ -95,17 +95,14 @@ class Action(AbstractBasePlugin):
             absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.do_orbit(
-                    radius_m,
-                    velocity_ms,
-                    yaw_behavior,
-                    latitude_deg,
-                    longitude_deg,
-                    absolute_altitude_m,
-                ),
-                loop=self._loop,
+        super().submit_coroutine(
+            self._system.action.do_orbit(
+                radius_m,
+                velocity_ms,
+                yaw_behavior,
+                latitude_deg,
+                longitude_deg,
+                absolute_altitude_m,
             )
         )
 

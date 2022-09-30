@@ -46,15 +46,16 @@ class AbstractPlugin(ABC):
         except Exception as e:
             self._logger.error(e)
 
-
-    def submit_coroutine(self, new_coroutine : typing.Coroutine) -> Future:
+    def submit_coroutine(self, new_coroutine: typing.Coroutine) -> Future:
         future = self.submit_task(
             asyncio.run_coroutine_threadsafe(new_coroutine, self._loop),
-            coroutine_name=new_coroutine.__qualname__
+            coroutine_name=new_coroutine.__qualname__,
         )
         return future
 
-    def submit_task(self, new_task: Future, coroutine_name : str = "Unknown Coroutine") -> Future:
+    def submit_task(
+        self, new_task: Future, coroutine_name: str = "Unknown Coroutine"
+    ) -> Future:
         """
         Puts a task returned by asyncio.ensure_future to the task_cache to prevent garbage collection and allow return
         value analysis
