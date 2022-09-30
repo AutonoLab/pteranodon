@@ -22,11 +22,7 @@ class Geofence(AbstractBasePlugin):
         Clears the current geofences present on the drone.
         """
         self._logger.info("Cleared all geofences onboard the system")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.geofence.clear_geofence(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.geofence.clear_geofence())
 
     def upload_geofence(self, polygons: List[Polygon]) -> None:
         """
@@ -34,8 +30,5 @@ class Geofence(AbstractBasePlugin):
         :param polygons: A list of mavsdk.geofence.Polygon objects which form the geofence
         """
         self._logger.info(f"Uploading {len(polygons)} geofences to the drone")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.geofence.upload_geofence(polygons), loop=self._loop
-            )
-        )
+
+        super().submit_coroutine(self._system.geofence.upload_geofence(polygons))

@@ -24,11 +24,7 @@ class Tune(AbstractBasePlugin):
         :type tune_desc: TuneDescription
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tune.play_tune(tune_desc), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.tune.play_tune(tune_desc))
 
     def play_note(self, note: str) -> None:
         """
@@ -57,8 +53,4 @@ class Tune(AbstractBasePlugin):
         elif note.upper() == "B":
             tune_description.song_elements.append(SongElement.NOTE_B)
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tune.play_tune(tune_description), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.tune.play_tune(tune_description))

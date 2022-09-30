@@ -26,11 +26,8 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided a custom parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_custom(name, value),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.param_server.provide_param_custom(name, value)
         )
 
     def provide_param_float(self, name: str, value: float):
@@ -42,11 +39,8 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided a float parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_float(name, value),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.param_server.provide_param_float(name, value)
         )
 
     def provide_param_int(self, name: str, value: int):
@@ -58,11 +52,8 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided an integer parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_int(name, value),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.param_server.provide_param_int(name, value)
         )
 
     def retrieve_all_params(self) -> Optional[param_server.AllParams]:

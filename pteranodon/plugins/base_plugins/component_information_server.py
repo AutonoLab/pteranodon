@@ -45,9 +45,6 @@ class ComponentInformationServer(AbstractBasePlugin):
         :type: FloatParam
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.component_information_server.provide_float_param(param),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.component_information_server.provide_float_param(param)
         )

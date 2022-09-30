@@ -26,11 +26,7 @@ class Transponder(AbstractBasePlugin):
         :param rate: Requested rate in Hz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.transponder.set_rate_transponder(rate), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.transponder.set_rate_transponder(rate))
 
     async def _transponder_update(self) -> None:
         async for transponder_val in self._system.transponder.transponder():

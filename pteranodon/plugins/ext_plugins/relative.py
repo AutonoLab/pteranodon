@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Tuple, Dict
@@ -60,14 +59,11 @@ class Relative(AbstractCustomPlugin):
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
         :param down: Relative distance below the drone
-        :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
+        :param on_dimensions: A tuple of 3 boolean values. In order, they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._maneuver_to(front, right, down, on_dimensions, test_min),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._maneuver_to(front, right, down, on_dimensions, test_min)
         )
 
     async def _maneuver_to(
@@ -114,7 +110,7 @@ class Relative(AbstractCustomPlugin):
         # get angle of yaw
         yaw = degrees(arctan2(relative_east, relative_north))
 
-        # add offset to curent position
+        # add offset to current position
         north = relative_north + current_pos.north_m
         east = relative_east + current_pos.east_m
         down = down + current_pos.down_m
@@ -129,9 +125,7 @@ class Relative(AbstractCustomPlugin):
         :param distance: The meters from home the drone can maneuver
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._create_geofence(distance), loop=self._loop)
-        )
+        super().submit_coroutine(self._create_geofence(distance))
 
     async def _create_geofence(self, distance: float) -> None:
         latitude = self._telemetry.home.latitude_deg

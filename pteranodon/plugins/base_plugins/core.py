@@ -30,11 +30,7 @@ class Core(AbstractBasePlugin):
         :param delay_s: Timeout in seconds
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.core.set_mavlink_timeout(delay_s), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.core.set_mavlink_timeout(delay_s))
 
     async def _update_connection_state(self) -> None:
         async for connection_state in self._system.core.connection_state():

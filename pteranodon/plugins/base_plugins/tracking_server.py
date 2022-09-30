@@ -39,13 +39,8 @@ class TrackingServer(AbstractBasePlugin):
             command_answer: The ack to answer to the incoming command
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.respond_tracking_off_command(
-                    command_answer
-                ),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.tracking_server.respond_tracking_off_command(command_answer)
         )
 
     def respond_tracking_point_command(self, command_answer: CommandAnswer) -> None:
@@ -55,13 +50,8 @@ class TrackingServer(AbstractBasePlugin):
             command_answer: The ack to answer to the incoming command
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.respond_tracking_point_command(
-                    command_answer
-                ),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.tracking_server.respond_tracking_point_command(command_answer)
         )
 
     def respond_tracking_rectangle_command(self, command_answer: CommandAnswer) -> None:
@@ -71,12 +61,9 @@ class TrackingServer(AbstractBasePlugin):
             command_answer: The ack to answer to the incoming command
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.respond_tracking_rectangle_command(
-                    command_answer
-                ),
-                loop=self._loop,
+        super().submit_coroutine(
+            self._system.tracking_server.respond_tracking_rectangle_command(
+                command_answer
             )
         )
 
@@ -85,11 +72,7 @@ class TrackingServer(AbstractBasePlugin):
         Set the current tracking status to off.
         """
         self._tracking_active = True
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.set_tracking_off_status(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.tracking_server.set_tracking_off_status())
 
     def set_tracking_point_status(self, tracked_point: TrackPoint) -> None:
         """
@@ -98,11 +81,8 @@ class TrackingServer(AbstractBasePlugin):
             tracked_point: The tracked point
         """
         self._tracking_active = True
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.set_tracking_point_status(tracked_point),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.tracking_server.set_tracking_point_status(tracked_point)
         )
 
     def set_tracking_rectangle_status(self, tracked_rectangle: TrackRectangle) -> None:
@@ -110,12 +90,9 @@ class TrackingServer(AbstractBasePlugin):
         Set/update the current rectangle tracking status.
         """
         self._tracking_active = True
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.tracking_server.set_tracking_rectangle_status(
-                    tracked_rectangle
-                ),
-                loop=self._loop,
+        super().submit_coroutine(
+            self._system.tracking_server.set_tracking_rectangle_status(
+                tracked_rectangle
             )
         )
 

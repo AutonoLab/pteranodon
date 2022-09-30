@@ -27,11 +27,8 @@ class Mocap(AbstractBasePlugin):
         """
 
         self._logger.info("Set Mocap attitude and position")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_attitude_position_mocap(attitude_position_mocap),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.mocap.set_attitude_position_mocap(attitude_position_mocap)
         )
 
     def set_odometry(self, odometry: mocap.Odometry) -> None:
@@ -42,11 +39,7 @@ class Mocap(AbstractBasePlugin):
         :type odemetry: mocap.Odometry
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_odometry(odometry), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mocap.set_odometry(odometry))
 
     def set_vision_position_estimate(
         self, vision_position_estimate: mocap.VisionPositionEstimate
@@ -58,11 +51,6 @@ class Mocap(AbstractBasePlugin):
         :type vision_position_estimate: mocap.VisionPositionEstimate
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_vision_position_estimate(
-                    vision_position_estimate
-                ),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.mocap.set_vision_position_estimate(vision_position_estimate)
         )

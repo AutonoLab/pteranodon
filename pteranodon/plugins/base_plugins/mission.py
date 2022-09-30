@@ -33,11 +33,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Download")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_download(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission.cancel_mission_download())
 
     def cancel_mission_upload(self):
         """
@@ -45,11 +41,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Upload")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_upload(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission.cancel_mission_upload())
 
     def clear_mission(self):
         """
@@ -57,9 +49,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Cleared mission")
-        super().submit_task(
-            asyncio.ensure_future(self._system.mission.clear_mission(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.mission.clear_mission())
 
     def download_mission(self) -> Optional[mission.MissionPlan]:
         """

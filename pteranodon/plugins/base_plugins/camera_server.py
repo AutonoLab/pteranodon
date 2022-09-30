@@ -118,10 +118,9 @@ class CameraServer(AbstractBasePlugin):
         """
         if not self._check_cam_info_set("Set In Progress"):
             return
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera_server.set_in_progress(in_progress), loop=self._loop
-            )
+
+        super().submit_coroutine(
+            self._system.camera_server.set_in_progress(in_progress)
         )
 
     def _respond_take_photo(
@@ -137,12 +136,9 @@ class CameraServer(AbstractBasePlugin):
         :param capture_info: The capture information
         :type capture_info: camera_server.CaptureInfo
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera_server.respond_take_photo(
-                    take_photo_feedback, capture_info
-                ),
-                loop=self._loop,
+        super().submit_coroutine(
+            self._system.camera_server.respond_take_photo(
+                take_photo_feedback, capture_info
             )
         )
 
@@ -156,8 +152,4 @@ class CameraServer(AbstractBasePlugin):
 
         self._cam_info = cam_info
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera_server.set_information(cam_info), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.camera_server.set_information(cam_info))

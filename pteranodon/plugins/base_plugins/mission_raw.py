@@ -31,11 +31,8 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Download")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.cancel_mission_download(), loop=self._loop
-            )
-        )
+
+        super().submit_coroutine(self._system.mission_raw.cancel_mission_download())
 
     def cancel_mission_upload(self):
         """
@@ -43,11 +40,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Upload")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.cancel_mission_upload(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission_raw.cancel_mission_upload())
 
     def clear_mission(self):
         """
@@ -55,11 +48,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Cleared mission")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.clear_mission(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission_raw.clear_mission())
 
     def download_mission(self) -> List[mission_raw.MissionItem]:
         """
@@ -150,11 +139,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Mission Paused")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.pause_mission(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission_raw.pause_mission())
 
     def set_current_mission_item(self, index: int):
         """
@@ -163,11 +148,8 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"Setting current mission to the mission at index {index}")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.set_current_mission_item(index),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.mission_raw.set_current_mission_item(index)
         )
 
     def start_mission(self):
@@ -176,11 +158,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Mission started")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.start_mission(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.mission_raw.start_mission())
 
     def upload_mission(self, items: List[mission_raw.MissionItem]):
         """
@@ -189,6 +167,4 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"Uploaded {len(items)} mission items as a mission")
-        super().submit_task(
-            asyncio.ensure_future(self._system.mission_raw.upload_mission(items))
-        )
+        super().submit_coroutine(self._system.mission_raw.upload_mission(items))

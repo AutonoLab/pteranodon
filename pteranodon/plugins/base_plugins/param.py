@@ -108,10 +108,8 @@ class Param(AbstractBasePlugin):
         :return: None
         """
         try:
-            param_task = super().submit_task(
-                asyncio.ensure_future(
-                    self._system.param.set_param_custom(name, value), loop=self._loop
-                )
+            param_task = super().submit_coroutine(
+                self._system.param.set_param_custom(name, value)
             )
             param_task.add_done_callback(partial(self._set_param_callback))
         except AttributeError:
@@ -126,10 +124,8 @@ class Param(AbstractBasePlugin):
         :param value: float ; Value of the parameter to be set
         :return: None
         """
-        param_task = super().submit_task(
-            asyncio.ensure_future(
-                self._system.param.set_param_float(name, value), loop=self._loop
-            )
+        param_task = super().submit_coroutine(
+            self._system.param.set_param_float(name, value)
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 
@@ -140,10 +136,8 @@ class Param(AbstractBasePlugin):
         :param value: int ; Value of the parameter to be set
         :return: None
         """
-        param_task = super().submit_task(
-            asyncio.ensure_future(
-                self._system.param.set_param_int(name, value), loop=self._loop
-            )
+        param_task = super().submit_coroutine(
+            self._system.param.set_param_int(name, value)
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 

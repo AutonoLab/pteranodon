@@ -95,11 +95,7 @@ class LogFiles(AbstractBasePlugin):
 
         self._logger.info("Erased all log files!")
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.log_files.erase_all_log_files(), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.log_files.erase_all_log_files())
 
     def _get_entries_callback(self, task: Task) -> None:
         # once task is completed, store the result

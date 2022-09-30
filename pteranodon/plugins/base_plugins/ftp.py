@@ -74,11 +74,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Downloading the file at "{remote_file_path}" to local directory "{local_directory}"'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._download_file(remote_file_path, local_directory), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._download_file(remote_file_path, local_directory))
 
     def upload(self, local_file_path: str, remote_directory: str) -> None:
         """
@@ -92,11 +88,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Uploading the file at "{local_file_path}" to remote directory "{remote_directory}"'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._upload_file(local_file_path, remote_directory), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._upload_file(local_file_path, remote_directory))
 
     def create_directory(self, remote_directory_path: str) -> None:
         """
@@ -108,11 +100,8 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Creating directory at path "{remote_directory_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.create_directory(remote_directory_path),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.ftp.create_directory(remote_directory_path)
         )
 
     def remove_directory(self, remote_directory_path: str) -> None:
@@ -125,11 +114,8 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Removing directory at path "{remote_directory_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.remove_directory(remote_directory_path),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.ftp.remove_directory(remote_directory_path)
         )
 
     def remove_file(self, remote_file_path: str) -> None:
@@ -140,11 +126,7 @@ class Ftp(AbstractBasePlugin):
         :type remote_file_path: str
         """
         self._logger.info(f'Removing file at path "{remote_file_path}" via FTP')
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.remove_file(remote_file_path), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.ftp.remove_file(remote_file_path))
 
     def rename(self, remote_source_path: str, remote_dest_path: str) -> None:
         """
@@ -158,11 +140,8 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Moving a remote file/directory from "{remote_source_path}" to "{remote_dest_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.rename(remote_source_path, remote_dest_path),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.ftp.rename(remote_source_path, remote_dest_path)
         )
 
     def reset(self) -> None:
@@ -171,9 +150,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info("Resetting the FTP server")
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.ftp.reset(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.ftp.reset())
 
     def set_root_directory(self, root_directory: str) -> None:
         """
@@ -186,11 +163,7 @@ class Ftp(AbstractBasePlugin):
             f"Setting the root directory of the MAVLink FTP server to {root_directory}"
         )
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.set_root_directory(root_directory), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.ftp.set_root_directory(root_directory))
 
         self._root_directory = root_directory
 
@@ -203,11 +176,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info(f"Setting the target's component ID to {comp_id}")
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.set_target_compid(comp_id), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.ftp.set_target_compid(comp_id))
 
         self._comp_id = comp_id
 

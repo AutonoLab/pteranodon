@@ -60,9 +60,6 @@ class MissionRawServer(AbstractBasePlugin):
         :return:
         """
         self._logger.info("Task item set to complete")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw_server.set_current_item_complete(),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.mission_raw_server.set_current_item_complete()
         )

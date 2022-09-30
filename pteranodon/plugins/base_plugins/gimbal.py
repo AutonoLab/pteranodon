@@ -44,9 +44,7 @@ class Gimbal(AbstractBasePlugin):
         Release control, such that other components can control the gimbal.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.release_control())
-        )
+        super().submit_coroutine(self._system.gimbal.release_control())
 
     def set_mode(self, gimbal_mode: GimbalMode) -> None:
         """
@@ -56,9 +54,7 @@ class Gimbal(AbstractBasePlugin):
         :type gimbal_mode: GimbalMode
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.set_mode(gimbal_mode))
-        )
+        super().submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
 
     def set_pitch_and_yaw(self, pitch_deg: float, yaw_deg: float) -> None:
         """
@@ -71,10 +67,8 @@ class Gimbal(AbstractBasePlugin):
         :type yaw_deg: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_pitch_and_yaw(pitch_deg, yaw_deg)
-            )
+        super().submit_coroutine(
+            self._system.gimbal.set_pitch_and_yaw(pitch_deg, yaw_deg)
         )
 
     def set_pitch_rate_and_yaw_rate(
@@ -90,11 +84,9 @@ class Gimbal(AbstractBasePlugin):
         :type yaw_rate_deg_s: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_pitch_rate_and_yaw_rate(
-                    pitch_rate_deg_s, yaw_rate_deg_s
-                )
+        super().submit_coroutine(
+            self._system.gimbal.set_pitch_rate_and_yaw_rate(
+                pitch_rate_deg_s, yaw_rate_deg_s
             )
         )
 
@@ -114,11 +106,9 @@ class Gimbal(AbstractBasePlugin):
         :type altitude_m: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_roi_location(
-                    latitude_deg, longitude_deg, altitude_m
-                )
+        super().submit_coroutine(
+            self._system.gimbal.set_roi_location(
+                latitude_deg, longitude_deg, altitude_m
             )
         )
 
@@ -130,6 +120,4 @@ class Gimbal(AbstractBasePlugin):
         :type control_mode: ControlMode
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.take_control(control_mode))
-        )
+        super().submit_coroutine(self._system.gimbal.take_control(control_mode))

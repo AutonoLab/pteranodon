@@ -75,11 +75,8 @@ class FollowMe(AbstractBasePlugin):
         :param config: follow_me.Config ; The configuration to be set
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.follow_me.set_config(config), loop=self._loop
-            )
-        )
+
+        super().submit_coroutine(self._system.follow_me.set_config(config))
         self._config = config
 
     def set_target_location(self, location: follow_me.TargetLocation) -> None:
@@ -88,11 +85,7 @@ class FollowMe(AbstractBasePlugin):
         :param location: follow_me.TargetLocation ; The target location to be set
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.follow_me.set_target_location(location), loop=self._loop
-            )
-        )
+        super().submit_coroutine(self._system.follow_me.set_target_location(location))
         self._last_location = location
 
     def start(self) -> None:
@@ -100,9 +93,7 @@ class FollowMe(AbstractBasePlugin):
         Start FollowMe mode
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.follow_me.start())
         self._is_active = True
 
     def stop(self) -> None:
@@ -110,7 +101,5 @@ class FollowMe(AbstractBasePlugin):
         Stop FollowMe mode
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.follow_me.stop())
         self._is_active = False

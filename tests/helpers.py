@@ -16,7 +16,7 @@ class PluginTaskFetcher:
         self._fetched_task: Optional[Task] = None
         self._fetching_plugin : AbstractPlugin = plugin
 
-    def _notify_condition(self):
+    def _notify_condition(self, *args):
         with self._condition:
             self._condition.notify()
 

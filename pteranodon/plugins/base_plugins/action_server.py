@@ -116,11 +116,8 @@ class ActionServer(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"setting allow_takeoff to {allow_takeoff}")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_allow_takeoff(allow_takeoff),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.action_server.set_allow_takeoff(allow_takeoff)
         )
 
     def set_allowable_flight_modes(
@@ -132,10 +129,8 @@ class ActionServer(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Setting allowable flight modes to inputted flight modes")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_allowable_flight_modes(flight_modes)
-            )
+        super().submit_coroutine(
+            self._system.action_server.set_allowable_flight_modes(flight_modes)
         )
 
     def set_armable(self, armable: bool, force_armable: bool):
@@ -148,11 +143,8 @@ class ActionServer(AbstractBasePlugin):
         self._logger.info(
             f'setting "is armable now?" to {armable}, and "is armable with force" to {force_armable}'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_armable(armable, force_armable),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.action_server.set_armable(armable, force_armable)
         )
 
     def set_disarmable(self, disarmable: bool, force_disarmable: bool):
@@ -165,11 +157,8 @@ class ActionServer(AbstractBasePlugin):
         self._logger.info(
             f'setting "Is disarmable" to {disarmable}, and "is disarmable with force" to {force_disarmable}'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_disarmable(disarmable, force_disarmable),
-                loop=self._loop,
-            )
+        super().submit_coroutine(
+            self._system.action_server.set_disarmable(disarmable, force_disarmable)
         )
 
     async def _shutdown(self):

@@ -35,9 +35,7 @@ class Shell(AbstractBasePlugin):
 
         :param command: The command to send
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.shell.send(command), loop=self._loop)
-        )
+        super().submit_coroutine(self._system.shell.send(command))
         self._cmd_history.append(command)
 
     def get_newest_feedback(self) -> str:
