@@ -20,10 +20,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r tests/test-requirements.txt
-      - name: Startup PX4 Docker
-        run: |
-          docker run --rm -dt jonasvautherin/px4-gazebo-headless:1.13.0
-          sleep 10
       - name: Test Abstract Plugin
         run: |
           pytest tests/integration/test_offboard.py
+
+    services:
+      px4_docker:
+        image: jonasvautherin/px4-gazebo-headless:1.13.0

@@ -1,12 +1,11 @@
 import asyncio
 import typing
 from abc import ABC
-from asyncio import AbstractEventLoop, Task, Future
+from asyncio import AbstractEventLoop, Future
 from logging import Logger
 from collections import deque
 from functools import partial
 import platform
-from typing import Callable
 
 from mavsdk import System
 

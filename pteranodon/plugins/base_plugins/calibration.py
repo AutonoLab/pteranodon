@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task, Future
+from asyncio import AbstractEventLoop, Future
 from logging import Logger
 from typing import AsyncGenerator
 
