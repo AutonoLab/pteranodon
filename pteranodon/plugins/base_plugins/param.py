@@ -35,7 +35,7 @@ class Param(AbstractBasePlugin):
 
     def _set_param_callback(self, _: Union[Task, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = asyncio.ensure_future(
+        self._param_task = asyncio.run_coroutine_threadsafe(
             self._system.param.get_all_params(), loop=self._loop
         )
         self._param_task.add_done_callback(partial(self._update_params_callback))  # type: ignore
@@ -108,10 +108,8 @@ class Param(AbstractBasePlugin):
         :return: None
         """
         try:
-            param_task = super().submit_task(
-                asyncio.ensure_future(
-                    self._system.param.set_param_custom(name, value), loop=self._loop
-                )
+            param_task = self._submit_coroutine(
+                self._system.param.set_param_custom(name, value)
             )
             param_task.add_done_callback(partial(self._set_param_callback))
         except AttributeError:
@@ -126,10 +124,8 @@ class Param(AbstractBasePlugin):
         :param value: float ; Value of the parameter to be set
         :return: None
         """
-        param_task = super().submit_task(
-            asyncio.ensure_future(
-                self._system.param.set_param_float(name, value), loop=self._loop
-            )
+        param_task = self._submit_coroutine(
+            self._system.param.set_param_float(name, value)
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 
@@ -140,10 +136,8 @@ class Param(AbstractBasePlugin):
         :param value: int ; Value of the parameter to be set
         :return: None
         """
-        param_task = super().submit_task(
-            asyncio.ensure_future(
-                self._system.param.set_param_int(name, value), loop=self._loop
-            )
+        param_task = self._submit_coroutine(
+            self._system.param.set_param_int(name, value)
         )
         param_task.add_done_callback(partial(self._set_param_callback))
 

@@ -3,8 +3,7 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 
 from mavsdk import System
-from mavsdk.component_information_server import FloatParamUpdate
-from mavsdk.component_information_server import FloatParam
+from mavsdk.component_information_server import FloatParamUpdate, FloatParam
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -18,7 +17,7 @@ class ComponentInformationServer(AbstractBasePlugin):
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._float_param_update_task = asyncio.ensure_future(
+        self._float_param_update_task = asyncio.run_coroutine_threadsafe(
             self._update_float_param(), loop=self._loop
         )
 
@@ -45,9 +44,6 @@ class ComponentInformationServer(AbstractBasePlugin):
         :type: FloatParam
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.component_information_server.provide_float_param(param),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.component_information_server.provide_float_param(param)
         )

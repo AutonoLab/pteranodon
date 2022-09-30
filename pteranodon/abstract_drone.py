@@ -453,6 +453,10 @@ class AbstractDrone(ABC):
         """
         pass
 
+    async def _teardown(self) -> None:
+        for thing in self._queue:
+            thing()
+
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
     ###############################################################################
@@ -484,7 +488,9 @@ class AbstractDrone(ABC):
             )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
                 self._task_cache.append(
-                    asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+                    asyncio.run_coroutine_threadsafe(
+                        com(*args, **kwargs), loop=self._loop
+                    )
                 )
             else:  # typical sync function
                 com(*args, **kwargs)
@@ -550,11 +556,11 @@ class AbstractDrone(ABC):
             pass
 
         # run teardown (queue should be clean from the clear before disarm)
-        self.teardown()
-        while (
-            len(self._queue) > 0
-        ):  # simple spin wait to ensure any mavlink commands from teardown are run
-            sleep(self._time_slice + 0.01)
+        asyncio.get_event_loop().run_until_complete(self._teardown())
+        # while (
+        #     len(self._queue) > 0
+        # ):  # simple spin wait to ensure any mavlink commands from teardown are run
+        #     sleep(self._time_slice + 0.01)
 
         # finally join the mavlink thread and stop it
         self._stopped_mavlink = True

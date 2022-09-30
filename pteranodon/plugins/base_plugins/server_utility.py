@@ -25,8 +25,4 @@ class ServerUtility(AbstractBasePlugin):
         self._logger.info(
             'Sent a "{typ}" status to the server with the message "{text}"'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.server_utility.send_status_text(typ, text)
-            )
-        )
+        self._submit_coroutine(self._system.server_utility.send_status_text(typ, text))

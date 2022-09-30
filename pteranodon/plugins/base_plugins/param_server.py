@@ -26,11 +26,8 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided a custom parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_custom(name, value),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.param_server.provide_param_custom(name, value)
         )
 
     def provide_param_float(self, name: str, value: float):
@@ -42,11 +39,8 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided a float parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_float(name, value),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.param_server.provide_param_float(name, value)
         )
 
     def provide_param_int(self, name: str, value: int):
@@ -58,12 +52,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info(
             f"Provided an integer parameter with the name {name} and a value of {value}"
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.param_server.provide_param_int(name, value),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.param_server.provide_param_int(name, value))
 
     def retrieve_all_params(self) -> Optional[param_server.AllParams]:
         """
@@ -73,7 +62,7 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_all_params")
 
-        retrieve_all_params_task = asyncio.ensure_future(
+        retrieve_all_params_task = asyncio.run_coroutine_threadsafe(
             self._system.param_server.retrieve_all_params(), loop=self._loop
         )
         done_condition = Condition()
@@ -97,7 +86,7 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_custom")
 
-        retrieve_param_custom_task = asyncio.ensure_future(
+        retrieve_param_custom_task = asyncio.run_coroutine_threadsafe(
             self._system.param_server.retrieve_param_custom(name), loop=self._loop
         )
         done_condition = Condition()
@@ -123,7 +112,7 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_float")
 
-        retrieve_param_float_task = asyncio.ensure_future(
+        retrieve_param_float_task = asyncio.run_coroutine_threadsafe(
             self._system.param_server.retrieve_param_float(name), loop=self._loop
         )
         done_condition = Condition()
@@ -147,7 +136,7 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_int")
 
-        retrieve_param_int_task = asyncio.ensure_future(
+        retrieve_param_int_task = asyncio.run_coroutine_threadsafe(
             self._system.param_server.retrieve_param_int(name), loop=self._loop
         )
         done_condition = Condition()

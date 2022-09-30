@@ -32,35 +32,31 @@ class Camera(AbstractBasePlugin):
         self._possible_setting_options: List[camera.SettingOptions] = []
 
         # Tasks of subscribed properties
-        self._capture_info_task = asyncio.ensure_future(
+        self._capture_info_task = asyncio.run_coroutine_threadsafe(
             self._update_capture_info(), loop=self._loop
         )
-        self._information_task = asyncio.ensure_future(
+        self._information_task = asyncio.run_coroutine_threadsafe(
             self._update_information(), loop=self._loop
         )
-        self._mode_task = asyncio.ensure_future(self._update_mode(), loop=self._loop)
-        self._status_task = asyncio.ensure_future(
+        self._mode_task = asyncio.run_coroutine_threadsafe(
+            self._update_mode(), loop=self._loop
+        )
+        self._status_task = asyncio.run_coroutine_threadsafe(
             self._update_status(), loop=self._loop
         )
-        self._video_stream_info_task = asyncio.ensure_future(
+        self._video_stream_info_task = asyncio.run_coroutine_threadsafe(
             self._update_vstream_info(), loop=self._loop
         )
 
         # Only want to fetch the current settings and options once on init
-        super().submit_task(
-            asyncio.ensure_future(self._update_current_settings(), loop=self._loop)
-        )
-        super().submit_task(
-            asyncio.ensure_future(self._update_possible_setting_opts(), loop=self._loop)
-        )
+        self._submit_coroutine(self._update_current_settings())
+        self._submit_coroutine(self._update_possible_setting_opts())
 
     def prepare(self) -> None:
         """
         Prepare the camera plugin (e.g. download the camera definition, etc)
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.prepare(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.prepare())
 
     def format_storage(self) -> None:
         """
@@ -68,9 +64,7 @@ class Camera(AbstractBasePlugin):
 
         This will delete all content of the camera storage!
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.format_storage(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.format_storage())
 
     def start_photo_interval(self, interval_s: float) -> None:
         """
@@ -79,11 +73,7 @@ class Camera(AbstractBasePlugin):
         :param interval_s: Interval between photos (in seconds)
         :type interval_s: float
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.start_photo_interval(interval_s), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.start_photo_interval(interval_s))
         if self._status is not None:
             self._status.photo_interval_on = True
 
@@ -91,11 +81,7 @@ class Camera(AbstractBasePlugin):
         """
         Stop a running photo timelapse
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.stop_photo_interval(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.stop_photo_interval())
         if self._status is not None:
             self._status.photo_interval_on = False
 
@@ -103,9 +89,7 @@ class Camera(AbstractBasePlugin):
         """
         Start a video recording
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.start_video(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.start_video())
         if self._status is not None:
             self._status.video_on = True
 
@@ -113,9 +97,7 @@ class Camera(AbstractBasePlugin):
         """
         Stop a running video recording
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.stop_video(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.stop_video())
         if self._status is not None:
             self._status.video_on = False
 
@@ -123,29 +105,19 @@ class Camera(AbstractBasePlugin):
         """
         Start video streaming
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.start_video_streaming(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.start_video_streaming())
 
     def stop_video_streaming(self) -> None:
         """
         Stop current video streaming
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.stop_video_streaming(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.stop_video_streaming())
 
     def take_photo(self) -> None:
         """
         Take one photo
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.take_photo(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.take_photo())
 
     def select_camera(self, camera_id: int) -> None:
         """
@@ -156,11 +128,7 @@ class Camera(AbstractBasePlugin):
         :param camera_id: The ID of the camera to select
         :type camera_id: int32
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.select_camera(camera_id), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.select_camera(camera_id))
         self._current_camera_id = camera_id
 
     def set_mode(self, mode: camera.Mode) -> None:
@@ -170,9 +138,7 @@ class Camera(AbstractBasePlugin):
         :param mode: Camera mode to set
         :type mode: camera.Mode
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera.set_mode(mode), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.camera.set_mode(mode))
         self._mode = mode
 
     def set_setting(
@@ -224,11 +190,7 @@ class Camera(AbstractBasePlugin):
             )
             return
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera.set_setting(setting_obj), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.camera.set_setting(setting_obj))
 
         # Update local setting object
         for setting_idx in range(len(self._current_settings)):
@@ -272,7 +234,7 @@ class Camera(AbstractBasePlugin):
         :return: List of capture infos (representing the photos)
         :rtype: List[camera.CaptureInfo]
         """
-        list_photos_task = asyncio.ensure_future(
+        list_photos_task = asyncio.run_coroutine_threadsafe(
             self._system.camera.list_photos(photos_range), loop=self._loop
         )
 

@@ -48,7 +48,7 @@ def test_submit_task(
 
     sum_of_five = 5 + 4 + 3 + 2 + 1 + 0
 
-    counting_task = asyncio.ensure_future(counting_function(5), loop=loop)
+    counting_task = asyncio.run_coroutine_threadsafe(counting_function(5), loop=loop)
     counting_task.add_done_callback(lambda _: condition.notify())
 
     mock_plugin.submit_task(counting_task)

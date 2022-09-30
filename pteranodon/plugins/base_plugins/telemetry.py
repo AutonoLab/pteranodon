@@ -70,7 +70,7 @@ class Telemetry(AbstractBasePlugin):
     def _start_async_gen_telemetry(self) -> Dict:
         tasks = {}
         for func in self._async_gen_methods:
-            tasks[func] = asyncio.ensure_future(
+            tasks[func] = asyncio.run_coroutine_threadsafe(
                 self._async_gen_wrapper(func), loop=self._loop
             )
         return tasks
@@ -83,7 +83,7 @@ class Telemetry(AbstractBasePlugin):
 
     def _get_getter_data(self, func: str) -> Any:
         if self._getter_data[func] is None:
-            task = asyncio.ensure_future(
+            task = asyncio.run_coroutine_threadsafe(
                 getattr(self._system.telemetry, func)(), loop=self._loop
             )
             while not task.done():
@@ -376,11 +376,8 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_actuator_control_target(rate),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry.set_rate_actuator_control_target(rate)
         )
 
     def set_rate_actuator_output_status(self, rate: float) -> None:
@@ -389,11 +386,8 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_actuator_output_status(rate),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry.set_rate_actuator_output_status(rate)
         )
 
     def set_rate_attitude(self, rate: float) -> None:
@@ -402,11 +396,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_attitude(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_attitude(rate))
 
     def set_rate_battery(self, rate: float) -> None:
         """
@@ -414,11 +404,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_battery(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_battery(rate))
 
     def set_rate_camera_attitude(self, rate: float) -> None:
         """
@@ -426,11 +412,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_camera_attitude(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_camera_attitude(rate))
 
     def set_rate_distance_sensor(self, rate: float) -> None:
         """
@@ -438,11 +420,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_distance_sensor(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_distance_sensor(rate))
 
     def set_rate_fixedwing_metrics(self, rate: float) -> None:
         """
@@ -450,11 +428,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_fixedwing_metrics(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_fixedwing_metrics(rate))
 
     def set_rate_gps_info(self, rate: float) -> None:
         """
@@ -462,11 +436,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_gps_info(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_gps_info(rate))
 
     def set_rate_ground_truth(self, rate: float) -> None:
         """
@@ -474,11 +444,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_ground_truth(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_ground_truth(rate))
 
     def set_rate_home(self, rate: float) -> None:
         """
@@ -486,11 +452,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_home(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_home(rate))
 
     def set_rate_imu(self, rate: float) -> None:
         """
@@ -498,11 +460,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_imu(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_imu(rate))
 
     def set_rate_in_air(self, rate: float) -> None:
         """
@@ -510,11 +468,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_in_air(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_in_air(rate))
 
     def set_rate_landed_state(self, rate: float) -> None:
         """
@@ -522,11 +476,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_landed_state(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_landed_state(rate))
 
     def set_rate_odometry(self, rate: float) -> None:
         """
@@ -534,11 +484,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_odometry(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_odometry(rate))
 
     def set_rate_position(self, rate: float) -> None:
         """
@@ -546,11 +492,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_position(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_position(rate))
 
     def set_rate_position_velocity_ned(self, rate: float) -> None:
         """
@@ -558,11 +500,8 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_position_velocity_ned(rate),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry.set_rate_position_velocity_ned(rate)
         )
 
     def set_rate_raw_imu(self, rate: float) -> None:
@@ -571,11 +510,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_raw_imu(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_raw_imu(rate))
 
     def set_rate_rc_status(self, rate: float) -> None:
         """
@@ -583,11 +518,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_rc_status(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_rc_status(rate))
 
     def set_rate_scaled_imu(self, rate: float) -> None:
         """
@@ -595,11 +526,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_scaled_imu(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_scaled_imu(rate))
 
     def set_rate_unix_epoch_time(self, rate: float) -> None:
         """
@@ -607,11 +534,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_unix_epoch_time(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_unix_epoch_time(rate))
 
     def set_rate_velocity_ned(self, rate: float) -> None:
         """
@@ -619,11 +542,7 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_velocity_ned(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_velocity_ned(rate))
 
     def set_rate_vtol_state(self, rate: float) -> None:
         """
@@ -631,8 +550,4 @@ class Telemetry(AbstractBasePlugin):
         :param rate: double ; The requested rate in Hertz
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry.set_rate_vtol_state(rate), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry.set_rate_vtol_state(rate))

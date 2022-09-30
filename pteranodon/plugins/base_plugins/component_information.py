@@ -5,8 +5,7 @@ from functools import partial
 from typing import List, Optional
 
 from mavsdk import System
-from mavsdk.component_information_server import FloatParam
-from mavsdk.component_information_server import FloatParamUpdate
+from mavsdk.component_information_server import FloatParamUpdate, FloatParam
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -20,13 +19,13 @@ class ComponentInformation(AbstractBasePlugin):
         super().__init__("component_information", system, loop, logger)
 
         self._param_list: List[FloatParam] = []
-        self._param_list_task = asyncio.ensure_future(
+        self._param_list_task = asyncio.run_coroutine_threadsafe(
             self._system.component_information.access_float_params(), loop=self._loop
         )
         self._param_list_task.add_done_callback(partial(self._param_list_callback))
 
         self._float_param_update: Optional[FloatParamUpdate] = None
-        self._float_param_update_task = asyncio.ensure_future(
+        self._float_param_update_task = asyncio.run_coroutine_threadsafe(
             self._update_float_param(), loop=self._loop
         )
 
@@ -37,7 +36,7 @@ class ComponentInformation(AbstractBasePlugin):
     async def _update_float_param(self) -> None:
         async for curr_param_update in self._system.component_information_server.float_param():
             if curr_param_update != self._float_param_update:
-                self._param_list_task = asyncio.ensure_future(
+                self._param_list_task = asyncio.run_coroutine_threadsafe(
                     self._system.component_information.access_float_params(),
                     loop=self._loop,
                 )

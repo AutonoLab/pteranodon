@@ -21,17 +21,17 @@ class FollowMe(AbstractBasePlugin):
         self._config: Optional[follow_me.Config] = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
-        self._is_active_task = asyncio.ensure_future(
+        self._is_active_task = asyncio.run_coroutine_threadsafe(
             self._system.follow_me.is_active(), loop=self._loop
         )
         self._is_active_task.add_done_callback(partial(self._is_active_callback))
-        self._last_location_task = asyncio.ensure_future(
+        self._last_location_task = asyncio.run_coroutine_threadsafe(
             self._system.follow_me.get_last_location(), loop=self._loop
         )
         self._last_location_task.add_done_callback(
             partial(self._last_location_callback)
         )
-        self._config_task = asyncio.ensure_future(
+        self._config_task = asyncio.run_coroutine_threadsafe(
             self._system.follow_me.get_config(), loop=self._loop
         )
         self._config_task.add_done_callback(partial(self._config_callback))
@@ -75,11 +75,7 @@ class FollowMe(AbstractBasePlugin):
         :param config: follow_me.Config ; The configuration to be set
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.follow_me.set_config(config), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.follow_me.set_config(config))
         self._config = config
 
     def set_target_location(self, location: follow_me.TargetLocation) -> None:
@@ -88,11 +84,7 @@ class FollowMe(AbstractBasePlugin):
         :param location: follow_me.TargetLocation ; The target location to be set
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.follow_me.set_target_location(location), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.follow_me.set_target_location(location))
         self._last_location = location
 
     def start(self) -> None:
@@ -100,9 +92,7 @@ class FollowMe(AbstractBasePlugin):
         Start FollowMe mode
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.follow_me.start())
         self._is_active = True
 
     def stop(self) -> None:
@@ -110,7 +100,5 @@ class FollowMe(AbstractBasePlugin):
         Stop FollowMe mode
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.follow_me.start(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.follow_me.start())
         self._is_active = False

@@ -19,11 +19,13 @@ class MissionRawServer(AbstractBasePlugin):
         self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
         self.clear_type: Optional[int] = None
         self.mission_item: Optional[mission_raw_server.MissionItem] = None
-        self._clear_all_task = asyncio.ensure_future(self._clear_all(), loop=self._loop)
-        self._current_item_changed_task = asyncio.ensure_future(
+        self._clear_all_task = asyncio.run_coroutine_threadsafe(
+            self._clear_all(), loop=self._loop
+        )
+        self._current_item_changed_task = asyncio.run_coroutine_threadsafe(
             self._current_item_changed(), loop=self._loop
         )
-        self._incoming_mission_task = asyncio.ensure_future(
+        self._incoming_mission_task = asyncio.run_coroutine_threadsafe(
             self._incoming_mission(), loop=self._loop
         )
 
@@ -60,9 +62,6 @@ class MissionRawServer(AbstractBasePlugin):
         :return:
         """
         self._logger.info("Task item set to complete")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw_server.set_current_item_complete(),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.mission_raw_server.set_current_item_complete()
         )

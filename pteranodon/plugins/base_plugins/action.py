@@ -18,7 +18,7 @@ class Action(AbstractBasePlugin):
         super().__init__("action", system, loop, logger)
 
         self._maximum_speed: Optional[float] = None
-        self._maximum_speed_task = asyncio.ensure_future(
+        self._maximum_speed_task = asyncio.run_coroutine_threadsafe(
             self._system.action.get_maximum_speed(), loop=self._loop
         )
         self._maximum_speed_task.add_done_callback(
@@ -26,7 +26,7 @@ class Action(AbstractBasePlugin):
         )
 
         self._launch_altitude: Optional[float] = None
-        self._launch_altitude_task = asyncio.ensure_future(
+        self._launch_altitude_task = asyncio.run_coroutine_threadsafe(
             self._system.action.get_return_to_launch_altitude(), loop=self._loop
         )
         self._launch_altitude_task.add_done_callback(
@@ -34,7 +34,7 @@ class Action(AbstractBasePlugin):
         )
 
         self._takeoff_altitude: Optional[float] = None
-        self._takeoff_altitude_task = asyncio.ensure_future(
+        self._takeoff_altitude_task = asyncio.run_coroutine_threadsafe(
             self._system.action.get_takeoff_altitude(), loop=self._loop
         )
         self._takeoff_altitude_task.add_done_callback(
@@ -60,9 +60,7 @@ class Action(AbstractBasePlugin):
         of the drone
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.arm(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.arm())
 
     def disarm(self) -> None:
         """
@@ -71,9 +69,7 @@ class Action(AbstractBasePlugin):
         This will disarm a drone that considers itself landed. If flying, the drone should reject the disarm command.
         Disarming means that all motors will stop.
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.disarm(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.disarm())
 
     def do_orbit(
         self,
@@ -98,17 +94,14 @@ class Action(AbstractBasePlugin):
             absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.do_orbit(
-                    radius_m,
-                    velocity_ms,
-                    yaw_behavior,
-                    latitude_deg,
-                    longitude_deg,
-                    absolute_altitude_m,
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.action.do_orbit(
+                radius_m,
+                velocity_ms,
+                yaw_behavior,
+                latitude_deg,
+                longitude_deg,
+                absolute_altitude_m,
             )
         )
 
@@ -153,12 +146,9 @@ class Action(AbstractBasePlugin):
             yaw: Yaw angle (in degrees, frame is NED, 0 is North, positive is clockwise)
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.goto_location(
-                    latitude_deg, longitude_deg, absolute_altitude_m, yaw
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.action.goto_location(
+                latitude_deg, longitude_deg, absolute_altitude_m, yaw
             )
         )
 
@@ -172,9 +162,7 @@ class Action(AbstractBasePlugin):
         Note: this command is specific to the PX4 Autopilot flight stack as it implies a change to a PX4-specific mode.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.hold(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.hold())
 
     def kill(self) -> None:
         """
@@ -184,9 +172,7 @@ class Action(AbstractBasePlugin):
         if this command is used while flying.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.kill(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.kill())
 
     def land(self) -> None:
         """
@@ -195,9 +181,7 @@ class Action(AbstractBasePlugin):
         This switches the drone to ‘Land’ flight mode.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.land(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.land())
 
     def reboot(self) -> None:
         """
@@ -206,9 +190,7 @@ class Action(AbstractBasePlugin):
         This will reboot the autopilot, companion computer, camera and gimbal.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.reboot(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.reboot())
 
     def return_to_launch(self) -> None:
         """
@@ -218,11 +200,7 @@ class Action(AbstractBasePlugin):
         it will rise up to a certain altitude to clear any obstacles before heading back to the launch (takeoff) position and land there.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.return_to_launch(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.return_to_launch())
 
     def set_acuator(self, index: int, value: float) -> None:
         """
@@ -232,11 +210,7 @@ class Action(AbstractBasePlugin):
             value:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.set_acuator(index, value), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.set_acuator(index, value))
 
     def set_current_speed(self, speed_m_s: float) -> None:
         """
@@ -248,11 +222,7 @@ class Action(AbstractBasePlugin):
             speed_m_s:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.set_current_speed(speed_m_s), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.set_current_speed(speed_m_s))
 
     def set_maximum_speed(self, speed_m_s: float) -> None:
         """
@@ -261,11 +231,7 @@ class Action(AbstractBasePlugin):
             speed_m_s:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.set_maximum_speed(speed_m_s), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.set_maximum_speed(speed_m_s))
         self._maximum_speed = speed_m_s
 
     def set_return_to_launch_altitude(self, relative_altitude_m: float) -> None:
@@ -275,11 +241,8 @@ class Action(AbstractBasePlugin):
             relative_altitude_m:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.set_return_to_launch_altitude(relative_altitude_m),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.action.set_return_to_launch_altitude(relative_altitude_m)
         )
         self._launch_altitude = relative_altitude_m
 
@@ -290,11 +253,8 @@ class Action(AbstractBasePlugin):
             relative_altitude_m:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.set_takeoff_altitude(relative_altitude_m),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.action.set_takeoff_altitude(relative_altitude_m)
         )
         self._takeoff_altitude = relative_altitude_m
 
@@ -306,9 +266,7 @@ class Action(AbstractBasePlugin):
         the autopilot is disarmed and autopilots commonly reject it if they are not already ready to shut down.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.shutdown(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.shutdown())
 
     def takeoff(self) -> None:
         """
@@ -320,9 +278,7 @@ class Action(AbstractBasePlugin):
         Note that the vehicle must be armed before it can take off.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.takeoff(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.takeoff())
 
     def terminate(self) -> None:
         """
@@ -331,9 +287,7 @@ class Action(AbstractBasePlugin):
         This will run the terminate routine as configured on the drone (e.g. disarm and open the parachute).
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.action.terminate(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.action.terminate())
 
     def transition_to_fixedwing(self) -> None:
         """
@@ -343,11 +297,7 @@ class Action(AbstractBasePlugin):
         The command will succeed if called when the vehicle is already in fixedwing mode.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.transition_to_fixedwing(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.transition_to_fixedwing())
 
     def transition_to_multicopter(self) -> None:
         """
@@ -357,8 +307,4 @@ class Action(AbstractBasePlugin):
         The command will succeed if called when the vehicle is already in multicopter mode.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action.transition_to_multicopter(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.action.transition_to_multicopter())

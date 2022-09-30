@@ -20,10 +20,10 @@ class Mission(AbstractBasePlugin):
         self._enable_return_to_land = None
         self._mission_plan = None
         self._mission_progress = None
-        self._download_mission_with_progress_task = asyncio.ensure_future(
+        self._download_mission_with_progress_task = asyncio.run_coroutine_threadsafe(
             self._download_mission_with_progress(), loop=self._loop
         )
-        self._update_mission_progress_task = asyncio.ensure_future(
+        self._update_mission_progress_task = asyncio.run_coroutine_threadsafe(
             self._update_mission_progress(), loop=self._loop
         )
 
@@ -33,11 +33,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Download")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_download(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission.cancel_mission_download())
 
     def cancel_mission_upload(self):
         """
@@ -45,11 +41,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Upload")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_upload(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission.cancel_mission_upload())
 
     def clear_mission(self):
         """
@@ -57,9 +49,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Cleared mission")
-        super().submit_task(
-            asyncio.ensure_future(self._system.mission.clear_mission(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.mission.clear_mission())
 
     def download_mission(self) -> Optional[mission.MissionPlan]:
         """
@@ -68,7 +58,7 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Downloading mission file")
 
-        download_mission_task = asyncio.ensure_future(
+        download_mission_task = asyncio.run_coroutine_threadsafe(
             self._system.mission.download_mission(), loop=self._loop
         )
         download_done_condition = Condition()
@@ -109,7 +99,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file with progress information")
 
         # Block a thread and allow it to run for 1 second before timing out
-        download_progress_mission_task = asyncio.ensure_future(
+        download_progress_mission_task = asyncio.run_coroutine_threadsafe(
             self._download_mission_with_progress(), loop=self._loop
         )
         download_progress_done_condition = Condition()
@@ -137,7 +127,7 @@ class Mission(AbstractBasePlugin):
         )
 
         # Block a thread and allow it to run for 1 second before timing out
-        get_rtl_task = asyncio.ensure_future(
+        get_rtl_task = asyncio.run_coroutine_threadsafe(
             self._system.mission.get_return_to_launch_after_mission(), loop=self._loop
         )
         done_condition = Condition()
@@ -163,7 +153,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Waiting for response to is_mission_finished()")
 
         # Block a thread and allow it to run for 1 second before timing out
-        get_imf_task = asyncio.ensure_future(
+        get_imf_task = asyncio.run_coroutine_threadsafe(
             self._system.mission.is_mission_finished(), loop=self._loop
         )
         done_condition = Condition()

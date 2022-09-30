@@ -26,9 +26,6 @@ class Failure(AbstractBasePlugin):
         :param instance: int ; instance to affect (0 for all)
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.failure.inject(failure_unit, failure_type, instance),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.failure.inject(failure_unit, failure_type, instance)
         )

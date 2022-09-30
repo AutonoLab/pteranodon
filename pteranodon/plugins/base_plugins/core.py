@@ -16,7 +16,7 @@ class Core(AbstractBasePlugin):
         super().__init__("core", system, loop, logger)
 
         self._connection_state = None
-        self._connection_task = asyncio.ensure_future(
+        self._connection_task = asyncio.run_coroutine_threadsafe(
             self._update_connection_state(), loop=self._loop
         )
 
@@ -30,11 +30,7 @@ class Core(AbstractBasePlugin):
         :param delay_s: Timeout in seconds
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.core.set_mavlink_timeout(delay_s), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.core.set_mavlink_timeout(delay_s))
 
     async def _update_connection_state(self) -> None:
         async for connection_state in self._system.core.connection_state():

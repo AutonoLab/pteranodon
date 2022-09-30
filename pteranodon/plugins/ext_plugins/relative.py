@@ -63,11 +63,8 @@ class Relative(AbstractCustomPlugin):
         :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._maneuver_to(front, right, down, on_dimensions, test_min),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._maneuver_to(front, right, down, on_dimensions, test_min)
         )
 
     async def _maneuver_to(
@@ -129,9 +126,7 @@ class Relative(AbstractCustomPlugin):
         :param distance: The meters from home the drone can maneuver
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._create_geofence(distance), loop=self._loop)
-        )
+        self._submit_coroutine(self._create_geofence(distance))
 
     async def _create_geofence(self, distance: float) -> None:
         latitude = self._telemetry.home.latitude_deg

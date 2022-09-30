@@ -16,23 +16,33 @@ class ActionServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action_server", system, loop, logger)
-        self._arm_disarm_task = asyncio.ensure_future(
+        self._arm_disarm_task = asyncio.run_coroutine_threadsafe(
             self._arm_disarm(), loop=self._loop
         )
         self._arm_disarm_value: Optional[action_server.ArmDisarm] = None
-        self._flight_mode_change_task = asyncio.ensure_future(
+        self._flight_mode_change_task = asyncio.run_coroutine_threadsafe(
             self._flight_mode_change(), loop=self._loop
         )
         self._flight_mode_change_value: Optional[action_server.FlightMode] = None
-        self._land_task = asyncio.ensure_future(self._land(), loop=self._loop)
+        self._land_task = asyncio.run_coroutine_threadsafe(
+            self._land(), loop=self._loop
+        )
         self._land_value: Optional[bool] = None
-        self._reboot_task = asyncio.ensure_future(self._reboot(), loop=self._loop)
+        self._reboot_task = asyncio.run_coroutine_threadsafe(
+            self._reboot(), loop=self._loop
+        )
         self._reboot_value: Optional[bool] = None
-        self._shutdown_task = asyncio.ensure_future(self._shutdown(), loop=self._loop)
+        self._shutdown_task = asyncio.run_coroutine_threadsafe(
+            self._shutdown(), loop=self._loop
+        )
         self._shutdown_value: Optional[bool] = None
-        self._takeoff_task = asyncio.ensure_future(self._takeoff(), loop=self._loop)
+        self._takeoff_task = asyncio.run_coroutine_threadsafe(
+            self._takeoff(), loop=self._loop
+        )
         self._takeoff_value: Optional[bool] = None
-        self._terminate_task = asyncio.ensure_future(self._terminate(), loop=self._loop)
+        self._terminate_task = asyncio.run_coroutine_threadsafe(
+            self._terminate(), loop=self._loop
+        )
         self._terminate_value: Optional[bool] = None
 
     async def _arm_disarm(self):
@@ -68,7 +78,7 @@ class ActionServer(AbstractBasePlugin):
         """
         self._logger.info("Pulling allowable flight modes")
 
-        get_flight_modes_task = asyncio.ensure_future(
+        get_flight_modes_task = asyncio.run_coroutine_threadsafe(
             self._system.action_server.get_allowable_flight_modes(), loop=self._loop
         )
         done_condition = Condition()
@@ -116,11 +126,8 @@ class ActionServer(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"setting allow_takeoff to {allow_takeoff}")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_allow_takeoff(allow_takeoff),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.action_server.set_allow_takeoff(allow_takeoff)
         )
 
     def set_allowable_flight_modes(
@@ -132,10 +139,8 @@ class ActionServer(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Setting allowable flight modes to inputted flight modes")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_allowable_flight_modes(flight_modes)
-            )
+        self._submit_coroutine(
+            self._system.action_server.set_allowable_flight_modes(flight_modes)
         )
 
     def set_armable(self, armable: bool, force_armable: bool):
@@ -148,11 +153,8 @@ class ActionServer(AbstractBasePlugin):
         self._logger.info(
             f'setting "is armable now?" to {armable}, and "is armable with force" to {force_armable}'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_armable(armable, force_armable),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.action_server.set_armable(armable, force_armable)
         )
 
     def set_disarmable(self, disarmable: bool, force_disarmable: bool):
@@ -165,11 +167,8 @@ class ActionServer(AbstractBasePlugin):
         self._logger.info(
             f'setting "Is disarmable" to {disarmable}, and "is disarmable with force" to {force_disarmable}'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.action_server.set_disarmable(disarmable, force_disarmable),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.action_server.set_disarmable(disarmable, force_disarmable)
         )
 
     async def _shutdown(self):

@@ -26,8 +26,4 @@ class Rtk(AbstractBasePlugin):
         """
         rtcm_data = RtcmData(string_data)
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.rtk.send_rtcm_data(rtcm_data), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.rtk.send_rtcm_data(rtcm_data))

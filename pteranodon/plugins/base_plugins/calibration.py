@@ -27,11 +27,8 @@ class Calibration(AbstractBasePlugin):
         self._logger.info(f"Finished calibration of {sensor_name}")
 
     def _calibrate_gyro(self) -> Task:
-        return super().submit_task(
-            asyncio.ensure_future(
-                self._calibrate_wrapper(self._system.calibration.calibrate_gyro()),
-                loop=self._loop,
-            )
+        return self._submit_coroutine(
+            self._calibrate_wrapper(self._system.calibration.calibrate_gyro())
         )
 
     def calibrate_gyro(self) -> None:
@@ -42,13 +39,8 @@ class Calibration(AbstractBasePlugin):
         self._calibrate_gyro()
 
     def _calibrate_accelerometer(self) -> Task:
-        return super().submit_task(
-            asyncio.ensure_future(
-                self._calibrate_wrapper(
-                    self._system.calibration.calibrate_accelerometer()
-                ),
-                loop=self._loop,
-            )
+        return self._submit_coroutine(
+            self._calibrate_wrapper(self._system.calibration.calibrate_accelerometer())
         )
 
     def calibrate_accelerometer(self) -> None:
@@ -59,12 +51,9 @@ class Calibration(AbstractBasePlugin):
         self._calibrate_accelerometer()
 
     def _calibrate_gimbal_accelerometer(self) -> Task:
-        return super().submit_task(
-            asyncio.ensure_future(
-                self._calibrate_wrapper(
-                    self._system.calibration.calibrate_gimbal_accelerometer()
-                ),
-                loop=self._loop,
+        return self._submit_coroutine(
+            self._calibrate_wrapper(
+                self._system.calibration.calibrate_gimbal_accelerometer()
             )
         )
 
@@ -76,13 +65,8 @@ class Calibration(AbstractBasePlugin):
         self._calibrate_gimbal_accelerometer()
 
     def _calibrate_magnetometer(self) -> Task:
-        return super().submit_task(
-            asyncio.ensure_future(
-                self._calibrate_wrapper(
-                    self._system.calibration.calibrate_magnetometer()
-                ),
-                loop=self._loop,
-            )
+        return self._submit_coroutine(
+            self._calibrate_wrapper(self._system.calibration.calibrate_magnetometer())
         )
 
     def calibrate_magnetometer(self) -> None:
@@ -93,13 +77,8 @@ class Calibration(AbstractBasePlugin):
         self._calibrate_magnetometer()
 
     def _calibrate_level_horizon(self) -> Task:
-        return super().submit_task(
-            asyncio.ensure_future(
-                self._calibrate_wrapper(
-                    self._system.calibration.calibrate_level_horizon()
-                ),
-                loop=self._loop,
-            )
+        return self._submit_coroutine(
+            self._calibrate_wrapper(self._system.calibration.calibrate_level_horizon())
         )
 
     def calibrate_level_horizon(self) -> None:
@@ -114,12 +93,7 @@ class Calibration(AbstractBasePlugin):
         Cancel ongoing calibration process.
         :return:
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.calibration.cancel(),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.calibration.cancel())
 
     async def _calibrate_all(self) -> None:
         task_funcs = [
@@ -130,7 +104,7 @@ class Calibration(AbstractBasePlugin):
             self._calibrate_level_horizon,
         ]
         for func in task_funcs:
-            task = asyncio.ensure_future(func(), loop=self._loop)
+            task = asyncio.run_coroutine_threadsafe(func(), loop=self._loop)
             while not task.done():
                 await asyncio.sleep(0.05)
 
@@ -139,6 +113,4 @@ class Calibration(AbstractBasePlugin):
         Perform calibrations on all available types of sensor.
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._calibrate_all(), loop=self._loop)
-        )
+        self._submit_coroutine(self._calibrate_all())

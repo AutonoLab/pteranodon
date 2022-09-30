@@ -6,8 +6,7 @@ from functools import partial
 from threading import Condition
 
 from mavsdk import System
-from mavsdk.log_files import Entry
-from mavsdk.log_files import ProgressData
+from mavsdk.log_files import Entry, ProgressData
 
 
 from .abstract_base_plugin import AbstractBasePlugin
@@ -24,7 +23,7 @@ class LogFiles(AbstractBasePlugin):
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
-        self._entry_list_task = asyncio.ensure_future(
+        self._entry_list_task = asyncio.run_coroutine_threadsafe(
             self._system.log_files.get_entries(), loop=self._loop
         )
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
@@ -41,7 +40,7 @@ class LogFiles(AbstractBasePlugin):
         :rtype: ProgressData
         """
 
-        download_progress_task = asyncio.ensure_future(
+        download_progress_task = asyncio.run_coroutine_threadsafe(
             self._system.log_files.download_log_file(entry, path), loop=self._loop
         )
 
@@ -74,7 +73,7 @@ class LogFiles(AbstractBasePlugin):
 
         """
 
-        self._entry_list_task = asyncio.ensure_future(
+        self._entry_list_task = asyncio.run_coroutine_threadsafe(
             self._system.log_files.get_entries(), loop=self._loop
         )
         self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
@@ -95,11 +94,7 @@ class LogFiles(AbstractBasePlugin):
 
         self._logger.info("Erased all log files!")
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.log_files.erase_all_log_files(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.log_files.erase_all_log_files())
 
     def _get_entries_callback(self, task: Task) -> None:
         # once task is completed, store the result
