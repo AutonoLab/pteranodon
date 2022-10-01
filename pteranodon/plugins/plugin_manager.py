@@ -100,17 +100,23 @@ class PluginManager:
         ]
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
+        # TODO, fix following plugins for MULTITHREADED ERRORS
+
         for base_type in base_plugin_types:
+            if base_type in [Action]:
+                pass
+            else:
+                continue
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
                 setattr(self, base_plugin.name, base_plugin)
 
-        for ext_type in ext_plugin_types:
-            ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
-            if not self._test_valid_plugin_name(ext_plugin.name):
-                self._ext_plugins[ext_plugin.name] = ext_plugin
-                setattr(self, ext_plugin.name, ext_plugin)
+        # for ext_type in ext_plugin_types:
+        #     ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
+        #     if not self._test_valid_plugin_name(ext_plugin.name):
+        #         self._ext_plugins[ext_plugin.name] = ext_plugin
+        #         setattr(self, ext_plugin.name, ext_plugin)
 
     @property
     def base_plugins(self) -> Dict:

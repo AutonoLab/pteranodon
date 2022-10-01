@@ -40,7 +40,7 @@ class AbstractPlugin(ABC):
         try:
             self._result_cache.append((coro_name, future.result()))
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error(f"{coro_name} -> {e}")
         self._future_cache.remove(future)
         self._name_cache.remove(coro_name)
 

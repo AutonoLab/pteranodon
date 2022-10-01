@@ -454,8 +454,8 @@ class AbstractDrone(ABC):
         pass
 
     async def _teardown(self) -> None:
-        for thing in self._queue:
-            thing()
+        for command in self._queue:
+            command()
 
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
@@ -546,7 +546,10 @@ class AbstractDrone(ABC):
             pass
 
         # shutdown the any asyncgens that have been opened
+        self._stopped_mavlink = True
         self._loop.stop()
+        self._telemetry_thread.join()
+        self._mavlink_thread.join()
 
         # stop execution of the loop
         self._stopped_loop = True
@@ -563,8 +566,6 @@ class AbstractDrone(ABC):
         #     sleep(self._time_slice + 0.01)
 
         # finally join the mavlink thread and stop it
-        self._stopped_mavlink = True
-        self._mavlink_thread.join()
 
         # close logging
         self._close_logger()
