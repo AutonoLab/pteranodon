@@ -1,4 +1,5 @@
 from asyncio import AbstractEventLoop
+from distutils.log import Log
 from logging import Logger
 from typing import Dict, Type, Union, List
 
@@ -103,7 +104,16 @@ class PluginManager:
         # TODO, fix following plugins for MULTITHREADED ERRORS
 
         for base_type in base_plugin_types:
-            if base_type in [Action]:
+            if base_type in [
+                Action,
+                Calibration,
+                Core,
+                Geofence,
+                Info,
+                Offboard,
+                Param,
+                Telemetry,
+            ]:
                 pass
             else:
                 continue
@@ -112,11 +122,11 @@ class PluginManager:
                 self._base_plugins[base_plugin.name] = base_plugin
                 setattr(self, base_plugin.name, base_plugin)
 
-        # for ext_type in ext_plugin_types:
-        #     ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
-        #     if not self._test_valid_plugin_name(ext_plugin.name):
-        #         self._ext_plugins[ext_plugin.name] = ext_plugin
-        #         setattr(self, ext_plugin.name, ext_plugin)
+        for ext_type in ext_plugin_types:
+            ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
+            if not self._test_valid_plugin_name(ext_plugin.name):
+                self._ext_plugins[ext_plugin.name] = ext_plugin
+                setattr(self, ext_plugin.name, ext_plugin)
 
     @property
     def base_plugins(self) -> Dict:
