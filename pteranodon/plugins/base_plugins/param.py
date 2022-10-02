@@ -24,12 +24,8 @@ class Param(AbstractBasePlugin):
         self.refresh()
 
     def _update_params_callback(self, task: Future) -> None:
-        all_params = task.result()
-        self._all_params = all_params
-        try:
-            self._custom_params = self._all_params.custom_params
-        except AttributeError:
-            pass
+        self._all_params: param.AllParams = task.result()
+        self._custom_params = self._all_params.custom_params
         self._float_params = self._all_params.float_params
         self._int_params = self._all_params.int_params
 

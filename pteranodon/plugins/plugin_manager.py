@@ -101,7 +101,7 @@ class PluginManager:
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
-            if base_type in [Param, ComponentInformation, ComponentInformationServer, CameraServer, Camera, Mission, MissionRaw, MissionRawServer]:
+            if base_type in [ComponentInformation, ComponentInformationServer, CameraServer, Camera, Mission, MissionRaw, MissionRawServer]:
                 continue
             else:
                 pass
