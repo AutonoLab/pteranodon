@@ -101,10 +101,6 @@ class PluginManager:
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
-            if base_type in [ComponentInformation, ComponentInformationServer, CameraServer, Camera, Mission, MissionRaw, MissionRawServer]:
-                continue
-            else:
-                pass
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
