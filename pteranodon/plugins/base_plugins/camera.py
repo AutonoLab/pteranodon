@@ -32,18 +32,10 @@ class Camera(AbstractBasePlugin):
         self._possible_setting_options: List[camera.SettingOptions] = []
 
         # Tasks of subscribed properties
-        self._capture_info_task = self._submit_coroutine(
-            self._update_capture_info()
-        )
-        self._information_task = self._submit_coroutine(
-            self._update_information()
-        )
-        self._mode_task = self._submit_coroutine(
-            self._update_mode()
-        )
-        self._status_task = self._submit_coroutine(
-            self._update_status()
-        )
+        self._capture_info_task = self._submit_coroutine(self._update_capture_info())
+        self._information_task = self._submit_coroutine(self._update_information())
+        self._mode_task = self._submit_coroutine(self._update_mode())
+        self._status_task = self._submit_coroutine(self._update_status())
         self._video_stream_info_task = self._submit_coroutine(
             self._update_vstream_info()
         )

@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from functools import partial
@@ -23,10 +22,9 @@ class Offboard(AbstractBasePlugin):
         super().__init__("offboard", system, loop, logger)
         self._is_active = False
 
-        self._is_active_task = asyncio.run_coroutine_threadsafe(
-            self._system.offboard.is_active(), loop=self._loop
+        self._is_active_task = self._submit_coroutine(
+            self._system.offboard.is_active(), partial(self._is_active_callback)
         )
-        self._is_active_task.add_done_callback(partial(self._is_active_callback))
 
     def _is_active_callback(self, task: Task) -> None:
         self._is_active = task.result()

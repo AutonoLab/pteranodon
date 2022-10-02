@@ -20,11 +20,11 @@ class Mission(AbstractBasePlugin):
         self._enable_return_to_land = None
         self._mission_plan = None
         self._mission_progress = None
-        self._download_mission_with_progress_task = asyncio.run_coroutine_threadsafe(
-            self._download_mission_with_progress(), loop=self._loop
+        self._download_mission_with_progress_task = self._submit_coroutine(
+            self._download_mission_with_progress()
         )
-        self._update_mission_progress_task = asyncio.run_coroutine_threadsafe(
-            self._update_mission_progress(), loop=self._loop
+        self._update_mission_progress_task = self._submit_coroutine(
+            self._update_mission_progress()
         )
 
     def cancel_mission_download(self):

@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
@@ -19,15 +18,11 @@ class MissionRawServer(AbstractBasePlugin):
         self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
         self.clear_type: Optional[int] = None
         self.mission_item: Optional[mission_raw_server.MissionItem] = None
-        self._clear_all_task = asyncio.run_coroutine_threadsafe(
-            self._clear_all(), loop=self._loop
+        self._clear_all_task = self._submit_coroutine(self._clear_all())
+        self._current_item_changed_task = self._submit_coroutine(
+            self._current_item_changed()
         )
-        self._current_item_changed_task = asyncio.run_coroutine_threadsafe(
-            self._current_item_changed(), loop=self._loop
-        )
-        self._incoming_mission_task = asyncio.run_coroutine_threadsafe(
-            self._incoming_mission(), loop=self._loop
-        )
+        self._incoming_mission_task = self._submit_coroutine(self._incoming_mission())
 
     async def _clear_all(self):
         """

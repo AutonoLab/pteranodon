@@ -22,17 +22,15 @@ class Ftp(AbstractBasePlugin):
         self._comp_id: typing.Optional[int] = None
         self._root_directory = "/"
 
-        self._comp_id_task = asyncio.run_coroutine_threadsafe(
-            self._system.ftp.get_our_compid(), loop=self._loop
+        self._comp_id_task = self._submit_coroutine(
+            self._system.ftp.get_our_compid(), partial(self._compid_callback)
         )
-        self._comp_id_task.add_done_callback(partial(self._compid_callback))
 
     def _compid_callback(self, task: Task) -> None:
         self._comp_id = task.result()
         del self._comp_id_task
 
     async def _download_file(self, remote_file_path: str, local_directory: str) -> None:
-
         async for data in self._system.ftp.download(remote_file_path, local_directory):
             percent_downloaded: float = data.bytes_transferred / data.total_bytes
             self._logger.info(
@@ -43,7 +41,6 @@ class Ftp(AbstractBasePlugin):
             )
 
     async def _upload_file(self, local_file_path: str, remote_directory: str) -> None:
-
         async for data in self._system.ftp.upload(local_file_path, remote_directory):
             percent_uploaded: float = data.bytes_transferred / data.total_bytes
             self._logger.info(

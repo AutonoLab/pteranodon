@@ -18,11 +18,11 @@ class MissionRaw(AbstractBasePlugin):
         super().__init__("mission_raw", system, loop, logger)
         self._mission_progress = None
         self.has_mission_changed = False
-        self._mission_changed_task = asyncio.run_coroutine_threadsafe(
-            self._update_mission_changed(), loop=self._loop
+        self._mission_changed_task = self._submit_coroutine(
+            self._update_mission_changed()
         )
-        self._mission_progress_task = asyncio.run_coroutine_threadsafe(
-            self._update_mission_progress(), loop=self._loop
+        self._mission_progress_task = self._submit_coroutine(
+            self._update_mission_progress()
         )
 
     def cancel_mission_download(self):

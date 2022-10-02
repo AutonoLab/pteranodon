@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop, Task
 from logging import Logger
 from functools import partial
@@ -19,17 +18,20 @@ class Action(AbstractBasePlugin):
 
         self._maximum_speed: Optional[float] = None
         self._maximum_speed_task = self._submit_coroutine(
-            self._system.action.get_maximum_speed(), partial(self._maximum_speed_callback)
+            self._system.action.get_maximum_speed(),
+            partial(self._maximum_speed_callback),
         )
 
         self._launch_altitude: Optional[float] = None
         self._launch_altitude_task = self._submit_coroutine(
-            self._system.action.get_return_to_launch_altitude(), partial(self._launch_altitude_callback)
+            self._system.action.get_return_to_launch_altitude(),
+            partial(self._launch_altitude_callback),
         )
 
         self._takeoff_altitude: Optional[float] = None
         self._takeoff_altitude_task = self._submit_coroutine(
-            self._system.action.get_takeoff_altitude(), partial(self._takeoff_altitude_callback)
+            self._system.action.get_takeoff_altitude(),
+            partial(self._takeoff_altitude_callback),
         )
 
     def _maximum_speed_callback(self, task: Task) -> None:

@@ -23,10 +23,9 @@ class LogFiles(AbstractBasePlugin):
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
-        self._entry_list_task = asyncio.run_coroutine_threadsafe(
-            self._system.log_files.get_entries(), loop=self._loop
+        self._entry_list_task = self._submit_coroutine(
+            self._system.log_files.get_entries(), partial(self._get_entries_callback)
         )
-        self._entry_list_task.add_done_callback(partial(self._get_entries_callback))
 
     def download_log_file(self, entry: Entry, path: str) -> Optional[ProgressData]:
         """

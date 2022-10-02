@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -17,9 +16,7 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._control_status = None
-        self._control_task = asyncio.run_coroutine_threadsafe(
-            self._update_control_status(), loop=self._loop
-        )
+        self._control_task = self._submit_coroutine(self._update_control_status())
 
     async def _update_control_status(self) -> None:
         """

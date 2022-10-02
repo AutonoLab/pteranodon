@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
@@ -16,9 +15,7 @@ class Shell(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
 
-        self._receive_task = asyncio.run_coroutine_threadsafe(
-            self._receive_feedback(), loop=self._loop
-        )
+        self._receive_task = self._submit_coroutine(self._receive_feedback())
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
 

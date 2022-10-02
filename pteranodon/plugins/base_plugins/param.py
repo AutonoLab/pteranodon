@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from logging import Logger
@@ -36,10 +35,9 @@ class Param(AbstractBasePlugin):
 
     def _set_param_callback(self, _: Union[Future, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = asyncio.run_coroutine_threadsafe(
-            self._system.param.get_all_params(), loop=self._loop
+        self._param_task = self._submit_coroutine(
+            self._system.param.get_all_params(), partial(self._update_params_callback)
         )
-        self._param_task.add_done_callback(partial(self._update_params_callback))  # type: ignore
 
     @staticmethod
     def _find_param(name: str, param_list: List) -> Any:
@@ -109,10 +107,10 @@ class Param(AbstractBasePlugin):
         :return: None
         """
         try:
-            param_task = self._submit_coroutine(
-                self._system.param.set_param_custom(name, value)
+            self._submit_coroutine(
+                self._system.param.set_param_custom(name, value),
+                partial(self._set_param_callback),
             )
-            param_task.add_done_callback(partial(self._set_param_callback))
         except AttributeError:
             self._logger.error(
                 f"Unable to set param: {name} to {value}. No attribute set_param_custom"
@@ -125,10 +123,10 @@ class Param(AbstractBasePlugin):
         :param value: float ; Value of the parameter to be set
         :return: None
         """
-        param_task = self._submit_coroutine(
-            self._system.param.set_param_float(name, value)
+        self._submit_coroutine(
+            self._system.param.set_param_float(name, value),
+            partial(self._set_param_callback),
         )
-        param_task.add_done_callback(partial(self._set_param_callback))
 
     def set_param_int(self, name: str, value: int) -> None:
         """
@@ -137,10 +135,10 @@ class Param(AbstractBasePlugin):
         :param value: int ; Value of the parameter to be set
         :return: None
         """
-        param_task = self._submit_coroutine(
-            self._system.param.set_param_int(name, value)
+        self._submit_coroutine(
+            self._system.param.set_param_int(name, value),
+            partial(self._set_param_callback),
         )
-        param_task.add_done_callback(partial(self._set_param_callback))
 
     def refresh(self) -> None:
         """

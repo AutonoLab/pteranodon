@@ -20,7 +20,8 @@ class ComponentInformation(AbstractBasePlugin):
 
         self._param_list: List[FloatParam] = []
         self._param_list_task = self._submit_coroutine(
-            self._system.component_information.access_float_params(), partial(self._param_list_callback)
+            self._system.component_information.access_float_params(),
+            partial(self._param_list_callback),
         )
 
         self._float_param_update: Optional[FloatParamUpdate] = None

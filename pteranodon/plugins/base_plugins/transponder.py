@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -16,9 +15,7 @@ class Transponder(AbstractBasePlugin):
         super().__init__("transponder", system, loop, logger)
 
         self._transponder_data = None
-        self._transponder_task = asyncio.run_coroutine_threadsafe(
-            self._transponder_update(), loop=self._loop
-        )
+        self._transponder_task = self._submit_coroutine(self._transponder_update())
 
     def set_rate_transponder(self, rate: float) -> None:
         """

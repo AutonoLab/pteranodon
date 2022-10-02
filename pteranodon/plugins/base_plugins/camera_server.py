@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Callable, Tuple, Optional
@@ -32,9 +31,7 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._take_photo_sub_task = self._submit_coroutine(
-            self._take_photo()
-        )
+        self._take_photo_sub_task = self._submit_coroutine(self._take_photo())
 
     def _check_cam_info_set(self, action_name: str) -> bool:
         """

@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
@@ -22,14 +21,14 @@ class TrackingServer(AbstractBasePlugin):
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
 
-        self._tracking_off_task = asyncio.run_coroutine_threadsafe(
-            self._update_tracking_off_command(), loop=self._loop
+        self._tracking_off_task = self._submit_coroutine(
+            self._update_tracking_off_command()
         )
-        self._tracking_point_task = asyncio.run_coroutine_threadsafe(
-            self._update_tracking_point_command(), loop=self._loop
+        self._tracking_point_task = self._submit_coroutine(
+            self._update_tracking_point_command()
         )
-        self._tracking_rectangle_task = asyncio.run_coroutine_threadsafe(
-            self._update_tracking_rectangle_command(), loop=self._loop
+        self._tracking_rectangle_task = self._submit_coroutine(
+            self._update_tracking_rectangle_command()
         )
 
     def respond_tracking_off_command(self, command_answer: CommandAnswer) -> None:

@@ -174,4 +174,3 @@ class PluginManager:
             plugin.cancel_futures()
         for plugin in self._custom_plugins.values():
             plugin.cancel_futures()
-            
