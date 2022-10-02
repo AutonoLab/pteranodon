@@ -1,5 +1,4 @@
 from asyncio import AbstractEventLoop
-from distutils.log import Log
 from logging import Logger
 from typing import Dict, Type, Union, List
 

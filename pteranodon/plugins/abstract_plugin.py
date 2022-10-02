@@ -5,7 +5,7 @@ from concurrent.futures import Future
 from logging import Logger
 from collections import deque
 from functools import partial
-from typing import Tuple, Any, Callable, Optional, List
+from typing import Tuple, Any, Callable, Optional
 
 from mavsdk import System
 
