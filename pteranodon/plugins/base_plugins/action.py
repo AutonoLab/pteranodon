@@ -18,27 +18,18 @@ class Action(AbstractBasePlugin):
         super().__init__("action", system, loop, logger)
 
         self._maximum_speed: Optional[float] = None
-        self._maximum_speed_task = asyncio.run_coroutine_threadsafe(
-            self._system.action.get_maximum_speed(), loop=self._loop
-        )
-        self._maximum_speed_task.add_done_callback(
-            partial(self._maximum_speed_callback)
+        self._maximum_speed_task = self._submit_coroutine(
+            self._system.action.get_maximum_speed(), partial(self._maximum_speed_callback)
         )
 
         self._launch_altitude: Optional[float] = None
-        self._launch_altitude_task = asyncio.run_coroutine_threadsafe(
-            self._system.action.get_return_to_launch_altitude(), loop=self._loop
-        )
-        self._launch_altitude_task.add_done_callback(
-            partial(self._launch_altitude_callback)
+        self._launch_altitude_task = self._submit_coroutine(
+            self._system.action.get_return_to_launch_altitude(), partial(self._launch_altitude_callback)
         )
 
         self._takeoff_altitude: Optional[float] = None
-        self._takeoff_altitude_task = asyncio.run_coroutine_threadsafe(
-            self._system.action.get_takeoff_altitude(), loop=self._loop
-        )
-        self._takeoff_altitude_task.add_done_callback(
-            partial(self._takeoff_altitude_callback)
+        self._takeoff_altitude_task = self._submit_coroutine(
+            self._system.action.get_takeoff_altitude(), partial(self._takeoff_altitude_callback)
         )
 
     def _maximum_speed_callback(self, task: Task) -> None:

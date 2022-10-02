@@ -1,6 +1,6 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from logging import Logger
 from collections import deque
@@ -44,12 +44,12 @@ class AbstractPlugin(ABC):
         try:
             coro_name: str = self._name_cache[self._future_cache.index(future)]
             self._logger.info(f"Task completed: {coro_name} ")
+            self._future_cache.remove(future)
+            self._name_cache.remove(coro_name)
             try:
                 self._result_cache.append((coro_name, future.result()))
             except Exception as e:
                 self._logger.error(f"{coro_name} -> {e}")
-            self._future_cache.remove(future)
-            self._name_cache.remove(coro_name)
         except Exception as e:
             self._logger.error(f"Callback failed: {future} -> {e}")
 
@@ -86,3 +86,10 @@ class AbstractPlugin(ABC):
             first = coros[0]
             coros.remove(first)
             self._submit_coroutine(first, partial(self._schedule, *coros))
+
+    def cancel_futures(self) -> None:
+        """
+        Cancels all currently running (or yet to run) Futures in the queue/cache
+        """
+        for future in list(self._future_cache):
+            future.cancel()

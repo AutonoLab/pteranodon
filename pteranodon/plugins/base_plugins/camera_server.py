@@ -32,8 +32,8 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._take_photo_sub_task = asyncio.run_coroutine_threadsafe(
-            self._take_photo(), loop=self._loop
+        self._take_photo_sub_task = self._submit_coroutine(
+            self._take_photo()
         )
 
     def _check_cam_info_set(self, action_name: str) -> bool:

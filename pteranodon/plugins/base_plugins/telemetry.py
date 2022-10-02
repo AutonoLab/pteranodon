@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, CancelledError
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
@@ -66,12 +66,12 @@ class Telemetry(AbstractBasePlugin):
         async for data in getattr(self._system.telemetry, func)():
             if data != self._async_gen_data[func]:
                 self._async_gen_data[func] = data
-
+                
     def _start_async_gen_telemetry(self) -> Dict:
         tasks = {}
         for func in self._async_gen_methods:
-            tasks[func] = asyncio.run_coroutine_threadsafe(
-                self._async_gen_wrapper(func), loop=self._loop
+            tasks[func] = self._submit_coroutine(
+                self._async_gen_wrapper(func)
             )
         return tasks
 

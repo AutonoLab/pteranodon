@@ -101,6 +101,11 @@ class PluginManager:
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
+            # TODO, remove TEMP CODE
+            if base_type in [Action, Offboard, Telemetry, Geofence]:
+                pass
+            else:
+                continue
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
@@ -158,3 +163,15 @@ class PluginManager:
             )
             return True
         return False
+
+    def cancel_all_futures(self) -> None:
+        """
+        Force cancels all running (or yet to run) Futures in ALL plugins
+        """
+        for plugin in self._base_plugins.values():
+            plugin.cancel_futures()
+        for plugin in self._ext_plugins.values():
+            plugin.cancel_futures()
+        for plugin in self._custom_plugins.values():
+            plugin.cancel_futures()
+            

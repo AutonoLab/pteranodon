@@ -584,6 +584,7 @@ class AbstractDrone(ABC):
         # shutdown any generators (yield) which are running
         # don't save the Future since cleaning and shutting down anyways
         self._logger.info("Closing async generators")
+        self._plugins.cancel_all_futures()
         asyncio.run_coroutine_threadsafe(
             self._loop.shutdown_asyncgens(), loop=self._loop
         )  # shutdown_asyncgens is a coroutine
@@ -600,12 +601,10 @@ class AbstractDrone(ABC):
         # attempt to join all threads
         self._logger.info("Attempting to join threads")
         map(self._join_thread, self._threads)
-        # publish signal to kill threads
-        signal.alarm(0)
 
         # run teardown (queue should be clean from the clear before disarm)
         self._logger.info("Running remaining async Tasks/Future, and MAVSDK commands")
-        asyncio.new_event_loop().run_until_complete(self._teardown())
+        asyncio.get_event_loop().run_until_complete(self._teardown())
 
         # cleanup the mavsdk.System instance
         self._cleanup()

@@ -32,20 +32,20 @@ class Camera(AbstractBasePlugin):
         self._possible_setting_options: List[camera.SettingOptions] = []
 
         # Tasks of subscribed properties
-        self._capture_info_task = asyncio.run_coroutine_threadsafe(
-            self._update_capture_info(), loop=self._loop
+        self._capture_info_task = self._submit_coroutine(
+            self._update_capture_info()
         )
-        self._information_task = asyncio.run_coroutine_threadsafe(
-            self._update_information(), loop=self._loop
+        self._information_task = self._submit_coroutine(
+            self._update_information()
         )
-        self._mode_task = asyncio.run_coroutine_threadsafe(
-            self._update_mode(), loop=self._loop
+        self._mode_task = self._submit_coroutine(
+            self._update_mode()
         )
-        self._status_task = asyncio.run_coroutine_threadsafe(
-            self._update_status(), loop=self._loop
+        self._status_task = self._submit_coroutine(
+            self._update_status()
         )
-        self._video_stream_info_task = asyncio.run_coroutine_threadsafe(
-            self._update_vstream_info(), loop=self._loop
+        self._video_stream_info_task = self._submit_coroutine(
+            self._update_vstream_info()
         )
 
         # Only want to fetch the current settings and options once on init

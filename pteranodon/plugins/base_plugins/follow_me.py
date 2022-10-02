@@ -21,20 +21,17 @@ class FollowMe(AbstractBasePlugin):
         self._config: Optional[follow_me.Config] = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
-        self._is_active_task = asyncio.run_coroutine_threadsafe(
-            self._system.follow_me.is_active(), loop=self._loop
+        self._is_active_task = self._submit_coroutine(
+            self._system.follow_me.is_active(), partial(self._is_active_callback)
         )
-        self._is_active_task.add_done_callback(partial(self._is_active_callback))
-        self._last_location_task = asyncio.run_coroutine_threadsafe(
-            self._system.follow_me.get_last_location(), loop=self._loop
+
+        self._last_location_task = self._submit_coroutine(
+            self._system.follow_me.get_last_location(), partial(self._last_location_callback)
         )
-        self._last_location_task.add_done_callback(
-            partial(self._last_location_callback)
+
+        self._config_task = self._submit_coroutine(
+            self._system.follow_me.get_config(), partial(self._config_callback)
         )
-        self._config_task = asyncio.run_coroutine_threadsafe(
-            self._system.follow_me.get_config(), loop=self._loop
-        )
-        self._config_task.add_done_callback(partial(self._config_callback))
 
     def _is_active_callback(self, task: Task) -> None:
         self._is_active = task.result()

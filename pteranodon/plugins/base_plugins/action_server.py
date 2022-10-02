@@ -16,32 +16,32 @@ class ActionServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action_server", system, loop, logger)
-        self._arm_disarm_task = asyncio.run_coroutine_threadsafe(
-            self._arm_disarm(), loop=self._loop
+        self._arm_disarm_task = self._submit_coroutine(
+            self._arm_disarm()
         )
         self._arm_disarm_value: Optional[action_server.ArmDisarm] = None
-        self._flight_mode_change_task = asyncio.run_coroutine_threadsafe(
-            self._flight_mode_change(), loop=self._loop
+        self._flight_mode_change_task = self._submit_coroutine(
+            self._flight_mode_change()
         )
         self._flight_mode_change_value: Optional[action_server.FlightMode] = None
-        self._land_task = asyncio.run_coroutine_threadsafe(
-            self._land(), loop=self._loop
+        self._land_task = self._submit_coroutine(
+            self._land()
         )
         self._land_value: Optional[bool] = None
-        self._reboot_task = asyncio.run_coroutine_threadsafe(
-            self._reboot(), loop=self._loop
+        self._reboot_task = self._submit_coroutine(
+            self._reboot()
         )
         self._reboot_value: Optional[bool] = None
-        self._shutdown_task = asyncio.run_coroutine_threadsafe(
-            self._shutdown(), loop=self._loop
+        self._shutdown_task = self._submit_coroutine(
+            self._shutdown()
         )
         self._shutdown_value: Optional[bool] = None
-        self._takeoff_task = asyncio.run_coroutine_threadsafe(
-            self._takeoff(), loop=self._loop
+        self._takeoff_task = self._submit_coroutine(
+            self._takeoff()
         )
         self._takeoff_value: Optional[bool] = None
-        self._terminate_task = asyncio.run_coroutine_threadsafe(
-            self._terminate(), loop=self._loop
+        self._terminate_task = self._submit_coroutine(
+            self._terminate()
         )
         self._terminate_value: Optional[bool] = None
 

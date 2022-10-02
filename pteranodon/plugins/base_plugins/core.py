@@ -16,7 +16,7 @@ class Core(AbstractBasePlugin):
         super().__init__("core", system, loop, logger)
 
         self._connection_state = None
-        self._connection_task = asyncio.run_coroutine_threadsafe(
+        self._connection_task = self._submit_coroutine(
             self._update_connection_state(), loop=self._loop
         )
 

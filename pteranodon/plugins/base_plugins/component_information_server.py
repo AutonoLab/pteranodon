@@ -17,8 +17,8 @@ class ComponentInformationServer(AbstractBasePlugin):
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._float_param_update_task = asyncio.run_coroutine_threadsafe(
-            self._update_float_param(), loop=self._loop
+        self._float_param_update_task = self._submit_coroutine(
+            self._update_float_param()
         )
 
     async def _update_float_param(self) -> None:
