@@ -1,5 +1,5 @@
-import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
 from logging import Logger
 from typing import AsyncGenerator
 
@@ -26,7 +26,7 @@ class Calibration(AbstractBasePlugin):
             self._logger.error(f"{sensor_name} calibration {e}")
         self._logger.info(f"Finished calibration of {sensor_name}")
 
-    def _calibrate_gyro(self) -> Task:
+    def _calibrate_gyro(self) -> Future:
         return self._submit_coroutine(
             self._calibrate_wrapper(self._system.calibration.calibrate_gyro())
         )
@@ -38,7 +38,7 @@ class Calibration(AbstractBasePlugin):
         """
         self._calibrate_gyro()
 
-    def _calibrate_accelerometer(self) -> Task:
+    def _calibrate_accelerometer(self) -> Future:
         return self._submit_coroutine(
             self._calibrate_wrapper(self._system.calibration.calibrate_accelerometer())
         )
@@ -50,7 +50,7 @@ class Calibration(AbstractBasePlugin):
         """
         self._calibrate_accelerometer()
 
-    def _calibrate_gimbal_accelerometer(self) -> Task:
+    def _calibrate_gimbal_accelerometer(self) -> Future:
         return self._submit_coroutine(
             self._calibrate_wrapper(
                 self._system.calibration.calibrate_gimbal_accelerometer()
@@ -64,7 +64,7 @@ class Calibration(AbstractBasePlugin):
         """
         self._calibrate_gimbal_accelerometer()
 
-    def _calibrate_magnetometer(self) -> Task:
+    def _calibrate_magnetometer(self) -> Future:
         return self._submit_coroutine(
             self._calibrate_wrapper(self._system.calibration.calibrate_magnetometer())
         )
@@ -76,7 +76,7 @@ class Calibration(AbstractBasePlugin):
         """
         self._calibrate_magnetometer()
 
-    def _calibrate_level_horizon(self) -> Task:
+    def _calibrate_level_horizon(self) -> Future:
         return self._submit_coroutine(
             self._calibrate_wrapper(self._system.calibration.calibrate_level_horizon())
         )
@@ -104,9 +104,7 @@ class Calibration(AbstractBasePlugin):
             self._calibrate_level_horizon,
         ]
         for func in task_funcs:
-            task = asyncio.run_coroutine_threadsafe(func(), loop=self._loop)
-            while not task.done():
-                await asyncio.sleep(0.05)
+            func()
 
     def calibrate_all(self) -> None:
         """

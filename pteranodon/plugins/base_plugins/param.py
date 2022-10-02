@@ -1,5 +1,6 @@
 import asyncio
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
 from logging import Logger
 from typing import List, Union, Any, Optional
 from functools import partial
@@ -20,10 +21,10 @@ class Param(AbstractBasePlugin):
         self._custom_params: Optional[List[param.CustomParam]] = None
         self._float_params: Optional[List[param.FloatParam]] = None
         self._int_params: Optional[List[param.IntParam]] = None
-        self._param_task: Optional[Task] = None
+        self._param_task: Optional[Future] = None
         self.refresh()
 
-    def _update_params_callback(self, task: Task) -> None:
+    def _update_params_callback(self, task: Future) -> None:
         all_params = task.result()
         self._all_params = all_params
         try:
@@ -33,7 +34,7 @@ class Param(AbstractBasePlugin):
         self._float_params = self._all_params.float_params
         self._int_params = self._all_params.int_params
 
-    def _set_param_callback(self, _: Union[Task, None]) -> None:
+    def _set_param_callback(self, _: Union[Future, None]) -> None:
         # can use a Union parameter for the callback since the task itself is not edited
         self._param_task = asyncio.run_coroutine_threadsafe(
             self._system.param.get_all_params(), loop=self._loop

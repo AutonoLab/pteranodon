@@ -557,7 +557,8 @@ class AbstractDrone(ABC):
     def _run_telemetry_loop(self):
         self._loop.run_forever()
 
-    # method which joins a thread with a timeout, used with map to close all threads
+    # method which joins a thread with a timeout, used with map to close all threads\
+    @staticmethod
     def _join_thread(thread: Thread, timeout=1) -> None:
         try:
             thread.join(timeout=timeout)

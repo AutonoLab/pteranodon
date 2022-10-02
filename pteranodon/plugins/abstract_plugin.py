@@ -1,11 +1,11 @@
 from abc import ABC
 import asyncio
-from asyncio import AbstractEventLoop, coroutine
+from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from logging import Logger
 from collections import deque
 from functools import partial
-from typing import Tuple, Any, Callable, Optional
+from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
 
 from mavsdk import System
 
@@ -23,9 +23,9 @@ class AbstractPlugin(ABC):
         self._loop: AbstractEventLoop = loop
         self._logger: Logger = logger
 
-        self._future_cache: deque = deque()
-        self._name_cache: deque = deque()
-        self._result_cache: deque[Tuple[str, Any]] = deque(maxlen=10)
+        self._future_cache: Deque[Future] = deque()
+        self._name_cache: Deque[str] = deque()
+        self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
     @property
     def name(self) -> str:
@@ -51,10 +51,10 @@ class AbstractPlugin(ABC):
             self._future_cache.remove(future)
             self._name_cache.remove(coro_name)
         except Exception as e:
-            self._logger.error(f"Callback failed: {future}")
+            self._logger.error(f"Callback failed: {future} -> {e}")
 
     def _submit_coroutine(
-        self, coro: coroutine, callback: Optional[Callable] = None
+        self, coro: Coroutine, callback: Optional[Callable] = None
     ) -> Future:
         """
         Puts a task returned by asyncio.run_coroutine_threadsafe to the future_cache to prevent garbage collection and allow return
@@ -63,7 +63,7 @@ class AbstractPlugin(ABC):
         :param callback: A Callable, which will be added with add_done_callback to the given coroutine
         :return: The submitted task, if plugin specific callbacks are added
         """
-        new_future = asyncio.run_coroutine_threadsafe(coro, loop=self._loop)
+        new_future: Future = asyncio.run_coroutine_threadsafe(coro, loop=self._loop)
         new_future.add_done_callback(partial(self._future_callback))
         if callback is not None:
             new_future.add_done_callback(callback)
@@ -71,7 +71,7 @@ class AbstractPlugin(ABC):
         self._name_cache.append(coro.__qualname__)
         return new_future
 
-    def _schedule(self, *args: coroutine) -> None:
+    def _schedule(self, *args: Coroutine) -> None:
         """
         Takes any ammount of coroutins as input and uses add_done_callback to chain all coroutines together
         :param *args: Any amount of coroutines
@@ -82,7 +82,7 @@ class AbstractPlugin(ABC):
             if isinstance(
                 coros[-1], Future
             ):  # remove the Future if this was called with a callback
-                coros.pop()
+                _ = coros.pop()
             first = coros[0]
             coros.remove(first)
             self._submit_coroutine(first, partial(self._schedule, *coros))
