@@ -2,6 +2,7 @@ from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
 import asyncio
+from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
 from typing import Any, List, Tuple, Callable, Dict, Optional
@@ -513,11 +514,15 @@ class AbstractDrone(ABC):
                 f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
             )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
-                self._task_cache.append(
-                    asyncio.run_coroutine_threadsafe(
-                        com(*args, **kwargs), loop=self._loop
+                new_future: Future = asyncio.run_coroutine_threadsafe(
+                    com(*args, **kwargs), loop=self._loop
+                )
+                new_future.add_done_callback(
+                    lambda f: self._logger.info(
+                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"
                     )
                 )
+                self._task_cache.append(new_future)
             else:  # typical sync function
                 com(*args, **kwargs)
         else:
