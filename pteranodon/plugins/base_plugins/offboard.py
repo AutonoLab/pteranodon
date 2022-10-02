@@ -120,11 +120,11 @@ class Offboard(AbstractBasePlugin):
         :return: None
         """
         self._is_active = True
-        self._submit_coroutine(
-            self._system.offboard.set_attitude(offboard.Attitude(0.0, 0.0, 0.0, 0.0))
+        self._schedule(
+            self._system.offboard.set_attitude(offboard.Attitude(0.0, 0.0, 0.0, 0.0)),
+            self._system.offboard.set_velocity_body(offboard.VelocityBodyYawspeed(0, 0, 0, 0)),  # self.hold coroutine equivalent
+            self._system.offboard.start()
         )
-        self.hold()
-        self._submit_coroutine(self._system.offboard.start())
 
     def stop(self) -> None:
         """
