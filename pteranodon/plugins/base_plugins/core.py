@@ -16,7 +16,7 @@ class Core(AbstractBasePlugin):
 
         self._connection_state = None
         self._connection_task = self._submit_coroutine(
-            self._update_connection_state(), loop=self._loop
+            self._update_connection_state()
         )
 
     def set_mavlink_timeout(self, delay_s: float) -> None:
