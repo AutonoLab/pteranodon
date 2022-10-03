@@ -14,6 +14,7 @@ class Failure(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("failure", system, loop, logger)
+        self._end_init()
 
     def inject(
         self, failure_unit: FailureUnit, failure_type: FailureType, instance: int

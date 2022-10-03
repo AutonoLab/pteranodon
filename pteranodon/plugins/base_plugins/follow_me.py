@@ -1,6 +1,5 @@
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
 from typing import Optional
 
 from mavsdk import System, follow_me
@@ -20,30 +19,11 @@ class FollowMe(AbstractBasePlugin):
         self._config: Optional[follow_me.Config] = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
-        self._is_active_task = self._submit_coroutine(
-            self._system.follow_me.is_active(), partial(self._is_active_callback)
-        )
+        self._is_active = self._loop.run_until_complete(self._system.follow_me.is_active())
+        self._last_location = self._loop.run_until_complete(self._system.follow_me.get_last_location())
+        self._config_task = self._loop.run_until_complete(self._system.follow_me.get_config())
 
-        self._last_location_task = self._submit_coroutine(
-            self._system.follow_me.get_last_location(),
-            partial(self._last_location_callback),
-        )
-
-        self._config_task = self._submit_coroutine(
-            self._system.follow_me.get_config(), partial(self._config_callback)
-        )
-
-    def _is_active_callback(self, task: Task) -> None:
-        self._is_active = task.result()
-        del self._is_active_task
-
-    def _last_location_callback(self, task: Task) -> None:
-        self._last_location = task.result()
-        del self._last_location_task
-
-    def _config_callback(self, task: Task) -> None:
-        self._config = task.result()
-        del self._config_task
+        self._end_init()
 
     def get_config(self) -> Optional[follow_me.Config]:
         """

@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from functools import partial
 
 from mavsdk import System, mission_raw_server
 
@@ -15,14 +16,37 @@ class MissionRawServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
-        self.mission_plan: Optional[mission_raw_server.MissionPlan] = None
-        self.clear_type: Optional[int] = None
-        self.mission_item: Optional[mission_raw_server.MissionItem] = None
-        self._clear_all_task = self._submit_coroutine(self._clear_all())
-        self._current_item_changed_task = self._submit_coroutine(
-            self._current_item_changed()
-        )
-        self._incoming_mission_task = self._submit_coroutine(self._incoming_mission())
+
+        self._mission_plan: Optional[mission_raw_server.MissionPlan] = None
+        self._clear_type: Optional[int] = None
+        self._mission_item: Optional[mission_raw_server.MissionItem] = None
+
+        self._submit_generator(partial(self._clear_all))
+        self._submit_generator(partial(self._current_item_changed))
+        self._submit_generator(partial(self._incoming_mission))
+
+        self._end_init()
+
+    @property
+    def mission_plan(self) -> Optional[mission_raw_server.MissionPlane]:
+        """
+        Returns current mission plan
+        """
+        return self._mission_plan
+
+    @property
+    def clear_type(self) -> Optional[int]:
+        """
+        Returns last clear_type received
+        """
+        return self._clear_type
+
+    @property
+    def mission_item(self) -> Optional[mission_raw_server.MissionItem]:
+        """
+        Returns current mission items
+        """
+        return self._mission_item
 
     async def _clear_all(self):
         """

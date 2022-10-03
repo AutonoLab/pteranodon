@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System, transponder
 
@@ -15,7 +16,9 @@ class Transponder(AbstractBasePlugin):
         super().__init__("transponder", system, loop, logger)
 
         self._transponder_data = None
-        self._transponder_task = self._submit_coroutine(self._transponder_update())
+        self._submit_generator(partial(self._transponder_update))
+
+        self._end_init()
 
     def set_rate_transponder(self, rate: float) -> None:
         """

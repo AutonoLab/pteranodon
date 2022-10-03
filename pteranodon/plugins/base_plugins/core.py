@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System, core
 
@@ -15,9 +16,9 @@ class Core(AbstractBasePlugin):
         super().__init__("core", system, loop, logger)
 
         self._connection_state = None
-        self._connection_task = self._submit_coroutine(
-            self._update_connection_state()
-        )
+        self._submit_generator(partial(self._update_connection_state))
+
+        self._end_init()
 
     def set_mavlink_timeout(self, delay_s: float) -> None:
         """

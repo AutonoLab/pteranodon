@@ -12,6 +12,7 @@ class ManualControl(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("manual_control", system, loop, logger)
+        self._end_init()
 
     def set_manual_control_input(self, x: float, y: float, z: float, r: float):
 

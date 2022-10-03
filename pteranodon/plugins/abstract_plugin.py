@@ -6,6 +6,7 @@ from logging import Logger
 from collections import deque
 from functools import partial
 from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
+from threading import Condition
 
 import grpc
 from mavsdk import System
@@ -36,6 +37,13 @@ class AbstractPlugin(ABC):
         :return: str ; returns the name of the plugin as a string
         """
         return self._name    
+
+    def _end_init(self) -> None:
+        """
+        Method which should be called at the end of the __init__ method for each class which inherits this
+        """
+        # call to wait on sleep so that way generators get created
+        self._loop.run_until_complete(asyncio.sleep(0.05))
 
     def _future_callback(self, future: Future) -> None:
         """
@@ -101,14 +109,33 @@ class AbstractPlugin(ABC):
         :return: The scheduled Future with coroutines chained to it
         """
         coros = [*args]
+        # remove the Future if this was called with a callback
+        if isinstance(coros[-1], Future):
+            _ = coros.pop()
         if len(coros) > 0:
-            if isinstance(
-                coros[-1], Future
-            ):  # remove the Future if this was called with a callback
-                _ = coros.pop()
             first = coros[0]
             coros.remove(first)
             self._submit_coroutine(first, partial(self._schedule, *coros))
+
+    def _submit_blocking_coroutine(self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0) -> Any:
+        """
+        Blocks until the given coroutine has completed, returning its result (or None if a timeout occurs)
+        :param coro: The Coroutine to run
+        :param callback: An optional callback function to call with the coroutine, this is not-blocking
+        :param timeout: The maximum number of seconds to block
+        :return: The result of the coroutine if it succeeds, otherwise None
+        """
+        done_condition = Condition()
+        blocking_future = self._submit_coroutine(coro(), callback)
+        blocking_future.add_done_callback(lambda _: done_condition.notify())
+        
+        done_condition.wait(timeout)
+
+        try:
+            return blocking_future.result()
+        except asyncio.InvalidStateError:
+            blocking_future.cancel()
+            return None
 
     def cancel_futures(self) -> None:
         """

@@ -15,6 +15,7 @@ class Calibration(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("calibration", system, loop, logger)
+        self._end_init()
 
     async def _calibrate_wrapper(self, com: AsyncGenerator) -> None:
         sensor_name = com.__name__.split("_")[1]  # type: ignore

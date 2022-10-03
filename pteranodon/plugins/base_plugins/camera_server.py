@@ -33,6 +33,8 @@ class CameraServer(AbstractBasePlugin):
 
         self._take_photo_sub_task = self._submit_coroutine(self._take_photo())
 
+        self._end_init()
+
     def _check_cam_info_set(self, action_name: str) -> bool:
         """
         Since the camera info must be set before any actions can be taken, this method checks for existence and
@@ -58,7 +60,6 @@ class CameraServer(AbstractBasePlugin):
         :param callback: The function which returns the parameters to respond_take_photo
         :type callback: Callable[[int], Tuple[camera.TakePhotoFeedback, camera.CaptureInfo]]
         """
-
         # Even though this doesn't call anything, it really cements the importance
         if not self._check_cam_info_set("Set Photo Request Callback"):
             return
@@ -93,7 +94,6 @@ class CameraServer(AbstractBasePlugin):
         return TakePhotoFeedback.FAILED, capture_info
 
     async def _take_photo(self) -> None:
-
         async for capture_req_idx in self._system.camera_server.take_photo():
             self._logger.info(
                 f"Received image capture request with index {capture_req_idx}"

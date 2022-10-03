@@ -18,10 +18,13 @@ class Param(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
+        
         self._custom_params: Dict[str, str] = {}
         self._float_params: Dict[str, float] = {}
         self._int_params: Dict[str, int] = {}
         self._get_all_params_callback(self._loop.run_until_complete(self._system.param.get_all_params()))
+
+        self._end_init()
 
     def _get_all_params_callback(self, all_params: AllParams) -> None:
         for param in all_params.custom_params:

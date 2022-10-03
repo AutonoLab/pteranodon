@@ -14,6 +14,7 @@ class Mocap(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mocap", system, loop, logger)
+        self._end_init()
 
     def set_attitude_position_mocap(
         self, attitude_position_mocap: mocap.AttitudePositionMocap

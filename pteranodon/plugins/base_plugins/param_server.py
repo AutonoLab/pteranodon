@@ -2,7 +2,7 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from threading import Condition
+from functools import partial
 
 from mavsdk import System, param_server
 
@@ -16,6 +16,7 @@ class ParamServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param_server", system, loop, logger)
+        self._end_init()
 
     def provide_param_custom(self, name: str, value: str):
         """
@@ -54,7 +55,7 @@ class ParamServer(AbstractBasePlugin):
         )
         self._submit_coroutine(self._system.param_server.provide_param_int(name, value))
 
-    def retrieve_all_params(self) -> Optional[param_server.AllParams]:
+    def retrieve_all_params(self, timeout: float = 1.0) -> Optional[param_server.AllParams]:
         """
         retrieves the all parameters item
         :return: param_server.AllParams or None ; If result is not none, it is the AllParams object, otherwise,
@@ -62,22 +63,18 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_all_params")
 
-        retrieve_all_params_task = asyncio.run_coroutine_threadsafe(
-            self._system.param_server.retrieve_all_params(), loop=self._loop
+        all_params = self._submit_blocking_coroutine(
+            partial(self._system.param_server.retrieve_all_params),
+            timeout=timeout
         )
-        done_condition = Condition()
-        retrieve_all_params_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = retrieve_all_params_task.result()
+        if all_params is not None:
             self._logger.info("Response to retrieve_all_params received")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Could not retrieve all params! Request timed out!")
-            return None
+        return all_params
 
-    def retrieve_param_custom(self, name) -> Optional[str]:
+    def retrieve_param_custom(self, name, timeout: float = 1.0) -> Optional[str]:
         """
         Retrieve the value of a custom parameter.
         :param name: Name of the custom parameter you want to retrieve.
@@ -86,24 +83,20 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_custom")
 
-        retrieve_param_custom_task = asyncio.run_coroutine_threadsafe(
-            self._system.param_server.retrieve_param_custom(name), loop=self._loop
+        param_custom = self._submit_blocking_coroutine(
+            partial(self._system.param_server.retrieve_param_custom, name),
+            timeout=timeout
         )
-        done_condition = Condition()
-        retrieve_param_custom_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = retrieve_param_custom_task.result()
+        if param_custom is not None:
             self._logger.info("Response to retrieve_param_custom received")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error(
                 "Could not retrieve custom parameter! Request timed out!"
             )
-            return None
+        return param_custom
 
-    def retrieve_param_float(self, name) -> Optional[float]:
+    def retrieve_param_float(self, name, timeout: float = 1.0) -> Optional[float]:
         """
         Retrieve the value of float parameter.
         :param name: Name of the float parameter you want to retrieve.
@@ -112,22 +105,18 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_float")
 
-        retrieve_param_float_task = asyncio.run_coroutine_threadsafe(
-            self._system.param_server.retrieve_param_float(name), loop=self._loop
+        param_float = self._submit_blocking_coroutine(
+            partial(self._system.param_server.retrieve_param_float, name),
+            timeout=timeout
         )
-        done_condition = Condition()
-        retrieve_param_float_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = retrieve_param_float_task.result()
+        if param_float is not None:
             self._logger.info("Response to retrieve_param_float received")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Could not retrieve float parameter! Request timed out!")
-            return None
+        return param_float
 
-    def retrieve_param_int(self, name) -> Optional[int]:
+    def retrieve_param_int(self, name, timeout: float = 1.0) -> Optional[int]:
         """
         Retrieve the value of an integer parameter.
         :param name: Name of the integer parameter you want to retrieve.
@@ -136,17 +125,13 @@ class ParamServer(AbstractBasePlugin):
         """
         self._logger.info("Waiting for response to retrieve_param_int")
 
-        retrieve_param_int_task = asyncio.run_coroutine_threadsafe(
-            self._system.param_server.retrieve_param_int(name), loop=self._loop
+        param_int = self._submit_blocking_coroutine(
+            partial(self._system.param_server.retrieve_param_int, name),
+            timeout=timeout
         )
-        done_condition = Condition()
-        retrieve_param_int_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = retrieve_param_int_task.result()
+        if param_int is not None:
             self._logger.info("Response to retrieve_param_float received")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Could not retrieve float parameter! Request timed out!")
-            return None
+        return param_int

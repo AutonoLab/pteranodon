@@ -1,4 +1,5 @@
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
 from logging import Logger
 from functools import partial
 from typing import Optional
@@ -17,34 +18,14 @@ class Action(AbstractBasePlugin):
         super().__init__("action", system, loop, logger)
 
         self._maximum_speed: Optional[float] = None
-        self._maximum_speed_task = self._submit_coroutine(
-            self._system.action.get_maximum_speed(),
-            partial(self._maximum_speed_callback),
-        )
-
         self._launch_altitude: Optional[float] = None
-        self._launch_altitude_task = self._submit_coroutine(
-            self._system.action.get_return_to_launch_altitude(),
-            partial(self._launch_altitude_callback),
-        )
-
         self._takeoff_altitude: Optional[float] = None
-        self._takeoff_altitude_task = self._submit_coroutine(
-            self._system.action.get_takeoff_altitude(),
-            partial(self._takeoff_altitude_callback),
-        )
 
-    def _maximum_speed_callback(self, task: Task) -> None:
-        self._maximum_speed = task.result()
-        del self._maximum_speed_task
+        self._maximum_speed = self._loop.run_until_complete(self._system.action.get_maximum_speed())
+        self._launch_altitude = self._loop.run_until_complete(self._system.action.get_return_to_launch_altitude())
+        self._takeoff_altitude = self._loop.run_until_complete(self._system.action.get_takeoff_altitude())
 
-    def _launch_altitude_callback(self, task: Task) -> None:
-        self._launch_altitude = task.result()
-        del self._launch_altitude_task
-
-    def _takeoff_altitude_callback(self, task: Task) -> None:
-        self._takeoff_altitude = task.result()
-        del self._takeoff_altitude_task
+        self._end_init()
 
     def arm(self) -> None:
         """

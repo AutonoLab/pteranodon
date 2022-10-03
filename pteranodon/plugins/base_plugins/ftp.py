@@ -1,9 +1,8 @@
 import asyncio
 import typing
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
-from functools import partial
 from threading import Condition
 
 from mavsdk import System
@@ -22,13 +21,9 @@ class Ftp(AbstractBasePlugin):
         self._comp_id: typing.Optional[int] = None
         self._root_directory = "/"
 
-        self._comp_id_task = self._submit_coroutine(
-            self._system.ftp.get_our_compid(), partial(self._compid_callback)
-        )
+        self._comp_id = self._loop.run_until_complete(self._system.ftp.get_our_compid())
 
-    def _compid_callback(self, task: Task) -> None:
-        self._comp_id = task.result()
-        del self._comp_id_task
+        self._end_init()
 
     async def _download_file(self, remote_file_path: str, local_directory: str) -> None:
         async for data in self._system.ftp.download(remote_file_path, local_directory):
@@ -39,6 +34,8 @@ class Ftp(AbstractBasePlugin):
                     f' downloading to directory "{local_directory}": {percent_downloaded:.2f}%      ',
                 )
             )
+            if percent_downloaded == 1.0:
+                break
 
     async def _upload_file(self, local_file_path: str, remote_directory: str) -> None:
         async for data in self._system.ftp.upload(local_file_path, remote_directory):
@@ -49,6 +46,8 @@ class Ftp(AbstractBasePlugin):
                     f' uploading to directory "{remote_directory}": {percent_uploaded:.2f}%      ',
                 )
             )
+            if percent_uploaded == 1.0:
+                break
 
     def get_our_component_id(self) -> typing.Optional[int]:
         """

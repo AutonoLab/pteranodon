@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from functools import partial
 
 from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -15,21 +16,17 @@ class TrackingServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tracking_server", system, loop, logger)
+        
         self._track_rectangle: Optional[TrackRectangle] = None
         self._track_point: Optional[TrackPoint] = None
-
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
 
-        self._tracking_off_task = self._submit_coroutine(
-            self._update_tracking_off_command()
-        )
-        self._tracking_point_task = self._submit_coroutine(
-            self._update_tracking_point_command()
-        )
-        self._tracking_rectangle_task = self._submit_coroutine(
-            self._update_tracking_rectangle_command()
-        )
+        self._submit_generator(partial(self._update_tracking_off_command))
+        self._submit_generator(partial(self._update_tracking_point_command))
+        self._submit_generator(partial(self._update_tracking_rectangle_command))
+
+        self._end_init()
 
     def respond_tracking_off_command(self, command_answer: CommandAnswer) -> None:
         """
@@ -99,7 +96,6 @@ class TrackingServer(AbstractBasePlugin):
         """
         Subscribe to incoming tracking off command.
         """
-
         async for dummy in self._system.tracking_server.tracking_off_command():
             self._tracking_active = False
             if dummy != self._dummy:
@@ -112,14 +108,12 @@ class TrackingServer(AbstractBasePlugin):
         """
         Abstracting tracking_off_command for user
         """
-
         return self._dummy
 
     async def _update_tracking_point_command(self) -> None:
         """
         Subscribe to incoming tracking point command.
         """
-
         async for track_point in self._system.tracking_server.tracking_point_command():
             if track_point != self._track_point:
                 self._track_point = track_point
@@ -128,14 +122,12 @@ class TrackingServer(AbstractBasePlugin):
         """
         Abstracting tracking_point_command for user
         """
-
         return self._track_point
 
     async def _update_tracking_rectangle_command(self) -> None:
         """
         Subscribe to incoming tracking rectangle command.
         """
-
         async for track_rectangle in self._system.tracking_server.tracking_rectangle_command():
             if track_rectangle != self._track_rectangle:
                 self._track_rectangle = track_rectangle
@@ -144,7 +136,6 @@ class TrackingServer(AbstractBasePlugin):
         """
         Abstracting tracking_rectangle_command for user
         """
-
         return self._track_rectangle
 
     @property

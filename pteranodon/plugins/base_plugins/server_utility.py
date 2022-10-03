@@ -13,6 +13,7 @@ class ServerUtility(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("server_utility", system, loop, logger)
+        self._end_init()
 
     def send_status_text(self, typ: server_utility.StatusTextType, text):
         """

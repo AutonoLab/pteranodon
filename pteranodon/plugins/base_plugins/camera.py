@@ -1,9 +1,7 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Optional, Union
-
-from threading import Condition
+from functools import partial
 
 from mavsdk import System, camera
 
@@ -32,17 +30,13 @@ class Camera(AbstractBasePlugin):
         self._possible_setting_options: List[camera.SettingOptions] = []
 
         # Tasks of subscribed properties
-        self._capture_info_task = self._submit_coroutine(self._update_capture_info())
-        self._information_task = self._submit_coroutine(self._update_information())
-        self._mode_task = self._submit_coroutine(self._update_mode())
-        self._status_task = self._submit_coroutine(self._update_status())
-        self._video_stream_info_task = self._submit_coroutine(
-            self._update_vstream_info()
-        )
+        self._submit_generator(partial(self._update_capture_info))
+        self._submit_generator(partial(self._update_information))
+        self._submit_generator(partial(self._update_mode))
+        self._submit_generator(partial(self._update_status))
+        self._submit_generator(partial(self._update_vstream_info))
 
-        # Only want to fetch the current settings and options once on init
-        self._submit_coroutine(self._update_current_settings())
-        self._submit_coroutine(self._update_possible_setting_opts())
+        self._end_init()
 
     def prepare(self) -> None:
         """
@@ -217,7 +211,7 @@ class Camera(AbstractBasePlugin):
 
         return None
 
-    def list_photos(self, photos_range: camera.PhotosRange) -> List[camera.CaptureInfo]:
+    def list_photos(self, photos_range: camera.PhotosRange, timeout: float = 1.0) -> List[camera.CaptureInfo]:
         """
         List photos available on the camera.
 
@@ -226,23 +220,15 @@ class Camera(AbstractBasePlugin):
         :return: List of capture infos (representing the photos)
         :rtype: List[camera.CaptureInfo]
         """
-        list_photos_task = asyncio.run_coroutine_threadsafe(
-            self._system.camera.list_photos(photos_range), loop=self._loop
+
+        list_photos = self._submit_blocking_coroutine(
+            partial(self._system.camera.list_photos, photos_range),
+            timeout=timeout
         )
 
-        done_condition = Condition()
-
-        # When task is done, stop waiting
-        list_photos_task.add_done_callback(lambda _: done_condition.notify())
-
-        # Wait with a timeout of 1 second
-        done_condition.wait(1.0)
-
-        try:
-            return list_photos_task.result()
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
+        if list_photos is not None:
+            return list_photos
+        else:
             self._logger.error("Could not return photos list! Request timed out!")
             return []
 
@@ -328,7 +314,6 @@ class Camera(AbstractBasePlugin):
                 self._video_stream_info = vstream_info
 
     async def _update_current_settings(self) -> None:
-
         # If any of the settings do not have an option set (empty data), do update
         # If the size is different, then definitely update.
         should_update_settings = any(
@@ -340,7 +325,6 @@ class Camera(AbstractBasePlugin):
                 should_update_settings = False
 
     async def _update_possible_setting_opts(self) -> None:
-
         async for setting_options in self._system.camera.possible_setting_options():
             if len(setting_options) != len(self._possible_setting_options):
                 self._possible_setting_options = setting_options

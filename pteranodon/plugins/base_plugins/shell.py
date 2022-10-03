@@ -14,10 +14,13 @@ class Shell(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
-
-        self._receive_task = self._submit_coroutine(self._receive_feedback())
+        
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
+
+        self._submit_generator(self._receive_feedback())
+
+        self._end_init()
 
     async def _receive_feedback(self) -> None:
         """

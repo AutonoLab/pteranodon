@@ -1,8 +1,7 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from threading import Condition
+from functools import partial
 
 from mavsdk import System, action_server
 
@@ -16,22 +15,23 @@ class ActionServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action_server", system, loop, logger)
-        self._arm_disarm_task = self._submit_coroutine(self._arm_disarm())
         self._arm_disarm_value: Optional[action_server.ArmDisarm] = None
-        self._flight_mode_change_task = self._submit_coroutine(
-            self._flight_mode_change()
-        )
         self._flight_mode_change_value: Optional[action_server.FlightMode] = None
-        self._land_task = self._submit_coroutine(self._land())
         self._land_value: Optional[bool] = None
-        self._reboot_task = self._submit_coroutine(self._reboot())
         self._reboot_value: Optional[bool] = None
-        self._shutdown_task = self._submit_coroutine(self._shutdown())
         self._shutdown_value: Optional[bool] = None
-        self._takeoff_task = self._submit_coroutine(self._takeoff())
         self._takeoff_value: Optional[bool] = None
-        self._terminate_task = self._submit_coroutine(self._terminate())
         self._terminate_value: Optional[bool] = None
+
+        self._submit_generator(partial(self._arm_disarm))
+        self._submit_generator(partial(self._flight_mode_change))
+        self._submit_generator(partial(self._land))
+        self._submit_generator(partial(self._reboot))
+        self._submit_generator(partial(self._shutdown))
+        self._submit_generator(partial(self._takeoff))
+        self._submit_generator(partial(self._terminate))
+
+        self._end_init()
 
     async def _arm_disarm(self):
         async for x in self._system.action_server.arm_disarm():
@@ -58,7 +58,7 @@ class ActionServer(AbstractBasePlugin):
         return self._flight_mode_change_value
 
     def get_allowable_flight_modes(
-        self,
+        self, timeout: float = 1.0
     ) -> Optional[action_server.AllowableFlightModes]:
         """
         Returns the flight modes allowed
@@ -66,22 +66,18 @@ class ActionServer(AbstractBasePlugin):
         """
         self._logger.info("Pulling allowable flight modes")
 
-        get_flight_modes_task = asyncio.run_coroutine_threadsafe(
-            self._system.action_server.get_allowable_flight_modes(), loop=self._loop
+        flight_modes = self._submit_blocking_coroutine(
+            partial(self._system.action_server.get_allowable_flight_modes),
+            timeout=timeout
         )
-        done_condition = Condition()
-        get_flight_modes_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = get_flight_modes_task.result()
+        if flight_modes is not None:
             self._logger.info("Successfully pulled allowable flight modes")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error(
                 "Could not pull allowable flight modes! Request timed out!"
             )
-            return None
+        return flight_modes
 
     async def _land(self):
         async for x in self._system.action_server.land():

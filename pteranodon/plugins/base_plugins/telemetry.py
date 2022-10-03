@@ -31,6 +31,8 @@ class Telemetry(AbstractBasePlugin):
 
         self._getter_data = self._init_getter_data()
 
+        self._end_init()
+
     def _get_methods(self) -> List[str]:
         return [
             func

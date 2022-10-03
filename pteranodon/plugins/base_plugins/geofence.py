@@ -15,6 +15,7 @@ class Geofence(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("geofence", system, loop, logger)
+        self._end_init()
 
     def clear_geofence(self) -> None:
         """

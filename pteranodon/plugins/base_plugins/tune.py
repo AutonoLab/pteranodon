@@ -14,6 +14,7 @@ class Tune(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tune", system, loop, logger)
+        self._end_init()
 
     def play_tune(self, tune_desc: TuneDescription) -> None:
         """

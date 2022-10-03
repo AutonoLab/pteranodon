@@ -29,6 +29,7 @@ class TelemetryServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("telemetry_server", system, loop, logger)
+        self._end_init()
 
     def publish_battery(self, battery: Battery) -> None:
         """

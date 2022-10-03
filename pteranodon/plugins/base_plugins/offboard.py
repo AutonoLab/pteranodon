@@ -1,6 +1,5 @@
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
 
 from mavsdk import System, offboard
 
@@ -22,13 +21,9 @@ class Offboard(AbstractBasePlugin):
         super().__init__("offboard", system, loop, logger)
         self._is_active = False
 
-        self._is_active_task = self._submit_coroutine(
-            self._system.offboard.is_active(), partial(self._is_active_callback)
-        )
+        self._is_active = self._loop.run_until_complete(self._system.offboard.is_active())
 
-    def _is_active_callback(self, task: Task) -> None:
-        self._is_active = task.result()
-        del self._is_active_task
+        self._end_init()
 
     def is_active(self) -> bool:
         """

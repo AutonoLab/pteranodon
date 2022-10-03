@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System
 from mavsdk.component_information_server import FloatParamUpdate, FloatParam
@@ -16,9 +17,9 @@ class ComponentInformationServer(AbstractBasePlugin):
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._float_param_update_task = self._submit_coroutine(
-            self._update_float_param()
-        )
+        self._submit_generator(partial(self._update_float_param))
+
+        self._end_init()
 
     async def _update_float_param(self) -> None:
         async for curr_param_update in self._system.component_information_server.float_param():

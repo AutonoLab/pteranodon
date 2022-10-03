@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System
 from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
@@ -16,14 +17,15 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._control_status = None
-        self._control_task = self._submit_coroutine(self._update_control_status())
+        self._submit_generator(partial(self._update_control_status))
+
+        self._end_init()
 
     async def _update_control_status(self) -> None:
         """
         Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
          over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
         """
-
         async for ctrl_status in self._system.gimbal.control():
             if ctrl_status != self._control_status:
                 self._control_status = ctrl_status
