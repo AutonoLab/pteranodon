@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
+from functools import partial
 
 from mavsdk import System
 
@@ -18,7 +19,7 @@ class Shell(AbstractBasePlugin):
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
 
-        self._submit_generator(self._receive_feedback())
+        self._submit_generator(partial(self._receive_feedback))
 
         self._end_init()
 

@@ -28,15 +28,15 @@ class Param(AbstractBasePlugin):
         self._end_init()
 
     def _get_all_params_callback(self, all_params: AllParams) -> None:
-        for param in all_params.custom_params:
-            self._custom_params[param.name] = param.value
-        for param in all_params.float_params:
-            self._float_params[param.name] = param.value
-        for param in all_params.int_params:
-            self._int_params[param.name] = param.value
+        for custom_param in all_params.custom_params:
+            self._custom_params[custom_param.name] = param.value
+        for float_param in all_params.float_params:
+            self._float_params[float_param.name] = param.value
+        for int_param in all_params.int_params:
+            self._int_params[int_param.name] = param.value
 
     def _set_param_callback(
-        self, param_dict: Dict, param_name: str, param_future: Union[Future, None]
+        self, param_dict: Dict, param_name: str, param_future: Future
     ) -> None:
         param_dict[param_name] = param_future.result()
 

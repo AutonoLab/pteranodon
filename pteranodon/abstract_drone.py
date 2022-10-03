@@ -523,7 +523,7 @@ class AbstractDrone(ABC):
                 )
                 new_future.add_done_callback(
                     lambda f: self._logger.info(
-                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"
+                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
                     )
                 )
                 self._task_cache.append(new_future)

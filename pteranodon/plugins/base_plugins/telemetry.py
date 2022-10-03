@@ -27,7 +27,7 @@ class Telemetry(AbstractBasePlugin):
         )
 
         self._async_gen_data = self._make_async_gen_data()
-        self._async_gen_tasks = self._start_async_gen_telemetry()
+        self._start_async_gen_telemetry()
 
         self._getter_data = self._init_getter_data()
 
@@ -70,11 +70,9 @@ class Telemetry(AbstractBasePlugin):
             if data != self._async_gen_data[func]:
                 self._async_gen_data[func] = data
 
-    def _start_async_gen_telemetry(self) -> Dict:
-        tasks = {}
+    def _start_async_gen_telemetry(self) -> None:
         for func in self._async_gen_methods:
-            tasks[func] = self._submit_generator(partial(self._async_gen_wrapper, func))
-        return tasks
+            self._submit_generator(partial(self._async_gen_wrapper, func))
 
     def _init_getter_data(self) -> Dict:
         data: Dict[str, Any] = {}

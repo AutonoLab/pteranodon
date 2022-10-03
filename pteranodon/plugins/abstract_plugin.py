@@ -82,7 +82,7 @@ class AbstractPlugin(ABC):
         self._name_cache.append(coro.__qualname__)
         return new_future
 
-    def _submit_generator(self, generator: Coroutine, retry_time: float = 0.5) -> None:
+    def _submit_generator(self, generator: Callable, retry_time: float = 0.5) -> None:
         """
         Wrapper for the body expressions of the async generators used to read MAVSDK data.
         :param gen_body: A Callable, body of the async generator. Must be callable without arguments (use functools.partial)
@@ -90,7 +90,7 @@ class AbstractPlugin(ABC):
         :return: None, the Futures created by submit_generator are not stable
         """
 
-        async def wrap_generator(generator: Coroutine, retry_time: float):
+        async def wrap_generator(generator: Callable, retry_time: float):
             while True:
                 try:
                     await generator()
@@ -120,11 +120,11 @@ class AbstractPlugin(ABC):
             self._submit_coroutine(first, partial(self._schedule, *coros))
 
     def _submit_blocking_coroutine(
-        self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0
+        self, coro: Callable, callback: Optional[Callable] = None, timeout: float = 1.0
     ) -> Any:
         """
         Blocks until the given coroutine has completed, returning its result (or None if a timeout occurs)
-        :param coro: The Coroutine to run
+        :param coro: The Callable Coroutine to run
         :param callback: An optional callback function to call with the coroutine, this is not-blocking
         :param timeout: The maximum number of seconds to block
         :return: The result of the coroutine if it succeeds, otherwise None

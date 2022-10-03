@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Dict, Type, Union, List
-import time
 
 from mavsdk import System
 
@@ -165,9 +164,9 @@ class PluginManager:
         """
         Force cancels all running (or yet to run) Futures in ALL plugins
         """
-        for plugin in self._base_plugins.values():
-            plugin.cancel_futures()
-        for plugin in self._ext_plugins.values():
-            plugin.cancel_futures()
-        for plugin in self._custom_plugins.values():
-            plugin.cancel_futures()
+        for base_plugin in self._base_plugins.values():
+            base_plugin.cancel_futures()
+        for ext_plugin in self._ext_plugins.values():
+            ext_plugin.cancel_futures()
+        for custom_plugin in self._custom_plugins.values():
+            custom_plugin.cancel_futures()
