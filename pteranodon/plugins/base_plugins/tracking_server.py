@@ -16,7 +16,7 @@ class TrackingServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tracking_server", system, loop, logger)
-        
+
         self._track_rectangle: Optional[TrackRectangle] = None
         self._track_point: Optional[TrackPoint] = None
         self._dummy: Optional[int] = None

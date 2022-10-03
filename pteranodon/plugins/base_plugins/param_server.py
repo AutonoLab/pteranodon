@@ -55,7 +55,9 @@ class ParamServer(AbstractBasePlugin):
         )
         self._submit_coroutine(self._system.param_server.provide_param_int(name, value))
 
-    def retrieve_all_params(self, timeout: float = 1.0) -> Optional[param_server.AllParams]:
+    def retrieve_all_params(
+        self, timeout: float = 1.0
+    ) -> Optional[param_server.AllParams]:
         """
         retrieves the all parameters item
         :return: param_server.AllParams or None ; If result is not none, it is the AllParams object, otherwise,
@@ -64,8 +66,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_all_params")
 
         all_params = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_all_params),
-            timeout=timeout
+            partial(self._system.param_server.retrieve_all_params), timeout=timeout
         )
 
         if all_params is not None:
@@ -85,7 +86,7 @@ class ParamServer(AbstractBasePlugin):
 
         param_custom = self._submit_blocking_coroutine(
             partial(self._system.param_server.retrieve_param_custom, name),
-            timeout=timeout
+            timeout=timeout,
         )
 
         if param_custom is not None:
@@ -107,7 +108,7 @@ class ParamServer(AbstractBasePlugin):
 
         param_float = self._submit_blocking_coroutine(
             partial(self._system.param_server.retrieve_param_float, name),
-            timeout=timeout
+            timeout=timeout,
         )
 
         if param_float is not None:
@@ -126,8 +127,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_param_int")
 
         param_int = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_param_int, name),
-            timeout=timeout
+            partial(self._system.param_server.retrieve_param_int, name), timeout=timeout
         )
 
         if param_int is not None:

@@ -14,7 +14,7 @@ class Shell(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
-        
+
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
 

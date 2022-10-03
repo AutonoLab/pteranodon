@@ -17,7 +17,9 @@ class ComponentInformation(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("component_information", system, loop, logger)
 
-        self._param_list: List[FloatParam] = self._loop.run_until_complete(self._system.component_information.access_float_params())
+        self._param_list: List[FloatParam] = self._loop.run_until_complete(
+            self._system.component_information.access_float_params()
+        )
 
         self._float_param_update: Optional[FloatParamUpdate] = None
         self._submit_generator(partial(self._update_float_param))
@@ -29,7 +31,7 @@ class ComponentInformation(AbstractBasePlugin):
             if curr_param_update != self._float_param_update:
                 self._submit_coroutine(
                     self._system.component_information.access_float_params(),
-                    partial(self._param_list_callback)
+                    partial(self._param_list_callback),
                 )
                 self._float_param_update = curr_param_update
 

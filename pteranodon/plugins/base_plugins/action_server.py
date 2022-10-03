@@ -68,7 +68,7 @@ class ActionServer(AbstractBasePlugin):
 
         flight_modes = self._submit_blocking_coroutine(
             partial(self._system.action_server.get_allowable_flight_modes),
-            timeout=timeout
+            timeout=timeout,
         )
 
         if flight_modes is not None:

@@ -211,7 +211,9 @@ class Camera(AbstractBasePlugin):
 
         return None
 
-    def list_photos(self, photos_range: camera.PhotosRange, timeout: float = 1.0) -> List[camera.CaptureInfo]:
+    def list_photos(
+        self, photos_range: camera.PhotosRange, timeout: float = 1.0
+    ) -> List[camera.CaptureInfo]:
         """
         List photos available on the camera.
 
@@ -222,8 +224,7 @@ class Camera(AbstractBasePlugin):
         """
 
         list_photos = self._submit_blocking_coroutine(
-            partial(self._system.camera.list_photos, photos_range),
-            timeout=timeout
+            partial(self._system.camera.list_photos, photos_range), timeout=timeout
         )
 
         if list_photos is not None:

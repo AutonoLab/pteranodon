@@ -19,9 +19,15 @@ class FollowMe(AbstractBasePlugin):
         self._config: Optional[follow_me.Config] = None
 
         # only gotta wait on async tasks to get the data non-async since we store the parameters in method calls
-        self._is_active = self._loop.run_until_complete(self._system.follow_me.is_active())
-        self._last_location = self._loop.run_until_complete(self._system.follow_me.get_last_location())
-        self._config_task = self._loop.run_until_complete(self._system.follow_me.get_config())
+        self._is_active = self._loop.run_until_complete(
+            self._system.follow_me.is_active()
+        )
+        self._last_location = self._loop.run_until_complete(
+            self._system.follow_me.get_last_location()
+        )
+        self._config_task = self._loop.run_until_complete(
+            self._system.follow_me.get_config()
+        )
 
         self._end_init()
 

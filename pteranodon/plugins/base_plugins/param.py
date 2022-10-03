@@ -18,11 +18,13 @@ class Param(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
-        
+
         self._custom_params: Dict[str, str] = {}
         self._float_params: Dict[str, float] = {}
         self._int_params: Dict[str, int] = {}
-        self._get_all_params_callback(self._loop.run_until_complete(self._system.param.get_all_params()))
+        self._get_all_params_callback(
+            self._loop.run_until_complete(self._system.param.get_all_params())
+        )
 
         self._end_init()
 
@@ -34,11 +36,16 @@ class Param(AbstractBasePlugin):
         for param in all_params.int_params:
             self._int_params[param.name] = param.value
 
-    def _set_param_callback(self, param_dict: Dict, param_name: str, param_future: Union[Future, None]) -> None:
+    def _set_param_callback(
+        self, param_dict: Dict, param_name: str, param_future: Union[Future, None]
+    ) -> None:
         param_dict[param_name] = param_future.result()
 
     @staticmethod
-    def _find_param(name: str, param_list: List[Union[param.CustomParam, param.FloatParam, param.IntParam]]) -> Any:
+    def _find_param(
+        name: str,
+        param_list: List[Union[param.CustomParam, param.FloatParam, param.IntParam]],
+    ) -> Any:
         for parameter in param_list:
             if name == parameter.name:
                 return parameter.value

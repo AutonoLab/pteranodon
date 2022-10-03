@@ -57,8 +57,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file")
 
         downloaded_mission = self._submit_blocking_coroutine(
-            partial(self._system.mission.download_mission),
-            timeout=timeout
+            partial(self._system.mission.download_mission), timeout=timeout
         )
 
         if downloaded_mission is not None:
@@ -80,7 +79,9 @@ class Mission(AbstractBasePlugin):
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
-    def download_mission_with_progress(self, timeout: float = 1.0) -> Optional[mission.MissionPlan]:
+    def download_mission_with_progress(
+        self, timeout: float = 1.0
+    ) -> Optional[mission.MissionPlan]:
         """
         Starts a download of the Mission plan which updates self._mission_progress with the downloads
         progress
@@ -89,8 +90,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file with progress information")
 
         mission_download_progess = self._submit_blocking_coroutine(
-            partial(self._download_mission_with_progress),
-            timeout=timeout
+            partial(self._download_mission_with_progress), timeout=timeout
         )
 
         if mission_download_progess is not None:
@@ -99,7 +99,9 @@ class Mission(AbstractBasePlugin):
             self._logger.error("Could not download mission file! Request timed out!")
         return mission_download_progess
 
-    def get_return_to_launch_after_mission(self, timeout: float = 1.0) -> Optional[bool]:
+    def get_return_to_launch_after_mission(
+        self, timeout: float = 1.0
+    ) -> Optional[bool]:
         """
         retrieves the boolean that determines if it returns to the launch location or stays at current location
         :return: boolean
@@ -110,7 +112,7 @@ class Mission(AbstractBasePlugin):
 
         rtl_state = self._submit_blocking_coroutine(
             partial(self._system.mission.get_return_to_launch_after_mission),
-            timeout=timeout
+            timeout=timeout,
         )
 
         if rtl_state is not None:
@@ -129,8 +131,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Waiting for response to is_mission_finished()")
 
         imf_state = self._submit_blocking_coroutine(
-            partial(self._system.mission.is_mission_finished),
-            timeout=timeout
+            partial(self._system.mission.is_mission_finished), timeout=timeout
         )
 
         if imf_state is not None:

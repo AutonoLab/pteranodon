@@ -21,9 +21,15 @@ class Action(AbstractBasePlugin):
         self._launch_altitude: Optional[float] = None
         self._takeoff_altitude: Optional[float] = None
 
-        self._maximum_speed = self._loop.run_until_complete(self._system.action.get_maximum_speed())
-        self._launch_altitude = self._loop.run_until_complete(self._system.action.get_return_to_launch_altitude())
-        self._takeoff_altitude = self._loop.run_until_complete(self._system.action.get_takeoff_altitude())
+        self._maximum_speed = self._loop.run_until_complete(
+            self._system.action.get_maximum_speed()
+        )
+        self._launch_altitude = self._loop.run_until_complete(
+            self._system.action.get_return_to_launch_altitude()
+        )
+        self._takeoff_altitude = self._loop.run_until_complete(
+            self._system.action.get_takeoff_altitude()
+        )
 
         self._end_init()
 

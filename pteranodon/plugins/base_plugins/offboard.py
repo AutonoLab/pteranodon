@@ -21,7 +21,9 @@ class Offboard(AbstractBasePlugin):
         super().__init__("offboard", system, loop, logger)
         self._is_active = False
 
-        self._is_active = self._loop.run_until_complete(self._system.offboard.is_active())
+        self._is_active = self._loop.run_until_complete(
+            self._system.offboard.is_active()
+        )
 
         self._end_init()
 

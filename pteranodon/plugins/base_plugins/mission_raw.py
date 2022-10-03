@@ -56,8 +56,7 @@ class MissionRaw(AbstractBasePlugin):
         self._logger.info("Downloading mission file")
 
         downloaded_mission = self._submit_blocking_coroutine(
-            partial(self._system.mission_raw.download_mission),
-            timeout=timeout
+            partial(self._system.mission_raw.download_mission), timeout=timeout
         )
 
         if downloaded_mission is not None:
@@ -78,10 +77,12 @@ class MissionRaw(AbstractBasePlugin):
         self._logger.info(f"Beginning mission import from {qgc_plan_path}")
 
         imported_mission = self._submit_blocking_coroutine(
-            partial(self._system.mission_raw.import_qgroundcontrol_mission, qgc_plan_path),
-            timeout=timeout
+            partial(
+                self._system.mission_raw.import_qgroundcontrol_mission, qgc_plan_path
+            ),
+            timeout=timeout,
         )
- 
+
         if imported_mission is not None:
             self._logger.info("Mission import completed successfully")
         else:

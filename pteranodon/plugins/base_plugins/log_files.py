@@ -21,11 +21,15 @@ class LogFiles(AbstractBasePlugin):
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
-        self._entry_list = self._loop.run_until_complete(self._system.log_files.get_entries())
+        self._entry_list = self._loop.run_until_complete(
+            self._system.log_files.get_entries()
+        )
 
         self._end_init()
 
-    def download_log_file(self, entry: Entry, path: str, timeout: float = 1.0) -> Optional[ProgressData]:
+    def download_log_file(
+        self, entry: Entry, path: str, timeout: float = 1.0
+    ) -> Optional[ProgressData]:
         """
         Download log file synchronously.
 
@@ -39,7 +43,7 @@ class LogFiles(AbstractBasePlugin):
         self._logger.info(f"Downloading log file with id: {entry.id}")
         self._download_progress = self._submit_blocking_coroutine(
             partial(self._system.log_files.download_log_file, entry, path),
-            timeout=timeout
+            timeout=timeout,
         )
 
         if self._download_progress is not None:

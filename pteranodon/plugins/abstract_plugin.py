@@ -36,7 +36,7 @@ class AbstractPlugin(ABC):
         """
         :return: str ; returns the name of the plugin as a string
         """
-        return self._name    
+        return self._name
 
     def _end_init(self) -> None:
         """
@@ -89,17 +89,19 @@ class AbstractPlugin(ABC):
         :param retry_time: Attempts to stalls retry of body for this amount of time (ms)
         :return: None, the Futures created by submit_generator are not stable
         """
+
         async def wrap_generator(generator: Coroutine, retry_time: float):
             while True:
                 try:
                     await generator()
-                except grpc.RpcError as rpc_error: 
+                except grpc.RpcError as rpc_error:
                     if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
                         pass
                 else:
                     raise rpc_error
                 finally:
                     await asyncio.sleep(retry_time)
+
         self._submit_coroutine(wrap_generator(generator, retry_time))
 
     def _schedule(self, *args: Coroutine) -> None:
@@ -117,7 +119,9 @@ class AbstractPlugin(ABC):
             coros.remove(first)
             self._submit_coroutine(first, partial(self._schedule, *coros))
 
-    def _submit_blocking_coroutine(self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0) -> Any:
+    def _submit_blocking_coroutine(
+        self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0
+    ) -> Any:
         """
         Blocks until the given coroutine has completed, returning its result (or None if a timeout occurs)
         :param coro: The Coroutine to run
@@ -128,7 +132,7 @@ class AbstractPlugin(ABC):
         done_condition = Condition()
         blocking_future = self._submit_coroutine(coro(), callback)
         blocking_future.add_done_callback(lambda _: done_condition.notify())
-        
+
         done_condition.wait(timeout)
 
         try:
