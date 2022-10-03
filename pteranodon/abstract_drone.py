@@ -10,7 +10,6 @@ import logging
 import sys
 import random
 import signal
-import os
 
 import uvloop
 from mavsdk import System

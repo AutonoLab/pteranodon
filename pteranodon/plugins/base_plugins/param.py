@@ -3,7 +3,6 @@ from concurrent.futures import Future
 from logging import Logger
 from typing import List, Union, Any, Dict, Tuple
 from functools import partial
-import time
 
 from mavsdk import System, param
 from mavsdk.param import AllParams

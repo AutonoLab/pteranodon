@@ -97,8 +97,8 @@ class AbstractPlugin(ABC):
                 except grpc.RpcError as rpc_error:
                     if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
                         pass
-                else:
-                    raise rpc_error
+                    else:
+                        raise rpc_error
                 finally:
                     await asyncio.sleep(retry_time)
 

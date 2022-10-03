@@ -1,7 +1,5 @@
 from asyncio import AbstractEventLoop
-from concurrent.futures import Future
 from logging import Logger
-from functools import partial
 from typing import Optional
 
 from mavsdk import System, action
