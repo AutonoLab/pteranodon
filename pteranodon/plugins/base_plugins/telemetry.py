@@ -3,6 +3,7 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from time import sleep
 from typing import List, Dict, Any
+from functools import partial
 
 from mavsdk import System, telemetry
 
@@ -30,7 +31,7 @@ class Telemetry(AbstractBasePlugin):
 
         self._getter_data = self._init_getter_data()
 
-    def _get_methods(self) -> List:
+    def _get_methods(self) -> List[str]:
         return [
             func
             for func in dir(self._system.telemetry)
@@ -38,7 +39,7 @@ class Telemetry(AbstractBasePlugin):
             and not func.startswith("_")
         ]
 
-    def _get_methods_startswith(self, methods: List, starts_with: str) -> List:
+    def _get_methods_startswith(self, methods: List[str], starts_with: str) -> List:
         return [func for func in methods if func.startswith(starts_with)]
 
     def _get_set_methods(self, methods: List) -> List:
@@ -70,7 +71,7 @@ class Telemetry(AbstractBasePlugin):
     def _start_async_gen_telemetry(self) -> Dict:
         tasks = {}
         for func in self._async_gen_methods:
-            tasks[func] = self._submit_coroutine(self._async_gen_wrapper(func))
+            tasks[func] = self._submit_generator(partial(self._async_gen_wrapper, func))
         return tasks
 
     def _init_getter_data(self) -> Dict:

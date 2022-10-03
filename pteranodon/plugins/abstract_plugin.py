@@ -1,12 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 import asyncio
-from asyncio import AbstractEventLoop, CancelledError
+from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from logging import Logger
 from collections import deque
 from functools import partial
 from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
 
+import grpc
 from mavsdk import System
 
 
@@ -27,12 +28,14 @@ class AbstractPlugin(ABC):
         self._name_cache: Deque[str] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
+        self._stopped = False
+
     @property
     def name(self) -> str:
         """
         :return: str ; returns the name of the plugin as a string
         """
-        return self._name
+        return self._name    
 
     def _future_callback(self, future: Future) -> None:
         """
@@ -70,6 +73,26 @@ class AbstractPlugin(ABC):
         self._future_cache.append(new_future)
         self._name_cache.append(coro.__qualname__)
         return new_future
+
+    def _submit_generator(self, generator: Coroutine, retry_time: float = 0.5) -> None:
+        """
+        Wrapper for the body expressions of the async generators used to read MAVSDK data.
+        :param gen_body: A Callable, body of the async generator. Must be callable without arguments (use functools.partial)
+        :param retry_time: Attempts to stalls retry of body for this amount of time (ms)
+        :return: None, the Futures created by submit_generator are not stable
+        """
+        async def wrap_generator(generator: Coroutine, retry_time: float):
+            while True:
+                try:
+                    await generator()
+                except grpc.RpcError as rpc_error: 
+                    if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+                        pass
+                else:
+                    raise rpc_error
+                finally:
+                    await asyncio.sleep(retry_time)
+        self._submit_coroutine(wrap_generator(generator, retry_time))
 
     def _schedule(self, *args: Coroutine) -> None:
         """

@@ -1,3 +1,4 @@
 mavsdk>=1.4.0
 numpy
-uvloop
+uvloop>=0.17.0
+grpcio

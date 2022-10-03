@@ -1,10 +1,12 @@
 from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from logging import Logger
-from typing import List, Union, Any, Optional
+from typing import List, Union, Any, Dict, Tuple
 from functools import partial
+import time
 
 from mavsdk import System, param
+from mavsdk.param import AllParams
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -16,53 +18,28 @@ class Param(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("param", system, loop, logger)
-        self._all_params: Optional[param.AllParams] = None
-        self._custom_params: Optional[List[param.CustomParam]] = None
-        self._float_params: Optional[List[param.FloatParam]] = None
-        self._int_params: Optional[List[param.IntParam]] = None
-        self._param_task: Optional[Future] = None
-        self.refresh()
+        self._custom_params: Dict[str, str] = {}
+        self._float_params: Dict[str, float] = {}
+        self._int_params: Dict[str, int] = {}
+        self._get_all_params_callback(self._loop.run_until_complete(self._system.param.get_all_params()))
 
-    def _update_params_callback(self, task: Future) -> None:
-        self._all_params: param.AllParams = task.result()
-        self._custom_params = self._all_params.custom_params
-        self._float_params = self._all_params.float_params
-        self._int_params = self._all_params.int_params
+    def _get_all_params_callback(self, all_params: AllParams) -> None:
+        for param in all_params.custom_params:
+            self._custom_params[param.name] = param.value
+        for param in all_params.float_params:
+            self._float_params[param.name] = param.value
+        for param in all_params.int_params:
+            self._int_params[param.name] = param.value
 
-    def _set_param_callback(self, _: Union[Future, None]) -> None:
-        # can use a Union parameter for the callback since the task itself is not edited
-        self._param_task = self._submit_coroutine(
-            self._system.param.get_all_params(), partial(self._update_params_callback)
-        )
+    def _set_param_callback(self, param_dict: Dict, param_name: str, param_future: Union[Future, None]) -> None:
+        param_dict[param_name] = param_future.result()
 
     @staticmethod
-    def _find_param(name: str, param_list: List) -> Any:
+    def _find_param(name: str, param_list: List[Union[param.CustomParam, param.FloatParam, param.IntParam]]) -> Any:
         for parameter in param_list:
             if name == parameter.name:
                 return parameter.value
         return None
-
-    def get_param(
-        self, name: str, search_custom=False, search_float=False, search_int=False
-    ) -> Any:
-        """
-        Method which gets the value of a parameter found in any of the parameter lists. The order in which the parameter
-        value is returned is -> custom, float, int. Thus, if a parameter is found in custom that value will be returned
-        before the float or int parameters are searched
-        :param name: The name of the parameters in string form
-        :param search_custom: Boolean, true if the custom parameters should be searched
-        :param search_float: Boolean, true if the float parameters should be searched
-        :param search_int: Boolean, true if the int parameters should be searched
-        :returns: The value of the parameter if found, otherwise None
-        """
-        param_val = None
-        if search_custom and self._custom_params is not None:
-            param_val = Param._find_param(name, self._custom_params)
-        elif search_float and self._float_params is not None:
-            param_val = Param._find_param(name, self._float_params)
-        elif search_int and self._int_params is not None:
-            param_val = Param._find_param(name, self._int_params)
-        return param_val
 
     def get_param_custom(self, name: str) -> Union[str, None]:
         """
@@ -70,7 +47,7 @@ class Param(AbstractBasePlugin):
         :param name: str ; name of the parameter you wish to retrieve
         :return: str ; string value of the parameter requested. None if value is not found
         """
-        return self.get_param(name, True, False, False)
+        return self._custom_params[name]
 
     def get_param_float(self, name: str) -> Union[float, None]:
         """
@@ -78,7 +55,7 @@ class Param(AbstractBasePlugin):
         :param name: str ; name of the parameter you wish to retrieve
         :return: float ; float value of the parameter requested. None if value is not found
         """
-        return self.get_param(name, False, True, False)
+        return self._float_params[name]
 
     def get_param_int(self, name: str) -> Union[int, None]:
         """
@@ -86,14 +63,14 @@ class Param(AbstractBasePlugin):
         :param name: str ; name of the parameter you wish to retrieve
         :return: int ; integer value of the parameter requested. None if value is not found
         """
-        return self.get_param(name, False, False, True)
+        return self._int_params[name]
 
-    def get_all_params(self) -> param.AllParams:
+    def get_all_params(self) -> Tuple[Dict[str, str], Dict[str, float], Dict[str, int]]:
         """
         Get all parameters
         :return: param.AllParams ; a collection of all parameters
         """
-        return self._all_params
+        return self._custom_params, self._float_params, self._int_params
 
     def set_param_custom(self, name: str, value: str) -> None:
         """
@@ -102,15 +79,10 @@ class Param(AbstractBasePlugin):
         :param value: str ; value of the parameter to be set
         :return: None
         """
-        try:
-            self._submit_coroutine(
-                self._system.param.set_param_custom(name, value),
-                partial(self._set_param_callback),
-            )
-        except AttributeError:
-            self._logger.error(
-                f"Unable to set param: {name} to {value}. No attribute set_param_custom"
-            )
+        self._submit_coroutine(
+            self._system.param.set_param_custom(name, value),
+            partial(self._set_param_callback, self._custom_params, name),
+        )
 
     def set_param_float(self, name: str, value: float) -> None:
         """
@@ -121,7 +93,7 @@ class Param(AbstractBasePlugin):
         """
         self._submit_coroutine(
             self._system.param.set_param_float(name, value),
-            partial(self._set_param_callback),
+            partial(self._set_param_callback, self._float_params, name),
         )
 
     def set_param_int(self, name: str, value: int) -> None:
@@ -133,12 +105,5 @@ class Param(AbstractBasePlugin):
         """
         self._submit_coroutine(
             self._system.param.set_param_int(name, value),
-            partial(self._set_param_callback),
+            partial(self._set_param_callback, self._int_params, name),
         )
-
-    def refresh(self) -> None:
-        """
-        Refresh parameters
-        :return: None
-        """
-        self._set_param_callback(None)
