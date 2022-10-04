@@ -52,7 +52,7 @@ def test_submit_task(
 
     try:
         assert (
-            counting_future.result(10) == sum_of_five
+            counting_future.result(1.0) == sum_of_five
         ), "Result is not equal to the expected value"
         assert any(
             sum_of_five in x

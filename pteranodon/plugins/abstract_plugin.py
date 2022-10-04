@@ -26,7 +26,6 @@ class AbstractPlugin(ABC):
         self._logger: Logger = logger
 
         self._future_cache: Deque[Future] = deque()
-        self._name_cache: Deque[str] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
         self._stopped = False
@@ -45,7 +44,7 @@ class AbstractPlugin(ABC):
         # call to wait on sleep so that way generators get created
         self._loop.run_until_complete(asyncio.sleep(0.05))
 
-    def _future_callback(self, future: Future) -> None:
+    def _future_callback(self, coroutine_name: str, future: Future) -> None:
         """
         Callback associated with each Future scheduled by method _submit_coroutine.
         This will send output to the logger, retrieve results and exceptions, and clear Futures from the cache.
@@ -53,14 +52,12 @@ class AbstractPlugin(ABC):
         :return: None
         """
         try:
-            coro_name: str = self._name_cache[self._future_cache.index(future)]
-            self._logger.info(f"Task completed: {coro_name} ")
+            self._logger.info(f"Task completed: {coroutine_name} ")
             self._future_cache.remove(future)
-            self._name_cache.remove(coro_name)
             try:
-                self._result_cache.append((coro_name, future.result()))
+                self._result_cache.append((coroutine_name, future.result()))
             except Exception as e:
-                self._logger.error(f"{coro_name} -> {e}")
+                self._logger.error(f"{coroutine_name} -> {e}")
         except Exception as e:
             self._logger.error(f"Callback failed: {future} -> {e}")
 
@@ -75,11 +72,10 @@ class AbstractPlugin(ABC):
         :return: The submitted task, if plugin specific callbacks are added
         """
         new_future: Future = asyncio.run_coroutine_threadsafe(coro, loop=self._loop)
-        new_future.add_done_callback(partial(self._future_callback))
+        new_future.add_done_callback(partial(self._future_callback, coro.__qualname__))
         if callback is not None:
             new_future.add_done_callback(callback)
         self._future_cache.append(new_future)
-        self._name_cache.append(coro.__qualname__)
         return new_future
 
     def _submit_generator(self, generator: Callable, retry_time: float = 0.5) -> None:
