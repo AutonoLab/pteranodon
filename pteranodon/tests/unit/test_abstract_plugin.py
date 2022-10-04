@@ -1,6 +1,7 @@
 import asyncio
 from threading import Condition
 from logging import Logger
+from concurrent.futures import TimeoutError
 
 from mavsdk import System
 import pytest
@@ -48,27 +49,24 @@ def test_submit_task(
 
     sum_of_five = 5 + 4 + 3 + 2 + 1 + 0
 
-    counting_task = asyncio.run_coroutine_threadsafe(counting_function(5), loop=loop)
-    counting_task.add_done_callback(lambda _: condition.notify())
-
-    mock_plugin.submit_task(counting_task)
-
-    loop.run_until_complete(counting_task)
-
-    with condition:
-        condition.wait(1.0)
+    counting_future = mock_plugin._submit_coroutine(
+        counting_function(5), lambda _: condition.notify()
+    )
 
     try:
+        assert (counting_future.result(1.0) == sum_of_five), "Result is not equal to the expected value"
         assert (
-            counting_task.result() == sum_of_five
-        ), "Result is not equal to the expected value"
-        assert (
-            counting_task in mock_plugin._task_cache  # pylint: disable=protected-access
+                counting_future
+                in mock_plugin._future_cache  # pylint: disable=protected-access
         ), "Task is not in the task cache"
         assert (
-            sum_of_five in mock_plugin._result_cache  # pylint: disable=protected-access
+                sum_of_five in mock_plugin._result_cache  # pylint: disable=protected-access
         ), "Result is not in the result cache"
-    except asyncio.InvalidStateError:
-        # If the result is not available yet,
-        #       it can be assumed that the wait call timed out before the callback was done
+
+    except TimeoutError:
         pytest.fail("Single task timed out!", pytrace=True)
+    except Exception as e:
+        pytest.fail(f"Single task raised an exception: {e}")
+    else:
+        assert True
+

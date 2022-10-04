@@ -28,7 +28,7 @@ class MissionRawServer(AbstractBasePlugin):
         self._end_init()
 
     @property
-    def mission_plan(self) -> Optional[mission_raw_server.MissionPlane]:
+    def mission_plan(self) -> Optional[mission_raw_server.MissionPlan]:
         """
         Returns current mission plan
         """
