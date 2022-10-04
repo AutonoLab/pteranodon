@@ -43,14 +43,15 @@ class AbstractPlugin(ABC):
         # call to wait on sleep so that way generators get created
         self._loop.run_until_complete(asyncio.sleep(0.05))
 
-    def _future_callback(self, coroutine_name: str, is_gen : bool, future: futures.Future) -> None:
+    def _future_callback(
+        self, coroutine_name: str, is_gen: bool, future: futures.Future
+    ) -> None:
         """
         Callback associated with each Future scheduled by method _submit_coroutine.
         This will send output to the logger, retrieve results and exceptions, and clear Futures from the cache.
         :param future: A concurrent.future.Future, which has been scheduled with asyncio.run_coroutine_threadsafe
         :return: None
         """
-
 
         try:
             self._future_cache.remove(future)
@@ -69,7 +70,10 @@ class AbstractPlugin(ABC):
             self._logger.error(f"Callback failed: {coroutine_name} -> {e}")
 
     def _submit_coroutine(
-        self, coro: Coroutine, callback: Optional[Callable] = None, is_generator : bool = False
+        self,
+        coro: Coroutine,
+        callback: Optional[Callable] = None,
+        is_generator: bool = False,
     ) -> futures.Future:
         """
         Puts a task returned by asyncio.run_coroutine_threadsafe to the future_cache to prevent garbage collection and allow return
@@ -81,7 +85,9 @@ class AbstractPlugin(ABC):
         new_future: futures.Future = asyncio.run_coroutine_threadsafe(
             coro, loop=self._loop
         )
-        new_future.add_done_callback(partial(self._future_callback, coro.__qualname__, is_generator))
+        new_future.add_done_callback(
+            partial(self._future_callback, coro.__qualname__, is_generator)
+        )
         if callback is not None:
             new_future.add_done_callback(callback)
         self._future_cache.append(new_future)

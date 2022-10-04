@@ -593,7 +593,9 @@ class AbstractDrone(ABC):
 
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
-        self.put(self.action.disarm)
+
+        # Likely not needed
+        # self.put(self.action.disarm)
 
         # shutdown the any asyncgens that have been opened
         self._stopped_mavlink = True

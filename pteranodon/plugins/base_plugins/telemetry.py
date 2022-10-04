@@ -78,9 +78,8 @@ class Telemetry(AbstractBasePlugin):
             data[func] = None
         return data
 
-    def _get_getter_data(self, func: str) -> Any:
+    def _get_getter_data(self, func: str, timeout: float) -> Any:
         if self._getter_data[func] is None:
-            timeout = 2.0
             opt_data = self._submit_blocking_coroutine(
                 getattr(self._system.telemetry, func)(), timeout=timeout
             )
@@ -95,13 +94,13 @@ class Telemetry(AbstractBasePlugin):
 
     # get methods
     # ==========================================================================================
-    @property
-    def get_gps_global_origin(self) -> telemetry.GpsGlobalOrigin:
+
+    def get_gps_global_origin(self, timeout: float = 1.0) -> telemetry.GpsGlobalOrigin:
         """
         Get the GPS location of where the estimator has been initialized.
         :return: telemetry.GpsGlobalOrigin ; Gets the Global Origin in latitude, longitude and altitude
         """
-        return self._get_getter_data("get_gps_global_origin")
+        return self._get_getter_data("get_gps_global_origin", timeout)
 
     # async gen method data
     # ==========================================================================================
