@@ -229,9 +229,9 @@ class Camera(AbstractBasePlugin):
 
         if list_photos is not None:
             return list_photos
-        else:
-            self._logger.error("Could not return photos list! Request timed out!")
-            return []
+
+        self._logger.error("Could not return photos list! Request timed out!")
+        return []
 
     @property
     def capture_info(self) -> Optional[camera.CaptureInfo]:

@@ -95,8 +95,11 @@ class AbstractPlugin(ABC):
                 try:
                     await generator()
                 except grpc.RpcError as rpc_error:
-                    if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-                        pass
+                    if isinstance(
+                        rpc_error, grpc.Call
+                    ):  # Only "Call" classes (which include _MultiThreadedRendezvous) have code()
+                        if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+                            pass
                     else:
                         raise rpc_error
                 finally:

@@ -62,9 +62,9 @@ class MissionRaw(AbstractBasePlugin):
         if downloaded_mission is not None:
             self._logger.info("Mission items downloaded successfully")
             return downloaded_mission
-        else:
-            self._logger.error("Could not download mission file! Request timed out!")
-            return []
+
+        self._logger.error("Could not download mission file! Request timed out!")
+        return []
 
     def import_qgroundcontrol_mission(
         self, qgc_plan_path, timeout: float = 1.0

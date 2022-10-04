@@ -549,9 +549,7 @@ class AbstractDrone(ABC):
                     if str(e) != "pop from an empty deque":
                         # if the exception makes it here, it is unexpected
                         self._logger.error(e)
-                except ActionError as e:
-                    self._logger.error(e)
-                except OffboardError as e:
+                except (OffboardError, ActionError) as e:
                     self._logger.error(e)
                 except Exception as e:
                     self._logger.error(e)
