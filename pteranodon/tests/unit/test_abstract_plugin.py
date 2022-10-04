@@ -3,6 +3,8 @@ import threading
 import time
 from logging import Logger
 import concurrent.futures as c_futures
+import subprocess
+import os
 
 from mavsdk import System
 import pytest
@@ -151,3 +153,7 @@ def test_schedule(
     assert (
         secs > 5.0
     ), f"Something went wrong! The coroutines should take at least 5 seconds to run but took {secs} seconds instead"
+
+
+
+subprocess.run()
