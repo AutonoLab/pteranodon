@@ -1,7 +1,5 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
-from time import sleep
 from typing import List, Dict, Any
 from functools import partial
 
@@ -82,13 +80,17 @@ class Telemetry(AbstractBasePlugin):
 
     def _get_getter_data(self, func: str) -> Any:
         if self._getter_data[func] is None:
-            task = asyncio.run_coroutine_threadsafe(
-                getattr(self._system.telemetry, func)(), loop=self._loop
+            timeout = 2.0
+            opt_data = self._submit_blocking_coroutine(
+                getattr(self._system.telemetry, func)(), timeout=timeout
             )
-            # TODO, improve from spin wait
-            while not task.done():
-                sleep(0.000001)
-            self._getter_data = task.result()
+
+            if opt_data is None:
+                self._logger.error(
+                    f'Failed to get telemetry data for function "{func}" with a timeout of {timeout} seconds'
+                )
+
+            self._getter_data[func] = opt_data  # Value is still None if timeout
         return self._getter_data[func]
 
     # get methods
