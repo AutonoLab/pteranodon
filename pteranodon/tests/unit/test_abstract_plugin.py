@@ -28,13 +28,13 @@ async def counting_function(num: int) -> int:
     return value_sum
 
 
-def test_submit_task(
+def test_submit_coroutine(
     mock_system: System,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
     mock_logger: Logger,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
     mock_loop: asyncio.AbstractEventLoop,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
 ):
     """
-    Tests the AbstractPlugin submit_task method using the counting_function.
+    Tests the AbstractPlugin _submit_coroutine method using the counting_function.
 
     :param mock_system: The system fixture, imported from mocks
     :type mock_system: System
@@ -65,3 +65,37 @@ def test_submit_task(
         pytest.fail(f"Single task raised an exception: {e}")
     else:
         assert True
+
+
+def test_submit_blocking_coroutine(
+    mock_system: System,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
+    mock_logger: Logger,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
+    mock_loop: asyncio.AbstractEventLoop,  # noqa: F811 # pylint: disable=redefined-outer-name # (Needed for fixtures)
+):
+    """
+    Tests the AbstractPlugin _submit_blocking_coroutine method using the counting_function.
+
+    :param mock_system: The system fixture, imported from mocks
+    :type mock_system: System
+    :param mock_logger: The logger fixture, imported from mocks
+    :type mock_logger: Logger
+    """
+
+    mock_plugin = AbstractPlugin("mock", mock_system, mock_loop, mock_logger)
+
+    sum_of_five = 5 + 4 + 3 + 2 + 1 + 0
+
+    counting_result = (
+        mock_plugin._submit_blocking_coroutine(  # pylint: disable=protected-access
+            counting_function(5), timeout=1.0
+        )
+    )
+
+    assert counting_result is not None, "Counting coroutine timed out!"
+
+    assert counting_result == sum_of_five, "Counting coroutine result is not correct"
+
+    assert any(
+        sum_of_five in x
+        for x in mock_plugin._result_cache  # pylint: disable=protected-access
+    ), "Result is not in the result cache"  # Don't know name so must test with any

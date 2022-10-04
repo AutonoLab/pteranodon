@@ -14,7 +14,7 @@ def mock_logger() -> Logger:
     return Logger("mock")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def mock_loop():
     """
     A Logger object for each test
