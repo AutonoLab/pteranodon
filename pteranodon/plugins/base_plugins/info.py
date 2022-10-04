@@ -2,7 +2,6 @@ import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System, info
 
@@ -30,8 +29,8 @@ class Info(AbstractBasePlugin):
         self._loop.run_until_complete(self._get_id())
         self._loop.run_until_complete(self._get_product())
         self._loop.run_until_complete(self._get_version())
-        self._submit_generator(partial(self._flight_info_gen))
-        self._submit_generator(partial(self._speed_factor_gen))
+        self._submit_generator(self._flight_info_gen)
+        self._submit_generator(self._speed_factor_gen)
 
         self._end_init()
 

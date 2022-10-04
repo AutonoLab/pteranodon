@@ -23,7 +23,7 @@ class ComponentInformation(AbstractBasePlugin):
         )
 
         self._float_param_update: Optional[FloatParamUpdate] = None
-        self._submit_generator(partial(self._update_float_param))
+        self._submit_generator(self._update_float_param)
 
         self._end_init()
 

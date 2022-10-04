@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional, List
-from functools import partial
 
 from mavsdk import System, mission_raw
 
@@ -19,8 +18,8 @@ class MissionRaw(AbstractBasePlugin):
         self._mission_progress = None
         self._has_mission_changed = False
 
-        self._submit_generator(partial(self._update_mission_changed))
-        self._submit_generator(partial(self._update_mission_progress))
+        self._submit_generator(self._update_mission_changed)
+        self._submit_generator(self._update_mission_progress)
 
         self._end_init()
 
@@ -56,7 +55,7 @@ class MissionRaw(AbstractBasePlugin):
         self._logger.info("Downloading mission file")
 
         downloaded_mission = self._submit_blocking_coroutine(
-            partial(self._system.mission_raw.download_mission), timeout=timeout
+            self._system.mission_raw.download_mission(), timeout=timeout
         )
 
         if downloaded_mission is not None:
@@ -77,9 +76,7 @@ class MissionRaw(AbstractBasePlugin):
         self._logger.info(f"Beginning mission import from {qgc_plan_path}")
 
         imported_mission = self._submit_blocking_coroutine(
-            partial(
-                self._system.mission_raw.import_qgroundcontrol_mission, qgc_plan_path
-            ),
+            self._system.mission_raw.import_qgroundcontrol_mission(qgc_plan_path),
             timeout=timeout,
         )
 

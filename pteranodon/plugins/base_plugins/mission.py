@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System, mission
 
@@ -21,7 +20,7 @@ class Mission(AbstractBasePlugin):
         self._mission_plan = None
         self._mission_progress = None
         self._loop.run_until_complete(self._download_mission_with_progress())
-        self._submit_generator(partial(self._update_mission_progress))
+        self._submit_generator(self._update_mission_progress)
 
         self._end_init()
 
@@ -57,7 +56,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file")
 
         downloaded_mission = self._submit_blocking_coroutine(
-            partial(self._system.mission.download_mission), timeout=timeout
+            self._system.mission.download_mission(), timeout=timeout
         )
 
         if downloaded_mission is not None:
@@ -90,7 +89,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Downloading mission file with progress information")
 
         mission_download_progess = self._submit_blocking_coroutine(
-            partial(self._download_mission_with_progress), timeout=timeout
+            self._download_mission_with_progress(), timeout=timeout
         )
 
         if mission_download_progess is not None:
@@ -111,7 +110,7 @@ class Mission(AbstractBasePlugin):
         )
 
         rtl_state = self._submit_blocking_coroutine(
-            partial(self._system.mission.get_return_to_launch_after_mission),
+            self._system.mission.get_return_to_launch_after_mission(),
             timeout=timeout,
         )
 
@@ -131,7 +130,7 @@ class Mission(AbstractBasePlugin):
         self._logger.info("Waiting for response to is_mission_finished()")
 
         imf_state = self._submit_blocking_coroutine(
-            partial(self._system.mission.is_mission_finished), timeout=timeout
+            self._system.mission.is_mission_finished(), timeout=timeout
         )
 
         if imf_state is not None:

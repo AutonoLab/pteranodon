@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System, action_server
 
@@ -23,13 +22,13 @@ class ActionServer(AbstractBasePlugin):
         self._takeoff_value: Optional[bool] = None
         self._terminate_value: Optional[bool] = None
 
-        self._submit_generator(partial(self._arm_disarm))
-        self._submit_generator(partial(self._flight_mode_change))
-        self._submit_generator(partial(self._land))
-        self._submit_generator(partial(self._reboot))
-        self._submit_generator(partial(self._shutdown))
-        self._submit_generator(partial(self._takeoff))
-        self._submit_generator(partial(self._terminate))
+        self._submit_generator(self._arm_disarm)
+        self._submit_generator(self._flight_mode_change)
+        self._submit_generator(self._land)
+        self._submit_generator(self._reboot)
+        self._submit_generator(self._shutdown)
+        self._submit_generator(self._takeoff)
+        self._submit_generator(self._terminate)
 
         self._end_init()
 
@@ -67,7 +66,7 @@ class ActionServer(AbstractBasePlugin):
         self._logger.info("Pulling allowable flight modes")
 
         flight_modes = self._submit_blocking_coroutine(
-            partial(self._system.action_server.get_allowable_flight_modes),
+            self._system.action_server.get_allowable_flight_modes(),
             timeout=timeout,
         )
 

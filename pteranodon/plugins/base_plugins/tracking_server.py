@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -22,9 +21,9 @@ class TrackingServer(AbstractBasePlugin):
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
 
-        self._submit_generator(partial(self._update_tracking_off_command))
-        self._submit_generator(partial(self._update_tracking_point_command))
-        self._submit_generator(partial(self._update_tracking_rectangle_command))
+        self._submit_generator(self._update_tracking_off_command)
+        self._submit_generator(self._update_tracking_point_command)
+        self._submit_generator(self._update_tracking_rectangle_command)
 
         self._end_init()
 

@@ -36,7 +36,7 @@ class Mocap(AbstractBasePlugin):
         Send odometry information with an external interface.
 
         :param odometry: The odometry data
-        :type odemetry: mocap.Odometry
+        :type odometry: mocap.Odometry
         """
 
         self._submit_coroutine(self._system.mocap.set_odometry(odometry))

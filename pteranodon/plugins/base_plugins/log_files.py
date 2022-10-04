@@ -42,16 +42,15 @@ class LogFiles(AbstractBasePlugin):
         """
         self._logger.info(f"Downloading log file with id: {entry.id}")
         self._download_progress = self._submit_blocking_coroutine(
-            partial(self._system.log_files.download_log_file, entry, path),
+            self._system.log_files.download_log_file(entry, path),
             timeout=timeout,
         )
 
-        if self._download_progress is not None:
-            pass
-        else:
+        if self._download_progress is None:
             self._logger.error(
                 "Could not return log file download progress! Request timed out!"
             )
+
         return self._download_progress
 
     def update_entries(self) -> None:

@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System, mission_raw_server
 
@@ -21,9 +20,9 @@ class MissionRawServer(AbstractBasePlugin):
         self._clear_type: Optional[int] = None
         self._mission_item: Optional[mission_raw_server.MissionItem] = None
 
-        self._submit_generator(partial(self._clear_all))
-        self._submit_generator(partial(self._current_item_changed))
-        self._submit_generator(partial(self._incoming_mission))
+        self._submit_generator(self._clear_all)
+        self._submit_generator(self._current_item_changed)
+        self._submit_generator(self._incoming_mission)
 
         self._end_init()
 
@@ -55,7 +54,7 @@ class MissionRawServer(AbstractBasePlugin):
         """
         async for x in self._system.mission_raw_server.clear_all():
             if x != self.clear_type:
-                self.clear_type = x
+                self._clear_type = x
 
     async def _current_item_changed(self):
         """
@@ -64,7 +63,7 @@ class MissionRawServer(AbstractBasePlugin):
         """
         async for x in self._system.mission_raw_server.current_item_changed():
             if x != self.mission_item:
-                self.mission_item = x
+                self._mission_item = x
 
     async def _incoming_mission(self):
         """
@@ -73,7 +72,7 @@ class MissionRawServer(AbstractBasePlugin):
         """
         async for x in self._system.mission_raw_server.incoming_mission():
             if x != self.mission_plan:
-                self.mission_plan = x
+                self._mission_plan = x
 
     def set_current_item_complete(self):
         """

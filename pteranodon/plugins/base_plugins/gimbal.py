@@ -1,6 +1,5 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
 
 from mavsdk import System
 from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
@@ -17,7 +16,7 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._control_status = None
-        self._submit_generator(partial(self._update_control_status))
+        self._submit_generator(self._update_control_status)
 
         self._end_init()
 

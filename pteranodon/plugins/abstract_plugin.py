@@ -1,12 +1,11 @@
 from abc import ABC
 import asyncio
 from asyncio import AbstractEventLoop
-from concurrent.futures import Future
+from concurrent import futures
 from logging import Logger
 from collections import deque
 from functools import partial
 from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
-from threading import Condition
 
 import grpc
 from mavsdk import System
@@ -25,7 +24,7 @@ class AbstractPlugin(ABC):
         self._loop: AbstractEventLoop = loop
         self._logger: Logger = logger
 
-        self._future_cache: Deque[Future] = deque()
+        self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
         self._stopped = False
@@ -44,7 +43,7 @@ class AbstractPlugin(ABC):
         # call to wait on sleep so that way generators get created
         self._loop.run_until_complete(asyncio.sleep(0.05))
 
-    def _future_callback(self, coroutine_name: str, future: Future) -> None:
+    def _future_callback(self, coroutine_name: str, future: futures.Future) -> None:
         """
         Callback associated with each Future scheduled by method _submit_coroutine.
         This will send output to the logger, retrieve results and exceptions, and clear Futures from the cache.
@@ -63,7 +62,7 @@ class AbstractPlugin(ABC):
 
     def _submit_coroutine(
         self, coro: Coroutine, callback: Optional[Callable] = None
-    ) -> Future:
+    ) -> futures.Future:
         """
         Puts a task returned by asyncio.run_coroutine_threadsafe to the future_cache to prevent garbage collection and allow return
         value analysis
@@ -71,7 +70,9 @@ class AbstractPlugin(ABC):
         :param callback: A Callable, which will be added with add_done_callback to the given coroutine
         :return: The submitted task, if plugin specific callbacks are added
         """
-        new_future: Future = asyncio.run_coroutine_threadsafe(coro, loop=self._loop)
+        new_future: futures.Future = asyncio.run_coroutine_threadsafe(
+            coro, loop=self._loop
+        )
         new_future.add_done_callback(partial(self._future_callback, coro.__qualname__))
         if callback is not None:
             new_future.add_done_callback(callback)
@@ -105,13 +106,13 @@ class AbstractPlugin(ABC):
 
     def _schedule(self, *args: Coroutine) -> None:
         """
-        Takes any ammount of coroutins as input and uses add_done_callback to chain all coroutines together
+        Takes any amount of coroutines as input and uses add_done_callback to chain all coroutines together
         :param *args: Any amount of coroutines
         :return: The scheduled Future with coroutines chained to it
         """
         coros = [*args]
         # remove the Future if this was called with a callback
-        if isinstance(coros[-1], Future):
+        if isinstance(coros[-1], futures.Future):
             _ = coros.pop()
         if len(coros) > 0:
             first = coros[0]
@@ -119,7 +120,7 @@ class AbstractPlugin(ABC):
             self._submit_coroutine(first, partial(self._schedule, *coros))
 
     def _submit_blocking_coroutine(
-        self, coro: Callable, callback: Optional[Callable] = None, timeout: float = 1.0
+        self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0
     ) -> Any:
         """
         Blocks until the given coroutine has completed, returning its result (or None if a timeout occurs)
@@ -128,16 +129,11 @@ class AbstractPlugin(ABC):
         :param timeout: The maximum number of seconds to block
         :return: The result of the coroutine if it succeeds, otherwise None
         """
-        done_condition = Condition()
-        blocking_future = self._submit_coroutine(coro(), callback)
-        blocking_future.add_done_callback(lambda _: done_condition.notify())
-
-        done_condition.wait(timeout)
+        blocking_future = self._submit_coroutine(coro, callback)
 
         try:
-            return blocking_future.result()
-        except asyncio.InvalidStateError:
-            blocking_future.cancel()
+            return blocking_future.result(timeout=timeout)
+        except futures.TimeoutError:
             return None
 
     def cancel_futures(self) -> None:

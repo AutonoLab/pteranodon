@@ -31,7 +31,7 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._take_photo_sub_task = self._submit_coroutine(self._take_photo())
+        self._submit_generator(self._take_photo)
 
         self._end_init()
 

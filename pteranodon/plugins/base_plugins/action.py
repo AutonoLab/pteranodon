@@ -188,7 +188,7 @@ class Action(AbstractBasePlugin):
             value:
         """
 
-        self._submit_coroutine(self._system.action.set_acuator(index, value))
+        self._submit_coroutine(self._system.action.set_actuator(index, value))
 
     def set_current_speed(self, speed_m_s: float) -> None:
         """

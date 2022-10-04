@@ -42,13 +42,13 @@ class Offboard(AbstractBasePlugin):
         """
         self._submit_coroutine(self._system.offboard.set_acceleration_ned(accel_ned))
 
-    def set_acuator_control(self, act_ctrl: offboard.ActuatorControl) -> None:
+    def set_actuator_control(self, act_ctrl: offboard.ActuatorControl) -> None:
         """
         Set direct actuator control values to groups #0 and #1
         :param act_ctrl: offboard.ActuatorControl ; Actuator control values
         :return: None
         """
-        self._submit_coroutine(self._system.offboard.set_acuator_control(act_ctrl))
+        self._submit_coroutine(self._system.offboard.set_actuator_control(act_ctrl))
 
     def set_attitude(self, attitude: offboard.Attitude) -> None:
         """

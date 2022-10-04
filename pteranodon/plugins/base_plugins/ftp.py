@@ -1,9 +1,7 @@
-import asyncio
 import typing
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
-from threading import Condition
 
 from mavsdk import System
 
@@ -186,28 +184,14 @@ class Ftp(AbstractBasePlugin):
         :rtype: Optional[bool]
         """
 
-        files_identical_task = asyncio.run_coroutine_threadsafe(
-            self._system.ftp.are_files_identical(local_file_path, remote_file_path),
-            loop=self._loop,
+        files_are_identical = self._submit_blocking_coroutine(
+            self._system.ftp.are_files_identical(local_file_path, remote_file_path)
         )
 
-        done_condition = Condition()
+        if files_are_identical is None:
+            self._logger.error("Could not return are_files_identical result!")
 
-        # When task is done, stop waiting
-        files_identical_task.add_done_callback(lambda _: done_condition.notify())
-
-        # Wait with a timeout of 1 second
-        done_condition.wait(1.0)
-
-        try:
-            return files_identical_task.result()
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
-            self._logger.error(
-                "Could not return are_files_identical result! Request timed out!"
-            )
-            return None
+        return files_are_identical
 
     def list_directory(self, remote_directory: str) -> List[str]:
         """
@@ -219,27 +203,16 @@ class Ftp(AbstractBasePlugin):
         :rtype: List[str]
         """
 
-        list_directory_task = asyncio.run_coroutine_threadsafe(
-            self._system.ftp.list_directory(remote_directory), loop=self._loop
+        files_list_opt = self._submit_blocking_coroutine(
+            self._system.ftp.list_directory(remote_directory)
         )
-
-        done_condition = Condition()
-
-        # When task is done, stop waiting
-        list_directory_task.add_done_callback(lambda _: done_condition.notify())
-
-        # Wait with a timeout of 1 second
-        done_condition.wait(1.0)
-
-        try:
-            return list_directory_task.result()
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
+        if files_list_opt is None:
             self._logger.error(
                 "Could not return list of directory contents! Request timed out!"
             )
             return []
+
+        return files_list_opt
 
     @property
     def root_directory(self) -> str:

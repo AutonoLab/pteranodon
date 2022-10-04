@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from functools import partial
 
 from mavsdk import System, param_server
 
@@ -65,7 +64,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_all_params")
 
         all_params = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_all_params), timeout=timeout
+            self._system.param_server.retrieve_all_params(), timeout=timeout
         )
 
         if all_params is not None:
@@ -84,7 +83,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_param_custom")
 
         param_custom = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_param_custom, name),
+            self._system.param_server.retrieve_param_custom(name),
             timeout=timeout,
         )
 
@@ -106,7 +105,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_param_float")
 
         param_float = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_param_float, name),
+            self._system.param_server.retrieve_param_float(name),
             timeout=timeout,
         )
 
@@ -126,7 +125,7 @@ class ParamServer(AbstractBasePlugin):
         self._logger.info("Waiting for response to retrieve_param_int")
 
         param_int = self._submit_blocking_coroutine(
-            partial(self._system.param_server.retrieve_param_int, name), timeout=timeout
+            self._system.param_server.retrieve_param_int(name), timeout=timeout
         )
 
         if param_int is not None:

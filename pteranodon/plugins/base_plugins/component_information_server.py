@@ -1,6 +1,5 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
 
 from mavsdk import System
 from mavsdk.component_information_server import FloatParamUpdate, FloatParam
@@ -17,7 +16,7 @@ class ComponentInformationServer(AbstractBasePlugin):
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._submit_generator(partial(self._update_float_param))
+        self._submit_generator(self._update_float_param)
 
         self._end_init()
 
@@ -28,7 +27,7 @@ class ComponentInformationServer(AbstractBasePlugin):
 
     def float_param(self) -> FloatParamUpdate:
         """
-        Subscribe to float param updates.
+        Fetch float param updates.
 
         :return: A parameter update
         :rtype: FloatParamUpdate

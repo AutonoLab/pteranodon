@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Optional, Union
-from functools import partial
 
 from mavsdk import System, camera
 
@@ -30,11 +29,11 @@ class Camera(AbstractBasePlugin):
         self._possible_setting_options: List[camera.SettingOptions] = []
 
         # Tasks of subscribed properties
-        self._submit_generator(partial(self._update_capture_info))
-        self._submit_generator(partial(self._update_information))
-        self._submit_generator(partial(self._update_mode))
-        self._submit_generator(partial(self._update_status))
-        self._submit_generator(partial(self._update_vstream_info))
+        self._submit_generator(self._update_capture_info)
+        self._submit_generator(self._update_information)
+        self._submit_generator(self._update_mode)
+        self._submit_generator(self._update_status)
+        self._submit_generator(self._update_vstream_info)
 
         self._end_init()
 
@@ -224,7 +223,7 @@ class Camera(AbstractBasePlugin):
         """
 
         list_photos = self._submit_blocking_coroutine(
-            partial(self._system.camera.list_photos, photos_range), timeout=timeout
+            self._system.camera.list_photos(photos_range), timeout=timeout
         )
 
         if list_photos is not None:

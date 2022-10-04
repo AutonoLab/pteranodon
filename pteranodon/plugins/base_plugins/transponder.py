@@ -1,6 +1,5 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
 
 from mavsdk import System, transponder
 
@@ -16,7 +15,7 @@ class Transponder(AbstractBasePlugin):
         super().__init__("transponder", system, loop, logger)
 
         self._transponder_data = None
-        self._submit_generator(partial(self._transponder_update))
+        self._submit_generator(self._transponder_update)
 
         self._end_init()
 
