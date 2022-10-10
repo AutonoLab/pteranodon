@@ -1,10 +1,7 @@
-import asyncio
 import typing
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
-from functools import partial
-from threading import Condition
 
 from mavsdk import System
 
@@ -22,17 +19,11 @@ class Ftp(AbstractBasePlugin):
         self._comp_id: typing.Optional[int] = None
         self._root_directory = "/"
 
-        self._comp_id_task = asyncio.ensure_future(
-            self._system.ftp.get_our_compid(), loop=self._loop
-        )
-        self._comp_id_task.add_done_callback(partial(self._compid_callback))
+        self._comp_id = self._loop.run_until_complete(self._system.ftp.get_our_compid())
 
-    def _compid_callback(self, task: Task) -> None:
-        self._comp_id = task.result()
-        del self._comp_id_task
+        self._end_init()
 
     async def _download_file(self, remote_file_path: str, local_directory: str) -> None:
-
         async for data in self._system.ftp.download(remote_file_path, local_directory):
             percent_downloaded: float = data.bytes_transferred / data.total_bytes
             self._logger.info(
@@ -41,9 +32,10 @@ class Ftp(AbstractBasePlugin):
                     f' downloading to directory "{local_directory}": {percent_downloaded:.2f}%      ',
                 )
             )
+            if percent_downloaded == 1.0:
+                break
 
     async def _upload_file(self, local_file_path: str, remote_directory: str) -> None:
-
         async for data in self._system.ftp.upload(local_file_path, remote_directory):
             percent_uploaded: float = data.bytes_transferred / data.total_bytes
             self._logger.info(
@@ -52,6 +44,8 @@ class Ftp(AbstractBasePlugin):
                     f' uploading to directory "{remote_directory}": {percent_uploaded:.2f}%      ',
                 )
             )
+            if percent_uploaded == 1.0:
+                break
 
     def get_our_component_id(self) -> typing.Optional[int]:
         """
@@ -74,11 +68,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Downloading the file at "{remote_file_path}" to local directory "{local_directory}"'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._download_file(remote_file_path, local_directory), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._download_file(remote_file_path, local_directory))
 
     def upload(self, local_file_path: str, remote_directory: str) -> None:
         """
@@ -92,11 +82,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Uploading the file at "{local_file_path}" to remote directory "{remote_directory}"'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._upload_file(local_file_path, remote_directory), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._upload_file(local_file_path, remote_directory))
 
     def create_directory(self, remote_directory_path: str) -> None:
         """
@@ -108,12 +94,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Creating directory at path "{remote_directory_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.create_directory(remote_directory_path),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.ftp.create_directory(remote_directory_path))
 
     def remove_directory(self, remote_directory_path: str) -> None:
         """
@@ -125,12 +106,7 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Removing directory at path "{remote_directory_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.remove_directory(remote_directory_path),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.ftp.remove_directory(remote_directory_path))
 
     def remove_file(self, remote_file_path: str) -> None:
         """
@@ -140,11 +116,7 @@ class Ftp(AbstractBasePlugin):
         :type remote_file_path: str
         """
         self._logger.info(f'Removing file at path "{remote_file_path}" via FTP')
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.remove_file(remote_file_path), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.ftp.remove_file(remote_file_path))
 
     def rename(self, remote_source_path: str, remote_dest_path: str) -> None:
         """
@@ -158,11 +130,8 @@ class Ftp(AbstractBasePlugin):
         self._logger.info(
             f'Moving a remote file/directory from "{remote_source_path}" to "{remote_dest_path}" via FTP'
         )
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.rename(remote_source_path, remote_dest_path),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.ftp.rename(remote_source_path, remote_dest_path)
         )
 
     def reset(self) -> None:
@@ -171,9 +140,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info("Resetting the FTP server")
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.ftp.reset(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.ftp.reset())
 
     def set_root_directory(self, root_directory: str) -> None:
         """
@@ -186,11 +153,7 @@ class Ftp(AbstractBasePlugin):
             f"Setting the root directory of the MAVLink FTP server to {root_directory}"
         )
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.set_root_directory(root_directory), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.ftp.set_root_directory(root_directory))
 
         self._root_directory = root_directory
 
@@ -203,11 +166,7 @@ class Ftp(AbstractBasePlugin):
         """
         self._logger.info(f"Setting the target's component ID to {comp_id}")
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.ftp.set_target_compid(comp_id), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.ftp.set_target_compid(comp_id))
 
         self._comp_id = comp_id
 
@@ -225,28 +184,14 @@ class Ftp(AbstractBasePlugin):
         :rtype: Optional[bool]
         """
 
-        files_identical_task = asyncio.ensure_future(
-            self._system.ftp.are_files_identical(local_file_path, remote_file_path),
-            loop=self._loop,
+        files_are_identical = self._submit_blocking_coroutine(
+            self._system.ftp.are_files_identical(local_file_path, remote_file_path)
         )
 
-        done_condition = Condition()
+        if files_are_identical is None:
+            self._logger.error("Could not return are_files_identical result!")
 
-        # When task is done, stop waiting
-        files_identical_task.add_done_callback(lambda _: done_condition.notify())
-
-        # Wait with a timeout of 1 second
-        done_condition.wait(1.0)
-
-        try:
-            return files_identical_task.result()
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
-            self._logger.error(
-                "Could not return are_files_identical result! Request timed out!"
-            )
-            return None
+        return files_are_identical
 
     def list_directory(self, remote_directory: str) -> List[str]:
         """
@@ -258,27 +203,16 @@ class Ftp(AbstractBasePlugin):
         :rtype: List[str]
         """
 
-        list_directory_task = asyncio.ensure_future(
-            self._system.ftp.list_directory(remote_directory), loop=self._loop
+        files_list_opt = self._submit_blocking_coroutine(
+            self._system.ftp.list_directory(remote_directory)
         )
-
-        done_condition = Condition()
-
-        # When task is done, stop waiting
-        list_directory_task.add_done_callback(lambda _: done_condition.notify())
-
-        # Wait with a timeout of 1 second
-        done_condition.wait(1.0)
-
-        try:
-            return list_directory_task.result()
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
+        if files_list_opt is None:
             self._logger.error(
                 "Could not return list of directory contents! Request timed out!"
             )
             return []
+
+        return files_list_opt
 
     @property
     def root_directory(self) -> str:

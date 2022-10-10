@@ -8,16 +8,16 @@ from .base_plugins import (
     ActionServer,
     Action,
     Calibration,
-    CameraServer,
+    # CameraServer,
     Camera,
-    ComponentInformationServer,
-    ComponentInformation,
+    # ComponentInformationServer,
+    # ComponentInformation,
     Core,
     Failure,
     FollowMe,
     Ftp,
     Geofence,
-    Gimbal,
+    # Gimbal,
     Info,
     LogFiles,
     ManualControl,
@@ -65,30 +65,34 @@ class PluginManager:
         self._ext_plugins: Dict[str, AbstractCustomPlugin] = {}
         self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
 
+        # Relatively sorted by amount of data being requested during init
+        # Lowest to the highest generators, Highest to the lowest bandwidth in __init__
+        # TODO: Gimbal, CameraServer, ComponentInformation, ComponentInformationServer # pylint: disable=fixme
         base_plugin_types: List[Type[AbstractBasePlugin]] = [
+            Param,
+            Mission,
+            # Resume alphabetical ordering here
             ActionServer,
             Action,
             Calibration,
-            CameraServer,
+            # CameraServer,
             Camera,
-            ComponentInformationServer,
-            ComponentInformation,
+            # ComponentInformationServer,
+            # ComponentInformation,
             Core,
             Failure,
             FollowMe,
             Ftp,
             Geofence,
-            Gimbal,
+            # Gimbal,
             Info,
             LogFiles,
             ManualControl,
             MissionRawServer,
             MissionRaw,
-            Mission,
             Mocap,
             Offboard,
             ParamServer,
-            Param,
             Rtk,
             ServerUtility,
             Shell,
@@ -101,6 +105,7 @@ class PluginManager:
         ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
+            self._logger.info(f"Beginning setup of: {base_type} plugin")
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
@@ -158,3 +163,14 @@ class PluginManager:
             )
             return True
         return False
+
+    def cancel_all_futures(self) -> None:
+        """
+        Force cancels all running (or yet to run) Futures in ALL plugins
+        """
+        for base_plugin in self._base_plugins.values():
+            base_plugin.cancel_futures()
+        for ext_plugin in self._ext_plugins.values():
+            ext_plugin.cancel_futures()
+        for custom_plugin in self._custom_plugins.values():
+            custom_plugin.cancel_futures()

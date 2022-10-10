@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -15,6 +14,7 @@ class Failure(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("failure", system, loop, logger)
+        self._end_init()
 
     def inject(
         self, failure_unit: FailureUnit, failure_type: FailureType, instance: int
@@ -26,9 +26,6 @@ class Failure(AbstractBasePlugin):
         :param instance: int ; instance to affect (0 for all)
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.failure.inject(failure_unit, failure_type, instance),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.failure.inject(failure_unit, failure_type, instance)
         )

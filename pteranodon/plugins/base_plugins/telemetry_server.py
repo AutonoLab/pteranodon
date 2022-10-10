@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -30,6 +29,7 @@ class TelemetryServer(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("telemetry_server", system, loop, logger)
+        self._end_init()
 
     def publish_battery(self, battery: Battery) -> None:
         """
@@ -38,11 +38,7 @@ class TelemetryServer(AbstractBasePlugin):
             battery: The next battery state
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_battery(battery), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_battery(battery))
 
     def publish_extended_sys_state(
         self, vtol_state: VtolState, landed_state: LandedState
@@ -54,12 +50,9 @@ class TelemetryServer(AbstractBasePlugin):
             landed_state:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_extended_sys_state(
-                    vtol_state, landed_state
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_extended_sys_state(
+                vtol_state, landed_state
             )
         )
 
@@ -70,11 +63,8 @@ class TelemetryServer(AbstractBasePlugin):
             ground_truth: Ground truth position information available in simulation
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_ground_truth(ground_truth),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_ground_truth(ground_truth)
         )
 
     def publish_home(self, home: Position) -> None:
@@ -84,11 +74,7 @@ class TelemetryServer(AbstractBasePlugin):
             home: The next home position
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_home(home), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_home(home))
 
     def publish_imu(self, imu: Imu) -> None:
         """
@@ -97,11 +83,7 @@ class TelemetryServer(AbstractBasePlugin):
             imu: The next IMU status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_imu(imu), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_imu(imu))
 
     def publish_odometry(self, odometry: Odometry) -> None:
         """
@@ -110,12 +92,7 @@ class TelemetryServer(AbstractBasePlugin):
             odometry: The next odometry status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_odometry(odometry),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_odometry(odometry))
 
     def publish_position(
         self, position: Position, velocity_ned: VelocityNed, heading: Heading
@@ -128,12 +105,9 @@ class TelemetryServer(AbstractBasePlugin):
             heading: Heading (yaw) in degrees
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_position(
-                    position, velocity_ned, heading
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_position(
+                position, velocity_ned, heading
             )
         )
 
@@ -146,12 +120,9 @@ class TelemetryServer(AbstractBasePlugin):
             position_velocity_ned: The next position and velocity status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_position_velocity_ned(
-                    position_velocity_ned
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_position_velocity_ned(
+                position_velocity_ned
             )
         )
 
@@ -164,11 +135,8 @@ class TelemetryServer(AbstractBasePlugin):
             gps_info: The next ‘GPS info’ state
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_raw_gps(raw_gps, gps_info),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_raw_gps(raw_gps, gps_info)
         )
 
     def publish_raw_imu(self, imu: Imu) -> None:
@@ -178,11 +146,7 @@ class TelemetryServer(AbstractBasePlugin):
             imu: The next raw IMU status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_raw_imu(imu), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_raw_imu(imu))
 
     def publish_scaled_imu(self, imu: Imu) -> None:
         """
@@ -191,11 +155,7 @@ class TelemetryServer(AbstractBasePlugin):
             imu: The next scaled IMU status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_scaled_imu(imu), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.telemetry_server.publish_scaled_imu(imu))
 
     def publish_status_text(self, status_text: StatusText) -> None:
         """
@@ -204,11 +164,8 @@ class TelemetryServer(AbstractBasePlugin):
             status_text:  The next ‘status text’
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_status_text(status_text),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_status_text(status_text)
         )
 
     def publish_sys_status(
@@ -231,17 +188,14 @@ class TelemetryServer(AbstractBasePlugin):
             gyro_status:
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_sys_status(
-                    battery,
-                    rc_receiver_status,
-                    gyro_status,
-                    accel_status,
-                    mag_status,
-                    gps_status,
-                ),
-                loop=self._loop,
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_sys_status(
+                battery,
+                rc_receiver_status,
+                gyro_status,
+                accel_status,
+                mag_status,
+                gps_status,
             )
         )
 
@@ -253,9 +207,6 @@ class TelemetryServer(AbstractBasePlugin):
             time_us: The next ‘unix epoch time’ status
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.telemetry_server.publish_unix_epoch_time(time_us),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.telemetry_server.publish_unix_epoch_time(time_us)
         )

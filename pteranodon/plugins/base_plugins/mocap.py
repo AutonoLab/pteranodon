@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -15,6 +14,7 @@ class Mocap(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mocap", system, loop, logger)
+        self._end_init()
 
     def set_attitude_position_mocap(
         self, attitude_position_mocap: mocap.AttitudePositionMocap
@@ -27,11 +27,8 @@ class Mocap(AbstractBasePlugin):
         """
 
         self._logger.info("Set Mocap attitude and position")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_attitude_position_mocap(attitude_position_mocap),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.mocap.set_attitude_position_mocap(attitude_position_mocap)
         )
 
     def set_odometry(self, odometry: mocap.Odometry) -> None:
@@ -39,14 +36,10 @@ class Mocap(AbstractBasePlugin):
         Send odometry information with an external interface.
 
         :param odometry: The odometry data
-        :type odemetry: mocap.Odometry
+        :type odometry: mocap.Odometry
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_odometry(odometry), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mocap.set_odometry(odometry))
 
     def set_vision_position_estimate(
         self, vision_position_estimate: mocap.VisionPositionEstimate
@@ -58,11 +51,6 @@ class Mocap(AbstractBasePlugin):
         :type vision_position_estimate: mocap.VisionPositionEstimate
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mocap.set_vision_position_estimate(
-                    vision_position_estimate
-                ),
-                loop=self._loop,
-            )
+        self._submit_coroutine(
+            self._system.mocap.set_vision_position_estimate(vision_position_estimate)
         )

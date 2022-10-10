@@ -2,13 +2,16 @@ from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
 import asyncio
+from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
 from typing import Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
 import random
+import signal
 
+import uvloop
 from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
@@ -48,7 +51,6 @@ from .plugins.base_plugins import (
     Tune,
 )
 from .plugins.ext_plugins import Sensor, Relative
-from .plugins.ext_plugins.sensor import AbstractSensor
 
 
 class AbstractDrone(ABC):
@@ -59,10 +61,8 @@ class AbstractDrone(ABC):
     def __init__(
         self,
         address: str,
-        sensor_list: Optional[List[AbstractSensor]] = None,
         log_file_name: Optional[str] = None,
         time_slice=0.050,
-        min_follow_distance=5.0,
         **kwargs,
     ):
         """
@@ -71,6 +71,12 @@ class AbstractDrone(ABC):
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
+        # set asyncio event loop policy
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        # attatch signal handlers
+        self._handle_signals_main()
+
         # setup the logger first
         logger_name = "mavlog.log" if log_file_name is None else log_file_name
         self._logger = self._setup_logger(logger_name)
@@ -87,22 +93,27 @@ class AbstractDrone(ABC):
         self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
         self._mavlink_thread = Thread(
-            name="Mavlink-Command-Thread", target=self._process_command_loop
+            name="Mavlink-Command-Thread",
+            target=self._process_command_loop,
+            daemon=True,
         )
 
         # make stuff for telemetry
         self._telemetry_thread = Thread(
-            name="Mavlink-Telemetry-Thread", target=self._run_telemetry_loop
+            name="Mavlink-Telemetry-Thread",
+            target=self._run_telemetry_loop,
+            daemon=True,
         )
 
         # register the stop method so everything cleans up
+        self._ran_stop = False
         atexit.register(self.stop)
 
         # connect the drone
         self._connect()
 
         # build arguments for the extension plugins
-        self._ext_args = {"sensor": sensor_list, "relative": min_follow_distance}
+        self._ext_args = {**kwargs}
 
         # setup all plugins
         self._plugins = PluginManager(
@@ -111,12 +122,21 @@ class AbstractDrone(ABC):
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
-        self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
+        self._loop_thread = Thread(
+            name="Loop-Thread", target=self._loop_loop, daemon=True
+        )
 
         # finally, start the mavlink thread
         self._mavlink_thread.start()
         self._telemetry_thread.start()
         self.sensor.start_all_sensors()
+
+        # create a list of threads in the object
+        self._threads: List[Thread] = [
+            self._loop_thread,
+            self._mavlink_thread,
+            self._telemetry_thread,
+        ]
 
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
@@ -453,6 +473,10 @@ class AbstractDrone(ABC):
         """
         pass
 
+    async def _teardown(self) -> None:
+        for command, args, kwargs in self._queue:
+            self._process_command(command, args, kwargs)
+
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
     ###############################################################################
@@ -474,8 +498,19 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
-        del self._drone
+        try:
+            self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
+            del self._drone
+        except AttributeError:
+            pass
+
+    def _force_cleanup(self) -> None:
+        self._cleanup()
+        sys.exit(-1)
+
+    def _handle_signals_main(self) -> None:
+        signal.signal(signal.SIGTERM, lambda a, b: self._force_cleanup)
+        signal.signal(signal.SIGINT, lambda a, b: self._force_cleanup)
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
         if com is not None:
@@ -483,9 +518,15 @@ class AbstractDrone(ABC):
                 f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
             )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
-                self._task_cache.append(
-                    asyncio.ensure_future(com(*args, **kwargs), loop=self._loop)
+                new_future: Future = asyncio.run_coroutine_threadsafe(
+                    com(*args, **kwargs), loop=self._loop
                 )
+                new_future.add_done_callback(
+                    lambda f: self._logger.info(
+                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
+                    )
+                )
+                self._task_cache.append(new_future)
             else:  # typical sync function
                 com(*args, **kwargs)
         else:
@@ -503,15 +544,14 @@ class AbstractDrone(ABC):
                     if kwargs is None:
                         kwargs = {}
                     self._process_command(com, args, kwargs)
-                # TODO, perform logging on these exceptions
                 except IndexError as e:
                     # this exception is expected since we expect the deque to not have elements sometimes
                     if str(e) != "pop from an empty deque":
                         # if the exception makes it here, it is unexpected
                         self._logger.error(e)
-                except ActionError as e:
+                except (OffboardError, ActionError) as e:
                     self._logger.error(e)
-                except OffboardError as e:
+                except Exception as e:
                     self._logger.error(e)
                 finally:
                     end_time = perf_counter() - start_time
@@ -524,6 +564,14 @@ class AbstractDrone(ABC):
     def _run_telemetry_loop(self):
         self._loop.run_forever()
 
+    # method which joins a thread with a timeout, used with map to close all threads\
+    @staticmethod
+    def _join_thread(thread: Thread, timeout=1) -> None:
+        try:
+            thread.join(timeout=timeout)
+        except RuntimeError:
+            pass
+
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
         """
@@ -531,34 +579,39 @@ class AbstractDrone(ABC):
         execution, stops the mavlink command loop, and then joins the mavlink thread.
         :return: None
         """
+        if self._ran_stop:
+            return
+        self._ran_stop = True
+
+        # shutdown any generators (yield) which are running
+        # don't save the Future since cleaning and shutting down anyways
+        self._logger.info("Closing async generators")
+        self._plugins.cancel_all_futures()
+        asyncio.run_coroutine_threadsafe(
+            self._loop.shutdown_asyncgens(), loop=self._loop
+        )  # shutdown_asyncgens is a coroutine
+
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
 
-        try:
-            self.disarm()
-        except AttributeError:  # means that _cleanup has already occurred
-            pass
+        # Likely not needed
+        # self.put(self.action.disarm)
 
         # shutdown the any asyncgens that have been opened
+        self._stopped_mavlink = True
+        self._stopped_loop = True
         self._loop.stop()
 
-        # stop execution of the loop
-        self._stopped_loop = True
-        try:
-            self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
-        except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
-            pass
+        # attempt to join all threads
+        self._logger.info("Attempting to join threads")
+        map(self._join_thread, self._threads)
 
         # run teardown (queue should be clean from the clear before disarm)
-        self.teardown()
-        while (
-            len(self._queue) > 0
-        ):  # simple spin wait to ensure any mavlink commands from teardown are run
-            sleep(self._time_slice + 0.01)
+        self._logger.info("Running remaining async Tasks/Future, and MAVSDK commands")
+        asyncio.get_event_loop().run_until_complete(self._teardown())
 
-        # finally join the mavlink thread and stop it
-        self._stopped_mavlink = True
-        self._mavlink_thread.join()
+        # cleanup the mavsdk.System instance
+        self._cleanup()
 
         # close logging
         self._close_logger()

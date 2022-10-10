@@ -26,9 +26,12 @@ class Sensor(AbstractCustomPlugin):
 
         self._sensors: Dict[str, AbstractSensor] = {}
 
-        if self._ext_args["sensor"] is not None:
-            for sensor in self._ext_args["sensor"]:
-                self._sensors[sensor.name] = sensor
+        try:
+            if self._ext_args["sensor"] is not None:
+                for sensor in self._ext_args["sensor"]:
+                    self._sensors[sensor.name] = sensor
+        except KeyError:
+            pass
 
     @property
     def sensors(self) -> Dict[str, AbstractSensor]:

@@ -1,7 +1,5 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
-from threading import Condition
 from typing import Optional, List
 
 from mavsdk import System, mission_raw
@@ -16,14 +14,14 @@ class MissionRaw(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw", system, loop, logger)
+
         self._mission_progress = None
-        self.has_mission_changed = False
-        self._mission_changed_task = asyncio.ensure_future(
-            self._update_mission_changed(), loop=self._loop
-        )
-        self._mission_progress_task = asyncio.ensure_future(
-            self._update_mission_progress(), loop=self._loop
-        )
+        self._has_mission_changed = False
+
+        self._submit_generator(self._update_mission_changed)
+        self._submit_generator(self._update_mission_progress)
+
+        self._end_init()
 
     def cancel_mission_download(self):
         """
@@ -31,11 +29,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Download")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.cancel_mission_download(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.cancel_mission_download())
 
     def cancel_mission_upload(self):
         """
@@ -43,11 +37,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Upload")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.cancel_mission_upload(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.cancel_mission_upload())
 
     def clear_mission(self):
         """
@@ -55,38 +45,28 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Cleared mission")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.clear_mission(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.clear_mission())
 
-    def download_mission(self) -> List[mission_raw.MissionItem]:
+    def download_mission(self, timeout: float = 1.0) -> List[mission_raw.MissionItem]:
         """
         Returns the current mission plan
         :return: mission.MissionPlan
         """
         self._logger.info("Downloading mission file")
 
-        download_mission_task = asyncio.ensure_future(
-            self._system.mission_raw.download_mission(), loop=self._loop
+        downloaded_mission = self._submit_blocking_coroutine(
+            self._system.mission_raw.download_mission(), timeout=timeout
         )
-        done_condition = Condition()
-        download_mission_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        try:
-            x = download_mission_task.result()
+        if downloaded_mission is not None:
             self._logger.info("Mission items downloaded successfully")
-            return x
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            #       it can be assumed that the wait call timed out before the callback was done
-            self._logger.error("Could not download mission file! Request timed out!")
-            return []
+            return downloaded_mission
+
+        self._logger.error("Could not download mission file! Request timed out!")
+        return []
 
     def import_qgroundcontrol_mission(
-        self, qgc_plan_path
+        self, qgc_plan_path, timeout: float = 1.0
     ) -> Optional[mission_raw.MissionImportData]:
         """
         Imports the contents from a JSON .plan format file as a mission
@@ -95,21 +75,16 @@ class MissionRaw(AbstractBasePlugin):
         """
         self._logger.info(f"Beginning mission import from {qgc_plan_path}")
 
-        import_mission_task = asyncio.ensure_future(
+        imported_mission = self._submit_blocking_coroutine(
             self._system.mission_raw.import_qgroundcontrol_mission(qgc_plan_path),
-            loop=self._loop,
+            timeout=timeout,
         )
-        import_done_condition = Condition()
-        import_mission_task.add_done_callback(lambda _: import_done_condition.notify())
-        import_done_condition.wait(1.0)
 
-        try:
-            x = import_mission_task.result()
+        if imported_mission is not None:
             self._logger.info("Mission import completed successfully")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Import was not completed! Request timed out!")
-            return None
+        return imported_mission
 
     async def _update_mission_changed(self):
         """
@@ -117,8 +92,8 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         async for mission_changed in self._system.mission_raw.mission_changed():
-            if mission_changed != self.has_mission_changed:
-                self.has_mission_changed = mission_changed
+            if mission_changed != self._has_mission_changed:
+                self._has_mission_changed = mission_changed
 
     def mission_changed(self) -> bool:
         """
@@ -126,7 +101,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: boolean ; returns True if the ground station has been uploaded or changed by a
         ground station or companion computer, False otherwise
         """
-        return self.has_mission_changed
+        return self._has_mission_changed
 
     async def _update_mission_progress(self):
         """
@@ -150,11 +125,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Mission Paused")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.pause_mission(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.pause_mission())
 
     def set_current_mission_item(self, index: int):
         """
@@ -163,12 +134,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"Setting current mission to the mission at index {index}")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.set_current_mission_item(index),
-                loop=self._loop,
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.set_current_mission_item(index))
 
     def start_mission(self):
         """
@@ -176,11 +142,7 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Mission started")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission_raw.start_mission(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission_raw.start_mission())
 
     def upload_mission(self, items: List[mission_raw.MissionItem]):
         """
@@ -189,6 +151,4 @@ class MissionRaw(AbstractBasePlugin):
         :return: None
         """
         self._logger.info(f"Uploaded {len(items)} mission items as a mission")
-        super().submit_task(
-            asyncio.ensure_future(self._system.mission_raw.upload_mission(items))
-        )
+        self._submit_coroutine(self._system.mission_raw.upload_mission(items))

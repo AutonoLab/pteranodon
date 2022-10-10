@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -17,16 +16,15 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._control_status = None
-        self._control_task = asyncio.ensure_future(
-            self._update_control_status(), loop=self._loop
-        )
+        self._submit_generator(self._update_control_status)
+
+        self._end_init()
 
     async def _update_control_status(self) -> None:
         """
         Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
          over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
         """
-
         async for ctrl_status in self._system.gimbal.control():
             if ctrl_status != self._control_status:
                 self._control_status = ctrl_status
@@ -44,9 +42,7 @@ class Gimbal(AbstractBasePlugin):
         Release control, such that other components can control the gimbal.
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.release_control())
-        )
+        self._submit_coroutine(self._system.gimbal.release_control())
 
     def set_mode(self, gimbal_mode: GimbalMode) -> None:
         """
@@ -56,9 +52,7 @@ class Gimbal(AbstractBasePlugin):
         :type gimbal_mode: GimbalMode
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.set_mode(gimbal_mode))
-        )
+        self._submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
 
     def set_pitch_and_yaw(self, pitch_deg: float, yaw_deg: float) -> None:
         """
@@ -71,10 +65,8 @@ class Gimbal(AbstractBasePlugin):
         :type yaw_deg: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_pitch_and_yaw(pitch_deg, yaw_deg)
-            )
+        self._submit_coroutine(
+            self._system.gimbal.set_pitch_and_yaw(pitch_deg, yaw_deg)
         )
 
     def set_pitch_rate_and_yaw_rate(
@@ -90,11 +82,9 @@ class Gimbal(AbstractBasePlugin):
         :type yaw_rate_deg_s: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_pitch_rate_and_yaw_rate(
-                    pitch_rate_deg_s, yaw_rate_deg_s
-                )
+        self._submit_coroutine(
+            self._system.gimbal.set_pitch_rate_and_yaw_rate(
+                pitch_rate_deg_s, yaw_rate_deg_s
             )
         )
 
@@ -114,11 +104,9 @@ class Gimbal(AbstractBasePlugin):
         :type altitude_m: float
         """
 
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.gimbal.set_roi_location(
-                    latitude_deg, longitude_deg, altitude_m
-                )
+        self._submit_coroutine(
+            self._system.gimbal.set_roi_location(
+                latitude_deg, longitude_deg, altitude_m
             )
         )
 
@@ -130,6 +118,4 @@ class Gimbal(AbstractBasePlugin):
         :type control_mode: ControlMode
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.gimbal.take_control(control_mode))
-        )
+        self._submit_coroutine(self._system.gimbal.take_control(control_mode))

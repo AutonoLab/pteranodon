@@ -1,8 +1,6 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
-from threading import Condition
 
 from mavsdk import System, mission
 
@@ -16,16 +14,15 @@ class Mission(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
+
         self._download_progress = None
         self._enable_return_to_land = None
         self._mission_plan = None
         self._mission_progress = None
-        self._download_mission_with_progress_task = asyncio.ensure_future(
-            self._download_mission_with_progress(), loop=self._loop
-        )
-        self._update_mission_progress_task = asyncio.ensure_future(
-            self._update_mission_progress(), loop=self._loop
-        )
+        self._loop.run_until_complete(self._download_mission_with_progress())
+        self._submit_generator(self._update_mission_progress)
+
+        self._end_init()
 
     def cancel_mission_download(self):
         """
@@ -33,11 +30,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Download")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_download(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission.cancel_mission_download())
 
     def cancel_mission_upload(self):
         """
@@ -45,11 +38,7 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Canceled Mission Upload")
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.mission.cancel_mission_upload(), loop=self._loop
-            )
-        )
+        self._submit_coroutine(self._system.mission.cancel_mission_upload())
 
     def clear_mission(self):
         """
@@ -57,37 +46,26 @@ class Mission(AbstractBasePlugin):
         :return: None
         """
         self._logger.info("Cleared mission")
-        super().submit_task(
-            asyncio.ensure_future(self._system.mission.clear_mission(), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.mission.clear_mission())
 
-    def download_mission(self) -> Optional[mission.MissionPlan]:
+    def download_mission(self, timeout: float = 1.0) -> Optional[mission.MissionPlan]:
         """
         Returns the current mission plan
         :return: mission.MissionPlan
         """
         self._logger.info("Downloading mission file")
 
-        download_mission_task = asyncio.ensure_future(
-            self._system.mission.download_mission(), loop=self._loop
+        downloaded_mission = self._submit_blocking_coroutine(
+            self._system.mission.download_mission(), timeout=timeout
         )
-        download_done_condition = Condition()
-        download_mission_task.add_done_callback(
-            lambda _: download_done_condition.notify()
-        )
-        download_done_condition.wait(1.0)
 
-        try:
-            x = download_mission_task.result()
+        if downloaded_mission is not None:
             self._logger.info("Mission file downloaded successfully")
-            return x
-        except asyncio.InvalidStateError:
-            # If the result is not available yet,
-            # it can be assumed that the wait call timed out before the callback was done
+        else:
             self._logger.error("Could not download mission file! Request timed out!")
-            return None
+        return downloaded_mission
 
-    async def _download_mission_with_progress(self) -> mission.MissionPlan:
+    async def _download_mission_with_progress(self) -> None:
         """
         updates mission progress, and when complete returns the current mission plan
         :return: mission.MissionPlan
@@ -95,12 +73,14 @@ class Mission(AbstractBasePlugin):
         async for progress in self._system.mission.download_mission_with_progress():
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
-                return progress.mission_plan
+                return
             if progress.has_progress:
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
-    def download_mission_with_progress(self) -> Optional[mission.MissionPlan]:
+    def download_mission_with_progress(
+        self, timeout: float = 1.0
+    ) -> Optional[mission.MissionPlan]:
         """
         Starts a download of the Mission plan which updates self._mission_progress with the downloads
         progress
@@ -108,26 +88,19 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Downloading mission file with progress information")
 
-        # Block a thread and allow it to run for 1 second before timing out
-        download_progress_mission_task = asyncio.ensure_future(
-            self._download_mission_with_progress(), loop=self._loop
+        mission_download_progess = self._submit_blocking_coroutine(
+            self._download_mission_with_progress(), timeout=timeout
         )
-        download_progress_done_condition = Condition()
-        download_progress_mission_task.add_done_callback(
-            lambda _: download_progress_done_condition.notify()
-        )
-        download_progress_done_condition.wait(1.0)
 
-        # Test if any information was returned or the function timed out
-        try:
-            x = download_progress_mission_task.result()
+        if mission_download_progess is not None:
             self._logger.info("Mission file downloaded successfully")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Could not download mission file! Request timed out!")
-            return None
+        return mission_download_progess
 
-    def get_return_to_launch_after_mission(self) -> Optional[bool]:
+    def get_return_to_launch_after_mission(
+        self, timeout: float = 1.0
+    ) -> Optional[bool]:
         """
         retrieves the boolean that determines if it returns to the launch location or stays at current location
         :return: boolean
@@ -136,48 +109,35 @@ class Mission(AbstractBasePlugin):
             "Waiting for response to get_return_to_launch_after_mission()"
         )
 
-        # Block a thread and allow it to run for 1 second before timing out
-        get_rtl_task = asyncio.ensure_future(
-            self._system.mission.get_return_to_launch_after_mission(), loop=self._loop
+        rtl_state = self._submit_blocking_coroutine(
+            self._system.mission.get_return_to_launch_after_mission(),
+            timeout=timeout,
         )
-        done_condition = Condition()
-        get_rtl_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        # Test if any information was returned or the function timed out
-        try:
-            x = get_rtl_task.result()
+        if rtl_state is not None:
             self._logger.info(
                 "Response to get_return_to_launch_after_mission() received"
             )
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("Could not retrieve RTL information! Request timed out!")
-            return None
+        return rtl_state
 
-    def is_mission_finished(self) -> Optional[bool]:
+    def is_mission_finished(self, timeout: float = 1.0) -> Optional[bool]:
         """
         retrieves the boolean that states the current status of the mission
         :return: boolean
         """
         self._logger.info("Waiting for response to is_mission_finished()")
 
-        # Block a thread and allow it to run for 1 second before timing out
-        get_imf_task = asyncio.ensure_future(
-            self._system.mission.is_mission_finished(), loop=self._loop
+        imf_state = self._submit_blocking_coroutine(
+            self._system.mission.is_mission_finished(), timeout=timeout
         )
-        done_condition = Condition()
-        get_imf_task.add_done_callback(lambda _: done_condition.notify())
-        done_condition.wait(1.0)
 
-        # Test if any information was returned or the function timed out
-        try:
-            x = get_imf_task.result()
+        if imf_state is not None:
             self._logger.info("Response to is_mission_finished received")
-            return x
-        except asyncio.InvalidStateError:
+        else:
             self._logger.error("is_mission_finished request timed out!")
-            return None
+        return imf_state
 
     def mission_progress(self) -> mission.MissionProgress:
         """
