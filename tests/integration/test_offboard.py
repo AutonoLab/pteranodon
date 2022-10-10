@@ -15,7 +15,7 @@ from threading import Condition
 # pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_drone() -> SimpleDrone:
     # Setup
     print("Setup")

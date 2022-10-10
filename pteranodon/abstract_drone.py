@@ -474,8 +474,8 @@ class AbstractDrone(ABC):
         pass
 
     async def _teardown(self) -> None:
-        for command, args, kwargs in self._queue:
-            self._process_command(command, args, kwargs)
+        for command, handler, args, kwargs in self._queue:
+            self._process_command(command, handler, args, kwargs)
 
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
@@ -546,7 +546,6 @@ class AbstractDrone(ABC):
                 start_time = perf_counter()
                 try:
                     com, handler, args, kwargs = self._queue.popleft()
-                    print("Com:", com)
                     if args is None:
                         args = []
                     if kwargs is None:
@@ -643,7 +642,7 @@ class AbstractDrone(ABC):
 
         command: Callable
         handler: Optional[Callable] = None
-        if isinstance(obj, Tuple):
+        if isinstance(obj, tuple):
             command, handler = obj
         else:
             command = obj

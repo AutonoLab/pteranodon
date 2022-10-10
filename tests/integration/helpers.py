@@ -1,4 +1,6 @@
 import asyncio
+import functools
+import typing
 from typing import Optional, Any
 from threading import Condition
 from asyncio import Task, Future
@@ -38,19 +40,34 @@ class PluginTaskFetcher:
 
         return self._fetched_task
 
-    def _scheduled_notify_callback(self):
+    def __callbacks_contains_func(self, func_name: str) -> bool:
+        for callback in self._fetched_task._done_callbacks:
+            func: typing.Callable = callback
+            if isinstance(func, functools.partial):
+                func = callback.func
+
+            if func.__qualname__.endswith(func_name):
+                return True
+
+        return False
+
+    def _scheduled_notify_callback(self, finished_future):
 
         # Assumes the ordering specified in _submit_coroutine where the _future_callback is called before
         #   the schedule_callback and this callback is added after both of them
 
+        future_cache = self._fetching_plugin._future_cache
+
+        # If cache is empty, no more scheduled coroutines (can't preemptively check if > 1, I don't know why)
+        if len(future_cache) <= 0:
+            self._notify_condition()
+            return
+
         # Update to the newest task
-        self._fetched_task = self._fetching_plugin._future_cache[-1]
+        self._fetched_task = future_cache[-1]
 
         # If this task is also in the schedule chain, recurse
-        if any(
-            callback.__qualname__ == "_schedule"
-            for callback in self._fetched_task._done_callbacks
-        ):
+        if self.__callbacks_contains_func("_schedule"):
             print(
                 f"Previously fetched task has another task {self._fetched_task} in the schedule chain, recursing"
             )
@@ -73,10 +90,7 @@ class PluginTaskFetcher:
             raise RuntimeError("Task not fetched yet!")
 
         # If this task is only one part of a scheduled task, wait until all finish
-        if any(
-            callback.__qualname__ == "_schedule"
-            for callback in self._fetched_task._done_callbacks
-        ):
+        if self.__callbacks_contains_func("_schedule"):
             self._fetched_task.add_done_callback(self._scheduled_notify_callback)
 
         with self._condition:
