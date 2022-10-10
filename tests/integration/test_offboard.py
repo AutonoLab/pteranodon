@@ -16,10 +16,10 @@ from threading import Condition
 
 
 @pytest.fixture(scope="session")
-def test_drone() -> SimpleDrone:
+def test_drone(hostname) -> SimpleDrone:
     # Setup
     print("Setup")
-    test_drone = SimpleDrone(f"udp://:14540")
+    test_drone = SimpleDrone(f"udp://{hostname}:14540")
 
     yield test_drone
 
