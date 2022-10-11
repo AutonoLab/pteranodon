@@ -31,4 +31,4 @@ jobs:
           - "50051:50051"
           - "14540:14540/udp"
 
-        options: --health-cmd "ss | grep ":14280" --health-interval=5s --health-timeout=100s
+        options: --health-cmd "ss -a | grep :14280" --health-interval=5s --health-timeout=100s
