@@ -35,4 +35,5 @@ jobs:
           --health-cmd "ss -a | grep :14280"
           --health-interval=5s
           --health-timeout=100s
-          --health-retries 5
+          --health-retries=5
+          --health-start-period=60s
