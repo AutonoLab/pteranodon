@@ -32,7 +32,7 @@ jobs:
           - "14540:14540/udp"
 
         options: >-
-          --health-cmd "if [ $(ps aux | grep -e "/root/Firmware/build/px4_sitl_default/bin/px4 /root/Firmware/build/px4_sitl_default/etc" | wc -l) -ge 2 ]; then exit 0; else exit 1; fi"
+          --health-cmd "if [ $(ps aux | grep /root/Firmware/build/px4_sitl_default/etc | wc -l) -ge 2 ]; then exit 0; else exit 1; fi"
           --health-interval 5s
           --health-timeout 100s
           --health-retries 5
