@@ -10,6 +10,6 @@ def pytest_addoption(parser: pytest.Parser):
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def hostname(request: pytest.FixtureRequest):
     return request.config.getoption("--hostname")
