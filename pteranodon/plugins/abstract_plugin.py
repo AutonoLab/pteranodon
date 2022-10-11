@@ -49,7 +49,13 @@ class AbstractPlugin(ABC):
         """
         Callback associated with each Future scheduled by method _submit_coroutine.
         This will send output to the logger, retrieve results and exceptions, and clear Futures from the cache.
+
+        :param coroutine_name: The name of the coroutine that finished
+        :type coroutine_name: str
+        :param is_gen: Whether the coroutine is a generator or not (used for logging)
+        :type is_gen: bool
         :param future: A concurrent.future.Future, which has been scheduled with asyncio.run_coroutine_threadsafe
+        :type future: concurrent.future.Future
         :return: None
         """
 
@@ -76,12 +82,19 @@ class AbstractPlugin(ABC):
         is_generator: bool = False,
     ) -> futures.Future:
         """
-        Puts a task returned by asyncio.run_coroutine_threadsafe to the future_cache to prevent garbage collection and allow return
+        Puts a future returned by asyncio.run_coroutine_threadsafe to the future_cache to prevent garbage collection and allow return
         value analysis
-        :param coro: A concurrent.future.Future
-        :param callback: A Callable, which will be added with add_done_callback to the given coroutine
-        :return: The submitted task, if plugin specific callbacks are added
+        :param coro: The coroutine to run
+        :type coro: asyncio.Coroutine
+        :param callback: A function to call once the coroutine finishes
+        :type callback: Optional[Callable]
+        :param is_generator: Whether the passed coroutine is a generator or not
+         (DO NOT pass generators, call submit_generator to submit a generator)
+        :type is_generator: bool
+        :return: The Future object generated run to the coroutine
+        :rtype: concurrent.futures.Future
         """
+
         new_future: futures.Future = asyncio.run_coroutine_threadsafe(
             coro, loop=self._loop
         )
@@ -93,18 +106,24 @@ class AbstractPlugin(ABC):
         self._future_cache.append(new_future)
         return new_future
 
-    def _submit_generator(self, generator: Callable, retry_time: float = 0.5) -> None:
+    def _submit_generator(
+        self, generator: Callable, retry_time: float = 0.5
+    ) -> futures.Future:
+
         """
         Wrapper for the body expressions of the async generators used to read MAVSDK data.
-        :param gen_body: A Callable, body of the async generator. Must be callable without arguments (use functools.partial)
-        :param retry_time: Attempts to stalls retry of body for this amount of time (ms)
-        :return: None, the Futures created by submit_generator are not stable
+
+        :param generator: Body of the async generator. Must be callable without arguments (use functools.partial otherwise)
+        :type generator: Callable
+        :param retry_time: Attempts to stall retry of body for this amount of time (ms)
+        :type retry_time: float
+        :return: The future created from the submit_coroutine call of wrap_generator
         """
 
-        async def wrap_generator(generator: Callable, retry_time: float):
+        async def wrap_generator(gen: Callable, ret_time: float):
             while True:
                 try:
-                    await generator()
+                    await gen()
                 except grpc.RpcError as rpc_error:
                     if isinstance(
                         rpc_error, grpc.Call
@@ -114,16 +133,20 @@ class AbstractPlugin(ABC):
                     else:
                         raise rpc_error
                 finally:
-                    await asyncio.sleep(retry_time)
+                    await asyncio.sleep(ret_time)
 
-        self._submit_coroutine(wrap_generator(generator, retry_time), is_generator=True)
+        return self._submit_coroutine(
+            wrap_generator(generator, retry_time), is_generator=True
+        )
 
-    def _schedule(self, *args: Coroutine) -> None:
+    def _schedule(self, *args: Coroutine):
         """
-        Takes any amount of coroutines as input and uses add_done_callback to chain all coroutines together
-        :param *args: Any amount of coroutines
-        :return: The scheduled Future with coroutines chained to it
+        Takes any amount of coroutines as input and runs them sequentially using add_done_callback
+
+        :param args: Any amount of coroutines
+        :type args: *Coroutine
         """
+
         coros = [*args]
         # remove the Future if this was called with a callback
         if isinstance(coros[-1], futures.Future):
@@ -135,13 +158,18 @@ class AbstractPlugin(ABC):
 
     def _submit_blocking_coroutine(
         self, coro: Coroutine, callback: Optional[Callable] = None, timeout: float = 1.0
-    ) -> Any:
+    ) -> Optional[Any]:
         """
         Blocks until the given coroutine has completed, returning its result (or None if a timeout occurs)
-        :param coro: The Callable Coroutine to run
-        :param callback: An optional callback function to call with the coroutine, this is not-blocking
+
+        :param coro: The coroutine to run
+        :type coro: Coroutine
+        :param callback: An optional callback function to call with the coroutine, this is non-blocking
+        :type callback: Optional[Callable]
         :param timeout: The maximum number of seconds to block
+        :type timeout: float
         :return: The result of the coroutine if it succeeds, otherwise None
+        :rtype: Optional[Any]
         """
         blocking_future = self._submit_coroutine(coro, callback)
 
