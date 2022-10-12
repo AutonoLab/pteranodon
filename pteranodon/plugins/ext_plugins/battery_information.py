@@ -58,8 +58,7 @@ class BatteryInfo(AbstractCustomPlugin):
             return self._param.get_param_float("BAT1_A_PER_V") * (
                 batt_info.voltage_v**2
             )
-        else:
-            return None
+        return None
 
     def _average_voltage(self, window) -> float:
         # Probably could be done with numpy mean with setting axes. Testing would need to encompass this file to tell
