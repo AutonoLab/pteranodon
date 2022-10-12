@@ -14,3 +14,24 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
 ## Requirments for Use
 
 ## Project Installation
+This project can be installed using WSL and Docker. Look below for instructions on both
+### WSL Method
+#### Intall WSL2
+To install WSL2 with the default Ubuntu distribution on a new installation of Windows 11:
+1. Open cmd.exe as administrator. This can be done by pressing the start key, typing cmd, right klicking on the Command prompt entry and selecting Run as administrator.
+2. Execute the command wsl --install to run the installation routine for WSL.
+3. Reboot the computer.
+4. Open cmd again as a normal user (not as administrator). This can be done by pressing the Start key, typing cmd and pressing Enter.
+5. Execute the command wsl to access the WSL shell.
+6. WSL will prompt you for a user name and password for the Ubuntu installation. Record these credentials as you will need them later on!
+
+#### Opening a WSL Shell
+All operations to install and build PX4 must be done within a WSL Shell (you can use the same shell that was used to install WSL2 or open a new one).
+1. Open a command prompt:
+   * Press the Windows Start key.
+   * Type cmd and press Enter to open the prompt.
+4. To start WSL and access the WSL shell, execute the command:
+   
+
+
+    
