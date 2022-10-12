@@ -25,7 +25,7 @@ Autonomous drones are becoming more and more common in the world of technology, 
 
 ## Description
 A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
-gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative cordinate systems.
+gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 ---
 
 ## Requirments for Use
