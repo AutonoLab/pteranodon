@@ -48,7 +48,7 @@ class BatteryInfo(AbstractCustomPlugin):
         async for battery in self._system.telemetry.battery():
             self._window.append((battery, time.time()))
 
-    def get_instantaneous_wattage(self) -> Optional[float, None]:
+    def get_instantaneous_wattage(self) -> Optional[float]:
         """
         Get the Current*Voltage value, or instantaneous wattage
         :return: float : Instantaneous battery usage, Current*Voltage, None if battery has not been polled yet
