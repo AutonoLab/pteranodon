@@ -1,7 +1,6 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Optional
 
 from mavsdk import System, camera_server
 from mavsdk.camera_server import TakePhotoFeedback, CaptureInfo
@@ -16,16 +15,42 @@ class CameraServer(AbstractBasePlugin):
 
     PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
 
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, cam_info: camera_server.Information) -> None:
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+    ) -> None:
         super().__init__("camera_server", system, loop, logger)
 
         # Must be called as soon as the camera server is created
-        self.set_information(cam_info)
+        self._cam_info: Optional[camera_server.Information] = None
 
         # Sets the request callback to the default since some behavior is required
-        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = CameraServer._default_photo_request_callback
+        self._photo_request_callback: CameraServer.PhotoRequestCallbackType = (
+            CameraServer._default_photo_request_callback
+        )
 
-        self._take_photo_sub_task = asyncio.ensure_future(self._take_photo(), loop=self._loop)
+        self._submit_generator(self._take_photo)
+
+        self._end_init()
+
+    def _check_cam_info_set(self, action_name: str) -> bool:
+        """
+        Since the camera info must be set before any actions can be taken, this method checks for existence and
+        prints an error message if it has not been set
+
+        :param action_name: The action that is calling this function
+        :type action_name: str
+        :return: Whether the camera info has been set or not
+        :rtype: bool
+        """
+        if self._cam_info is None:
+            self._logger.error(
+                f'Cannot execute action "{action_name}"! Camera info has not been set!'
+            )
+            return False
+        return True
 
     def set_photo_request_callback(self, callback: PhotoRequestCallbackType):
         """
@@ -35,10 +60,16 @@ class CameraServer(AbstractBasePlugin):
         :param callback: The function which returns the parameters to respond_take_photo
         :type callback: Callable[[int], Tuple[camera.TakePhotoFeedback, camera.CaptureInfo]]
         """
+        # Even though this doesn't call anything, it really cements the importance
+        if not self._check_cam_info_set("Set Photo Request Callback"):
+            return
+
         self._photo_request_callback = callback
 
     @staticmethod
-    def _default_photo_request_callback(index: int) -> Tuple[TakePhotoFeedback, CaptureInfo]:
+    def _default_photo_request_callback(
+        index: int,
+    ) -> Tuple[TakePhotoFeedback, CaptureInfo]:
         """
         The default implementation of the method which takes an index and returns CaptureInfo and feedback.
         Called when a `take_photo` request is received, result is passed to `respond_take_photo`
@@ -57,15 +88,16 @@ class CameraServer(AbstractBasePlugin):
             time_utc_us=0,
             is_success=False,
             index=index,
-            file_url="/"
+            file_url="/",
         )
 
         return TakePhotoFeedback.FAILED, capture_info
 
     async def _take_photo(self) -> None:
-
         async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info(f"Received image capture request with index {capture_req_idx}")
+            self._logger.info(
+                f"Received image capture request with index {capture_req_idx}"
+            )
 
             # Uses the photo request callback to get the arguments for the response_take_photo method.
             self.set_in_progress(True)
@@ -81,11 +113,15 @@ class CameraServer(AbstractBasePlugin):
         :param in_progress: true if capture is in progress or false for idle.
         :type in_progress: bool
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera_server.set_in_progress(in_progress), loop=self._loop)
-        )
+        if not self._check_cam_info_set("Set In Progress"):
+            return
+        self._submit_coroutine(self._system.camera_server.set_in_progress(in_progress))
 
-    def _respond_take_photo(self, take_photo_feedback: camera_server.TakePhotoFeedback, capture_info: camera_server.CaptureInfo):
+    def _respond_take_photo(
+        self,
+        take_photo_feedback: camera_server.TakePhotoFeedback,
+        capture_info: camera_server.CaptureInfo,
+    ):
         """
         Respond to an image capture request from SubscribeTakePhoto (_take_photo).
 
@@ -94,10 +130,9 @@ class CameraServer(AbstractBasePlugin):
         :param capture_info: The capture information
         :type capture_info: camera_server.CaptureInfo
         """
-        super().submit_task(
-            asyncio.ensure_future(
-                self._system.camera_server.respond_take_photo(take_photo_feedback, capture_info),
-                loop=self._loop
+        self._submit_coroutine(
+            self._system.camera_server.respond_take_photo(
+                take_photo_feedback, capture_info
             )
         )
 
@@ -108,6 +143,7 @@ class CameraServer(AbstractBasePlugin):
         :param cam_info: Information about the camera
         :type cam_info: camera.Information
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.camera_server.set_information(cam_info), loop=self._loop)
-        )
+
+        self._cam_info = cam_info
+
+        self._submit_coroutine(self._system.camera_server.set_information(cam_info))

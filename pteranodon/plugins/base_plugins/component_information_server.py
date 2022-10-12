@@ -1,21 +1,24 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
 from mavsdk import System
-from mavsdk.component_information_server import FloatParamUpdate
-from mavsdk.component_information_server import FloatParam
+from mavsdk.component_information_server import FloatParamUpdate, FloatParam
 
 from .abstract_base_plugin import AbstractBasePlugin
 
 
 class ComponentInformationServer(AbstractBasePlugin):
+    """
+    Provide component information such as parameters.
+    """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("component_information_server", system, loop, logger)
 
         self._float_param_update = None
-        self._float_param_update_task = asyncio.ensure_future(self._update_float_param(), loop=self._loop)
+        self._submit_generator(self._update_float_param)
+
+        self._end_init()
 
     async def _update_float_param(self) -> None:
         async for curr_param_update in self._system.component_information_server.float_param():
@@ -24,7 +27,7 @@ class ComponentInformationServer(AbstractBasePlugin):
 
     def float_param(self) -> FloatParamUpdate:
         """
-        Subscribe to float param updates.
+        Fetch float param updates.
 
         :return: A parameter update
         :rtype: FloatParamUpdate
@@ -40,6 +43,6 @@ class ComponentInformationServer(AbstractBasePlugin):
         :type: FloatParam
         """
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.component_information_server.provide_float_param(param), loop=self._loop)
+        self._submit_coroutine(
+            self._system.component_information_server.provide_float_param(param)
         )

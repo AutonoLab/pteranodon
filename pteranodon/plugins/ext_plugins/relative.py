@@ -1,24 +1,36 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Tuple, Dict
-from math import atan2, degrees, sqrt, cos, sin, radians
 
 from mavsdk import System
 from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
+from numpy import arctan2, degrees, sqrt, cos, sin, radians
 
 from .abstract_custom_plugin import AbstractCustomPlugin
 
 
 class Relative(AbstractCustomPlugin):
-    def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger, base_plugins: Dict, ext_args: Dict)\
-            -> None:
-        super().__init__("relative", system, loop, logger, base_plugins, ext_args)
+    """
+    Enables movement relative to the drone compared to absolute movement.
+    """
 
+    def __init__(
+        self,
+        system: System,
+        loop: AbstractEventLoop,
+        logger: Logger,
+        base_plugins: Dict,
+        ext_args: Dict,
+    ) -> None:
+        super().__init__("relative", system, loop, logger, base_plugins, ext_args)
         self._min_follow_distance = 10.0
-        if self._ext_args["relative"] is not None:
-            self._min_follow_distance = self._ext_args["relative"]
+
+        try:
+            if self._ext_args["relative"] is not None:
+                self._min_follow_distance = self._ext_args["relative"]
+        except KeyError:
+            pass
 
         self._telemetry = self._base_plugins["telemetry"]
 
@@ -36,9 +48,16 @@ class Relative(AbstractCustomPlugin):
         """
         self._min_follow_distance = dist
 
-    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
+    def maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+        test_min: bool = False,
+    ):
         """
-        A movement command for moving relative to the drones current position. The front direction is aligned directly with 
+        A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
@@ -46,18 +65,33 @@ class Relative(AbstractCustomPlugin):
         :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
-        super().submit_task(
-            asyncio.ensure_future(self._maneuver_to(front, right, down, on_dimensions, test_min), loop=self._loop)
+        self._submit_coroutine(
+            self._maneuver_to(front, right, down, on_dimensions, test_min)
         )
 
-    async def _maneuver_to(self, front: float, right: float, down: float, on_dimensions=(True, True, True), test_min=False) -> None:
+    async def _maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions=(True, True, True),
+        test_min=False,
+    ) -> None:
         if test_min:
             total_distance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
             if total_distance < self._min_follow_distance:
-                await self._system.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0, 0))
+                await self._system.offboard.set_velocity_body(
+                    VelocityBodyYawspeed(0, 0, 0, 0)
+                )
         await self._maneuver_with_ned(front, right, down, on_dimensions)
 
-    async def _maneuver_with_ned(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True)) -> None:
+    async def _maneuver_with_ned(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+    ) -> None:
         # zero out dimensions that will not be moved
         front = 0.0 if not on_dimensions[0] else front
         right = 0.0 if not on_dimensions[1] else right
@@ -72,12 +106,12 @@ class Relative(AbstractCustomPlugin):
         angle = task2.yaw_deg
         angle_of_rotation = radians(angle)
 
-        # convert FRD to NED 
+        # convert FRD to NED
         relative_north = right * sin(angle_of_rotation) + front * cos(angle_of_rotation)
         relative_east = right * cos(angle_of_rotation) - front * sin(angle_of_rotation)
 
         # get angle of yaw
-        yaw = degrees(atan2(relative_east, relative_north))
+        yaw = degrees(arctan2(relative_east, relative_north))
 
         # add offset to curent position
         north = relative_north + current_pos.north_m
@@ -94,9 +128,7 @@ class Relative(AbstractCustomPlugin):
         :param distance: The meters from home the drone can maneuver
         :return: None
         """
-        super().submit_task(
-            asyncio.ensure_future(self._create_geofence(distance), loop=self._loop)
-        )
+        self._submit_coroutine(self._create_geofence(distance))
 
     async def _create_geofence(self, distance: float) -> None:
         latitude = self._telemetry.home.latitude_deg

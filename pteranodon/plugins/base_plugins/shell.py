@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List
@@ -6,7 +5,6 @@ from typing import List
 from mavsdk import System
 
 from .abstract_base_plugin import AbstractBasePlugin
-
 
 
 class Shell(AbstractBasePlugin):
@@ -17,9 +15,12 @@ class Shell(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("shell", system, loop, logger)
 
-        self._receive_task = asyncio.ensure_future(self._receive_feedback(), loop=self._loop)
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
+
+        self._submit_generator(self._receive_feedback)
+
+        self._end_init()
 
     async def _receive_feedback(self) -> None:
         """
@@ -34,9 +35,7 @@ class Shell(AbstractBasePlugin):
 
         :param command: The command to send
         """
-        super().submit_task(
-            asyncio.ensure_future(self._system.shell.send(command), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.shell.send(command))
         self._cmd_history.append(command)
 
     def get_newest_feedback(self) -> str:
@@ -72,5 +71,3 @@ class Shell(AbstractBasePlugin):
         :return: a list of command strings
         """
         return self._cmd_history
-
-

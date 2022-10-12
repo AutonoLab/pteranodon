@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -9,7 +8,6 @@ from mavsdk.rtk import RtcmData
 from .abstract_base_plugin import AbstractBasePlugin
 
 
-
 class Rtk(AbstractBasePlugin):
     """
     Service to send RTK corrections to the vehicle.
@@ -17,7 +15,7 @@ class Rtk(AbstractBasePlugin):
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("rtk", system, loop, logger)
-
+        self._end_init()
 
     def send_rtcm_data(self, string_data: str) -> None:
         """
@@ -28,6 +26,4 @@ class Rtk(AbstractBasePlugin):
         """
         rtcm_data = RtcmData(string_data)
 
-        super().submit_task(
-            asyncio.ensure_future(self._system.rtk.send_rtcm_data(rtcm_data), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.rtk.send_rtcm_data(rtcm_data))

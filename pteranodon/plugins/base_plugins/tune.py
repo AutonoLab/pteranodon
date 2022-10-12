@@ -1,4 +1,3 @@
-import asyncio
 from asyncio import AbstractEventLoop
 from logging import Logger
 
@@ -12,8 +11,10 @@ class Tune(AbstractBasePlugin):
     """
     Enable creating and sending a tune to be played on the system.
     """
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tune", system, loop, logger)
+        self._end_init()
 
     def play_tune(self, tune_desc: TuneDescription) -> None:
         """
@@ -23,11 +24,7 @@ class Tune(AbstractBasePlugin):
         :type tune_desc: TuneDescription
         """
 
-
-        
-        super().submit_task(
-            asyncio.ensure_future(self._system.tune.play_tune(tune_desc), loop=self._loop)
-        )
+        self._submit_coroutine(self._system.tune.play_tune(tune_desc))
 
     def play_note(self, note: str) -> None:
         """
@@ -37,24 +34,25 @@ class Tune(AbstractBasePlugin):
         :type note: str
         """
 
-        tune_description = TuneDescription([SongElement.STYLE_LEGATO, SongElement.DURATION_2], 100)
-
-        if note.upper() == 'C':
-            tune_description.song_elements.append(SongElement.NOTE_C)
-        elif note.upper() == 'D':
-            tune_description.song_elements.append(SongElement.NOTE_D)
-        elif note.upper() == 'E':
-            tune_description.song_elements.append(SongElement.NOTE_E)
-        elif note.upper() == 'F':
-            tune_description.song_elements.append(SongElement.NOTE_F)
-        elif note.upper() == 'G':
-            tune_description.song_elements.append(SongElement.NOTE_G)
-        elif note.upper() == 'A':
-            tune_description.song_elements.append(SongElement.NOTE_A)
-        elif note.upper() == 'B':
-            tune_description.song_elements.append(SongElement.NOTE_B)
-
-        super().submit_task(
-            asyncio.ensure_future(self._system.tune.play_tune(tune_description), loop=self._loop)
+        tune_description = TuneDescription(
+            [SongElement.STYLE_LEGATO, SongElement.DURATION_2], 100
         )
 
+        if note.upper() == "C":
+            tune_description.song_elements.append(SongElement.NOTE_C)
+        elif note.upper() == "D":
+            tune_description.song_elements.append(SongElement.NOTE_D)
+        elif note.upper() == "E":
+            tune_description.song_elements.append(SongElement.NOTE_E)
+        elif note.upper() == "F":
+            tune_description.song_elements.append(SongElement.NOTE_F)
+        elif note.upper() == "G":
+            tune_description.song_elements.append(SongElement.NOTE_G)
+        elif note.upper() == "A":
+            tune_description.song_elements.append(SongElement.NOTE_A)
+        elif note.upper() == "B":
+            tune_description.song_elements.append(SongElement.NOTE_B)
+        else:
+            raise Exception("Unkown note type")
+
+        self._submit_coroutine(self._system.tune.play_tune(tune_description))

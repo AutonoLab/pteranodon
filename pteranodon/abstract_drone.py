@@ -2,32 +2,81 @@ from threading import Thread
 from time import sleep, perf_counter
 from collections import deque
 import asyncio
+from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
 from typing import Any, List, Tuple, Callable, Dict, Optional
 import logging
 import sys
 import random
+import signal
 
+import uvloop
 from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
 
 from .plugins import PluginManager
-from .plugins.base_plugins import *
-from .plugins.ext_plugins import *
-from .plugins.ext_plugins.sensor import AbstractSensor
+from .plugins.base_plugins import (
+    ActionServer,
+    Action,
+    Calibration,
+    CameraServer,
+    Camera,
+    ComponentInformationServer,
+    ComponentInformation,
+    Core,
+    Failure,
+    FollowMe,
+    Ftp,
+    Geofence,
+    Gimbal,
+    Info,
+    LogFiles,
+    ManualControl,
+    MissionRawServer,
+    MissionRaw,
+    Mission,
+    Mocap,
+    Offboard,
+    ParamServer,
+    Param,
+    Rtk,
+    ServerUtility,
+    Shell,
+    TelemetryServer,
+    Telemetry,
+    TrackingServer,
+    Transponder,
+    Tune,
+)
+from .plugins.ext_plugins import Sensor, Relative
 
 
 class AbstractDrone(ABC):
-    def __init__(self, address: str, sensor_list: Optional[List[AbstractSensor]] = None, 
-                 log_file_name: Optional[str] = None, time_slice=0.050, min_follow_distance=5.0, **kwargs):
+    """
+    An abstract class with base functionality, some methods must be overridden for usage
+    """
+
+    def __init__(
+        self,
+        address: str,
+        log_file_name: Optional[str] = None,
+        time_slice=0.050,
+        **kwargs,
+    ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
         :param time_slice: The interval to process commands in the queue
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
+        # set asyncio event loop policy
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        # attatch signal handlers
+        self._handle_signals_main()
+
         # setup the logger first
         logger_name = "mavlog.log" if log_file_name is None else log_file_name
         self._logger = self._setup_logger(logger_name)
@@ -43,40 +92,57 @@ class AbstractDrone(ABC):
         self._queue: deque = deque()
         self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
-        self._mavlink_thread = Thread(name="Mavlink-Command-Thread", target=self._process_command_loop)
+        self._mavlink_thread = Thread(
+            name="Mavlink-Command-Thread",
+            target=self._process_command_loop,
+            daemon=True,
+        )
 
         # make stuff for telemetry
-        self._telemetry_thread = Thread(name="Mavlink-Telemetry-Thread", target=self._run_telemetry_loop)
+        self._telemetry_thread = Thread(
+            name="Mavlink-Telemetry-Thread",
+            target=self._run_telemetry_loop,
+            daemon=True,
+        )
 
         # register the stop method so everything cleans up
+        self._ran_stop = False
         atexit.register(self.stop)
 
         # connect the drone
         self._connect()
 
         # build arguments for the extension plugins
-        self._ext_args = {
-            "sensor": sensor_list,
-            "relative": min_follow_distance
-        }
+        self._ext_args = {**kwargs}
 
         # setup all plugins
-        self._plugins = PluginManager(self._drone, self._loop, self._logger, self._ext_args, kwargs)
+        self._plugins = PluginManager(
+            self._drone, self._loop, self._logger, self._ext_args, kwargs
+        )
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()
-        self._loop_thread = Thread(name="Loop-Thread", target=self._loop_loop)
+        self._loop_thread = Thread(
+            name="Loop-Thread", target=self._loop_loop, daemon=True
+        )
 
         # finally, start the mavlink thread
         self._mavlink_thread.start()
         self._telemetry_thread.start()
         self.sensor.start_all_sensors()
 
+        # create a list of threads in the object
+        self._threads: List[Thread] = [
+            self._loop_thread,
+            self._mavlink_thread,
+            self._telemetry_thread,
+        ]
+
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
 
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setLevel(logging.DEBUG)
@@ -101,79 +167,226 @@ class AbstractDrone(ABC):
     @property
     def plugins(self) -> PluginManager:
         """
-        :return: The plugin manager instance
+        The plugin manager instance
         """
         return self._plugins
 
     @property
-    def core(self) -> Core:
+    def action_server(self) -> ActionServer:
         """
-        :return: The Core plugin class instance
+        The ActionServer plugin instance
         """
-        return self._plugins.base_plugins["core"]
-
-    @property
-    def telemetry(self) -> Telemetry:
-        """
-        :return: The Telemetry plugin class instance
-        """
-        return self._plugins.base_plugins["telemetry"]
-
-    @property
-    def geofence(self) -> Geofence:
-        """
-        :return: The Geofence plugin class instance
-        """
-        return self._plugins.base_plugins["geofence"]
-
-    @property
-    def param(self) -> Param:
-        """
-        :return: The Param plugin class instance
-        """
-        return self._plugins.base_plugins["param"]
-
-    @property
-    def offboard(self) -> Offboard:
-        """
-        :return: The Offboard plugin class instance
-        """
-        return self._plugins.base_plugins["offboard"]
-
-    @property
-    def calibration(self) -> Calibration:
-        """
-        :return: The Calibration plugin class instance
-        """
-        return self._plugins.base_plugins["calibration"]
-
-    @property
-    def info(self) -> Info:
-        """
-        :return: The Info plugin class instance
-        """
-        return self._plugins.base_plugins["info"]
-
-    @property
-    def transponder(self) -> Transponder:
-        """
-        :return: The Transponder plugin class instance
-        """
-        return self._plugins.base_plugins["transponder"]
-
-    @property
-    def follow_me(self) -> FollowMe:
-        """
-        :return: The FollowMe plugin class instance
-        """
-        return self._plugins.base_plugins["follow_me"]
+        return self._plugins.base_plugins["action_server"]
 
     @property
     def action(self) -> Action:
         """
-        :return: The Action plugin class instance
+        The Action plugin instance
         """
         return self._plugins.base_plugins["action"]
+
+    @property
+    def calibration(self) -> Calibration:
+        """
+        The Calibration plugin instance
+        """
+        return self._plugins.base_plugins["calibration"]
+
+    @property
+    def camera_server(self) -> CameraServer:
+        """
+        The CameraServer plugin instance
+        """
+        return self._plugins.base_plugins["camera_server"]
+
+    @property
+    def camera(self) -> Camera:
+        """
+        The Camera plugin instance
+        """
+        return self._plugins.base_plugins["camera"]
+
+    @property
+    def component_information_server(self) -> ComponentInformationServer:
+        """
+        The ComponentInformationServer plugin instance
+        """
+        return self._plugins.base_plugins["component_information_server"]
+
+    @property
+    def component_information(self) -> ComponentInformation:
+        """
+        The ComponentInformation plugin instance
+        """
+        return self._plugins.base_plugins["component_information"]
+
+    @property
+    def core(self) -> Core:
+        """
+        The Core plugin instance
+        """
+        return self._plugins.base_plugins["core"]
+
+    @property
+    def failure(self) -> Failure:
+        """
+        The Failure plugin instance
+        """
+        return self._plugins.base_plugins["failure"]
+
+    @property
+    def follow_me(self) -> FollowMe:
+        """
+        The FollowMe plugin instance
+        """
+        return self._plugins.base_plugins["follow_me"]
+
+    @property
+    def ftp(self) -> Ftp:
+        """
+        The Ftp plugin instance
+        """
+        return self._plugins.base_plugins["ftp"]
+
+    @property
+    def geofence(self) -> Geofence:
+        """
+        The Geofence plugin instance
+        """
+        return self._plugins.base_plugins["geofence"]
+
+    @property
+    def gimbal(self) -> Gimbal:
+        """
+        The  plugin instance
+        """
+        return self._plugins.base_plugins["gimbal"]
+
+    @property
+    def info(self) -> Info:
+        """
+        The Info plugin instance
+        """
+        return self._plugins.base_plugins["info"]
+
+    @property
+    def log_files(self) -> LogFiles:
+        """
+        The LogFiles plugin instance
+        """
+        return self._plugins.base_plugins["log_files"]
+
+    @property
+    def manual_control(self) -> ManualControl:
+        """
+        The ManualControl plugin instance
+        """
+        return self._plugins.base_plugins["manual_control"]
+
+    @property
+    def mission_raw_server(self) -> MissionRawServer:
+        """
+        The MissionRawServer plugin instance
+        """
+        return self._plugins.base_plugins["mission_raw_server"]
+
+    @property
+    def mission_raw(self) -> MissionRaw:
+        """
+        The MissionRaw plugin instance
+        """
+        return self._plugins.base_plugins["mission_raw"]
+
+    @property
+    def mission(self) -> Mission:
+        """
+        The Mission plugin instance
+        """
+        return self._plugins.base_plugins["mission"]
+
+    @property
+    def mocap(self) -> Mocap:
+        """
+        The Mocap plugin instance
+        """
+        return self._plugins.base_plugins["mocap"]
+
+    @property
+    def offboard(self) -> Offboard:
+        """
+        The Offboard plugin instance
+        """
+        return self._plugins.base_plugins["offboard"]
+
+    @property
+    def param_server(self) -> ParamServer:
+        """
+        The ParamServer plugin instance
+        """
+        return self._plugins.base_plugins["param_server"]
+
+    @property
+    def param(self) -> Param:
+        """
+        The Param plugin instance
+        """
+        return self._plugins.base_plugins["param"]
+
+    @property
+    def rtk(self) -> Rtk:
+        """
+        The Rtk plugin instance
+        """
+        return self._plugins.base_plugins["rtk"]
+
+    @property
+    def server_utility(self) -> ServerUtility:
+        """
+        The ServerUtility plugin instance
+        """
+        return self._plugins.base_plugins["server_utility"]
+
+    @property
+    def shell(self) -> Shell:
+        """
+        The Shell plugin instance
+        """
+        return self._plugins.base_plugins["shell"]
+
+    @property
+    def telemetry_server(self) -> TelemetryServer:
+        """
+        The TelemetryServer plugin instance
+        """
+        return self._plugins.base_plugins["telemetry_server"]
+
+    @property
+    def telemetry(self) -> Telemetry:
+        """
+        The Telemetry plugin instance
+        """
+        return self._plugins.base_plugins["telemetry"]
+
+    @property
+    def tracking_server(self) -> TrackingServer:
+        """
+        The TrackingServer plugin instance
+        """
+        return self._plugins.base_plugins["tracking_server"]
+
+    @property
+    def transponder(self) -> Transponder:
+        """
+        The Transponder plugin instance
+        """
+        return self._plugins.base_plugins["transponder"]
+
+    @property
+    def tune(self) -> Tune:
+        """
+        The Tune plugin instance
+        """
+        return self._plugins.base_plugins["tune"]
 
     @property
     def sensor(self) -> Sensor:
@@ -189,7 +402,7 @@ class AbstractDrone(ABC):
         """
         return self._plugins.ext_plugins["relative"]
 
-    # typical properties
+    # NON-PLUGIN PROPERTIES
     @property
     def logger(self) -> logging.Logger:
         """
@@ -260,12 +473,18 @@ class AbstractDrone(ABC):
         """
         pass
 
+    async def _teardown(self) -> None:
+        for command, args, kwargs in self._queue:
+            self._process_command(command, args, kwargs)
+
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
     ###############################################################################
     def _connect(self) -> None:
         try:
-            self._loop.run_until_complete(self._drone.connect(system_address=self.address))
+            self._loop.run_until_complete(
+                self._drone.connect(system_address=self.address)
+            )
         except KeyboardInterrupt as e:
             self._cleanup()
             raise KeyboardInterrupt from e
@@ -279,20 +498,41 @@ class AbstractDrone(ABC):
                 break
 
     def _cleanup(self) -> None:
-        self._drone.__del__()  # mypy: ignore
-        del self._drone
+        try:
+            self._drone.__del__()  # mypy: ignore # pylint: disable=unnecessary-dunder-call
+            del self._drone
+        except AttributeError:
+            pass
+
+    def _force_cleanup(self) -> None:
+        self._cleanup()
+        sys.exit(-1)
+
+    def _handle_signals_main(self) -> None:
+        signal.signal(signal.SIGTERM, lambda a, b: self._force_cleanup)
+        signal.signal(signal.SIGINT, lambda a, b: self._force_cleanup)
 
     def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
         if com is not None:
-            self._logger.info(f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}")
+            self._logger.info(
+                f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
+            )
             if asyncio.iscoroutinefunction(com):  # if it is an async function
-                self._task_cache.append(asyncio.ensure_future(com(*args, **kwargs), loop=self._loop))
+                new_future: Future = asyncio.run_coroutine_threadsafe(
+                    com(*args, **kwargs), loop=self._loop
+                )
+                new_future.add_done_callback(
+                    lambda f: self._logger.info(
+                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
+                    )
+                )
+                self._task_cache.append(new_future)
             else:  # typical sync function
                 com(*args, **kwargs)
         else:
             pass
 
-    # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate. 
+    # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate.
     def _process_command_loop(self) -> None:
         try:
             while not self._stopped_mavlink:
@@ -304,15 +544,14 @@ class AbstractDrone(ABC):
                     if kwargs is None:
                         kwargs = {}
                     self._process_command(com, args, kwargs)
-                # TODO, perform logging on these exceptions
                 except IndexError as e:
                     # this exception is expected since we expect the deque to not have elements sometimes
                     if str(e) != "pop from an empty deque":
                         # if the exception makes it here, it is unexpected
                         self._logger.error(e)
-                except ActionError as e:
+                except (OffboardError, ActionError) as e:
                     self._logger.error(e)
-                except OffboardError as e:
+                except Exception as e:
                     self._logger.error(e)
                 finally:
                     end_time = perf_counter() - start_time
@@ -325,6 +564,14 @@ class AbstractDrone(ABC):
     def _run_telemetry_loop(self):
         self._loop.run_forever()
 
+    # method which joins a thread with a timeout, used with map to close all threads\
+    @staticmethod
+    def _join_thread(thread: Thread, timeout=1) -> None:
+        try:
+            thread.join(timeout=timeout)
+        except RuntimeError:
+            pass
+
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
         """
@@ -332,32 +579,39 @@ class AbstractDrone(ABC):
         execution, stops the mavlink command loop, and then joins the mavlink thread.
         :return: None
         """
+        if self._ran_stop:
+            return
+        self._ran_stop = True
+
+        # shutdown any generators (yield) which are running
+        # don't save the Future since cleaning and shutting down anyways
+        self._logger.info("Closing async generators")
+        self._plugins.cancel_all_futures()
+        asyncio.run_coroutine_threadsafe(
+            self._loop.shutdown_asyncgens(), loop=self._loop
+        )  # shutdown_asyncgens is a coroutine
+
         # on a stop call put a disarm call in the empty queue
         self._queue.clear()
 
-        try:
-            self.disarm()
-        except AttributeError:  # means that _cleanup has already occurred
-            pass
+        # Likely not needed
+        # self.put(self.action.disarm)
 
         # shutdown the any asyncgens that have been opened
+        self._stopped_mavlink = True
+        self._stopped_loop = True
         self._loop.stop()
 
-        # stop execution of the loop
-        self._stopped_loop = True
-        try:
-            self._loop_thread.join()  # join the loop thread first since it most likely generates mavlink commands
-        except RuntimeError:  # occurs if the loop_thread was never started with self.start_loop()
-            pass
+        # attempt to join all threads
+        self._logger.info("Attempting to join threads")
+        map(self._join_thread, self._threads)
 
         # run teardown (queue should be clean from the clear before disarm)
-        self.teardown()
-        while len(self._queue) > 0:  # simple spin wait to ensure any mavlink commands from teardown are run
-            sleep(self._time_slice + 0.01)
-        
-        # finally join the mavlink thread and stop it
-        self._stopped_mavlink = True
-        self._mavlink_thread.join()
+        self._logger.info("Running remaining async Tasks/Future, and MAVSDK commands")
+        asyncio.get_event_loop().run_until_complete(self._teardown())
+
+        # cleanup the mavsdk.System instance
+        self._cleanup()
 
         # close logging
         self._close_logger()
@@ -372,7 +626,9 @@ class AbstractDrone(ABC):
         :param kwargs: The keyword arguments for the function/method
         :return: None
         """
-        self._logger.info(f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue")
+        self._logger.info(
+            f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue"
+        )
         self._queue.append((obj, args, kwargs))
 
     ##################################################
@@ -451,9 +707,16 @@ class AbstractDrone(ABC):
         """
         self.put(self.action.takeoff)
 
-    def maneuver_to(self, front: float, right: float, down: float, on_dimensions: Tuple = (True, True, True), test_min: bool = False):
+    def maneuver_to(
+        self,
+        front: float,
+        right: float,
+        down: float,
+        on_dimensions: Tuple = (True, True, True),
+        test_min: bool = False,
+    ):
         """
-        A movement command for moving relative to the drones current position. The front direction is aligned directly with 
+        A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone

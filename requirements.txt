@@ -1,1 +1,4 @@
-mavsdk>=1.3.0
+mavsdk>=1.4.0
+numpy
+uvloop>=0.17.0
+grpcio

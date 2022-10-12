@@ -7,6 +7,11 @@ from ..abstract_plugin import AbstractPlugin
 
 
 class AbstractBasePlugin(AbstractPlugin):
-    def __init__(self, name: str, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__(name, system, loop, logger)
+    """
+    A plugin with no function used to inherit normal plugin behavior.
+    """
 
+    def __init__(
+        self, name: str, system: System, loop: AbstractEventLoop, logger: Logger
+    ) -> None:
+        super().__init__(name, system, loop, logger)

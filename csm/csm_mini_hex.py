@@ -11,8 +11,12 @@ class CSM_Mini_Hexsoon(AbstractDrone):
         self.frame = None
 
         print("running Drone.__init__ ...")
-        super().__init__(address="serial:///dev/ttyACM0", sensors=[RealSense()], 
-                         time_slice=time_slice, min_follow_distance=min_follow_dist)
+        super().__init__(
+            address="serial:///dev/ttyACM0",
+            sensors=[RealSense()],
+            time_slice=time_slice,
+            min_follow_distance=min_follow_dist,
+        )
         print("done init")
 
         self.param.set_param_int("COM_ARM_WO_GPS", 1)
