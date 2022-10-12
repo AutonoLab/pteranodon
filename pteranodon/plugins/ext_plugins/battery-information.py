@@ -99,7 +99,7 @@ class BatteryInfo(AbstractCustomPlugin):
             time_array = np.append(time_array, x[1])
         time_array = time_array - time_array[0]
         time_array_fixed = np.vstack([time_array, np.ones(len(time_array))]).T
-        slope, power_intercept = np.linalg.lstsq(time_array_fixed, percentage_array)
+        slope, power_intercept = np.linalg.lstsq(time_array_fixed, percentage_array, rcond=None)[0]
         time_intercept = -power_intercept / slope
         return time_intercept
 
