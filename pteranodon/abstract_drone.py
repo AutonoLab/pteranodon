@@ -5,7 +5,7 @@ import asyncio
 from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
-from typing import Any, List, Tuple, Callable, Dict, Optional
+from typing import Any, List, Tuple, Callable, Dict, Optional, Union
 import logging
 import sys
 import random
@@ -474,8 +474,8 @@ class AbstractDrone(ABC):
         pass
 
     async def _teardown(self) -> None:
-        for command, args, kwargs in self._queue:
-            self._process_command(command, args, kwargs)
+        for command, handler, args, kwargs in self._queue:
+            self._process_command(command, handler, args, kwargs)
 
     ###############################################################################
     # internal methods for drone control, connection, threading of actions, etc..
@@ -512,25 +512,32 @@ class AbstractDrone(ABC):
         signal.signal(signal.SIGTERM, lambda a, b: self._force_cleanup)
         signal.signal(signal.SIGINT, lambda a, b: self._force_cleanup)
 
-    def _process_command(self, com: Callable, args: List, kwargs: Dict) -> None:
-        if com is not None:
-            self._logger.info(
-                f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
+    def _process_command(
+        self, com: Callable, handler: Optional[Callable], args: List, kwargs: Dict
+    ) -> None:
+
+        if com is None:
+            return
+
+        self._logger.info(
+            f"Processing: {com.__module__}.{com.__qualname__} with args: {args} and kwargs: {kwargs}"
+        )
+        if asyncio.iscoroutinefunction(com):  # if it is an async function
+            new_future: Future = asyncio.run_coroutine_threadsafe(
+                com(*args, **kwargs), loop=self._loop
             )
-            if asyncio.iscoroutinefunction(com):  # if it is an async function
-                new_future: Future = asyncio.run_coroutine_threadsafe(
-                    com(*args, **kwargs), loop=self._loop
+            new_future.add_done_callback(
+                lambda f: self._logger.info(
+                    f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
                 )
-                new_future.add_done_callback(
-                    lambda f: self._logger.info(
-                        f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
-                    )
-                )
-                self._task_cache.append(new_future)
-            else:  # typical sync function
-                com(*args, **kwargs)
-        else:
-            pass
+            )
+            self._task_cache.append(new_future)
+        else:  # typical sync function
+            com(*args, **kwargs)
+
+        # If a handler is present, call it when the command has been processed
+        if handler is not None:
+            handler()
 
     # loop for processing mavlink commands. Uses the time slice determined in the contructor for its maximum rate.
     def _process_command_loop(self) -> None:
@@ -538,20 +545,21 @@ class AbstractDrone(ABC):
             while not self._stopped_mavlink:
                 start_time = perf_counter()
                 try:
-                    com, args, kwargs = self._queue.popleft()
+                    com, handler, args, kwargs = self._queue.popleft()
                     if args is None:
                         args = []
                     if kwargs is None:
                         kwargs = {}
-                    self._process_command(com, args, kwargs)
+                    self._process_command(com, handler, args, kwargs)
+                # TODO, perform logging on these exceptions
                 except IndexError as e:
                     # this exception is expected since we expect the deque to not have elements sometimes
                     if str(e) != "pop from an empty deque":
                         # if the exception makes it here, it is unexpected
                         self._logger.error(e)
-                except (OffboardError, ActionError) as e:
+                except ActionError as e:
                     self._logger.error(e)
-                except Exception as e:
+                except OffboardError as e:
                     self._logger.error(e)
                 finally:
                     end_time = perf_counter() - start_time
@@ -559,6 +567,7 @@ class AbstractDrone(ABC):
                         sleep(self._time_slice - end_time)
         finally:
             self._cleanup()
+            pass
 
     # method for running telemetry data
     def _run_telemetry_loop(self):
@@ -618,7 +627,11 @@ class AbstractDrone(ABC):
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
-    def put(self, obj: Callable, *args: Any, **kwargs: Any) -> None:
+
+    # Can be either a function, or a function and a handler
+    def put(
+        self, obj: Union[Callable, Tuple[Callable, Callable]], *args: Any, **kwargs: Any
+    ) -> None:
         """
         Used to put functions/methods in a queue for execution in a separate thread asynchronously or otherwise
         :param obj: A callable function/method which will get executed in the mavlink command loop thread
@@ -626,10 +639,18 @@ class AbstractDrone(ABC):
         :param kwargs: The keyword arguments for the function/method
         :return: None
         """
+
+        command: Callable
+        handler: Optional[Callable] = None
+        if isinstance(obj, tuple):
+            command, handler = obj
+        else:
+            command = obj
+
         self._logger.info(
-            f"User called: {obj.__module__}.{obj.__qualname__}, putting call in queue"
+            f"User called: {command.__module__}.{command.__qualname__}, putting call in queue"
         )
-        self._queue.append((obj, args, kwargs))
+        self._queue.append((command, handler, args, kwargs))
 
     ##################################################
     # TODO, implement the flag for put in these methods

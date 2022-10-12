@@ -7,7 +7,7 @@ import concurrent.futures as c_futures
 from mavsdk import System
 import pytest
 
-from ...plugins.abstract_plugin import AbstractPlugin
+from pteranodon.plugins.abstract_plugin import AbstractPlugin
 from .mocks import (  # noqa: F401 # pylint: disable=unused-import # (Needed for fixtures)
     mock_system,
     mock_logger,
@@ -149,5 +149,5 @@ def test_schedule(
 
     secs = end_time - start_time
     assert (
-        secs > 5.0
+        round(secs, 2) >= 4.99
     ), f"Something went wrong! The coroutines should take at least 5 seconds to run but took {secs} seconds instead"
