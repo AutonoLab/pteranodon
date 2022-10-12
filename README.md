@@ -9,7 +9,7 @@ Autonomous drones are becoming more and more common in the world of technology, 
 ## Description
 A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
 gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative cordinate systems.
-
+---
 
 ## Requirments for Use
 
@@ -31,7 +31,38 @@ All operations to install and build PX4 must be done within a WSL Shell (you can
    * Press the Windows Start key.
    * Type cmd and press Enter to open the prompt.
 4. To start WSL and access the WSL shell, execute the command:
-   
+   * wsl
 
+Note: Enter the following commands to first close the WSL shell, and then shut down WSL:
+* exit
+* wsl --shutdown
 
-    
+Alternatively, after entering exit you can just close the prompt
+
+#### Install PX4 Toolchain
+
+Next we download the PX4 source code within the WSL2 environment, and use the normal Ubuntu installer script to to set up the developer environment. This will install the toolchain for Gazebo simulation, JMAVSim simulation and Pixhawk/NuttX hardware.
+
+To install the development toolchain:
+1. Open a WSL2 Shell (if it is still open you can use the same one that was used to install WSL2).
+2. Execute the command cd ~ to switch to the home folder of WSL for the next steps.
+
+Warning: This is important! If you work from a location outside of the WSL file system you'll run into issues such as very slow execution and access right/permission errors.
+
+1. Download PX4 source code using git (which is already installed in WSL2):
+   * git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+2. Run the ubuntu.sh installer script and acknowledge any prompts as the script progresses:
+   * bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+
+Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
+* You can use the --no-nuttx and --no-sim-tools options to omit the NuttX and/or simulation tools.
+* Other Linux build targets are untested (you can try these by entering the appropriate commands in Ubuntu Development Environment into the WSL shell).
+
+1. Restart the "WSL computer" after the script completes (exit the shell, shutdown WSL, and restart WSL):
+   * exit
+   * wsl --shutdown
+   * wsl
+2. Switch to the PX4 repository in the WSL home folder:
+   * cd ~/PX4-Autopilot
+3. Build the PX4 SITL target and test your environment:
+   * make px4_sitl
