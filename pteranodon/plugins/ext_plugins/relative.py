@@ -3,6 +3,7 @@ from logging import Logger
 from typing import Tuple, Dict
 
 from mavsdk import System
+from mavsdk.telemetry import Battery
 from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
 from numpy import arctan2, degrees, sqrt, cos, sin, radians
@@ -33,6 +34,19 @@ class Relative(AbstractCustomPlugin):
             pass
 
         self._telemetry = self._base_plugins["telemetry"]
+
+        # Method 1
+        @self._telemetry.register_handler("battery")
+        def test(battery: Battery):
+            print("Subbed battery data")
+            print(battery)
+
+        # Method 2
+        self._telemetry.register_handler("battery")(self.test_2)
+
+    def test_2(self, battery: Battery):
+        print("Subbed battery data2")
+        print(battery)
 
     @property
     def min_follow_distance(self) -> float:
