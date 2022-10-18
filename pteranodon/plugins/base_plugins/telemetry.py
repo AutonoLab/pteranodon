@@ -1,7 +1,8 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from functools import partial
+import time
 
 from mavsdk import System, telemetry
 
@@ -24,7 +25,15 @@ class Telemetry(AbstractBasePlugin):
             self._all_methods, self._rate_set_methods, self._getter_methods
         )
 
-        self._async_gen_data = self._make_async_gen_data()
+        self._async_gen_data: Dict[str, Any] = {
+            key: None for key in self._async_gen_methods
+        }
+        self._async_rate_data: Dict[str, float] = {
+            key: 1.0 for key in self._rate_set_methods
+        }
+        self._rate_last_times: Dict[str, Optional[float]] = {
+            key: None for key in self._rate_set_methods
+        }
         self._start_async_gen_telemetry()
 
         self._getter_data = self._init_getter_data()
@@ -57,16 +66,28 @@ class Telemetry(AbstractBasePlugin):
             methods.remove(method)
         return methods
 
-    def _make_async_gen_data(self) -> Dict:
-        data: Dict[str, Any] = {}
-        for func in self._async_gen_methods:
-            data[func] = None
-        return data
-
     async def _async_gen_wrapper(self, func: str) -> None:
         async for data in getattr(self._system.telemetry, func)():
             if data != self._async_gen_data[func]:
                 self._async_gen_data[func] = data
+
+            if func in self._rate_set_methods:
+                prev_time = self._rate_last_times[func]
+                current_time = time.time()
+
+                # Need one cycle to calculate
+                if prev_time is None:
+                    self._rate_last_times[func] = current_time
+                    continue
+
+                delta_secs = current_time - prev_time
+
+                # Average the current value and the last value if they are close enough to account for minor variations?
+                new_hz = 1 / delta_secs
+                current_hz = self._async_rate_data[func]
+                if abs(new_hz - current_hz) <= 0.5:
+                    new_hz = (new_hz + current_hz) / 2
+                self._async_rate_data[func] = new_hz
 
     def _start_async_gen_telemetry(self) -> None:
         for func in self._async_gen_methods:
