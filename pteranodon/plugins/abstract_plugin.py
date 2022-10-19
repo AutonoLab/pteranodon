@@ -1,3 +1,4 @@
+import functools
 from abc import ABC
 import asyncio
 from asyncio import AbstractEventLoop
@@ -5,7 +6,20 @@ from concurrent import futures
 from logging import Logger
 from collections import deque
 from functools import partial
-from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
+from typing import (
+    Tuple,
+    Any,
+    Callable,
+    Optional,
+    Deque,
+    Coroutine,
+    Dict,
+    List,
+    AsyncGenerator,
+)
+import time
+from collections import defaultdict
+from inspect import signature
 
 import grpc
 from mavsdk import System
@@ -26,6 +40,11 @@ class AbstractPlugin(ABC):
 
         self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
+
+        self._async_gen_data: Dict[AsyncGenerator, Optional[Any]] = defaultdict(None)
+        self._async_handlers: Dict[AsyncGenerator, List[Callable]] = defaultdict(list)
+        self._async_rate_data: Dict[AsyncGenerator, float] = defaultdict(lambda: 1.0)
+        self.__rate_last_times: Dict[AsyncGenerator, float] = {}
 
         self._stopped = False
 
@@ -105,6 +124,64 @@ class AbstractPlugin(ABC):
             new_future.add_done_callback(callback)
         self._future_cache.append(new_future)
         return new_future
+
+    def _submit_simple_generator(
+        self,
+        generator: AsyncGenerator,
+        should_compute_rate: bool = False,
+        retry_time: float = 0.5,
+    ) -> futures.Future:
+        """
+        Wrapper for the body expressions of the async generators used to read MAVSDK data.
+         This function will automatically handle the saving of the generated data, any added handlers, and rate calculations.
+         _submit_generator does not add this functionality.
+        :param generator: The AsyncGenerator to submit and handle
+        :type generator: AsyncGenerator
+        :param should_compute_rate: Whether the rate of updates should be computed for this property (in Hz)
+        :type should_compute_rate: bool
+        :param retry_time: Attempts to stall retry of body for this amount of time (ms)
+        :type retry_time: float
+        :return: The future created from the submit_coroutine call of wrap_generator
+        """
+
+        async def async_gen_wrapper(
+            gen: AsyncGenerator, comp_rate: bool = False
+        ) -> None:
+            async for data in gen:
+                if data != self._async_gen_data[gen]:
+                    self._async_gen_data[gen] = data
+
+                func_handlers = self._async_handlers[gen]
+                if len(func_handlers) > 0:
+                    for handler in func_handlers:
+                        sig = signature(handler)
+                        if len(sig.parameters.keys()) == 0:
+                            handler()
+                            continue
+                        if len(sig.parameters.keys()) == 1:
+                            handler(data)
+
+                if comp_rate:
+                    current_time = time.perf_counter()
+                    try:
+                        # Need one cycle to calculate
+                        prev_time = self.__rate_last_times[gen]
+                    except KeyError:
+                        self.__rate_last_times[gen] = current_time
+                        continue
+
+                    delta_secs = current_time - prev_time
+                    # Average the current value and the last value if they are close enough to account for minor variations
+                    new_hz = 1 / delta_secs
+                    current_hz = self._async_rate_data[gen]
+                    if abs(new_hz - current_hz) <= 0.5:
+                        new_hz = (new_hz + current_hz) / 2
+                    self._async_rate_data[gen] = new_hz
+
+        return self._submit_generator(
+            functools.partial(async_gen_wrapper, generator, should_compute_rate),
+            retry_time=retry_time,
+        )
 
     def _submit_generator(
         self, generator: Callable, retry_time: float = 0.5

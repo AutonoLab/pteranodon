@@ -3,7 +3,7 @@ from logging import Logger
 from typing import List, Dict, Any, Callable
 from functools import partial
 from collections import defaultdict
-from inspect import signature
+
 
 from mavsdk import System, telemetry
 
