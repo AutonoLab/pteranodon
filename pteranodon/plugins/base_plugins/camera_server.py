@@ -31,7 +31,8 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._submit_generator(self._take_photo)
+        self._submit_simple_generator(self._system.camera_server.take_photo())
+        self.register_handler(self._system.camera_server.take_photo())(self._take_photo)
 
         self._end_init()
 
@@ -94,16 +95,16 @@ class CameraServer(AbstractBasePlugin):
         return TakePhotoFeedback.FAILED, capture_info
 
     async def _take_photo(self) -> None:
-        async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info(
-                f"Received image capture request with index {capture_req_idx}"
-            )
+        capture_req_idx = self._async_gen_data[self._system.camera_server.take_photo()]
+        self._logger.info(
+            f"Received image capture request with index {capture_req_idx}"
+        )
 
-            # Uses the photo request callback to get the arguments for the response_take_photo method.
-            self.set_in_progress(True)
-            feedback_capture_tuple = self._photo_request_callback(capture_req_idx)
-            self.set_in_progress(False)
-            self._respond_take_photo(*feedback_capture_tuple)
+        # Uses the photo request callback to get the arguments for the response_take_photo method.
+        self.set_in_progress(True)
+        feedback_capture_tuple = self._photo_request_callback(capture_req_idx)
+        self.set_in_progress(False)
+        self._respond_take_photo(*feedback_capture_tuple)
 
     def set_in_progress(self, in_progress: bool) -> None:
         """

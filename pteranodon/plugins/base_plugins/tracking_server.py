@@ -16,18 +16,27 @@ class TrackingServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("tracking_server", system, loop, logger)
 
-        self._track_rectangle: Optional[TrackRectangle] = None
-        self._track_point: Optional[TrackPoint] = None
         self._dummy: Optional[int] = None
         self._tracking_active: Optional[bool] = None
 
-        self._submit_generator(self._update_tracking_off_command)
         self._submit_simple_generator(
             self._system.tracking_server.tracking_point_command()
         )
         self._submit_simple_generator(
             self._system.tracking_server.tracking_rectangle_command()
         )
+        self._submit_simple_generator(
+            self._system.tracking_server.tracking_off_command()
+        )
+
+        @self.register_handler(self._system.tracking_server.tracking_off_command())
+        def _update_tracking_off_command(dummy) -> None:
+            self._tracking_active = False
+            if dummy != self._dummy:
+                self._dummy = dummy
+                self._tracking_active = False
+            else:
+                self._tracking_active = True
 
         self._end_init()
 
@@ -94,18 +103,6 @@ class TrackingServer(AbstractBasePlugin):
                 tracked_rectangle
             )
         )
-
-    async def _update_tracking_off_command(self) -> None:
-        """
-        Subscribe to incoming tracking off command.
-        """
-        async for dummy in self._system.tracking_server.tracking_off_command():
-            self._tracking_active = False
-            if dummy != self._dummy:
-                self._dummy = dummy
-                self._tracking_active = False
-            else:
-                self._tracking_active = True
 
     def tracking_off_command(self) -> Optional[int]:
         """

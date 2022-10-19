@@ -159,18 +159,25 @@ class AbstractPlugin(ABC):
             gen: AsyncGenerator, comp_rate: bool = False
         ) -> None:
             async for data in gen:
-                if data != self._async_gen_data[gen]:
-                    self._async_gen_data[gen] = data
+                self._async_gen_data[gen] = data
 
                 func_handlers = self._async_handlers[gen]
                 if len(func_handlers) > 0:
                     for handler in func_handlers:
                         sig = signature(handler)
-                        if len(sig.parameters.keys()) == 0:
+                        params = list(sig.parameters.keys())
+
+                        if len(params) <= 0:
                             handler()
                             continue
-                        if len(sig.parameters.keys()) == 1:
-                            handler(data)
+
+                        # Some handlers may use "self", don't forget to include it.
+                        args_list = [data]
+                        if params[0] == "self":
+                            args_list.insert(0, self)
+
+                        if len(sig.parameters.keys()) in [1, 2]:
+                            handler(*args_list)
 
                 if comp_rate:
                     current_time = time.perf_counter()
