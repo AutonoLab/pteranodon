@@ -1,9 +1,10 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, Optional
 from functools import partial
 from collections import defaultdict
 
+import time
 
 from mavsdk import System, telemetry
 
@@ -27,20 +28,19 @@ class Telemetry(AbstractBasePlugin):
             self._all_methods, self._rate_set_methods, self._getter_methods
         )
 
-        self._async_gen_data = self._make_async_gen_data()
         self._start_async_gen_telemetry()
 
         self._getter_data: Dict[str, Any] = {key: None for key in self._getter_methods}
-        self._async_handlers: Dict[str, List[Callable]] = defaultdict(list)
+        #self._async_handlers: Dict[str, List[Callable]] = defaultdict(list)
 
         self._end_init()
 
-    def register_handler(self, func_name: str):
-        def inner(func):
-            self._async_handlers[func_name].append(func)
-            return func
-
-        return inner
+    # def register_handler(self, func_name: str):
+    #     def inner(func):
+    #         self._async_handlers[func_name].append(func)
+    #         return func
+    #
+    #     return inner
 
     def _get_methods(self) -> List[str]:
         return [
@@ -74,24 +74,15 @@ class Telemetry(AbstractBasePlugin):
             data[func] = None
         return data
 
-    async def _async_gen_wrapper(self, func: str) -> None:
-        async for data in getattr(self._system.telemetry, func)():
-            if data != self._async_gen_data[func]:
-                self._async_gen_data[func] = data
-
-            func_handlers = self._async_handlers[func]
-            if len(func_handlers) > 0:
-                for handler in func_handlers:
-                    sig = signature(handler)
-                    if len(sig.parameters.keys()) == 0:
-                        handler()
-                        continue
-                    if len(sig.parameters.keys()) == 1:
-                        handler(data)
-
     def _start_async_gen_telemetry(self) -> None:
         for func in self._async_gen_methods:
             self._submit_generator(partial(self._async_gen_wrapper, func))
+
+    def _init_getter_data(self) -> Dict:
+        data: Dict[str, Any] = {}
+        for func in self._getter_methods:
+            data[func] = None
+        return data
 
     def _get_getter_data(self, func: str, timeout: float) -> Any:
         if self._getter_data[func] is None:
