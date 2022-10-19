@@ -4,8 +4,10 @@ import asyncio
 from asyncio import AbstractEventLoop
 from concurrent import futures
 from logging import Logger
-from collections import deque
+from collections import deque, defaultdict
 from functools import partial
+import time
+from inspect import signature
 from typing import (
     Tuple,
     Any,
@@ -17,9 +19,7 @@ from typing import (
     List,
     AsyncGenerator,
 )
-import time
-from collections import defaultdict
-from inspect import signature
+
 
 import grpc
 from mavsdk import System
@@ -49,6 +49,13 @@ class AbstractPlugin(ABC):
         self._stopped = False
 
     def register_handler(self, generator: AsyncGenerator):
+        """
+        Annotation to register a handler for a AsyncGenerator that is submitted via submit_simple_generator
+
+        :param generator: The generator to trigger the handler for
+        :type generator: AsyncGenerator
+        """
+
         def inner(func):
             self._async_handlers[generator].append(func)
             return func

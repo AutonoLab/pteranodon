@@ -83,7 +83,7 @@ class MissionRaw(AbstractBasePlugin):
             self._logger.error("Import was not completed! Request timed out!")
         return imported_mission
 
-    def mission_changed(self) -> bool:
+    def mission_changed(self) -> Optional[bool]:
         """
         Notifies the user if the mission has changed
         :return: boolean ; returns True if the ground station has been uploaded or changed by a

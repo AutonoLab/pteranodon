@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any, Callable, Tuple
+from typing import List, Dict, Any, Callable, Tuple, Optional
 from inspect import getmembers, ismethod
 
 from mavsdk import System, telemetry
@@ -57,8 +57,8 @@ class Telemetry(AbstractBasePlugin):
         }
 
     def _start_async_gen_telemetry(self) -> None:
-        for func_name, func in self._async_gen_methods.items():
-            self._submit_simple_generator(func, should_compute_rate=True)
+        for _, func in self._async_gen_methods.items():
+            self._submit_simple_generator(func(), should_compute_rate=True)
 
     def _get_getter_data(self, func_name: str, timeout: float) -> Any:
 
@@ -71,7 +71,7 @@ class Telemetry(AbstractBasePlugin):
             return None
 
         opt_data = self._submit_blocking_coroutine(
-            self._getter_methods[func_name], timeout=timeout
+            self._getter_methods[func_name](), timeout=timeout
         )
         if opt_data is None:
             self._logger.error(
@@ -85,7 +85,9 @@ class Telemetry(AbstractBasePlugin):
     # get methods
     # ==========================================================================================
 
-    def get_gps_global_origin(self, timeout: float = 1.0) -> telemetry.GpsGlobalOrigin:
+    def get_gps_global_origin(
+        self, timeout: float = 1.0
+    ) -> Optional[telemetry.GpsGlobalOrigin]:
         """
         Get the GPS location of where the estimator has been initialized.
         :return: telemetry.GpsGlobalOrigin ; Gets the Global Origin in latitude, longitude and altitude
@@ -95,7 +97,7 @@ class Telemetry(AbstractBasePlugin):
     # async gen method data
     # ==========================================================================================
     @property
-    def actuator_control_target(self) -> telemetry.ActuatorControlTarget:
+    def actuator_control_target(self) -> Optional[telemetry.ActuatorControlTarget]:
         """
         Get the next actuator control target
         :return: telemetry.ActuatorControlTarget ; the next control target
@@ -103,7 +105,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.actuator_control_target()]
 
     @property
-    def actuator_output_staus(self) -> telemetry.ActuatorOutputStatus:
+    def actuator_output_staus(self) -> Optional[telemetry.ActuatorOutputStatus]:
         """
         Subscribe to ‘actuator output status’ updates.
         :return: telemetry.ActuatorOutputStatus ; The next actuator output status
@@ -111,7 +113,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.actuator_output_status()]
 
     @property
-    def armed(self) -> bool:
+    def armed(self) -> Optional[bool]:
         """
         Subscribe to armed updates.
         :return: bool ; The next ‘armed’ state
@@ -119,7 +121,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.armed()]
 
     @property
-    def attitude_angular_velocity_body(self) -> telemetry.AngularVelocityBody:
+    def attitude_angular_velocity_body(self) -> Optional[telemetry.AngularVelocityBody]:
         """
         Subscribe to ‘attitude’ updates (angular velocity)
         :return: telemetry.AngularVelocityBody ; The next angular velocity (rad/s)
@@ -129,7 +131,7 @@ class Telemetry(AbstractBasePlugin):
         ]
 
     @property
-    def attitude_euler(self) -> telemetry.EulerAngle:
+    def attitude_euler(self) -> Optional[telemetry.EulerAngle]:
         """
         Subscribe to ‘attitude’ updates (Euler).
         :return: telemetry.EulerAngle ; The next attitude (Euler)
@@ -137,7 +139,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.attitude_euler()]
 
     @property
-    def attitude_quaternion(self) -> telemetry.Quaternion:
+    def attitude_quaternion(self) -> Optional[telemetry.Quaternion]:
         """
         Subscribe to ‘attitude’ updates (quaternion).
         :return: telemetry.Quaternion ;  The next attitude (quaternion)
@@ -145,7 +147,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.attitude_quaternion()]
 
     @property
-    def battery(self) -> telemetry.Battery:
+    def battery(self) -> Optional[telemetry.Battery]:
         """
         Subscribe to ‘battery’ updates.
         :return: telemetry.Battery ; The next ‘battery’ state
@@ -153,7 +155,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.battery()]
 
     @property
-    def camera_attitude_euler(self) -> telemetry.EulerAngle:
+    def camera_attitude_euler(self) -> Optional[telemetry.EulerAngle]:
         """
         Subscribe to ‘camera attitude’ updates (Euler).
         :return: telemetry.EulerAngle ; The next camera attitude (Euler)
@@ -161,7 +163,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.camera_attitude_euler()]
 
     @property
-    def camera_attitude_quaternion(self) -> telemetry.Quaternion:
+    def camera_attitude_quaternion(self) -> Optional[telemetry.Quaternion]:
         """
         Subscribe to ‘camera attitude’ updates (quaternion).
         :return: telemetry.Quaternion ; The next camera attitude (quaternion)
@@ -169,7 +171,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.camera_attitude_quaternion()]
 
     @property
-    def distance_sensor(self) -> telemetry.DistanceSensor:
+    def distance_sensor(self) -> Optional[telemetry.DistanceSensor]:
         """
         Subscribe to ‘Distance Sensor’ updates.
         :return: telemetry.DistanceSensor ; The next Distance Sensor status
@@ -177,7 +179,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.distance_sensor()]
 
     @property
-    def fixedwing_metrics(self) -> telemetry.FixedwingMetrics:
+    def fixedwing_metrics(self) -> Optional[telemetry.FixedwingMetrics]:
         """
         Subscribe to ‘fixedwing metrics’ updates.
         :return: telemetry.FixedwingMetrics ; The next fixedwing metrics
@@ -185,7 +187,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.fixedwing_metrics()]
 
     @property
-    def flight_mode(self) -> telemetry.FlightMode:
+    def flight_mode(self) -> Optional[telemetry.FlightMode]:
         """
         Subscribe to ‘flight mode’ updates.
         :return: telemetry.FlightMode ; The next flight mode
@@ -193,7 +195,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.flight_mode()]
 
     @property
-    def gps_info(self) -> telemetry.GpsInfo:
+    def gps_info(self) -> Optional[telemetry.GpsInfo]:
         """
         Subscribe to ‘GPS info’ updates.
         :return: telemetry.GpsInfo ; The next ‘GPS info’ state
@@ -201,7 +203,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.gps_info()]
 
     @property
-    def ground_truth(self) -> telemetry.GroundTruth:
+    def ground_truth(self) -> Optional[telemetry.GroundTruth]:
         """
         Subscribe to ‘ground truth’ updates.
         :return: telemetry.GroundTruth ; Ground truth position information available in simulation
@@ -209,7 +211,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.ground_truth()]
 
     @property
-    def heading(self) -> telemetry.Heading:
+    def heading(self) -> Optional[telemetry.Heading]:
         """
         Subscribe to ‘Heading’ updates.
         :return: telemetry.Heading ; The next heading (yaw) in degrees
@@ -217,7 +219,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.heading()]
 
     @property
-    def health(self) -> telemetry.Health:
+    def health(self) -> Optional[telemetry.Health]:
         """
         Subscribe to ‘health’ updates.
         :return: telemetry.Health ; The next ‘health’ state
@@ -225,7 +227,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.health()]
 
     @property
-    def health_all_ok(self) -> bool:
+    def health_all_ok(self) -> Optional[bool]:
         """
         Subscribe to ‘HealthAllOk’ updates
         :return: bool ; The next ‘health all ok’ status
@@ -233,7 +235,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.health_all_ok()]
 
     @property
-    def home(self) -> telemetry.Position:
+    def home(self) -> Optional[telemetry.Position]:
         """
         Subscribe to ‘home position’ updates.
         :return: telemetry.Position ; The next home position
@@ -241,7 +243,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.home()]
 
     @property
-    def imu(self) -> telemetry.Imu:
+    def imu(self) -> Optional[telemetry.Imu]:
         """
         Subscribe to ‘IMU’ updates (in SI units in NED body frame).
         :return: telemetry.Imu ; The next IMU status
@@ -249,7 +251,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.imu()]
 
     @property
-    def in_air(self) -> bool:
+    def in_air(self) -> Optional[bool]:
         """
         Subscribe to in-air updates.
         :return: bool ; The next ‘in-air’ state
@@ -257,7 +259,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.in_air()]
 
     @property
-    def landed_state(self) -> telemetry.LandedState:
+    def landed_state(self) -> Optional[telemetry.LandedState]:
         """
         Subscribe to landed state updates
         :return: telemetry.LandedState ; The next ‘landed’ state
@@ -265,7 +267,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.landed_state()]
 
     @property
-    def odometry(self) -> telemetry.Odometry:
+    def odometry(self) -> Optional[telemetry.Odometry]:
         """
         Subscribe to ‘odometry’ updates.
         :return: telemetry.Odometry ; The next odometry status
@@ -273,7 +275,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.odometry()]
 
     @property
-    def position(self) -> telemetry.Position:
+    def position(self) -> Optional[telemetry.Position]:
         """
         Subscribe to ‘position’ updates.
         :return: telemetry.Position ; The next position
@@ -281,7 +283,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.position()]
 
     @property
-    def position_velocity_ned(self) -> telemetry.PositionVelocityNed:
+    def position_velocity_ned(self) -> Optional[telemetry.PositionVelocityNed]:
         """
         Subscribe to ‘position velocity’ updates.
         :return: telemetry.PositionVelocityNed ; The next position and velocity status
@@ -289,7 +291,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.position_velocity_ned()]
 
     @property
-    def raw_gps(self) -> telemetry.RawGps:
+    def raw_gps(self) -> Optional[telemetry.RawGps]:
         """
         Subscribe to ‘Raw GPS’ updates.
         :return: telemetry.RawGps ; The next ‘Raw GPS’ state. Warning: this is an advanced feature, use Position updates
@@ -298,7 +300,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.raw_gps()]
 
     @property
-    def raw_imu(self) -> telemetry.Imu:
+    def raw_imu(self) -> Optional[telemetry.Imu]:
         """
         Subscribe to ‘Raw IMU’ updates.
         :return: telemetry.Imu ; The next raw IMU status
@@ -306,7 +308,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.raw_imu()]
 
     @property
-    def rc_status(self) -> telemetry.RcStatus:
+    def rc_status(self) -> Optional[telemetry.RcStatus]:
         """
         Subscribe to ‘RC status’ updates.
         :return: telemetry.RcStatus ; The next RC status
@@ -314,7 +316,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.rc_status()]
 
     @property
-    def scaled_imu(self) -> telemetry.Imu:
+    def scaled_imu(self) -> Optional[telemetry.Imu]:
         """
         Subscribe to ‘Scaled IMU’ updates.
         :return: telemetry.Imu ; The next scaled IMU status
@@ -322,7 +324,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.scaled_imu()]
 
     @property
-    def scaled_pressure(self) -> telemetry.ScaledPressure:
+    def scaled_pressure(self) -> Optional[telemetry.ScaledPressure]:
         """
         Subscribe to ‘Scaled Pressure’ updates.
         :return: telemetry.ScaledPressure ; The next scaled pressure status
@@ -330,7 +332,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.scaled_pressure()]
 
     @property
-    def status_text(self) -> telemetry.StatusText:
+    def status_text(self) -> Optional[telemetry.StatusText]:
         """
         Subscribe to ‘status text’ updates.
         :return: telemetry.StatusText ; Status text information type
@@ -338,7 +340,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.status_text()]
 
     @property
-    def unix_epoch_time(self) -> int:
+    def unix_epoch_time(self) -> Optional[int]:
         """
         Returns the current unix epoch time
         :return: int ; unix epoch time
@@ -346,7 +348,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.unix_epoch_time()]
 
     @property
-    def velocity_ned(self) -> telemetry.VelocityNed:
+    def velocity_ned(self) -> Optional[telemetry.VelocityNed]:
         """
         Returns the Velocity in NED coordinate
         :return: telemetry.VelocityNed ; Velocity in NED coordinates
@@ -354,7 +356,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.velocity_ned()]
 
     @property
-    def vtol_state(self) -> telemetry.VtolState:
+    def vtol_state(self) -> Optional[telemetry.VtolState]:
         """
         Returns the vtol state
         :return: telemetry.VtolState ; Enumeration of the vtol state

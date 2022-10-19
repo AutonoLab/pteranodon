@@ -6,8 +6,7 @@ from mavsdk import System, camera
 
 from .abstract_base_plugin import AbstractBasePlugin
 
-# TODO: Fix status issues with handlers
-# TODO: Settings not being run
+
 class Camera(AbstractBasePlugin):
     """
     Can be used to manage cameras that implement the MAVLink Camera Protocol: https://mavlink.io/en/protocol/camera.html.
@@ -20,17 +19,32 @@ class Camera(AbstractBasePlugin):
         super().__init__("camera", system, loop, logger)
 
         self._current_camera_id: Optional[int] = None
+        self._status: Optional[camera.Status] = None
+        self._mode: Optional[camera.Mode] = None
 
         self._video_stream_info: Optional[camera.VideoStreamInfo] = None
         self._current_settings: List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
 
+        # Only want to fetch the current settings and options once on init
+        self._submit_coroutine(self._update_current_settings())
+        self._submit_coroutine(self._update_possible_setting_opts())
+
         # Tasks of subscribed properties
         self._submit_simple_generator(self._system.camera.capture_info())
         self._submit_simple_generator(self._system.camera.information())
-        self._submit_simple_generator(self._system.camera.mode())
-        self._submit_simple_generator(self._system.camera.status())
         self._submit_simple_generator(self._system.camera.video_stream_info())
+
+        self._submit_simple_generator(self._system.camera.status())
+        self._submit_simple_generator(self._system.camera.mode())
+
+        @self.register_handler(self._system.camera.status())
+        def _update_camera_status(status):
+            self._status = status
+
+        @self.register_handler(self._system.camera.mode())
+        def _update_mode(mode):
+            self._mode = mode
 
         self._end_init()
 
@@ -251,7 +265,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera mode
         :rtype: Optional[camera.Mode]
         """
-        return self._async_gen_data[self._system.camera.mode()]
+        return self._mode
 
     @property
     def status(self) -> Optional[camera.Status]:

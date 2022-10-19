@@ -94,8 +94,13 @@ class CameraServer(AbstractBasePlugin):
 
         return TakePhotoFeedback.FAILED, capture_info
 
-    async def _take_photo(self) -> None:
-        capture_req_idx = self._async_gen_data[self._system.camera_server.take_photo()]
+    def _take_photo(self) -> None:
+        capture_req_idx_opt = self._async_gen_data[
+            self._system.camera_server.take_photo()
+        ]
+        if capture_req_idx_opt is None:
+            return
+        capture_req_idx: int = capture_req_idx_opt
         self._logger.info(
             f"Received image capture request with index {capture_req_idx}"
         )

@@ -41,13 +41,6 @@ class Relative(AbstractCustomPlugin):
             print("Subbed battery data")
             print(battery)
 
-        # Method 2
-        self._telemetry.register_handler(self._system.telemetry.battery())(self.test_2)
-
-    def test_2(self, battery: Battery):
-        print("Subbed battery data2")
-        print(battery)
-
     @property
     def min_follow_distance(self) -> float:
         """
