@@ -555,3 +555,188 @@ class Telemetry(AbstractBasePlugin):
         :return: None
         """
         self._submit_coroutine(self._system.telemetry.set_rate_vtol_state(rate))
+
+    # rate getter methods
+    # ==========================================================================================
+
+    def get_rate_actuator_target(self) -> float:
+        """
+        Get 'actuator control target' updates rate in Hertz
+        :return: 'actuator control target' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.actuator_control_target()]
+
+    def get_rate_actuator_output_status(self) -> float:
+        """
+        Get 'actuator output status' updates rate in Hertz
+        :return: 'actuator output status' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.actuator_output_status()]
+
+    def get_rate_attitude(self) -> float:
+        """
+        Get 'attitude' updates rate in Hertz
+        :return: 'attitude' updates rate in Hertz
+        :rtype: float
+        """
+        euler = self._async_rate_data[self._system.telemetry.attitude_euler()]
+        quat = self._async_rate_data[self._system.telemetry.attitude_quaternion()]
+        return (euler + quat) / 2  # They should be the same so just average them
+
+    def get_rate_battery(self) -> float:
+        """
+        Get 'battery' updates rate in Hertz
+        :return: 'battery' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.battery()]
+
+    def get_rate_camera_attitude(self) -> float:
+        """
+        Get 'camera attitude' updates rate in Hertz
+        :return: 'camera attitude' updates rate in Hertz
+        :rtype: float
+        """
+        euler = self._async_rate_data[self._system.telemetry.camera_attitude_euler()]
+        quat = self._async_rate_data[
+            self._system.telemetry.camera_attitude_quaternion()
+        ]
+        return (euler + quat) / 2  # They should be the same so just average them
+
+    def get_rate_distance_sensor(self) -> float:
+        """
+        Get 'distance sensor' updates rate in Hertz
+        :return: 'distance sensor' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.distance_sensor()]
+
+    def get_rate_fixedwing_metrics(self) -> float:
+        """
+        Get 'fixedwing metrics' updates rate in Hertz
+        :return: 'fixedwing metrics' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.fixedwing_metrics()]
+
+    def get_rate_gps_info(self) -> float:
+        """
+        Get 'GPS info' updates rate in Hertz
+        :return: 'GPS info' updates rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.gps_info()]
+
+    def get_rate_ground_truth(self) -> float:
+        """
+        Get 'ground truth' update rate in Hertz
+        :return: 'ground truth' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.ground_truth()]
+
+    def get_rate_home(self) -> float:
+        """
+        Get 'home position' update rate in Hertz
+        :return: 'home position' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.home()]
+
+    def get_rate_imu(self) -> float:
+        """
+        Get 'IMU' update rate in Hertz
+        :return: 'IMU' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.imu()]
+
+    def get_rate_in_air(self) -> float:
+        """
+        Get 'in-air' update rate in Hertz
+        :return: 'in-air' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.in_air()]
+
+    def get_rate_landed_state(self) -> float:
+        """
+        Get 'landed-state' update rate in Hertz
+        :return: 'landed-state' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.landed_state()]
+
+    def get_rate_odometry(self) -> float:
+        """
+        Get 'odometry' update rate in Hertz
+        :return: 'odometry' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.odometry()]
+
+    def get_rate_position(self) -> float:
+        """
+        Get 'position' update rate in Hertz
+        :return: 'position' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.position()]
+
+    def get_rate_position_velocity_ned(self) -> float:
+        """
+        Get 'position velocity' update rate in Hertz
+        :return: 'position velocity' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.position_velocity_ned()]
+
+    def get_rate_raw_imu(self) -> float:
+        """
+        Get 'raw IMU' update rate in Hertz
+        :return: 'Raw IMU' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.raw_imu()]
+
+    def get_rate_rc_status(self) -> float:
+        """
+        Get 'RC status' update rate in Hertz
+        :return: 'RC status' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.rc_status()]
+
+    def get_rate_scaled_imu(self) -> float:
+        """
+        Get 'scaled IMU' update rate in Hertz
+        :return: 'scaled IMU' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.scaled_imu()]
+
+    def get_rate_unix_epoch_time(self) -> float:
+        """
+        Get 'unix epoch time' update rate in Hertz
+        :return: 'unix epoch time' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.unix_epoch_time()]
+
+    def get_rate_velocity_ned(self) -> float:
+        """
+        Get 'ground speed' update rate in Hertz (NED)
+        :return: 'ground speed' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.velocity_ned()]
+
+    def get_rate_vtol_state(self) -> float:
+        """
+        Get 'VTOL state' update rate in Hertz
+        :return: 'VTOL state' update rate in Hertz
+        :rtype: float
+        """
+        return self._async_rate_data[self._system.telemetry.vtol_state()]
