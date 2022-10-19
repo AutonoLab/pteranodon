@@ -45,16 +45,8 @@ class Telemetry(AbstractBasePlugin):
         self._getter_data: Dict[str, Any] = {
             key: None for key, _ in self._getter_methods.items()
         }
-        # self._async_handlers: Dict[str, List[Callable]] = defaultdict(list)
 
         self._end_init()
-
-    # def register_handler(self, func_name: str):
-    #     def inner(func):
-    #         self._async_handlers[func_name].append(func)
-    #         return func
-    #
-    #     return inner
 
     def _get_all_tele_methods(self) -> Dict[str, Callable]:
         tele_methods_list: List[Tuple[str, Callable]] = getmembers(

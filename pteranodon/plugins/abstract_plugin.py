@@ -48,6 +48,13 @@ class AbstractPlugin(ABC):
 
         self._stopped = False
 
+    def register_handler(self, generator: AsyncGenerator):
+        def inner(func):
+            self._async_handlers[generator].append(func)
+            return func
+
+        return inner
+
     @property
     def name(self) -> str:
         """

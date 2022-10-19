@@ -36,13 +36,13 @@ class Relative(AbstractCustomPlugin):
         self._telemetry = self._base_plugins["telemetry"]
 
         # Method 1
-        @self._telemetry.register_handler("battery")
+        @self._telemetry.register_handler(self._system.telemetry.battery())
         def test(battery: Battery):
             print("Subbed battery data")
             print(battery)
 
         # Method 2
-        self._telemetry.register_handler("battery")(self.test_2)
+        self._telemetry.register_handler(self._system.telemetry.battery())(self.test_2)
 
     def test_2(self, battery: Battery):
         print("Subbed battery data2")
