@@ -15,19 +15,9 @@ class Gimbal(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 
-        self._control_status = None
-        self._submit_generator(self._update_control_status)
+        self._submit_simple_generator(self._system.gimbal.control())
 
         self._end_init()
-
-    async def _update_control_status(self) -> None:
-        """
-        Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
-         over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
-        """
-        async for ctrl_status in self._system.gimbal.control():
-            if ctrl_status != self._control_status:
-                self._control_status = ctrl_status
 
     def control(self) -> ControlStatus:
         """
@@ -35,7 +25,7 @@ class Gimbal(AbstractBasePlugin):
 
         :return: the current control status
         """
-        return self._control_status
+        return self._async_gen_data[self._system.gimbal.control()]
 
     def release_control(self) -> None:
         """

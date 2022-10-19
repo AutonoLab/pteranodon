@@ -15,11 +15,8 @@ class MissionRaw(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw", system, loop, logger)
 
-        self._mission_progress = None
-        self._has_mission_changed = False
-
-        self._submit_generator(self._update_mission_changed)
-        self._submit_generator(self._update_mission_progress)
+        self._submit_simple_generator(self._system.mission_raw.mission_changed())
+        self._submit_simple_generator(self._system.mission_raw.mission_progress())
 
         self._end_init()
 
@@ -86,38 +83,20 @@ class MissionRaw(AbstractBasePlugin):
             self._logger.error("Import was not completed! Request timed out!")
         return imported_mission
 
-    async def _update_mission_changed(self):
-        """
-        Updates self.has_mission_changed
-        :return: None
-        """
-        async for mission_changed in self._system.mission_raw.mission_changed():
-            if mission_changed != self._has_mission_changed:
-                self._has_mission_changed = mission_changed
-
     def mission_changed(self) -> bool:
         """
         Notifies the user if the mission has changed
         :return: boolean ; returns True if the ground station has been uploaded or changed by a
         ground station or companion computer, False otherwise
         """
-        return self._has_mission_changed
+        return self._async_gen_data[self._system.mission_raw.mission_changed()]
 
-    async def _update_mission_progress(self):
-        """
-        Updates the current mission progress
-        :return: None
-        """
-        async for mission_progress in self._system.mission_raw.mission_progress():
-            if mission_progress != self._mission_progress:
-                self._mission_progress = mission_progress
-
-    def mission_progress(self) -> mission_raw.MissionProgress:
+    def mission_progress(self) -> Optional[mission_raw.MissionProgress]:
         """
         Get the current mission progress
         :return: mission_raw.MissionProgress ; returns the current mission progress
         """
-        return self._mission_progress
+        return self._async_gen_data[self._system.mission_raw.mission_progress()]
 
     def pause_mission(self):
         """

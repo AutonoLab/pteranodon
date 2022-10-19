@@ -144,6 +144,10 @@ class AbstractPlugin(ABC):
         :return: The future created from the submit_coroutine call of wrap_generator
         """
 
+        self._async_gen_data[generator] = None
+        self._async_rate_data[generator] = 1.0
+        self._async_handlers[generator] = []
+
         async def async_gen_wrapper(
             gen: AsyncGenerator, comp_rate: bool = False
         ) -> None:

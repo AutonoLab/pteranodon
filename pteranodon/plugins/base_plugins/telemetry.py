@@ -1,10 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Dict, Any, Callable, Optional, Tuple
-from functools import partial
-from collections import defaultdict
+from typing import List, Dict, Any, Callable, Tuple
 from inspect import getmembers, ismethod
-import time
 
 from mavsdk import System, telemetry
 
