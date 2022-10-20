@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Tuple, Dict
 
 from mavsdk import System
-from mavsdk.telemetry import Battery, PositionVelocityNed, EulerAngle, Position
+from mavsdk.telemetry import PositionVelocityNed, EulerAngle, Position
 from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
 from numpy import arctan2, degrees, sqrt, cos, sin, radians
