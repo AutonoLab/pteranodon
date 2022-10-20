@@ -9,6 +9,7 @@ from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
 from numpy import arctan2, degrees, sqrt, cos, sin, radians
 
 from .abstract_custom_plugin import AbstractCustomPlugin
+from ..base_plugins.telemetry import Telemetry
 
 
 class Relative(AbstractCustomPlugin):
@@ -33,12 +34,14 @@ class Relative(AbstractCustomPlugin):
         except KeyError:
             pass
 
-        self._telemetry = self._base_plugins["telemetry"]
+        self._telemetry: Telemetry = self._base_plugins["telemetry"]
 
         # Method 1
-        @self._telemetry._register_handler(  # pylint: disable=protected-access
-            self._system.telemetry.battery
-        )
+        # @self._telemetry._register_handler(  # pylint: disable=protected-access
+        #     self._system.telemetry.battery
+        # )
+
+        @self._telemetry.register_battery_handler
         def test(battery: Battery):
             print("Subbed battery data")
             print(battery)
