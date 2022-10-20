@@ -36,16 +36,6 @@ class Relative(AbstractCustomPlugin):
 
         self._telemetry: Telemetry = self._base_plugins["telemetry"]
 
-        # Method 1
-        # @self._telemetry._register_handler(  # pylint: disable=protected-access
-        #     self._system.telemetry.battery
-        # )
-
-        @self._telemetry.register_battery_handler
-        def test(battery: Battery):
-            print("Subbed battery data")
-            print(battery)
-
     @property
     def min_follow_distance(self) -> float:
         """
