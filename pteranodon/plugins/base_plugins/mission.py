@@ -18,9 +18,8 @@ class Mission(AbstractBasePlugin):
         self._download_progress = None
         self._enable_return_to_land = None
         self._mission_plan = None
-        self._mission_progress = None
         self._loop.run_until_complete(self._download_mission_with_progress())
-        self._submit_generator(self._update_mission_progress)
+        self._submit_simple_generator(self._system.mission.mission_progress)
 
         self._end_init()
 
@@ -139,17 +138,9 @@ class Mission(AbstractBasePlugin):
             self._logger.error("is_mission_finished request timed out!")
         return imf_state
 
-    def mission_progress(self) -> mission.MissionProgress:
+    def mission_progress(self) -> Optional[mission.MissionProgress]:
         """
         returns the current mission progress
         :return: mission.MissionProgress
         """
-        return self._mission_progress
-
-    async def _update_mission_progress(self):
-        """
-        updates the mission progress
-        :return: None
-        """
-        async for progress in self._system.mission.mission_progress():
-            self._mission_progress = progress
+        return self._async_gen_data[self._system.mission.mission_progress]
