@@ -2,7 +2,7 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Dict, Any, Callable, Tuple, Optional
 from inspect import getmembers, ismethod
-from functools import partialmethod
+from functools import partial
 
 from mavsdk import System, telemetry
 
@@ -48,104 +48,104 @@ class Telemetry(AbstractBasePlugin):
         }
 
         # Start setup partial method handler registers
-        self.register_actuator_control_target_handler = partialmethod(
+        self.register_actuator_control_target_handler = partial(
             self._register_handler, self._system.telemetry.actuator_control_target
         )
-        self.register_actuator_output_status_handler = partialmethod(
+        self.register_actuator_output_status_handler = partial(
             self._register_handler, self._system.telemetry.actuator_output_status
         )
-        self.register_armed_handler = partialmethod(
+        self.register_armed_handler = partial(
             self._register_handler, self._system.telemetry.armed
         )
-        self.register_attitude_angular_velocity_body_handler = partialmethod(
+        self.register_attitude_angular_velocity_body_handler = partial(
             self._register_handler,
             self._system.telemetry.attitude_angular_velocity_body,
         )
-        self.register_attitude_euler_handler = partialmethod(
+        self.register_attitude_euler_handler = partial(
             self._register_handler, self._system.telemetry.attitude_euler
         )
-        self.register_attitude_quaternion_handler = partialmethod(
+        self.register_attitude_quaternion_handler = partial(
             self._register_handler, self._system.telemetry.attitude_quaternion
         )
-        self.register_battery_handler = partialmethod(
+        self.register_battery_handler = partial(
             self._register_handler, self._system.telemetry.battery
         )
-        self.register_camera_attitude_euler_handler = partialmethod(
+        self.register_camera_attitude_euler_handler = partial(
             self._register_handler, self._system.telemetry.camera_attitude_euler
         )
-        self.register_camera_attitude_quaternion_handler = partialmethod(
+        self.register_camera_attitude_quaternion_handler = partial(
             self._register_handler, self._system.telemetry.camera_attitude_quaternion
         )
-        self.register_distance_sensor_handler = partialmethod(
+        self.register_distance_sensor_handler = partial(
             self._register_handler, self._system.telemetry.distance_sensor
         )
-        self.register_fixedwing_metrics_handler = partialmethod(
+        self.register_fixedwing_metrics_handler = partial(
             self._register_handler, self._system.telemetry.fixedwing_metrics
         )
-        self.register_flight_mode_handler = partialmethod(
+        self.register_flight_mode_handler = partial(
             self._register_handler, self._system.telemetry.flight_mode
         )
-        self.register_gps_info_handler = partialmethod(
+        self.register_gps_info_handler = partial(
             self._register_handler, self._system.telemetry.gps_info
         )
-        self.register_ground_truth_handler = partialmethod(
+        self.register_ground_truth_handler = partial(
             self._register_handler, self._system.telemetry.ground_truth
         )
-        self.register_heading_handler = partialmethod(
+        self.register_heading_handler = partial(
             self._register_handler, self._system.telemetry.heading
         )
-        self.register_health_handler = partialmethod(
+        self.register_health_handler = partial(
             self._register_handler, self._system.telemetry.health
         )
-        self.register_health_all_ok_handler = partialmethod(
+        self.register_health_all_ok_handler = partial(
             self._register_handler, self._system.telemetry.health_all_ok
         )
-        self.register_home_handler = partialmethod(
+        self.register_home_handler = partial(
             self._register_handler, self._system.telemetry.home
         )
-        self.register_imu_handler = partialmethod(
+        self.register_imu_handler = partial(
             self._register_handler, self._system.telemetry.imu
         )
-        self.register_in_air_handler = partialmethod(
+        self.register_in_air_handler = partial(
             self._register_handler, self._system.telemetry.in_air
         )
-        self.register_landed_state_handler = partialmethod(
+        self.register_landed_state_handler = partial(
             self._register_handler, self._system.telemetry.landed_state
         )
-        self.register_odometry_handler = partialmethod(
+        self.register_odometry_handler = partial(
             self._register_handler, self._system.telemetry.odometry
         )
-        self.register_position_handler = partialmethod(
+        self.register_position_handler = partial(
             self._register_handler, self._system.telemetry.position
         )
-        self.register_position_velocity_ned_handler = partialmethod(
+        self.register_position_velocity_ned_handler = partial(
             self._register_handler, self._system.telemetry.position_velocity_ned
         )
-        self.register_raw_gps_handler = partialmethod(
+        self.register_raw_gps_handler = partial(
             self._register_handler, self._system.telemetry.raw_gps
         )
-        self.register_raw_imu_handler = partialmethod(
+        self.register_raw_imu_handler = partial(
             self._register_handler, self._system.telemetry.raw_imu
         )
-        self.register_rc_status_handler = partialmethod(
+        self.register_rc_status_handler = partial(
             self._register_handler, self._system.telemetry.rc_status
         )
-        self.register_scaled_imu_handler = partialmethod(
+        self.register_scaled_imu_handler = partial(
             self._register_handler, self._system.telemetry.scaled_imu
         )
-        self.register_scaled_pressure_handler = partialmethod(
+        self.register_scaled_pressure_handler = partial(
             self._register_handler, self._system.telemetry.scaled_pressure
         )
-        self.register_status_text_handler = partialmethod(
+        self.register_status_text_handler = partial(
             self._register_handler, self._system.telemetry.status_text
         )
-        self.register_unix_epoch_time_handler = partialmethod(
+        self.register_unix_epoch_time_handler = partial(
             self._register_handler, self._system.telemetry.unix_epoch_time
         )
-        self.register_velocity_ned_handler = partialmethod(
+        self.register_velocity_ned_handler = partial(
             self._register_handler, self._system.telemetry.velocity_ned
         )
-        self.register_vtol_state_handler = partialmethod(
+        self.register_vtol_state_handler = partial(
             self._register_handler, self._system.telemetry.vtol_state
         )
         # End handler registers

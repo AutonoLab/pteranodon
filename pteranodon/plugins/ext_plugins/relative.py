@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Tuple, Dict
 
 from mavsdk import System
-from mavsdk.telemetry import Battery
+from mavsdk.telemetry import Battery, PositionVelocityNed, EulerAngle, Position
 from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
 from numpy import arctan2, degrees, sqrt, cos, sin, radians
@@ -112,11 +112,17 @@ class Relative(AbstractCustomPlugin):
         down = 0.0 if not on_dimensions[2] else down
 
         # get current position
-        task = self._telemetry.position_velocity_ned
+        task_opt = self._telemetry.position_velocity_ned
+        task2_opt = self._telemetry.attitude_euler
+        if task_opt is None:
+            return None
+
+        task: PositionVelocityNed = task_opt
+        task2: EulerAngle = task2_opt
+
         current_pos = task.position
 
         # get angle of rotation
-        task2 = self._telemetry.attitude_euler
         angle = task2.yaw_deg
         angle_of_rotation = radians(angle)
 
@@ -145,8 +151,15 @@ class Relative(AbstractCustomPlugin):
         self._submit_coroutine(self._create_geofence(distance))
 
     async def _create_geofence(self, distance: float) -> None:
-        latitude = self._telemetry.home.latitude_deg
-        longitude = self._telemetry.home.longitude_deg
+
+        home_opt = self._telemetry.home
+        if home_opt is None:
+            return None
+
+        home: Position = home_opt
+
+        latitude = home.latitude_deg
+        longitude = home.longitude_deg
 
         # source for magic number
         # https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of
