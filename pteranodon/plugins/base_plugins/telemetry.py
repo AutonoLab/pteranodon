@@ -58,7 +58,8 @@ class Telemetry(AbstractBasePlugin):
             self._register_handler, self._system.telemetry.armed
         )
         self.register_attitude_angular_velocity_body_handler = partialmethod(
-            self._register_handler, self._system.telemetry.attitude_angular_velocity_body
+            self._register_handler,
+            self._system.telemetry.attitude_angular_velocity_body,
         )
         self.register_attitude_euler_handler = partialmethod(
             self._register_handler, self._system.telemetry.attitude_euler
