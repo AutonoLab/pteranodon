@@ -62,13 +62,9 @@ class Telemetry(AbstractBasePlugin):
 
     def _get_getter_data(self, func_name: str, timeout: float) -> Any:
 
-        # Check for func_name existence and data while I am at it
-        try:
-            current_getter_data = self._getter_data[func_name]
-            if current_getter_data is None:
-                return current_getter_data
-        except KeyError:
-            return None
+        current_getter_data = self._getter_data[func_name]
+        if current_getter_data is None:
+            return current_getter_data
 
         opt_data = self._submit_blocking_coroutine(
             self._getter_methods[func_name](), timeout=timeout
@@ -105,7 +101,7 @@ class Telemetry(AbstractBasePlugin):
         return self._async_gen_data[self._system.telemetry.actuator_control_target]
 
     @property
-    def actuator_output_staus(self) -> Optional[telemetry.ActuatorOutputStatus]:
+    def actuator_output_status(self) -> Optional[telemetry.ActuatorOutputStatus]:
         """
         Subscribe to ‘actuator output status’ updates.
         :return: telemetry.ActuatorOutputStatus ; The next actuator output status

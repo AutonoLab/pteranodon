@@ -43,7 +43,7 @@ class AbstractPlugin(ABC):
         self._async_gen_data: Dict[Callable, Optional[Any]] = defaultdict(lambda: None)
         self._async_handlers: Dict[Callable, List[Callable]] = defaultdict(list)
         self._async_rate_data: Dict[Callable, float] = defaultdict(lambda: 1.0)
-        self.__rate_last_times: Dict[Callable, float] = {}
+        self._rate_last_times: Dict[Callable, float] = {}
 
         self._stopped = False
 
@@ -165,7 +165,7 @@ class AbstractPlugin(ABC):
                     current_time = time.perf_counter()
                     try:
 
-                        prev_time = self.__rate_last_times[gen]
+                        prev_time = self._rate_last_times[gen]
 
                         delta_secs = current_time - prev_time
                         # Average the current value and the last value if they are close enough to account for minor variations
@@ -177,7 +177,7 @@ class AbstractPlugin(ABC):
 
                     except KeyError:
                         # Need one cycle to calculate
-                        self.__rate_last_times[gen] = current_time
+                        self._rate_last_times[gen] = current_time
                         pass
 
                 func_handlers = self._async_handlers[gen]
