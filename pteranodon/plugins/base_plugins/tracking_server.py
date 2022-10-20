@@ -20,16 +20,14 @@ class TrackingServer(AbstractBasePlugin):
         self._tracking_active: Optional[bool] = None
 
         self._submit_simple_generator(
-            self._system.tracking_server.tracking_point_command()
+            self._system.tracking_server.tracking_point_command
         )
         self._submit_simple_generator(
-            self._system.tracking_server.tracking_rectangle_command()
+            self._system.tracking_server.tracking_rectangle_command
         )
-        self._submit_simple_generator(
-            self._system.tracking_server.tracking_off_command()
-        )
+        self._submit_simple_generator(self._system.tracking_server.tracking_off_command)
 
-        @self.register_handler(self._system.tracking_server.tracking_off_command())
+        @self._register_handler(self._system.tracking_server.tracking_off_command)
         def _update_tracking_off_command(dummy) -> None:
             self._tracking_active = False
             if dummy != self._dummy:

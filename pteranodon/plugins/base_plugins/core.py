@@ -14,7 +14,7 @@ class Core(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("core", system, loop, logger)
 
-        self._submit_simple_generator(self._system.core.connection_state())
+        self._submit_simple_generator(self._system.core.connection_state)
 
         self._end_init()
 
@@ -35,4 +35,4 @@ class Core(AbstractBasePlugin):
         Subscribe to 'connection state' updates
         :return: core.ConnectionState ; The current connection state
         """
-        return self._async_gen_data[self._system.core.connection_state()]
+        return self._async_gen_data[self._system.core.connection_state]

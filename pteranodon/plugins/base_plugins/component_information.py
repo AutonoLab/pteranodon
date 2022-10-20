@@ -24,9 +24,9 @@ class ComponentInformation(AbstractBasePlugin):
 
         self._float_param_update: Optional[FloatParamUpdate] = None
         self._submit_simple_generator(
-            self._system.component_information_server.float_param()
+            self._system.component_information_server.float_param
         )
-        self.register_handler(self._system.component_information_server.float_param())(
+        self._register_handler(self._system.component_information_server.float_param)(
             self._update_float_param
         )
 

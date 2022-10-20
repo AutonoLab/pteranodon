@@ -17,7 +17,6 @@ from typing import (
     Coroutine,
     Dict,
     List,
-    AsyncGenerator,
 )
 
 
@@ -41,19 +40,19 @@ class AbstractPlugin(ABC):
         self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
-        self._async_gen_data: Dict[AsyncGenerator, Optional[Any]] = defaultdict(None)
-        self._async_handlers: Dict[AsyncGenerator, List[Callable]] = defaultdict(list)
-        self._async_rate_data: Dict[AsyncGenerator, float] = defaultdict(lambda: 1.0)
-        self.__rate_last_times: Dict[AsyncGenerator, float] = {}
+        self._async_gen_data: Dict[Callable, Optional[Any]] = defaultdict(lambda: None)
+        self._async_handlers: Dict[Callable, List[Callable]] = defaultdict(list)
+        self._async_rate_data: Dict[Callable, float] = defaultdict(lambda: 1.0)
+        self.__rate_last_times: Dict[Callable, float] = {}
 
         self._stopped = False
 
-    def register_handler(self, generator: AsyncGenerator):
+    def _register_handler(self, generator: Callable):
         """
-        Annotation to register a handler for a AsyncGenerator that is submitted via submit_simple_generator
+        Annotation to register a handler for an async generator that is submitted via submit_simple_generator
 
         :param generator: The generator to trigger the handler for
-        :type generator: AsyncGenerator
+        :type generator: Callable
         """
 
         def inner(func):
@@ -141,7 +140,7 @@ class AbstractPlugin(ABC):
 
     def _submit_simple_generator(
         self,
-        generator: AsyncGenerator,
+        generator: Callable,
         should_compute_rate: bool = False,
         retry_time: float = 0.5,
     ) -> futures.Future:
@@ -149,8 +148,8 @@ class AbstractPlugin(ABC):
         Wrapper for the body expressions of the async generators used to read MAVSDK data.
          This function will automatically handle the saving of the generated data, any added handlers, and rate calculations.
          _submit_generator does not add this functionality.
-        :param generator: The AsyncGenerator to submit and handle
-        :type generator: AsyncGenerator
+        :param generator: The Callable to submit and handle
+        :type generator: Callable
         :param should_compute_rate: Whether the rate of updates should be computed for this property (in Hz)
         :type should_compute_rate: bool
         :param retry_time: Attempts to stall retry of body for this amount of time (ms)
@@ -158,15 +157,28 @@ class AbstractPlugin(ABC):
         :return: The future created from the submit_coroutine call of wrap_generator
         """
 
-        self._async_gen_data[generator] = None
-        self._async_rate_data[generator] = 1.0
-        self._async_handlers[generator] = []
-
-        async def async_gen_wrapper(
-            gen: AsyncGenerator, comp_rate: bool = False
-        ) -> None:
-            async for data in gen:
+        async def async_gen_wrapper(gen: Callable, comp_rate: bool = False) -> None:
+            async for data in gen():
                 self._async_gen_data[gen] = data
+
+                if comp_rate:
+                    current_time = time.perf_counter()
+                    try:
+
+                        prev_time = self.__rate_last_times[gen]
+
+                        delta_secs = current_time - prev_time
+                        # Average the current value and the last value if they are close enough to account for minor variations
+                        new_hz = 1 / delta_secs
+                        current_hz = self._async_rate_data[gen]
+                        if abs(new_hz - current_hz) <= 0.5:
+                            new_hz = (new_hz + current_hz) / 2
+                        self._async_rate_data[gen] = new_hz
+
+                    except KeyError:
+                        # Need one cycle to calculate
+                        self.__rate_last_times[gen] = current_time
+                        pass
 
                 func_handlers = self._async_handlers[gen]
                 if len(func_handlers) > 0:
@@ -185,23 +197,11 @@ class AbstractPlugin(ABC):
 
                         if len(sig.parameters.keys()) in [1, 2]:
                             handler(*args_list)
+                            continue
 
-                if comp_rate:
-                    current_time = time.perf_counter()
-                    try:
-                        # Need one cycle to calculate
-                        prev_time = self.__rate_last_times[gen]
-                    except KeyError:
-                        self.__rate_last_times[gen] = current_time
-                        continue
-
-                    delta_secs = current_time - prev_time
-                    # Average the current value and the last value if they are close enough to account for minor variations
-                    new_hz = 1 / delta_secs
-                    current_hz = self._async_rate_data[gen]
-                    if abs(new_hz - current_hz) <= 0.5:
-                        new_hz = (new_hz + current_hz) / 2
-                    self._async_rate_data[gen] = new_hz
+                        self._logger.error(
+                            f"Could not run handler ({handler.__qualname__}) for async generator ({gen.__qualname__})! Too many arguments!"
+                        )
 
         return self._submit_generator(
             functools.partial(async_gen_wrapper, generator, should_compute_rate),

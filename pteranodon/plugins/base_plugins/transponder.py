@@ -14,7 +14,7 @@ class Transponder(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("transponder", system, loop, logger)
 
-        self._submit_simple_generator(self._system.transponder.transponder())
+        self._submit_simple_generator(self._system.transponder.transponder)
 
         self._end_init()
 
@@ -31,4 +31,4 @@ class Transponder(AbstractBasePlugin):
         Subscribe to transponder updates
         :return: transponder.AdsbVehicle ; The next transponder detection
         """
-        return self._async_gen_data[self._system.transponder.transponder()]
+        return self._async_gen_data[self._system.transponder.transponder]

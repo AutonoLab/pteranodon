@@ -15,8 +15,8 @@ class MissionRaw(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw", system, loop, logger)
 
-        self._submit_simple_generator(self._system.mission_raw.mission_changed())
-        self._submit_simple_generator(self._system.mission_raw.mission_progress())
+        self._submit_simple_generator(self._system.mission_raw.mission_changed)
+        self._submit_simple_generator(self._system.mission_raw.mission_progress)
 
         self._end_init()
 
@@ -89,14 +89,14 @@ class MissionRaw(AbstractBasePlugin):
         :return: boolean ; returns True if the ground station has been uploaded or changed by a
         ground station or companion computer, False otherwise
         """
-        return self._async_gen_data[self._system.mission_raw.mission_changed()]
+        return self._async_gen_data[self._system.mission_raw.mission_changed]
 
     def mission_progress(self) -> Optional[mission_raw.MissionProgress]:
         """
         Get the current mission progress
         :return: mission_raw.MissionProgress ; returns the current mission progress
         """
-        return self._async_gen_data[self._system.mission_raw.mission_progress()]
+        return self._async_gen_data[self._system.mission_raw.mission_progress]
 
     def pause_mission(self):
         """

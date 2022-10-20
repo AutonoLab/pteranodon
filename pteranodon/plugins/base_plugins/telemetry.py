@@ -58,7 +58,7 @@ class Telemetry(AbstractBasePlugin):
 
     def _start_async_gen_telemetry(self) -> None:
         for _, func in self._async_gen_methods.items():
-            self._submit_simple_generator(func(), should_compute_rate=True)
+            self._submit_simple_generator(func, should_compute_rate=True)
 
     def _get_getter_data(self, func_name: str, timeout: float) -> Any:
 
@@ -102,7 +102,7 @@ class Telemetry(AbstractBasePlugin):
         Get the next actuator control target
         :return: telemetry.ActuatorControlTarget ; the next control target
         """
-        return self._async_gen_data[self._system.telemetry.actuator_control_target()]
+        return self._async_gen_data[self._system.telemetry.actuator_control_target]
 
     @property
     def actuator_output_staus(self) -> Optional[telemetry.ActuatorOutputStatus]:
@@ -110,7 +110,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘actuator output status’ updates.
         :return: telemetry.ActuatorOutputStatus ; The next actuator output status
         """
-        return self._async_gen_data[self._system.telemetry.actuator_output_status()]
+        return self._async_gen_data[self._system.telemetry.actuator_output_status]
 
     @property
     def armed(self) -> Optional[bool]:
@@ -118,7 +118,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to armed updates.
         :return: bool ; The next ‘armed’ state
         """
-        return self._async_gen_data[self._system.telemetry.armed()]
+        return self._async_gen_data[self._system.telemetry.armed]
 
     @property
     def attitude_angular_velocity_body(self) -> Optional[telemetry.AngularVelocityBody]:
@@ -136,7 +136,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘attitude’ updates (Euler).
         :return: telemetry.EulerAngle ; The next attitude (Euler)
         """
-        return self._async_gen_data[self._system.telemetry.attitude_euler()]
+        return self._async_gen_data[self._system.telemetry.attitude_euler]
 
     @property
     def attitude_quaternion(self) -> Optional[telemetry.Quaternion]:
@@ -144,7 +144,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘attitude’ updates (quaternion).
         :return: telemetry.Quaternion ;  The next attitude (quaternion)
         """
-        return self._async_gen_data[self._system.telemetry.attitude_quaternion()]
+        return self._async_gen_data[self._system.telemetry.attitude_quaternion]
 
     @property
     def battery(self) -> Optional[telemetry.Battery]:
@@ -152,7 +152,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘battery’ updates.
         :return: telemetry.Battery ; The next ‘battery’ state
         """
-        return self._async_gen_data[self._system.telemetry.battery()]
+        return self._async_gen_data[self._system.telemetry.battery]
 
     @property
     def camera_attitude_euler(self) -> Optional[telemetry.EulerAngle]:
@@ -160,7 +160,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘camera attitude’ updates (Euler).
         :return: telemetry.EulerAngle ; The next camera attitude (Euler)
         """
-        return self._async_gen_data[self._system.telemetry.camera_attitude_euler()]
+        return self._async_gen_data[self._system.telemetry.camera_attitude_euler]
 
     @property
     def camera_attitude_quaternion(self) -> Optional[telemetry.Quaternion]:
@@ -168,7 +168,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘camera attitude’ updates (quaternion).
         :return: telemetry.Quaternion ; The next camera attitude (quaternion)
         """
-        return self._async_gen_data[self._system.telemetry.camera_attitude_quaternion()]
+        return self._async_gen_data[self._system.telemetry.camera_attitude_quaternion]
 
     @property
     def distance_sensor(self) -> Optional[telemetry.DistanceSensor]:
@@ -176,7 +176,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘Distance Sensor’ updates.
         :return: telemetry.DistanceSensor ; The next Distance Sensor status
         """
-        return self._async_gen_data[self._system.telemetry.distance_sensor()]
+        return self._async_gen_data[self._system.telemetry.distance_sensor]
 
     @property
     def fixedwing_metrics(self) -> Optional[telemetry.FixedwingMetrics]:
@@ -184,7 +184,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘fixedwing metrics’ updates.
         :return: telemetry.FixedwingMetrics ; The next fixedwing metrics
         """
-        return self._async_gen_data[self._system.telemetry.fixedwing_metrics()]
+        return self._async_gen_data[self._system.telemetry.fixedwing_metrics]
 
     @property
     def flight_mode(self) -> Optional[telemetry.FlightMode]:
@@ -192,7 +192,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘flight mode’ updates.
         :return: telemetry.FlightMode ; The next flight mode
         """
-        return self._async_gen_data[self._system.telemetry.flight_mode()]
+        return self._async_gen_data[self._system.telemetry.flight_mode]
 
     @property
     def gps_info(self) -> Optional[telemetry.GpsInfo]:
@@ -200,7 +200,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘GPS info’ updates.
         :return: telemetry.GpsInfo ; The next ‘GPS info’ state
         """
-        return self._async_gen_data[self._system.telemetry.gps_info()]
+        return self._async_gen_data[self._system.telemetry.gps_info]
 
     @property
     def ground_truth(self) -> Optional[telemetry.GroundTruth]:
@@ -208,7 +208,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘ground truth’ updates.
         :return: telemetry.GroundTruth ; Ground truth position information available in simulation
         """
-        return self._async_gen_data[self._system.telemetry.ground_truth()]
+        return self._async_gen_data[self._system.telemetry.ground_truth]
 
     @property
     def heading(self) -> Optional[telemetry.Heading]:
@@ -216,7 +216,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘Heading’ updates.
         :return: telemetry.Heading ; The next heading (yaw) in degrees
         """
-        return self._async_gen_data[self._system.telemetry.heading()]
+        return self._async_gen_data[self._system.telemetry.heading]
 
     @property
     def health(self) -> Optional[telemetry.Health]:
@@ -224,7 +224,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘health’ updates.
         :return: telemetry.Health ; The next ‘health’ state
         """
-        return self._async_gen_data[self._system.telemetry.health()]
+        return self._async_gen_data[self._system.telemetry.health]
 
     @property
     def health_all_ok(self) -> Optional[bool]:
@@ -232,7 +232,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘HealthAllOk’ updates
         :return: bool ; The next ‘health all ok’ status
         """
-        return self._async_gen_data[self._system.telemetry.health_all_ok()]
+        return self._async_gen_data[self._system.telemetry.health_all_ok]
 
     @property
     def home(self) -> Optional[telemetry.Position]:
@@ -240,7 +240,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘home position’ updates.
         :return: telemetry.Position ; The next home position
         """
-        return self._async_gen_data[self._system.telemetry.home()]
+        return self._async_gen_data[self._system.telemetry.home]
 
     @property
     def imu(self) -> Optional[telemetry.Imu]:
@@ -248,7 +248,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘IMU’ updates (in SI units in NED body frame).
         :return: telemetry.Imu ; The next IMU status
         """
-        return self._async_gen_data[self._system.telemetry.imu()]
+        return self._async_gen_data[self._system.telemetry.imu]
 
     @property
     def in_air(self) -> Optional[bool]:
@@ -256,7 +256,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to in-air updates.
         :return: bool ; The next ‘in-air’ state
         """
-        return self._async_gen_data[self._system.telemetry.in_air()]
+        return self._async_gen_data[self._system.telemetry.in_air]
 
     @property
     def landed_state(self) -> Optional[telemetry.LandedState]:
@@ -264,7 +264,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to landed state updates
         :return: telemetry.LandedState ; The next ‘landed’ state
         """
-        return self._async_gen_data[self._system.telemetry.landed_state()]
+        return self._async_gen_data[self._system.telemetry.landed_state]
 
     @property
     def odometry(self) -> Optional[telemetry.Odometry]:
@@ -272,7 +272,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘odometry’ updates.
         :return: telemetry.Odometry ; The next odometry status
         """
-        return self._async_gen_data[self._system.telemetry.odometry()]
+        return self._async_gen_data[self._system.telemetry.odometry]
 
     @property
     def position(self) -> Optional[telemetry.Position]:
@@ -280,7 +280,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘position’ updates.
         :return: telemetry.Position ; The next position
         """
-        return self._async_gen_data[self._system.telemetry.position()]
+        return self._async_gen_data[self._system.telemetry.position]
 
     @property
     def position_velocity_ned(self) -> Optional[telemetry.PositionVelocityNed]:
@@ -288,7 +288,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘position velocity’ updates.
         :return: telemetry.PositionVelocityNed ; The next position and velocity status
         """
-        return self._async_gen_data[self._system.telemetry.position_velocity_ned()]
+        return self._async_gen_data[self._system.telemetry.position_velocity_ned]
 
     @property
     def raw_gps(self) -> Optional[telemetry.RawGps]:
@@ -297,7 +297,7 @@ class Telemetry(AbstractBasePlugin):
         :return: telemetry.RawGps ; The next ‘Raw GPS’ state. Warning: this is an advanced feature, use Position updates
         to get the location of the drone!
         """
-        return self._async_gen_data[self._system.telemetry.raw_gps()]
+        return self._async_gen_data[self._system.telemetry.raw_gps]
 
     @property
     def raw_imu(self) -> Optional[telemetry.Imu]:
@@ -305,7 +305,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘Raw IMU’ updates.
         :return: telemetry.Imu ; The next raw IMU status
         """
-        return self._async_gen_data[self._system.telemetry.raw_imu()]
+        return self._async_gen_data[self._system.telemetry.raw_imu]
 
     @property
     def rc_status(self) -> Optional[telemetry.RcStatus]:
@@ -313,7 +313,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘RC status’ updates.
         :return: telemetry.RcStatus ; The next RC status
         """
-        return self._async_gen_data[self._system.telemetry.rc_status()]
+        return self._async_gen_data[self._system.telemetry.rc_status]
 
     @property
     def scaled_imu(self) -> Optional[telemetry.Imu]:
@@ -321,7 +321,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘Scaled IMU’ updates.
         :return: telemetry.Imu ; The next scaled IMU status
         """
-        return self._async_gen_data[self._system.telemetry.scaled_imu()]
+        return self._async_gen_data[self._system.telemetry.scaled_imu]
 
     @property
     def scaled_pressure(self) -> Optional[telemetry.ScaledPressure]:
@@ -329,7 +329,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘Scaled Pressure’ updates.
         :return: telemetry.ScaledPressure ; The next scaled pressure status
         """
-        return self._async_gen_data[self._system.telemetry.scaled_pressure()]
+        return self._async_gen_data[self._system.telemetry.scaled_pressure]
 
     @property
     def status_text(self) -> Optional[telemetry.StatusText]:
@@ -337,7 +337,7 @@ class Telemetry(AbstractBasePlugin):
         Subscribe to ‘status text’ updates.
         :return: telemetry.StatusText ; Status text information type
         """
-        return self._async_gen_data[self._system.telemetry.status_text()]
+        return self._async_gen_data[self._system.telemetry.status_text]
 
     @property
     def unix_epoch_time(self) -> Optional[int]:
@@ -345,7 +345,7 @@ class Telemetry(AbstractBasePlugin):
         Returns the current unix epoch time
         :return: int ; unix epoch time
         """
-        return self._async_gen_data[self._system.telemetry.unix_epoch_time()]
+        return self._async_gen_data[self._system.telemetry.unix_epoch_time]
 
     @property
     def velocity_ned(self) -> Optional[telemetry.VelocityNed]:
@@ -353,7 +353,7 @@ class Telemetry(AbstractBasePlugin):
         Returns the Velocity in NED coordinate
         :return: telemetry.VelocityNed ; Velocity in NED coordinates
         """
-        return self._async_gen_data[self._system.telemetry.velocity_ned()]
+        return self._async_gen_data[self._system.telemetry.velocity_ned]
 
     @property
     def vtol_state(self) -> Optional[telemetry.VtolState]:
@@ -361,7 +361,7 @@ class Telemetry(AbstractBasePlugin):
         Returns the vtol state
         :return: telemetry.VtolState ; Enumeration of the vtol state
         """
-        return self._async_gen_data[self._system.telemetry.vtol_state()]
+        return self._async_gen_data[self._system.telemetry.vtol_state]
 
     # rate setter methods
     # ==========================================================================================
@@ -556,7 +556,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'actuator control target' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.actuator_control_target()]
+        return self._async_rate_data[self._system.telemetry.actuator_control_target]
 
     def get_rate_actuator_output_status(self) -> float:
         """
@@ -564,7 +564,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'actuator output status' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.actuator_output_status()]
+        return self._async_rate_data[self._system.telemetry.actuator_output_status]
 
     def get_rate_attitude(self) -> float:
         """
@@ -572,8 +572,8 @@ class Telemetry(AbstractBasePlugin):
         :return: 'attitude' updates rate in Hertz
         :rtype: float
         """
-        euler = self._async_rate_data[self._system.telemetry.attitude_euler()]
-        quat = self._async_rate_data[self._system.telemetry.attitude_quaternion()]
+        euler = self._async_rate_data[self._system.telemetry.attitude_euler]
+        quat = self._async_rate_data[self._system.telemetry.attitude_quaternion]
         return (euler + quat) / 2  # They should be the same so just average them
 
     def get_rate_battery(self) -> float:
@@ -582,7 +582,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'battery' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.battery()]
+        return self._async_rate_data[self._system.telemetry.battery]
 
     def get_rate_camera_attitude(self) -> float:
         """
@@ -590,7 +590,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'camera attitude' updates rate in Hertz
         :rtype: float
         """
-        euler = self._async_rate_data[self._system.telemetry.camera_attitude_euler()]
+        euler = self._async_rate_data[self._system.telemetry.camera_attitude_euler]
         quat = self._async_rate_data[
             self._system.telemetry.camera_attitude_quaternion()
         ]
@@ -602,7 +602,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'distance sensor' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.distance_sensor()]
+        return self._async_rate_data[self._system.telemetry.distance_sensor]
 
     def get_rate_fixedwing_metrics(self) -> float:
         """
@@ -610,7 +610,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'fixedwing metrics' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.fixedwing_metrics()]
+        return self._async_rate_data[self._system.telemetry.fixedwing_metrics]
 
     def get_rate_gps_info(self) -> float:
         """
@@ -618,7 +618,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'GPS info' updates rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.gps_info()]
+        return self._async_rate_data[self._system.telemetry.gps_info]
 
     def get_rate_ground_truth(self) -> float:
         """
@@ -626,7 +626,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'ground truth' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.ground_truth()]
+        return self._async_rate_data[self._system.telemetry.ground_truth]
 
     def get_rate_home(self) -> float:
         """
@@ -634,7 +634,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'home position' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.home()]
+        return self._async_rate_data[self._system.telemetry.home]
 
     def get_rate_imu(self) -> float:
         """
@@ -642,7 +642,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'IMU' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.imu()]
+        return self._async_rate_data[self._system.telemetry.imu]
 
     def get_rate_in_air(self) -> float:
         """
@@ -650,7 +650,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'in-air' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.in_air()]
+        return self._async_rate_data[self._system.telemetry.in_air]
 
     def get_rate_landed_state(self) -> float:
         """
@@ -658,7 +658,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'landed-state' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.landed_state()]
+        return self._async_rate_data[self._system.telemetry.landed_state]
 
     def get_rate_odometry(self) -> float:
         """
@@ -666,7 +666,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'odometry' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.odometry()]
+        return self._async_rate_data[self._system.telemetry.odometry]
 
     def get_rate_position(self) -> float:
         """
@@ -674,7 +674,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'position' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.position()]
+        return self._async_rate_data[self._system.telemetry.position]
 
     def get_rate_position_velocity_ned(self) -> float:
         """
@@ -682,7 +682,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'position velocity' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.position_velocity_ned()]
+        return self._async_rate_data[self._system.telemetry.position_velocity_ned]
 
     def get_rate_raw_imu(self) -> float:
         """
@@ -690,7 +690,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'Raw IMU' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.raw_imu()]
+        return self._async_rate_data[self._system.telemetry.raw_imu]
 
     def get_rate_rc_status(self) -> float:
         """
@@ -698,7 +698,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'RC status' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.rc_status()]
+        return self._async_rate_data[self._system.telemetry.rc_status]
 
     def get_rate_scaled_imu(self) -> float:
         """
@@ -706,7 +706,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'scaled IMU' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.scaled_imu()]
+        return self._async_rate_data[self._system.telemetry.scaled_imu]
 
     def get_rate_unix_epoch_time(self) -> float:
         """
@@ -714,7 +714,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'unix epoch time' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.unix_epoch_time()]
+        return self._async_rate_data[self._system.telemetry.unix_epoch_time]
 
     def get_rate_velocity_ned(self) -> float:
         """
@@ -722,7 +722,7 @@ class Telemetry(AbstractBasePlugin):
         :return: 'ground speed' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.velocity_ned()]
+        return self._async_rate_data[self._system.telemetry.velocity_ned]
 
     def get_rate_vtol_state(self) -> float:
         """
@@ -730,4 +730,4 @@ class Telemetry(AbstractBasePlugin):
         :return: 'VTOL state' update rate in Hertz
         :rtype: float
         """
-        return self._async_rate_data[self._system.telemetry.vtol_state()]
+        return self._async_rate_data[self._system.telemetry.vtol_state]

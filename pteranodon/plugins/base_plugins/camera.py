@@ -31,18 +31,18 @@ class Camera(AbstractBasePlugin):
         self._submit_coroutine(self._update_possible_setting_opts())
 
         # Tasks of subscribed properties
-        self._submit_simple_generator(self._system.camera.capture_info())
-        self._submit_simple_generator(self._system.camera.information())
-        self._submit_simple_generator(self._system.camera.video_stream_info())
+        self._submit_simple_generator(self._system.camera.capture_info)
+        self._submit_simple_generator(self._system.camera.information)
+        self._submit_simple_generator(self._system.camera.video_stream_info)
 
-        self._submit_simple_generator(self._system.camera.status())
-        self._submit_simple_generator(self._system.camera.mode())
+        self._submit_simple_generator(self._system.camera.status)
+        self._submit_simple_generator(self._system.camera.mode)
 
-        @self.register_handler(self._system.camera.status())
+        @self._register_handler(self._system.camera.status)
         def _update_camera_status(status):
             self._status = status
 
-        @self.register_handler(self._system.camera.mode())
+        @self._register_handler(self._system.camera.mode)
         def _update_mode(mode):
             self._mode = mode
 
@@ -227,6 +227,8 @@ class Camera(AbstractBasePlugin):
         """
         List photos available on the camera.
 
+        :param timeout:
+        :type timeout:
         :param photos_range: Which photos should be listed (all or since connection)
         :type photos_range: camera.PhotosRange
         :return: List of capture infos (representing the photos)
@@ -249,7 +251,7 @@ class Camera(AbstractBasePlugin):
         :return: The current capture information
         :rtype: Optional[camera.CaptureInfo]
         """
-        return self._async_gen_data[self._system.camera.capture_info()]
+        return self._async_gen_data[self._system.camera.capture_info]
 
     @property
     def information(self) -> Optional[camera.Information]:
@@ -257,7 +259,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera information
         :rtype: Optional[camera.Information]
         """
-        return self._async_gen_data[self._system.camera.information()]
+        return self._async_gen_data[self._system.camera.information]
 
     @property
     def mode(self) -> Optional[camera.Mode]:
@@ -273,7 +275,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera status
         :rtype: Optional[camera.Status]
         """
-        return self._async_gen_data[self._system.camera.status()]
+        return self._async_gen_data[self._system.camera.status]
 
     @property
     def video_stream_info(self) -> Optional[camera.VideoStreamInfo]:
@@ -281,7 +283,7 @@ class Camera(AbstractBasePlugin):
         :return: The current video stream information
         :rtype: Optional[camera.VideoStreamInfo]
         """
-        return self._async_gen_data[self._system.camera.video_stream_info()]
+        return self._async_gen_data[self._system.camera.video_stream_info]
 
     @property
     def possible_settings_options(self) -> List[camera.SettingOptions]:

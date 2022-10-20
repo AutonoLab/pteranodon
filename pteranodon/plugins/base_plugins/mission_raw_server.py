@@ -16,13 +16,11 @@ class MissionRawServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
 
-        self._submit_simple_generator(self._system.mission_raw_server.clear_all())
+        self._submit_simple_generator(self._system.mission_raw_server.clear_all)
         self._submit_simple_generator(
-            self._system.mission_raw_server.current_item_changed()
+            self._system.mission_raw_server.current_item_changed
         )
-        self._submit_simple_generator(
-            self._system.mission_raw_server.incoming_mission()
-        )
+        self._submit_simple_generator(self._system.mission_raw_server.incoming_mission)
 
         self._end_init()
 
@@ -31,14 +29,14 @@ class MissionRawServer(AbstractBasePlugin):
         """
         Returns current mission plan
         """
-        return self._async_gen_data[self._system.mission_raw_server.incoming_mission()]
+        return self._async_gen_data[self._system.mission_raw_server.incoming_mission]
 
     @property
     def clear_type(self) -> Optional[int]:
         """
         Returns last clear_type received
         """
-        return self._async_gen_data[self._system.mission_raw_server.clear_all()]
+        return self._async_gen_data[self._system.mission_raw_server.clear_all]
 
     @property
     def mission_item(self) -> Optional[mission_raw_server.MissionItem]:

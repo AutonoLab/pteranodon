@@ -19,7 +19,7 @@ class Mission(AbstractBasePlugin):
         self._enable_return_to_land = None
         self._mission_plan = None
         self._loop.run_until_complete(self._download_mission_with_progress())
-        self._submit_simple_generator(self._system.mission.mission_progress())
+        self._submit_simple_generator(self._system.mission.mission_progress)
 
         self._end_init()
 
@@ -143,4 +143,4 @@ class Mission(AbstractBasePlugin):
         returns the current mission progress
         :return: mission.MissionProgress
         """
-        return self._async_gen_data[self._system.mission.mission_progress()]
+        return self._async_gen_data[self._system.mission.mission_progress]

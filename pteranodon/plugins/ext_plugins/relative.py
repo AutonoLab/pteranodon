@@ -36,7 +36,9 @@ class Relative(AbstractCustomPlugin):
         self._telemetry = self._base_plugins["telemetry"]
 
         # Method 1
-        @self._telemetry.register_handler(self._system.telemetry.battery())
+        @self._telemetry._register_handler(  # pylint: disable=protected-access
+            self._system.telemetry.battery
+        )
         def test(battery: Battery):
             print("Subbed battery data")
             print(battery)
@@ -66,10 +68,12 @@ class Relative(AbstractCustomPlugin):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
+        :param test_min:
+        :type test_min:
         :param front: Relative distance in front of drone
         :param right: Relative distance to the right of drone
         :param down: Relative distance below the drone
-        :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
+        :param on_dimensions: A tuple of 3 boolean values. In order, they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
         """
         self._submit_coroutine(
@@ -120,7 +124,7 @@ class Relative(AbstractCustomPlugin):
         # get angle of yaw
         yaw = degrees(arctan2(relative_east, relative_north))
 
-        # add offset to curent position
+        # add offset to current position
         north = relative_north + current_pos.north_m
         east = relative_east + current_pos.east_m
         down = down + current_pos.down_m

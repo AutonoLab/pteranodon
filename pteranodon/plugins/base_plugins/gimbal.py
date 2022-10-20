@@ -15,7 +15,7 @@ class Gimbal(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 
-        self._submit_simple_generator(self._system.gimbal.control())
+        self._submit_simple_generator(self._system.gimbal.control)
 
         self._end_init()
 
@@ -25,7 +25,7 @@ class Gimbal(AbstractBasePlugin):
 
         :return: the current control status
         """
-        return self._async_gen_data[self._system.gimbal.control()]
+        return self._async_gen_data[self._system.gimbal.control]
 
     def release_control(self) -> None:
         """

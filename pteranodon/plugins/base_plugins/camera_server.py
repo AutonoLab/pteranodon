@@ -31,8 +31,8 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._submit_simple_generator(self._system.camera_server.take_photo())
-        self.register_handler(self._system.camera_server.take_photo())(self._take_photo)
+        self._submit_simple_generator(self._system.camera_server.take_photo)
+        self._register_handler(self._system.camera_server.take_photo)(self._take_photo)
 
         self._end_init()
 

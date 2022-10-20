@@ -18,9 +18,9 @@ class Shell(AbstractBasePlugin):
         self._feedback_history: List[str] = []
         self._cmd_history: List[str] = []
 
-        self._submit_simple_generator(self._system.shell.receive())
+        self._submit_simple_generator(self._system.shell.receive)
 
-        @self.register_handler(self._system.shell.receive())
+        @self._register_handler(self._system.shell.receive)
         def _update_feedback(data):
             self._feedback_history.append(data)
 

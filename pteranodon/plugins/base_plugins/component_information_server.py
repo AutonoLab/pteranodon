@@ -17,7 +17,7 @@ class ComponentInformationServer(AbstractBasePlugin):
 
         self._float_param_update = None
         self._submit_simple_generator(
-            self._system.component_information_server.float_param()
+            self._system.component_information_server.float_param
         )
 
         self._end_init()

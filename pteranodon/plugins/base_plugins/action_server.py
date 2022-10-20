@@ -15,13 +15,13 @@ class ActionServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("action_server", system, loop, logger)
 
-        self._submit_simple_generator(self._system.action_server.arm_disarm())
-        self._submit_simple_generator(self._system.action_server.flight_mode_change())
-        self._submit_simple_generator(self._system.action_server.land())
-        self._submit_simple_generator(self._system.action_server.reboot())
-        self._submit_simple_generator(self._system.action_server.shutdown())
-        self._submit_simple_generator(self._system.action_server.takeoff())
-        self._submit_simple_generator(self._system.action_server.terminate())
+        self._submit_simple_generator(self._system.action_server.arm_disarm)
+        self._submit_simple_generator(self._system.action_server.flight_mode_change)
+        self._submit_simple_generator(self._system.action_server.land)
+        self._submit_simple_generator(self._system.action_server.reboot)
+        self._submit_simple_generator(self._system.action_server.shutdown)
+        self._submit_simple_generator(self._system.action_server.takeoff)
+        self._submit_simple_generator(self._system.action_server.terminate)
 
         self._end_init()
 
@@ -30,28 +30,28 @@ class ActionServer(AbstractBasePlugin):
         returns the current arm_disarm value
         :return: action_server.ArmDisarm ; the current arm_disarm value
         """
-        return self._async_gen_data[self._system.action_server.arm_disarm()]
+        return self._async_gen_data[self._system.action_server.arm_disarm]
 
     def flight_mode_change(self) -> Optional[action_server.FlightMode]:
         """
         returns the current flight mode
         :return: action_server.FlightMode
         """
-        return self._async_gen_data[self._system.action_server.flight_mode_change()]
+        return self._async_gen_data[self._system.action_server.flight_mode_change]
 
     def land(self) -> Optional[bool]:
         """
         returns the boolean that explains if the vehicle is landing
         :return: bool ; True if the vehicle is landing, False otherwise
         """
-        return self._async_gen_data[self._system.action_server.land()]
+        return self._async_gen_data[self._system.action_server.land]
 
     def reboot(self) -> Optional[bool]:
         """
         returns the boolean that states if the vehicle is rebooting
         :return: bool ; True if the vehicle is rebooting, False otherwise
         """
-        return self._async_gen_data[self._system.action_server.reboot()]
+        return self._async_gen_data[self._system.action_server.reboot]
 
     def get_allowable_flight_modes(
         self, timeout: float = 1.0
@@ -132,18 +132,18 @@ class ActionServer(AbstractBasePlugin):
         returns if the vehicle is in the process of shutting down
         :return: bool ; True if the vehicle is shutting down, False otherwise
         """
-        return self._async_gen_data[self._system.action_server.shutdown()]
+        return self._async_gen_data[self._system.action_server.shutdown]
 
     def takeoff(self) -> Optional[bool]:
         """
         Returns if the vehicle is in the state of taking off
         :return: bool ; True if the vehicle is taking off, false otherwise
         """
-        return self._async_gen_data[self._system.action_server.takeoff()]
+        return self._async_gen_data[self._system.action_server.takeoff]
 
     def terminate(self) -> Optional[bool]:
         """
         Returns if the mission is being terminated
         :return: bool ; True if the mission is terminated, False othewise
         """
-        return self._async_gen_data[self._system.action_server.terminate()]
+        return self._async_gen_data[self._system.action_server.terminate]
