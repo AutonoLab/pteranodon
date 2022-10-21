@@ -5,12 +5,12 @@ from typing import Dict, Optional
 from collections import deque
 
 import numpy as np
-from mavsdk import System
+from mavsdk import System, telemetry
 
 from .abstract_custom_plugin import AbstractCustomPlugin
 
 
-class BatteryInfo(AbstractCustomPlugin):
+class Power(AbstractCustomPlugin):
     """
     Generates battery usage information
     """
@@ -23,16 +23,14 @@ class BatteryInfo(AbstractCustomPlugin):
         base_plugins: Dict,
         ext_args: Dict,
     ) -> None:
-        super().__init__(
-            "battery_information", system, loop, logger, base_plugins, ext_args
-        )
+        super().__init__("power", system, loop, logger, base_plugins, ext_args)
         # pulling plugins
         self._telemetry = self._base_plugins["telemetry"]
         self._param = self._base_plugins["param"]
 
         # pulling args
         if self._ext_args["battery_information"] is not None:
-            self._window_size = self._ext_args["battery_information"]
+            self._window_size = self._ext_args["power"]
 
         # Submitting Generators
         self._submit_generator(self._battery_updates)
@@ -62,10 +60,7 @@ class BatteryInfo(AbstractCustomPlugin):
 
     def _average_voltage(self, window) -> float:
         # Probably could be done with numpy mean with setting axes. Testing would need to encompass this file to tell
-        sum_voltage = 0
-        for batt_and_time in window:
-            sum_voltage += batt_and_time[0].voltage_v
-        return sum_voltage / self._window_size
+        return np.mean([b.voltage_v for b in list(window)])
 
     def battery_percent_usage_over_time(self) -> float:
         """
