@@ -5,7 +5,7 @@ from typing import Dict, Optional
 from collections import deque
 
 import numpy as np
-from mavsdk import System, telemetry
+from mavsdk import System
 
 from .abstract_custom_plugin import AbstractCustomPlugin
 
