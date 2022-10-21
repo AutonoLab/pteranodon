@@ -112,13 +112,8 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # build arguments for the extension plugins
-        self._ext_args = {**kwargs}
-
         # setup all plugins
-        self._plugins = PluginManager(
-            self._drone, self._loop, self._logger, self._ext_args, kwargs
-        )
+        self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
 
         # after connection run setup, then initialize loop, run teardown during cleanup phase
         self.setup()

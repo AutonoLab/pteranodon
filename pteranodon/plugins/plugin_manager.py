@@ -54,13 +54,11 @@ class PluginManager:
         loop: AbstractEventLoop,
         logger: Logger,
         ext_args: Dict,
-        custom_args: Dict,
     ) -> None:
         self._system = system
         self._loop = loop
         self._logger = logger
         self._ext_args = ext_args
-        self._custom_args = custom_args
 
         self._base_plugins: Dict[str, AbstractBasePlugin] = {}
         self._ext_plugins: Dict[str, AbstractExtensionPlugin] = {}
@@ -71,9 +69,6 @@ class PluginManager:
         # TODO: Gimbal, CameraServer, ComponentInformation, ComponentInformationServer # pylint: disable=fixme
         base_plugin_types: List[Type[AbstractBasePlugin]] = sorted(
             [
-                Param,
-                Mission,
-                # Resume alphabetical ordering here
                 ActionServer,
                 Action,
                 Calibration,
@@ -92,9 +87,11 @@ class PluginManager:
                 ManualControl,
                 MissionRawServer,
                 MissionRaw,
+                Mission,
                 Mocap,
                 Offboard,
                 ParamServer,
+                Param,
                 Rtk,
                 ServerUtility,
                 Shell,
@@ -156,7 +153,7 @@ class PluginManager:
         """
         new_plugin_obj: AbstractCustomPlugin
         if isinstance(new_plugin, type):
-            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_plugins, self._custom_args)  # type: ignore
+            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_plugins, self._ext_args)  # type: ignore
         else:
             new_plugin_obj = new_plugin
 
