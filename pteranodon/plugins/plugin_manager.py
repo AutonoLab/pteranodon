@@ -111,12 +111,18 @@ class PluginManager:
         for base_type in base_plugin_types:
             self._logger.info(f"Beginning setup of: {base_type} plugin")
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
+            if not base_plugin.ready:
+                self._logger.error(f"Plugin {base_plugin.name} is not ready after intialization!")
+                continue
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
                 setattr(self, base_plugin.name, base_plugin)
 
         for ext_type in ext_plugin_types:
             ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
+            if not ext_plugin.ready:
+                self._logger.error(f"Plugin {ext_plugin.name} is not ready after intialization!")
+                continue
             if not self._test_valid_plugin_name(ext_plugin.name):
                 self._ext_plugins[ext_plugin.name] = ext_plugin
                 setattr(self, ext_plugin.name, ext_plugin)

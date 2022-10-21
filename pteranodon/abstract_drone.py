@@ -399,6 +399,13 @@ class AbstractDrone(ABC):
 
     # NON-PLUGIN PROPERTIES
     @property
+    def system(self) -> System:
+        """
+        :return: The MAVSDK System instance
+        """
+        return self._drone
+
+    @property
     def logger(self) -> logging.Logger:
         """
         :return: The logger instance setup in the __init__ method of AbstractDrone

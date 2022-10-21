@@ -36,6 +36,7 @@ class AbstractPlugin(ABC):
         self._loop: AbstractEventLoop = loop
         self._logger: Logger = logger
 
+        self._ready: bool = False
         self._num_generators: int = 0
 
         self._future_cache: Deque[futures.Future] = deque()
@@ -76,6 +77,13 @@ class AbstractPlugin(ABC):
         """
         return self._num_generators
 
+    @property
+    def ready(self) -> bool:
+        """
+        :return: bool ; returns the number of generators
+        """
+        return self._ready
+
     def _end_init(self) -> None:
         """
         Method which should be called at the end of the __init__ method for each class which inherits this
@@ -90,6 +98,8 @@ class AbstractPlugin(ABC):
             if not func.startswith("_") and "register" in func and "handler" in func
         ]
         self._num_generators = len(register_methods)
+
+        self._ready = True
 
     def _future_callback(
         self, coroutine_name: str, is_gen: bool, future: futures.Future
@@ -308,6 +318,12 @@ class AbstractPlugin(ABC):
         Gets the current items in the results cache as a list
         """
         return list(self._result_cache)
+
+    def clear_results(self) -> None:
+        """
+        Clears the results cache
+        """
+        self._result_cache.clear()
 
     def get_newest_result(self) -> Any:
         """
