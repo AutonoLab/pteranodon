@@ -19,21 +19,32 @@ class Camera(AbstractBasePlugin):
         super().__init__("camera", system, loop, logger)
 
         self._current_camera_id: Optional[int] = None
-
-        self._capture_info: Optional[camera.CaptureInfo] = None
-        self._information: Optional[camera.Information] = None
-        self._mode: Optional[camera.Mode] = None
         self._status: Optional[camera.Status] = None
+        self._mode: Optional[camera.Mode] = None
+
         self._video_stream_info: Optional[camera.VideoStreamInfo] = None
         self._current_settings: List[camera.Setting] = []
         self._possible_setting_options: List[camera.SettingOptions] = []
 
+        # Only want to fetch the current settings and options once on init
+        self._submit_coroutine(self._update_current_settings())
+        self._submit_coroutine(self._update_possible_setting_opts())
+
         # Tasks of subscribed properties
-        self._submit_generator(self._update_capture_info)
-        self._submit_generator(self._update_information)
-        self._submit_generator(self._update_mode)
-        self._submit_generator(self._update_status)
-        self._submit_generator(self._update_vstream_info)
+        self._submit_simple_generator(self._system.camera.capture_info)
+        self._submit_simple_generator(self._system.camera.information)
+        self._submit_simple_generator(self._system.camera.video_stream_info)
+
+        self._submit_simple_generator(self._system.camera.status)
+        self._submit_simple_generator(self._system.camera.mode)
+
+        @self._register_handler(self._system.camera.status)
+        def _update_camera_status(status):
+            self._status = status
+
+        @self._register_handler(self._system.camera.mode)
+        def _update_mode(mode):
+            self._mode = mode
 
         self._end_init()
 
@@ -216,6 +227,8 @@ class Camera(AbstractBasePlugin):
         """
         List photos available on the camera.
 
+        :param timeout:
+        :type timeout:
         :param photos_range: Which photos should be listed (all or since connection)
         :type photos_range: camera.PhotosRange
         :return: List of capture infos (representing the photos)
@@ -238,7 +251,7 @@ class Camera(AbstractBasePlugin):
         :return: The current capture information
         :rtype: Optional[camera.CaptureInfo]
         """
-        return self._capture_info
+        return self._async_gen_data[self._system.camera.capture_info]
 
     @property
     def information(self) -> Optional[camera.Information]:
@@ -246,7 +259,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera information
         :rtype: Optional[camera.Information]
         """
-        return self._information
+        return self._async_gen_data[self._system.camera.information]
 
     @property
     def mode(self) -> Optional[camera.Mode]:
@@ -262,7 +275,7 @@ class Camera(AbstractBasePlugin):
         :return: The current camera status
         :rtype: Optional[camera.Status]
         """
-        return self._status
+        return self._async_gen_data[self._system.camera.status]
 
     @property
     def video_stream_info(self) -> Optional[camera.VideoStreamInfo]:
@@ -270,7 +283,7 @@ class Camera(AbstractBasePlugin):
         :return: The current video stream information
         :rtype: Optional[camera.VideoStreamInfo]
         """
-        return self._video_stream_info
+        return self._async_gen_data[self._system.camera.video_stream_info]
 
     @property
     def possible_settings_options(self) -> List[camera.SettingOptions]:
@@ -287,31 +300,6 @@ class Camera(AbstractBasePlugin):
         :rtype: List[camera.Setting]
         """
         return self._current_settings
-
-    async def _update_capture_info(self) -> None:
-        async for info in self._system.camera.capture_info():
-            if info != self._capture_info:
-                self._capture_info = info
-
-    async def _update_information(self) -> None:
-        async for info in self._system.camera.information():
-            if info != self._information:
-                self._information = info
-
-    async def _update_mode(self) -> None:
-        async for mode in self._system.camera.mode():
-            if mode != self._mode:
-                self._mode = mode
-
-    async def _update_status(self) -> None:
-        async for status in self._system.camera.status():
-            if status != self._status:
-                self._status = status
-
-    async def _update_vstream_info(self) -> None:
-        async for vstream_info in self._system.camera.video_stream_info():
-            if vstream_info != self._video_stream_info:
-                self._video_stream_info = vstream_info
 
     async def _update_current_settings(self) -> None:
         # If any of the settings do not have an option set (empty data), do update

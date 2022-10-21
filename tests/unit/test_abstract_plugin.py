@@ -149,5 +149,5 @@ def test_schedule(
 
     secs = end_time - start_time
     assert (
-        round(secs, 2) >= 4.99
+        round(secs, 2) >= 4.95
     ), f"Something went wrong! The coroutines should take at least 5 seconds to run but took {secs} seconds instead"

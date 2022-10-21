@@ -1,11 +1,24 @@
+import functools
 from abc import ABC
 import asyncio
 from asyncio import AbstractEventLoop
 from concurrent import futures
 from logging import Logger
-from collections import deque
+from collections import deque, defaultdict
 from functools import partial
-from typing import Tuple, Any, Callable, Optional, Deque, Coroutine
+import time
+from inspect import signature
+from typing import (
+    Tuple,
+    Any,
+    Callable,
+    Optional,
+    Deque,
+    Coroutine,
+    Dict,
+    List,
+)
+
 
 import grpc
 from mavsdk import System
@@ -27,7 +40,26 @@ class AbstractPlugin(ABC):
         self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
+        self._async_gen_data: Dict[Callable, Optional[Any]] = defaultdict(lambda: None)
+        self._async_handlers: Dict[Callable, List[Callable]] = defaultdict(list)
+        self._async_rate_data: Dict[Callable, float] = defaultdict(lambda: 1.0)
+        self._rate_last_times: Dict[Callable, float] = {}
+
         self._stopped = False
+
+    def _register_handler(self, generator: Callable):
+        """
+        Annotation to register a handler for an async generator that is submitted via submit_simple_generator
+
+        :param generator: The generator to trigger the handler for
+        :type generator: Callable
+        """
+
+        def inner(func):
+            self._async_handlers[generator].append(func)
+            return func
+
+        return inner
 
     @property
     def name(self) -> str:
@@ -105,6 +137,76 @@ class AbstractPlugin(ABC):
             new_future.add_done_callback(callback)
         self._future_cache.append(new_future)
         return new_future
+
+    def _submit_simple_generator(
+        self,
+        generator: Callable,
+        should_compute_rate: bool = False,
+        retry_time: float = 0.5,
+    ) -> futures.Future:
+        """
+        Wrapper for the body expressions of the async generators used to read MAVSDK data.
+         This function will automatically handle the saving of the generated data, any added handlers, and rate calculations.
+         _submit_generator does not add this functionality.
+        :param generator: The Callable to submit and handle
+        :type generator: Callable
+        :param should_compute_rate: Whether the rate of updates should be computed for this property (in Hz)
+        :type should_compute_rate: bool
+        :param retry_time: Attempts to stall retry of body for this amount of time (ms)
+        :type retry_time: float
+        :return: The future created from the submit_coroutine call of wrap_generator
+        """
+
+        async def async_gen_wrapper(gen: Callable, comp_rate: bool = False) -> None:
+            async for data in gen():
+                self._async_gen_data[gen] = data
+
+                if comp_rate:
+                    current_time = time.perf_counter()
+                    try:
+
+                        prev_time = self._rate_last_times[gen]
+
+                        delta_secs = current_time - prev_time
+                        # Average the current value and the last value if they are close enough to account for minor variations
+                        new_hz = 1 / delta_secs
+                        current_hz = self._async_rate_data[gen]
+                        if abs(new_hz - current_hz) <= 0.5:
+                            new_hz = (new_hz + current_hz) / 2
+                        self._async_rate_data[gen] = new_hz
+
+                    except KeyError:
+                        # Need one cycle to calculate
+                        self._rate_last_times[gen] = current_time
+                        pass
+
+                func_handlers = self._async_handlers[gen]
+                if len(func_handlers) > 0:
+                    for handler in func_handlers:
+                        sig = signature(handler)
+                        params = list(sig.parameters.keys())
+
+                        if len(params) <= 0:
+                            handler()
+                            continue
+
+                        # Some handlers may use "self", don't forget to include it.
+                        args_list = [data]
+                        if params[0] == "self":
+                            args_list.insert(0, self)
+
+                        if len(sig.parameters.keys()) in [1, 2]:
+                            handler(*args_list)
+                            continue
+
+                        self._logger.error(
+                            f"Could not run handler ({handler.__qualname__}) for async generator ({gen.__qualname__})! Too many arguments!"
+                        )
+
+        return self._submit_generator(
+            functools.partial(async_gen_wrapper, generator, should_compute_rate),
+            retry_time=retry_time,
+        )
 
     def _submit_generator(
         self, generator: Callable, retry_time: float = 0.5
