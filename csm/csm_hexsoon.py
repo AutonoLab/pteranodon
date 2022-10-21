@@ -3,6 +3,7 @@ import time
 import numpy as np
 
 from pteranodon import AbstractDrone
+from pteranodon.utils import timeit
 from RealSense import RealSense
 from hlca import FrameProcessor
 
@@ -37,7 +38,8 @@ class CSM_Hexsoon(AbstractDrone):
 
     def setup(self):
         pass
-
+    
+    @timeit
     def loop(self):
         self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
         motion_vector = self.fp.processFrame(self.frame, display=False)

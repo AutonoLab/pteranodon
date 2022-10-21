@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Callable, Optional
 
 
-def timeit(logger: Optional[Logger] = None) -> Callable:
+def timeit() -> Callable:
     """
     Decorator which can output to stdout or a loggers info stream, the duration it took 
     for a function or method to execute
@@ -13,10 +13,17 @@ def timeit(logger: Optional[Logger] = None) -> Callable:
     """
     def inner(func: Callable):
         def time_function(*args, **kwargs) -> None:
+            logger: Optional[Logger] = None
+            try:  # attempt to pull a logger property off the first arg (would be a self)
+                _logger = args[0].logger
+                logger = _logger if isinstance(_logger, Logger) else None
+            except Exception:  # catch basic level exception since multiple could occur
+                pass
             start_time = time.perf_counter()
             func(*args, **kwargs)
             elapsed_time = time.perf_counter() - start_time
             print_str = f"{func.__name__} took: {round(elapsed_time * 1000, 1)} ms"
-            _ = logger.info(print_str) if logger else print(print_str)
+            log_func = logger.info if logger else print
+            log_func(print_str)
         return time_function
     return inner

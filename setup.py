@@ -12,6 +12,6 @@ setup(
         "pteranodon.plugins.base_plugins",
         "pteranodon.plugins.ext_plugins",
         "pteranodon.plugins.ext_plugins.sensor",
-        "csm",
+        "pteranodon.utils",
     ],
 )
