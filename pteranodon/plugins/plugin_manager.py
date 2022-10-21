@@ -69,41 +69,47 @@ class PluginManager:
         # Relatively sorted by amount of data being requested during init
         # Lowest to the highest generators, Highest to the lowest bandwidth in __init__
         # TODO: Gimbal, CameraServer, ComponentInformation, ComponentInformationServer # pylint: disable=fixme
-        base_plugin_types: List[Type[AbstractBasePlugin]] = [
-            Param,
-            Mission,
-            # Resume alphabetical ordering here
-            ActionServer,
-            Action,
-            Calibration,
-            # CameraServer,
-            Camera,
-            # ComponentInformationServer,
-            # ComponentInformation,
-            Core,
-            Failure,
-            FollowMe,
-            Ftp,
-            Geofence,
-            # Gimbal,
-            Info,
-            LogFiles,
-            ManualControl,
-            MissionRawServer,
-            MissionRaw,
-            Mocap,
-            Offboard,
-            ParamServer,
-            Rtk,
-            ServerUtility,
-            Shell,
-            TelemetryServer,
-            Telemetry,
-            TrackingServer,
-            Transponder,
-            Tune,
-        ]
-        ext_plugin_types: List[Type[AbstractExtensionPlugin]] = [Sensor, Relative]
+        base_plugin_types: List[Type[AbstractBasePlugin]] = sorted(
+            [
+                Param,
+                Mission,
+                # Resume alphabetical ordering here
+                ActionServer,
+                Action,
+                Calibration,
+                # CameraServer,
+                Camera,
+                # ComponentInformationServer,
+                # ComponentInformation,
+                Core,
+                Failure,
+                FollowMe,
+                Ftp,
+                Geofence,
+                # Gimbal,
+                Info,
+                LogFiles,
+                ManualControl,
+                MissionRawServer,
+                MissionRaw,
+                Mocap,
+                Offboard,
+                ParamServer,
+                Rtk,
+                ServerUtility,
+                Shell,
+                TelemetryServer,
+                Telemetry,
+                TrackingServer,
+                Transponder,
+                Tune,
+            ],
+            key=lambda a: a.num_generators,
+            reverse=False,
+        )
+        ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
+            [Sensor, Relative], key=lambda a: a.num_generators, reverse=False
+        )
 
         for base_type in base_plugin_types:
             self._logger.info(f"Beginning setup of: {base_type} plugin")

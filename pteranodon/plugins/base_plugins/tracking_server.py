@@ -31,11 +31,14 @@ class TrackingServer(AbstractBasePlugin):
             self._system.tracking_server.tracking_rectangle_command
         )
         self.register_tracking_rectangle_command_handler = partial(
-            self._register_handler, self._system.tracking_server.tracking_rectangle_command
+            self._register_handler,
+            self._system.tracking_server.tracking_rectangle_command,
         )
 
         self._submit_simple_generator(self._system.tracking_server.tracking_off_command)
-        self._register_handler(self._system.tracking_server.tracking_off_command)(self._update_tracking_off_command)
+        self._register_handler(self._system.tracking_server.tracking_off_command)(
+            self._update_tracking_off_command
+        )
         self.register_tracking_off_command_handler = partial(
             self._register_handler, self._system.tracking_server.tracking_off_command
         )

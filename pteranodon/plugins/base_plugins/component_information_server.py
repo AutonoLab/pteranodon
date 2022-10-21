@@ -21,7 +21,8 @@ class ComponentInformationServer(AbstractBasePlugin):
             self._system.component_information_server.float_param
         )
         self.register_float_param_handler = partial(
-            self._register_handler, self._system.component_information_server.float_param
+            self._register_handler,
+            self._system.component_information_server.float_param,
         )
 
         self._end_init()

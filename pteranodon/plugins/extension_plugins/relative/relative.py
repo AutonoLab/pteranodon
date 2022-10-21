@@ -36,6 +36,8 @@ class Relative(AbstractExtensionPlugin):
 
         self._telemetry: Telemetry = self._base_plugins["telemetry"]
 
+        self._end_init()
+
     @property
     def min_follow_distance(self) -> float:
         """

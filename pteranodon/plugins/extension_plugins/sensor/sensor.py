@@ -33,6 +33,8 @@ class Sensor(AbstractExtensionPlugin):
         except KeyError:
             pass
 
+        self._end_init()
+
     @property
     def sensors(self) -> Dict[str, AbstractSensor]:
         """

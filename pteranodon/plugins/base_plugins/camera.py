@@ -57,7 +57,7 @@ class Camera(AbstractBasePlugin):
         self._register_handler(self._system.camera.mode)(self._update_mode)
         self.register_mode_handler = partial(
             self._register_handler, self._system.camera.mode
-        )     
+        )
 
         self._end_init()
 

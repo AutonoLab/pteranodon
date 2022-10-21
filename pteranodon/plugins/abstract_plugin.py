@@ -36,6 +36,8 @@ class AbstractPlugin(ABC):
         self._loop: AbstractEventLoop = loop
         self._logger: Logger = logger
 
+        self._num_generators: int = 0
+
         self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
 
@@ -67,12 +69,27 @@ class AbstractPlugin(ABC):
         """
         return self._name
 
+    @property
+    def num_generators(self) -> int:
+        """
+        :return: int ; returns the number of generators this plugin starts
+        """
+        return self._num_generators
+
     def _end_init(self) -> None:
         """
         Method which should be called at the end of the __init__ method for each class which inherits this
         """
         # call to wait on sleep so that way generators get created
         self._loop.run_until_complete(asyncio.sleep(0.05))
+
+        # get the number of generators on the plugin
+        register_methods = [
+            func
+            for func in dir(self)
+            if not func.startswith("_") and "register" in func and "handler" in func
+        ]
+        self._num_generators = len(register_methods)
 
     def _future_callback(
         self, coroutine_name: str, is_gen: bool, future: futures.Future

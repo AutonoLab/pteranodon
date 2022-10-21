@@ -44,15 +44,18 @@ class Info(AbstractBasePlugin):
     async def _get_product(self) -> None:
         self._product = await self._attempt_acquire(self._system.info.get_product)
 
-
     async def _get_version(self) -> None:
         self._version = await self._attempt_acquire(self._system.info.get_version)
 
     async def _flight_info_gen(self) -> None:
-        self._flight_info = await self._attempt_acquire(self._system.info.get_flight_information)
+        self._flight_info = await self._attempt_acquire(
+            self._system.info.get_flight_information
+        )
 
     async def _speed_factor_gen(self) -> None:
-        self._speed_factor = await self._attempt_acquire(self._system.info.get_speed_factor)
+        self._speed_factor = await self._attempt_acquire(
+            self._system.info.get_speed_factor
+        )
 
     def get_identification(self) -> Optional[info.Identification]:
         """
