@@ -19,7 +19,6 @@ from typing import (
     List,
 )
 
-
 import grpc
 from mavsdk import System
 
@@ -286,3 +285,21 @@ class AbstractPlugin(ABC):
         """
         for future in list(self._future_cache):
             future.cancel()
+
+    def get_results(self) -> List[Any]:
+        """
+        Gets the current items in the results cache as a list
+        """
+        return list(self._result_cache)
+
+    def get_newest_result(self) -> Any:
+        """
+        Gets the last result added to the result cache
+        """
+        return list(self._result_cache)[-1] if len(self._result_cache) > 0 else None
+
+    def get_oldest_result(self) -> Any:
+        """
+        Gets the oldest result added to the result cache
+        """
+        return list(self._result_cache)[0] if len(self._result_cache) > 0 else None

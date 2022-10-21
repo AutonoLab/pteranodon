@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System
 from mavsdk.component_information_server import FloatParamUpdate, FloatParam
@@ -18,6 +19,9 @@ class ComponentInformationServer(AbstractBasePlugin):
         self._float_param_update = None
         self._submit_simple_generator(
             self._system.component_information_server.float_param
+        )
+        self.register_float_param_handler = partial(
+            self._register_handler, self._system.component_information_server.float_param
         )
 
         self._end_init()

@@ -8,11 +8,11 @@ from mavsdk.geofence import Point, Polygon
 from mavsdk.offboard import VelocityBodyYawspeed, PositionNedYaw
 from numpy import arctan2, degrees, sqrt, cos, sin, radians
 
-from .abstract_custom_plugin import AbstractCustomPlugin
-from ..base_plugins.telemetry import Telemetry
+from ..abstract_extension_plugin import AbstractExtensionPlugin
+from ...base_plugins.telemetry import Telemetry
 
 
-class Relative(AbstractCustomPlugin):
+class Relative(AbstractExtensionPlugin):
     """
     Enables movement relative to the drone compared to absolute movement.
     """

@@ -4,6 +4,7 @@ from typing import Dict, Type, Union, List
 
 from mavsdk import System
 
+from .base_plugins.abstract_base_plugin import AbstractBasePlugin
 from .base_plugins import (
     ActionServer,
     Action,
@@ -37,9 +38,9 @@ from .base_plugins import (
     Transponder,
     Tune,
 )
-from .ext_plugins import Sensor, Relative
-from .ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
-from .base_plugins.abstract_base_plugin import AbstractBasePlugin
+from .extension_plugins.abstract_extension_plugin import AbstractExtensionPlugin
+from .extension_plugins import Sensor, Relative
+from .custom_plugins import AbstractCustomPlugin
 
 
 class PluginManager:
@@ -62,7 +63,7 @@ class PluginManager:
         self._custom_args = custom_args
 
         self._base_plugins: Dict[str, AbstractBasePlugin] = {}
-        self._ext_plugins: Dict[str, AbstractCustomPlugin] = {}
+        self._ext_plugins: Dict[str, AbstractExtensionPlugin] = {}
         self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
 
         # Relatively sorted by amount of data being requested during init
@@ -102,7 +103,7 @@ class PluginManager:
             Transponder,
             Tune,
         ]
-        ext_plugin_types: List[Type[AbstractCustomPlugin]] = [Sensor, Relative]
+        ext_plugin_types: List[Type[AbstractExtensionPlugin]] = [Sensor, Relative]
 
         for base_type in base_plugin_types:
             self._logger.info(f"Beginning setup of: {base_type} plugin")
@@ -118,21 +119,21 @@ class PluginManager:
                 setattr(self, ext_plugin.name, ext_plugin)
 
     @property
-    def base_plugins(self) -> Dict:
+    def base_plugins(self) -> Dict[str, AbstractBasePlugin]:
         """
         :return: Dict ; Returns a dictionary of the base plugins
         """
         return self._base_plugins
 
     @property
-    def ext_plugins(self) -> Dict:
+    def ext_plugins(self) -> Dict[str, AbstractExtensionPlugin]:
         """
         :return: Dict ; Returns a dictionary of external plugins
         """
         return self._ext_plugins
 
     @property
-    def custom_plugins(self) -> Dict:
+    def custom_plugins(self) -> Dict[str, AbstractCustomPlugin]:
         """
         :return: Dict ; Returns a dictionary of custom plugins
         """
@@ -149,12 +150,13 @@ class PluginManager:
         """
         new_plugin_obj: AbstractCustomPlugin
         if isinstance(new_plugin, type):
-            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._custom_args)  # type: ignore
+            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_plugins, self._custom_args)  # type: ignore
         else:
             new_plugin_obj = new_plugin
 
         if not self._test_valid_plugin_name(new_plugin_obj.name):
             self._custom_plugins[new_plugin_obj.name] = new_plugin_obj
+            setattr(self, new_plugin_obj.name, new_plugin_obj)
 
     def _test_valid_plugin_name(self, plugin_name: str) -> bool:
         if hasattr(self, plugin_name):

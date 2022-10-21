@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from functools import partial
 
 from mavsdk import System, core
 
@@ -15,6 +16,9 @@ class Core(AbstractBasePlugin):
         super().__init__("core", system, loop, logger)
 
         self._submit_simple_generator(self._system.core.connection_state)
+        self.register_connection_state_handler = partial(
+            self._register_handler, self._system.core.connection_state
+        )
 
         self._end_init()
 

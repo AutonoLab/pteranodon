@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from functools import partial
 
 from mavsdk import System, action_server
 
@@ -16,12 +17,39 @@ class ActionServer(AbstractBasePlugin):
         super().__init__("action_server", system, loop, logger)
 
         self._submit_simple_generator(self._system.action_server.arm_disarm)
+        self.register_arm_disarm_handler = partial(
+            self._register_handler, self._system.action_server.arm_disarm
+        )
+
         self._submit_simple_generator(self._system.action_server.flight_mode_change)
+        self.register_flight_mode_change_handler = partial(
+            self._register_handler, self._system.action_server.flight_mode_change
+        )
+
         self._submit_simple_generator(self._system.action_server.land)
+        self.register_land_handler = partial(
+            self._register_handler, self._system.action_server.land
+        )
+
         self._submit_simple_generator(self._system.action_server.reboot)
+        self.register_reboot_handler = partial(
+            self._register_handler, self._system.action_server.reboot
+        )
+
         self._submit_simple_generator(self._system.action_server.shutdown)
+        self.register_shutdown_handler = partial(
+            self._register_handler, self._system.action_server.shutdown
+        )
+
         self._submit_simple_generator(self._system.action_server.takeoff)
+        self.register_takeoff_handler = partial(
+            self._register_handler, self._system.action_server.takeoff
+        )
+
         self._submit_simple_generator(self._system.action_server.terminate)
+        self.register_terminate_handler = partial(
+            self._register_handler, self._system.action_server.terminate
+        )
 
         self._end_init()
 

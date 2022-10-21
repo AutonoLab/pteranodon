@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Optional, Union
+from functools import partial
 
 from mavsdk import System, camera
 
@@ -32,21 +33,39 @@ class Camera(AbstractBasePlugin):
 
         # Tasks of subscribed properties
         self._submit_simple_generator(self._system.camera.capture_info)
+        self.register_capture_info_handler = partial(
+            self._register_handler, self._system.camera.capture_info
+        )
+
         self._submit_simple_generator(self._system.camera.information)
+        self.register_information_handler = partial(
+            self._register_handler, self._system.camera.information
+        )
+
         self._submit_simple_generator(self._system.camera.video_stream_info)
+        self.register_video_stream_info_handler = partial(
+            self._register_handler, self._system.camera.video_stream_info
+        )
 
         self._submit_simple_generator(self._system.camera.status)
+        self._register_handler(self._system.camera.status)(self._update_camera_status)
+        self.register_camera_status_handler = partial(
+            self._register_handler, self._system.camera.status
+        )
+
         self._submit_simple_generator(self._system.camera.mode)
-
-        @self._register_handler(self._system.camera.status)
-        def _update_camera_status(status):
-            self._status = status
-
-        @self._register_handler(self._system.camera.mode)
-        def _update_mode(mode):
-            self._mode = mode
+        self._register_handler(self._system.camera.mode)(self._update_mode)
+        self.register_mode_handler = partial(
+            self._register_handler, self._system.camera.mode
+        )     
 
         self._end_init()
+
+    def _update_camera_status(self, status):
+        self._status = status
+
+    def _update_mode(self, mode):
+        self._mode = mode
 
     def prepare(self) -> None:
         """

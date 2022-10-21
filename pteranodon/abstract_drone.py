@@ -50,7 +50,7 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.ext_plugins import Sensor, Relative
+from .plugins.extension_plugins import Sensor, Relative
 
 
 class AbstractDrone(ABC):
