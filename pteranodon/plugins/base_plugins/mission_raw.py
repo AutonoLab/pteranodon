@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional, List
+from functools import partial
 
 from mavsdk import System, mission_raw
 
@@ -16,7 +17,14 @@ class MissionRaw(AbstractBasePlugin):
         super().__init__("mission_raw", system, loop, logger)
 
         self._submit_simple_generator(self._system.mission_raw.mission_changed)
+        self.register_mission_changed_handler = partial(
+            self._register_handler, self._system.mission_raw.mission_changed
+        )
+
         self._submit_simple_generator(self._system.mission_raw.mission_progress)
+        self.register_mission_progress_handler = partial(
+            self._register_handler, self._system.mission_raw.mission_progress
+        )
 
         self._end_init()
 

@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from functools import partial
 
 from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -22,21 +23,32 @@ class TrackingServer(AbstractBasePlugin):
         self._submit_simple_generator(
             self._system.tracking_server.tracking_point_command
         )
+        self.register_tracking_point_command_handler = partial(
+            self._register_handler, self._system.tracking_server.tracking_point_command
+        )
+
         self._submit_simple_generator(
             self._system.tracking_server.tracking_rectangle_command
         )
-        self._submit_simple_generator(self._system.tracking_server.tracking_off_command)
+        self.register_tracking_rectangle_command_handler = partial(
+            self._register_handler, self._system.tracking_server.tracking_rectangle_command
+        )
 
-        @self._register_handler(self._system.tracking_server.tracking_off_command)
-        def _update_tracking_off_command(dummy) -> None:
-            self._tracking_active = False
-            if dummy != self._dummy:
-                self._dummy = dummy
-                self._tracking_active = False
-            else:
-                self._tracking_active = True
+        self._submit_simple_generator(self._system.tracking_server.tracking_off_command)
+        self._register_handler(self._system.tracking_server.tracking_off_command)(self._update_tracking_off_command)
+        self.register_tracking_off_command_handler = partial(
+            self._register_handler, self._system.tracking_server.tracking_off_command
+        )
 
         self._end_init()
+
+    def _update_tracking_off_command(self, dummy: int) -> None:
+        self._tracking_active = False
+        if dummy != self._dummy:
+            self._dummy = dummy
+            self._tracking_active = False
+        else:
+            self._tracking_active = True
 
     def respond_tracking_off_command(self, command_answer: CommandAnswer) -> None:
         """

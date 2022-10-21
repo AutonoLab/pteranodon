@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Optional
+from functools import partial
 
 from mavsdk import System, mission
 
@@ -19,7 +20,11 @@ class Mission(AbstractBasePlugin):
         self._enable_return_to_land = None
         self._mission_plan = None
         self._loop.run_until_complete(self._download_mission_with_progress())
+
         self._submit_simple_generator(self._system.mission.mission_progress)
+        self.register_mission_progress_handler = partial(
+            self._register_handler, self._system.mission.mission_progress
+        )
 
         self._end_init()
 
