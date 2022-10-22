@@ -1,3 +1,6 @@
+# Author: Jonas Vautherin
+# Original Found at: https://github.com/JonasVautherin/px4-gazebo-headless
+
 #!/bin/bash
 
 function is_ip_valid {

@@ -1,3 +1,6 @@
+// Author: Jonas Vautherin
+// Original Found at: https://github.com/JonasVautherin/px4-gazebo-headless
+
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 #include <iostream>

@@ -1,4 +1,6 @@
-#!/bin/bash
+# Author: Jonas Vautherin
+# Original Found at: https://github.com/JonasVautherin/px4-gazebo-headless
+# Edited by: David Shearon
 
 function show_help {
     echo ""

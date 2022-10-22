@@ -1,3 +1,7 @@
+# Author: Jonas Vautherin
+# Original Found at: https://github.com/JonasVautherin/px4-gazebo-headless
+# Edited by: David Shearon
+
 FROM ubuntu:20.04
 
 ENV WORKSPACE_DIR /root
