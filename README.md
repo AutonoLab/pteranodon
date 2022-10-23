@@ -26,7 +26,7 @@ A framework to built on top of MAVSDK which provides physical/virtual drone abst
 gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 ---
 
-## Requirments for Use
+## Requirements for Use
 Information TBD
 
 ## Project Installation
@@ -86,10 +86,10 @@ Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
 ### Using Docker
 
 ### Simulation Setup
-`git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
-`bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
+* `git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
+* `bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
 
-### Mutli Vehicle Simulation
+### Multi Vehicle Simulation
 1. Tools/gazebo_sitl_multiple_run.sh [-m <model>] [-n <number_of_vehicles>] [-w <world>]
 2. Tools/gazebo_sitl_multiple_run.sh -s typhoon_h480:1,iris:1 -w baylands
       
