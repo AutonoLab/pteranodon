@@ -103,5 +103,13 @@ Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
    * If there is one connect to it using: `screen -r`
    * If not create one using: `-S "Name of session"`
    * To kill a screen session: `screen -X -S [session] quit`
-5. Once in the 
+5. Once in the session start the docker container: `docker start px4_sitl_gazebo`
+6. Then attach to the container: `docker attach px4_sitl_gazebo`
+7. Go into the src dir: `cd src/PX4-Autopilot/`
+8. Run the following to clean: `make distclean`
+9. Then run the following command to compile and run the simulation: `make px4_sitl gazebo___sonoma_raceway`.
+   * There are also multiple different environments to use. You can check them out here: https://github.com/PX4/PX4-SITL_gazebo/tree/master/worlds
+10. To "minimize" the screen session do "ctrl+a d"
+11. You should be able to connect to the simulation using the code, and view the simulation using Xpra.
+    * Ctrl + D to log out of instanbul
       
