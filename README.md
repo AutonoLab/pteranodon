@@ -85,4 +85,23 @@ Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
 
 ### Using Docker
 
-### Building/Installing Software
+### Simulation Setup
+`git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
+`bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
+
+#### Steps to run Gazebo remotely
+1. Log in to the px4_sitl Instanbul ssh
+2. In your ssh config:
+   * Host istanbul.mines.edu
+   * HostName istanbul.mines.edu
+   * User px4_sim
+   * PasswordAuthentication yes
+   * ChallengeResponseAuthentication: yes
+   * Forward X11 yes
+3. The password is: "scaryG3ese24"
+4. Check if there is a screen session using: `screen -ls`
+   * If there is one connect to it using: `screen -r`
+   * If not create one using: `-S "Name of session"`
+   * To kill a screen session: `screen -X -S [session] quit`
+5. Once in the 
+      
