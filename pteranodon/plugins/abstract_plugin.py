@@ -1,5 +1,5 @@
 import functools
-from abc import ABC, abstractmethod
+from abc import ABC
 import asyncio
 from asyncio import AbstractEventLoop
 from concurrent import futures
@@ -27,6 +27,7 @@ class AbstractPlugin(ABC):
     """
     Base plugin functionality, no methods required to overwrite
     """
+
     _bandwidth: int = 1  # lower is higher placement for startup times
 
     def __init__(
@@ -93,6 +94,7 @@ class AbstractPlugin(ABC):
         """
         return self._ready
 
+    @cached_property
     def sort_keys(self) -> Tuple[int, int]:
         """
         :return: Tuple[int, int] ; returns the keys for which to sort plugin startup time via
@@ -104,7 +106,7 @@ class AbstractPlugin(ABC):
         Method which should be called at the end of the __init__ method for each class which inherits this
         """
         # call to wait on sleep so that way generators get created
-        self._loop.run_until_complete(asyncio.sleep(0.05))
+        self._loop.run_until_complete(asyncio.sleep(0.025))
         self._ready = True
 
     def _future_callback(
@@ -138,6 +140,76 @@ class AbstractPlugin(ABC):
                     self._logger.error(f"{coroutine_name} -> {e}")
         except Exception as e:
             self._logger.error(f"Callback failed: {coroutine_name} -> {e}")
+
+    async def _async_gen_wrapper(self, gen: Callable, comp_rate: bool = False) -> None:
+        """
+        Defines a wrapper around an async data stream (yielding function) which computes receive rate and manages
+        callback (handler functions) functions.
+        """
+        async for data in gen():
+            self._async_gen_data[gen] = data
+
+            if comp_rate:
+                current_time = time.perf_counter()
+                try:
+
+                    prev_time = self._rate_last_times[gen]
+
+                    delta_secs = current_time - prev_time
+                    # Average the current value and the last value if they are close enough to account for minor variations
+                    new_hz = 1 / delta_secs
+                    current_hz = self._async_rate_data[gen]
+                    if abs(new_hz - current_hz) <= 0.5:
+                        new_hz = (new_hz + current_hz) / 2
+                    self._async_rate_data[gen] = new_hz
+
+                except KeyError:
+                    # Need one cycle to calculate
+                    self._rate_last_times[gen] = current_time
+                    pass
+
+            func_handlers = self._async_handlers[gen]
+            if len(func_handlers) > 0:
+                for handler in func_handlers:
+                    sig = signature(handler)
+                    params = list(sig.parameters.keys())
+
+                    if len(params) <= 0:
+                        handler()
+                        continue
+
+                    # Some handlers may use "self", don't forget to include it.
+                    args_list = [data]
+                    if params[0] == "self":
+                        args_list.insert(0, self)
+
+                    if len(sig.parameters.keys()) in [1, 2]:
+                        handler(*args_list)
+                        continue
+
+                    self._logger.error(
+                        f"Could not run handler ({handler.__qualname__}) for async generator ({gen.__qualname__})! Too many arguments!"
+                    )
+
+    @staticmethod
+    async def _wrap_generator(gen: Callable, ret_time: float):
+        """
+        Wraps a generator such that any grpc UNAVAILABLE errors will cause the generator to restart.
+        This is the defined behavior in the grpc docs, such that an UNAVAILABLE means a packet was lost.
+        """
+        while True:
+            try:
+                await gen()
+            except grpc.RpcError as rpc_error:
+                if isinstance(
+                    rpc_error, grpc.Call
+                ):  # Only "Call" classes (which include _MultiThreadedRendezvous) have code()
+                    if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+                        pass
+                else:
+                    raise rpc_error
+            finally:
+                await asyncio.sleep(ret_time)
 
     def _submit_coroutine(
         self,
@@ -188,55 +260,8 @@ class AbstractPlugin(ABC):
         :type retry_time: float
         :return: The future created from the submit_coroutine call of wrap_generator
         """
-
-        async def async_gen_wrapper(gen: Callable, comp_rate: bool = False) -> None:
-            async for data in gen():
-                self._async_gen_data[gen] = data
-
-                if comp_rate:
-                    current_time = time.perf_counter()
-                    try:
-
-                        prev_time = self._rate_last_times[gen]
-
-                        delta_secs = current_time - prev_time
-                        # Average the current value and the last value if they are close enough to account for minor variations
-                        new_hz = 1 / delta_secs
-                        current_hz = self._async_rate_data[gen]
-                        if abs(new_hz - current_hz) <= 0.5:
-                            new_hz = (new_hz + current_hz) / 2
-                        self._async_rate_data[gen] = new_hz
-
-                    except KeyError:
-                        # Need one cycle to calculate
-                        self._rate_last_times[gen] = current_time
-                        pass
-
-                func_handlers = self._async_handlers[gen]
-                if len(func_handlers) > 0:
-                    for handler in func_handlers:
-                        sig = signature(handler)
-                        params = list(sig.parameters.keys())
-
-                        if len(params) <= 0:
-                            handler()
-                            continue
-
-                        # Some handlers may use "self", don't forget to include it.
-                        args_list = [data]
-                        if params[0] == "self":
-                            args_list.insert(0, self)
-
-                        if len(sig.parameters.keys()) in [1, 2]:
-                            handler(*args_list)
-                            continue
-
-                        self._logger.error(
-                            f"Could not run handler ({handler.__qualname__}) for async generator ({gen.__qualname__})! Too many arguments!"
-                        )
-
         return self._submit_generator(
-            functools.partial(async_gen_wrapper, generator, should_compute_rate),
+            functools.partial(self._async_gen_wrapper, generator, should_compute_rate),
             retry_time=retry_time,
         )
 
@@ -253,24 +278,8 @@ class AbstractPlugin(ABC):
         :type retry_time: float
         :return: The future created from the submit_coroutine call of wrap_generator
         """
-
-        async def wrap_generator(gen: Callable, ret_time: float):
-            while True:
-                try:
-                    await gen()
-                except grpc.RpcError as rpc_error:
-                    if isinstance(
-                        rpc_error, grpc.Call
-                    ):  # Only "Call" classes (which include _MultiThreadedRendezvous) have code()
-                        if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-                            pass
-                    else:
-                        raise rpc_error
-                finally:
-                    await asyncio.sleep(ret_time)
-
         return self._submit_coroutine(
-            wrap_generator(generator, retry_time), is_generator=True
+            self._wrap_generator(generator, retry_time), is_generator=True
         )
 
     def _schedule(self, *args: Coroutine):

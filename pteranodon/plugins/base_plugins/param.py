@@ -14,6 +14,7 @@ class Param(AbstractBasePlugin):
     """
     Provide raw access to get and set parameters.
     """
+
     _bandwidth: int = 0
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:

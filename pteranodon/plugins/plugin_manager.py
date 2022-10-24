@@ -10,16 +10,16 @@ from .base_plugins import (
     ActionServer,
     Action,
     Calibration,
-    # CameraServer,
+    CameraServer,
     Camera,
-    # ComponentInformationServer,
-    # ComponentInformation,
+    ComponentInformationServer,
+    ComponentInformation,
     Core,
     Failure,
     FollowMe,
     Ftp,
     Geofence,
-    # Gimbal,
+    Gimbal,
     Info,
     LogFiles,
     ManualControl,
@@ -102,12 +102,12 @@ class PluginManager:
                 Transponder,
                 Tune,
             ],
-            key=lambda a: self._get_sort_keys(a),
+            key=self._get_sort_keys,
             reverse=False,
         )
         ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
             [Sensor, Relative],
-            key=lambda a: self._get_sort_keys(a),
+            key=self._get_sort_keys,
             reverse=False,
         )
 
@@ -119,9 +119,8 @@ class PluginManager:
                     f"Plugin {base_plugin.name} is not ready after intialization!"
                 )
                 continue
-            if not self._test_valid_plugin_name(base_plugin.name):
-                self._base_plugins[base_plugin.name] = base_plugin
-                setattr(self, base_plugin.name, base_plugin)
+            self._base_plugins[base_plugin.name] = base_plugin
+            AbstractBasePlugin.register(base_type)
 
         for ext_type in ext_plugin_types:
             ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
@@ -130,9 +129,8 @@ class PluginManager:
                     f"Plugin {ext_plugin.name} is not ready after intialization!"
                 )
                 continue
-            if not self._test_valid_plugin_name(ext_plugin.name):
-                self._ext_plugins[ext_plugin.name] = ext_plugin
-                setattr(self, ext_plugin.name, ext_plugin)
+            self._ext_plugins[ext_plugin.name] = ext_plugin
+            AbstractExtensionPlugin.register(ext_type)
 
     @property
     def base_plugins(self) -> Dict[str, AbstractBasePlugin]:
@@ -166,13 +164,23 @@ class PluginManager:
         """
         new_plugin_obj: AbstractCustomPlugin
         if isinstance(new_plugin, type):
-            new_plugin_obj = new_plugin(self._system, self._loop, self._logger, self._base_plugins, self._ext_plugins, self._ext_args)  # type: ignore
+            cust_args = (
+                self._system,
+                self._loop,
+                self._logger,
+                self._base_plugins,
+                self._ext_plugins,
+                self._ext_args,
+            )
+            new_plugin_obj = new_plugin(*cust_args)  # type: ignore
         else:
             new_plugin_obj = new_plugin
 
         if not self._test_valid_plugin_name(new_plugin_obj.name):
             self._custom_plugins[new_plugin_obj.name] = new_plugin_obj
             setattr(self, new_plugin_obj.name, new_plugin_obj)
+
+        AbstractCustomPlugin.register(type(new_plugin_obj))
 
     def _test_valid_plugin_name(self, plugin_name: str) -> bool:
         if hasattr(self, plugin_name):
@@ -182,7 +190,7 @@ class PluginManager:
             return True
         return False
 
-    def _get_sort_keys(self, a: AbstractPlugin) -> Tuple[int, int]:
+    def _get_sort_keys(self, a: Type[AbstractPlugin]) -> Tuple[int, int]:
         num_gens = len(
             [
                 func
@@ -202,3 +210,234 @@ class PluginManager:
             ext_plugin.cancel_futures()
         for custom_plugin in self._custom_plugins.values():
             custom_plugin.cancel_futures()
+
+    @property
+    def action_server(self) -> ActionServer:
+        """
+        The ActionServer plugin instance
+        """
+        return self.base_plugins["action_server"]  # type: ignore
+
+    @property
+    def action(self) -> Action:
+        """
+        The Action plugin instance
+        """
+        return self.base_plugins["action"]  # type: ignore
+
+    @property
+    def calibration(self) -> Calibration:
+        """
+        The Calibration plugin instance
+        """
+        return self.base_plugins["calibration"]  # type: ignore
+
+    @property
+    def camera_server(self) -> CameraServer:
+        """
+        The CameraServer plugin instance
+        """
+        return self.base_plugins["camera_server"]  # type: ignore
+
+    @property
+    def camera(self) -> Camera:
+        """
+        The Camera plugin instance
+        """
+        return self.base_plugins["camera"]  # type: ignore
+
+    @property
+    def component_information_server(self) -> ComponentInformationServer:
+        """
+        The ComponentInformationServer plugin instance
+        """
+        return self.base_plugins["component_information_server"]  # type: ignore
+
+    @property
+    def component_information(self) -> ComponentInformation:
+        """
+        The ComponentInformation plugin instance
+        """
+        return self.base_plugins["component_information"]  # type: ignore
+
+    @property
+    def core(self) -> Core:
+        """
+        The Core plugin instance
+        """
+        return self.base_plugins["core"]  # type: ignore
+
+    @property
+    def failure(self) -> Failure:
+        """
+        The Failure plugin instance
+        """
+        return self.base_plugins["failure"]  # type: ignore
+
+    @property
+    def follow_me(self) -> FollowMe:
+        """
+        The FollowMe plugin instance
+        """
+        return self.base_plugins["follow_me"]  # type: ignore
+
+    @property
+    def ftp(self) -> Ftp:
+        """
+        The Ftp plugin instance
+        """
+        return self.base_plugins["ftp"]  # type: ignore
+
+    @property
+    def geofence(self) -> Geofence:
+        """
+        The Geofence plugin instance
+        """
+        return self.base_plugins["geofence"]  # type: ignore
+
+    @property
+    def gimbal(self) -> Gimbal:
+        """
+        The  plugin instance
+        """
+        return self.base_plugins["gimbal"]  # type: ignore
+
+    @property
+    def info(self) -> Info:
+        """
+        The Info plugin instance
+        """
+        return self.base_plugins["info"]  # type: ignore
+
+    @property
+    def log_files(self) -> LogFiles:
+        """
+        The LogFiles plugin instance
+        """
+        return self.base_plugins["log_files"]  # type: ignore
+
+    @property
+    def manual_control(self) -> ManualControl:
+        """
+        The ManualControl plugin instance
+        """
+        return self.base_plugins["manual_control"]  # type: ignore
+
+    @property
+    def mission_raw_server(self) -> MissionRawServer:
+        """
+        The MissionRawServer plugin instance
+        """
+        return self.base_plugins["mission_raw_server"]  # type: ignore
+
+    @property
+    def mission_raw(self) -> MissionRaw:
+        """
+        The MissionRaw plugin instance
+        """
+        return self.base_plugins["mission_raw"]  # type: ignore
+
+    @property
+    def mission(self) -> Mission:
+        """
+        The Mission plugin instance
+        """
+        return self.base_plugins["mission"]  # type: ignore
+
+    @property
+    def mocap(self) -> Mocap:
+        """
+        The Mocap plugin instance
+        """
+        return self.base_plugins["mocap"]  # type: ignore
+
+    @property
+    def offboard(self) -> Offboard:
+        """
+        The Offboard plugin instance
+        """
+        return self.base_plugins["offboard"]  # type: ignore
+
+    @property
+    def param_server(self) -> ParamServer:
+        """
+        The ParamServer plugin instance
+        """
+        return self.base_plugins["param_server"]  # type: ignore
+
+    @property
+    def param(self) -> Param:
+        """
+        The Param plugin instance
+        """
+        return self.base_plugins["param"]  # type: ignore
+
+    @property
+    def rtk(self) -> Rtk:
+        """
+        The Rtk plugin instance
+        """
+        return self.base_plugins["rtk"]  # type: ignore
+
+    @property
+    def server_utility(self) -> ServerUtility:
+        """
+        The ServerUtility plugin instance
+        """
+        return self.base_plugins["server_utility"]  # type: ignore
+
+    @property
+    def shell(self) -> Shell:
+        """
+        The Shell plugin instance
+        """
+        return self.base_plugins["shell"]  # type: ignore
+
+    @property
+    def telemetry_server(self) -> TelemetryServer:
+        """
+        The TelemetryServer plugin instance
+        """
+        return self.base_plugins["telemetry_server"]  # type: ignore
+
+    @property
+    def telemetry(self) -> Telemetry:
+        """
+        The Telemetry plugin instance
+        """
+        return self.base_plugins["telemetry"]  # type: ignore
+
+    @property
+    def tracking_server(self) -> TrackingServer:
+        """
+        The TrackingServer plugin instance
+        """
+        return self.base_plugins["tracking_server"]  # type: ignore
+
+    @property
+    def transponder(self) -> Transponder:
+        """
+        The Transponder plugin instance
+        """
+        return self.base_plugins["transponder"]  # type: ignore
+
+    @property
+    def tune(self) -> Tune:
+        """
+        The Tune plugin instance
+        """
+        return self.base_plugins["tune"]  # type: ignore
+
+    @property
+    def sensor(self) -> Sensor:
+        """
+        :return: The Sensor plugin class instance
+        """
+        return self.ext_plugins["sensor"]  # type: ignore
+
+    @property
+    def relative(self) -> Relative:
+        """
+        :return: The Relative plugin class instance
+        """
+        return self.ext_plugins["relative"]  # type: ignore

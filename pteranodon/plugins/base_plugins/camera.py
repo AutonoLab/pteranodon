@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Optional, Union, Callable
-from functools import partial
 
 from mavsdk import System, camera
 
