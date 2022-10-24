@@ -1,5 +1,5 @@
 import functools
-from abc import ABC
+from abc import ABC, abstractmethod
 import asyncio
 from asyncio import AbstractEventLoop
 from concurrent import futures
@@ -48,6 +48,20 @@ class AbstractPlugin(ABC):
         self._rate_last_times: Dict[Callable, float] = {}
 
         self._stopped = False
+
+    #     while True:
+    #         try:
+    #             self._init()
+    #             self._end_init()
+    #         except Exception:
+    #             self._logger.error(f"Failed to start class: {self._name}, retrying...")
+    #             self.cancel_futures()
+    #             self._result_cache.clear()
+    #             self._future_cache.clear()
+
+    # @abstractmethod
+    # def _init(self):
+    #     pass
 
     def _register_handler(self, generator: Callable):
         """

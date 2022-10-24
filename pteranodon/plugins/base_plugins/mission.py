@@ -74,7 +74,7 @@ class Mission(AbstractBasePlugin):
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
                 return
-            if progress.has_progress:
+            if progress.has_progress and progress.progress != 0.0:
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 

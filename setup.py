@@ -10,8 +10,9 @@ setup(
         "pteranodon",
         "pteranodon.plugins",
         "pteranodon.plugins.base_plugins",
-        "pteranodon.plugins.ext_plugins",
-        "pteranodon.plugins.ext_plugins.sensor",
-        "csm",
+        "pteranodon.plugins.extension_plugins",
+        "pteranodon.plugins.extension_plugins.sensor",
+        "pteranodon.plugins.extension_plugins.relative",
+        "pteranodon.plugins.custom_plugins",
     ],
 )
