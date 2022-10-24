@@ -94,12 +94,20 @@ class AbstractPlugin(ABC):
         """
         return self._ready
 
+    @property
+    @classmethod
+    def bandwidth(cls) -> int:
+        """
+        :return: int ; bandwidth level of plugin
+        """
+        return cls._bandwidth
+
     @cached_property
     def sort_keys(self) -> Tuple[int, int]:
         """
         :return: Tuple[int, int] ; returns the keys for which to sort plugin startup time via
         """
-        return (self._bandwidth, self.num_generators)
+        return (self.bandwidth, self.num_generators)
 
     def _end_init(self) -> None:
         """
