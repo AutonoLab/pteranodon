@@ -27,6 +27,7 @@ class AbstractPlugin(ABC):
     """
     Base plugin functionality, no methods required to overwrite
     """
+    _bandwidth: int = 1  # lower is higher placement for startup times
 
     def __init__(
         self, name: str, system: System, loop: AbstractEventLoop, logger: Logger
@@ -36,8 +37,8 @@ class AbstractPlugin(ABC):
         self._loop: AbstractEventLoop = loop
         self._logger: Logger = logger
 
-        self._ready: bool = False
         self._num_generators: int = 0
+        self._ready: bool = False
 
         self._future_cache: Deque[futures.Future] = deque()
         self._result_cache: Deque[Tuple[str, Any]] = deque(maxlen=10)
@@ -48,20 +49,6 @@ class AbstractPlugin(ABC):
         self._rate_last_times: Dict[Callable, float] = {}
 
         self._stopped = False
-
-    #     while True:
-    #         try:
-    #             self._init()
-    #             self._end_init()
-    #         except Exception:
-    #             self._logger.error(f"Failed to start class: {self._name}, retrying...")
-    #             self.cancel_futures()
-    #             self._result_cache.clear()
-    #             self._future_cache.clear()
-
-    # @abstractmethod
-    # def _init(self):
-    #     pass
 
     def _register_handler(self, generator: Callable):
         """
@@ -90,11 +77,13 @@ class AbstractPlugin(ABC):
         :return: int ; returns the number of generators this plugin starts
         """
         # get the number of generators on the plugin
-        self._num_generators = len([
-            func
-            for func in dir(self)
-            if not func.startswith("_") and "register" in func and "handler" in func
-        ])
+        self._num_generators = len(
+            [
+                func
+                for func in dir(self)
+                if not func.startswith("_") and "register" in func and "handler" in func
+            ]
+        )
         return self._num_generators
 
     @property
@@ -103,6 +92,12 @@ class AbstractPlugin(ABC):
         :return: bool ; returns the number of generators
         """
         return self._ready
+
+    def sort_keys(self) -> Tuple[int, int]:
+        """
+        :return: Tuple[int, int] ; returns the keys for which to sort plugin startup time via
+        """
+        return (self._bandwidth, self.num_generators)
 
     def _end_init(self) -> None:
         """

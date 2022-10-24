@@ -52,4 +52,6 @@ class ComponentInformationServer(AbstractBasePlugin):
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.component_information_server.float_param)(handler)
+        self._register_handler(self._system.component_information_server.float_param)(
+            handler
+        )

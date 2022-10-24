@@ -728,7 +728,7 @@ class Telemetry(AbstractBasePlugin):
         """
         return self._async_rate_data[self._system.telemetry.vtol_state]
 
-    def register_actuator_control_target_handler(self, handler: Callable): 
+    def register_actuator_control_target_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
@@ -741,7 +741,7 @@ class Telemetry(AbstractBasePlugin):
         :param handler: A Callable which gets executed each time new data is received
         """
         self._register_handler(self._system.telemetry.actuator_output_status)(handler)
-    
+
     def register_armed_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
@@ -754,7 +754,9 @@ class Telemetry(AbstractBasePlugin):
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.telemetry.attitude_angular_velocity_body)(handler)
+        self._register_handler(self._system.telemetry.attitude_angular_velocity_body)(
+            handler
+        )
 
     def register_attitude_euler_handler(self, handler: Callable):
         """
@@ -770,7 +772,6 @@ class Telemetry(AbstractBasePlugin):
         """
         self._register_handler(self._system.telemetry.attitude_quaternion)(handler)
 
-    
     def register_battery_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
@@ -783,14 +784,16 @@ class Telemetry(AbstractBasePlugin):
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.telemetry.camera_attitude_euler)(handler) 
-    
+        self._register_handler(self._system.telemetry.camera_attitude_euler)(handler)
+
     def register_camera_attitude_quaternion_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.telemetry.camera_attitude_quaternion)(handler)
+        self._register_handler(self._system.telemetry.camera_attitude_quaternion)(
+            handler
+        )
 
     def register_distance_sensor_handler(self, handler: Callable):
         """
@@ -861,7 +864,7 @@ class Telemetry(AbstractBasePlugin):
         :param handler: A Callable which gets executed each time new data is received
         """
         self._register_handler(self._system.telemetry.imu)(handler)
-        
+
     def register_in_air_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream

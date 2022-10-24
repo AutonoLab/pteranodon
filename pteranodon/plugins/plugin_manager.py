@@ -1,9 +1,10 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, Type, Union, List
+from typing import Dict, Type, Union, List, Tuple
 
 from mavsdk import System
 
+from .abstract_plugin import AbstractPlugin
 from .base_plugins.abstract_base_plugin import AbstractBasePlugin
 from .base_plugins import (
     ActionServer,
@@ -101,18 +102,22 @@ class PluginManager:
                 Transponder,
                 Tune,
             ],
-            key=lambda a: self._get_num_generators(a),
+            key=lambda a: self._get_sort_keys(a),
             reverse=False,
         )
         ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
-            [Sensor, Relative], key=lambda a: self._get_num_generators(a), reverse=False
+            [Sensor, Relative],
+            key=lambda a: self._get_sort_keys(a),
+            reverse=False,
         )
 
         for base_type in base_plugin_types:
             self._logger.info(f"Beginning setup of: {base_type} plugin")
             base_plugin = base_type(self._system, self._loop, self._logger)  # type: ignore
             if not base_plugin.ready:
-                self._logger.error(f"Plugin {base_plugin.name} is not ready after intialization!")
+                self._logger.error(
+                    f"Plugin {base_plugin.name} is not ready after intialization!"
+                )
                 continue
             if not self._test_valid_plugin_name(base_plugin.name):
                 self._base_plugins[base_plugin.name] = base_plugin
@@ -121,7 +126,9 @@ class PluginManager:
         for ext_type in ext_plugin_types:
             ext_plugin = ext_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_args)  # type: ignore
             if not ext_plugin.ready:
-                self._logger.error(f"Plugin {ext_plugin.name} is not ready after intialization!")
+                self._logger.error(
+                    f"Plugin {ext_plugin.name} is not ready after intialization!"
+                )
                 continue
             if not self._test_valid_plugin_name(ext_plugin.name):
                 self._ext_plugins[ext_plugin.name] = ext_plugin
@@ -175,13 +182,15 @@ class PluginManager:
             return True
         return False
 
-    def _get_num_generators(self, plugin_type: Union[Type[AbstractBasePlugin], Type[AbstractExtensionPlugin]]) -> int:
-        # gets the number of register_*_handler methods
-        return len([
-            func
-            for func in dir(plugin_type)
-            if not func.startswith("_") and "register" in func and "handler" in func
-        ])
+    def _get_sort_keys(self, a: AbstractPlugin) -> Tuple[int, int]:
+        num_gens = len(
+            [
+                func
+                for func in dir(a)
+                if not func.startswith("_") and "register" in func and "handler" in func
+            ]
+        )
+        return (a._bandwidth, num_gens)
 
     def cancel_all_futures(self) -> None:
         """

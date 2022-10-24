@@ -63,17 +63,21 @@ class MissionRawServer(AbstractBasePlugin):
         :param handler: A Callable which gets executed each time new data is received
         """
         self._register_handler(self._system.mission_raw_server.clear_all)(handler)
-    
+
     def register_current_item_changed_handler(self, handler: Callable) -> None:
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.mission_raw_server.current_item_changed)(handler)
-    
+        self._register_handler(self._system.mission_raw_server.current_item_changed)(
+            handler
+        )
+
     def register_incoming_mission_handler(self, handler: Callable) -> None:
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.mission_raw_server.incoming_mission)(handler)
+        self._register_handler(self._system.mission_raw_server.incoming_mission)(
+            handler
+        )

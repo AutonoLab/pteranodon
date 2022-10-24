@@ -138,18 +138,24 @@ class TrackingServer(AbstractBasePlugin):
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.tracking_server.tracking_point_command)(handler)
+        self._register_handler(self._system.tracking_server.tracking_point_command)(
+            handler
+        )
 
     def register_tracking_rectangle_command_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.tracking_server.tracking_rectangle_command)(handler)
+        self._register_handler(self._system.tracking_server.tracking_rectangle_command)(
+            handler
+        )
 
     def register_tracking_off_command_handler(self, handler: Callable):
         """
         Registers a function (Callable) to be a handler of the data stream
         :param handler: A Callable which gets executed each time new data is received
         """
-        self._register_handler(self._system.tracking_server.tracking_off_command)(handler)
+        self._register_handler(self._system.tracking_server.tracking_off_command)(
+            handler
+        )

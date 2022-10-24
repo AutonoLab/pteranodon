@@ -11,6 +11,7 @@ class Mission(AbstractBasePlugin):
     """
     Enable waypoint missions.
     """
+    _bandwidth: int = 0
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
