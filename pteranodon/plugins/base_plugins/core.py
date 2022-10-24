@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Callable
 
 from mavsdk import System, core
 
@@ -36,3 +37,10 @@ class Core(AbstractBasePlugin):
         :return: core.ConnectionState ; The current connection state
         """
         return self._async_gen_data[self._system.core.connection_state]
+
+    def register_connection_state_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.core.connection_state)(handler)

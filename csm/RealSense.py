@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-from pteranodon.plugins.ext_plugins.sensor import AbstractSensor
+from pteranodon.plugins.extension_plugins.sensor import AbstractSensor
 
 
 class RealSense(AbstractSensor):

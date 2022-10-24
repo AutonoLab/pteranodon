@@ -2,7 +2,6 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import List, Dict, Any, Callable, Tuple, Optional
 from inspect import getmembers, ismethod
-from functools import partial
 
 from mavsdk import System, telemetry
 
@@ -46,109 +45,6 @@ class Telemetry(AbstractBasePlugin):
         self._getter_data: Dict[str, Any] = {
             key: None for key, _ in self._getter_methods.items()
         }
-
-        # Start setup partial method handler registers
-        self.register_actuator_control_target_handler = partial(
-            self._register_handler, self._system.telemetry.actuator_control_target
-        )
-        self.register_actuator_output_status_handler = partial(
-            self._register_handler, self._system.telemetry.actuator_output_status
-        )
-        self.register_armed_handler = partial(
-            self._register_handler, self._system.telemetry.armed
-        )
-        self.register_attitude_angular_velocity_body_handler = partial(
-            self._register_handler,
-            self._system.telemetry.attitude_angular_velocity_body,
-        )
-        self.register_attitude_euler_handler = partial(
-            self._register_handler, self._system.telemetry.attitude_euler
-        )
-        self.register_attitude_quaternion_handler = partial(
-            self._register_handler, self._system.telemetry.attitude_quaternion
-        )
-        self.register_battery_handler = partial(
-            self._register_handler, self._system.telemetry.battery
-        )
-        self.register_camera_attitude_euler_handler = partial(
-            self._register_handler, self._system.telemetry.camera_attitude_euler
-        )
-        self.register_camera_attitude_quaternion_handler = partial(
-            self._register_handler, self._system.telemetry.camera_attitude_quaternion
-        )
-        self.register_distance_sensor_handler = partial(
-            self._register_handler, self._system.telemetry.distance_sensor
-        )
-        self.register_fixedwing_metrics_handler = partial(
-            self._register_handler, self._system.telemetry.fixedwing_metrics
-        )
-        self.register_flight_mode_handler = partial(
-            self._register_handler, self._system.telemetry.flight_mode
-        )
-        self.register_gps_info_handler = partial(
-            self._register_handler, self._system.telemetry.gps_info
-        )
-        self.register_ground_truth_handler = partial(
-            self._register_handler, self._system.telemetry.ground_truth
-        )
-        self.register_heading_handler = partial(
-            self._register_handler, self._system.telemetry.heading
-        )
-        self.register_health_handler = partial(
-            self._register_handler, self._system.telemetry.health
-        )
-        self.register_health_all_ok_handler = partial(
-            self._register_handler, self._system.telemetry.health_all_ok
-        )
-        self.register_home_handler = partial(
-            self._register_handler, self._system.telemetry.home
-        )
-        self.register_imu_handler = partial(
-            self._register_handler, self._system.telemetry.imu
-        )
-        self.register_in_air_handler = partial(
-            self._register_handler, self._system.telemetry.in_air
-        )
-        self.register_landed_state_handler = partial(
-            self._register_handler, self._system.telemetry.landed_state
-        )
-        self.register_odometry_handler = partial(
-            self._register_handler, self._system.telemetry.odometry
-        )
-        self.register_position_handler = partial(
-            self._register_handler, self._system.telemetry.position
-        )
-        self.register_position_velocity_ned_handler = partial(
-            self._register_handler, self._system.telemetry.position_velocity_ned
-        )
-        self.register_raw_gps_handler = partial(
-            self._register_handler, self._system.telemetry.raw_gps
-        )
-        self.register_raw_imu_handler = partial(
-            self._register_handler, self._system.telemetry.raw_imu
-        )
-        self.register_rc_status_handler = partial(
-            self._register_handler, self._system.telemetry.rc_status
-        )
-        self.register_scaled_imu_handler = partial(
-            self._register_handler, self._system.telemetry.scaled_imu
-        )
-        self.register_scaled_pressure_handler = partial(
-            self._register_handler, self._system.telemetry.scaled_pressure
-        )
-        self.register_status_text_handler = partial(
-            self._register_handler, self._system.telemetry.status_text
-        )
-        self.register_unix_epoch_time_handler = partial(
-            self._register_handler, self._system.telemetry.unix_epoch_time
-        )
-        self.register_velocity_ned_handler = partial(
-            self._register_handler, self._system.telemetry.velocity_ned
-        )
-        self.register_vtol_state_handler = partial(
-            self._register_handler, self._system.telemetry.vtol_state
-        )
-        # End handler registers
 
         self._end_init()
 
@@ -831,3 +727,238 @@ class Telemetry(AbstractBasePlugin):
         :rtype: float
         """
         return self._async_rate_data[self._system.telemetry.vtol_state]
+
+    def register_actuator_control_target_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.actuator_control_target)(handler)
+
+    def register_actuator_output_status_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.actuator_output_status)(handler)
+
+    def register_armed_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.armed)(handler)
+
+    def register_attitude_angular_velocity_body_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.attitude_angular_velocity_body)(
+            handler
+        )
+
+    def register_attitude_euler_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.attitude_euler)(handler)
+
+    def register_attitude_quaternion_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.attitude_quaternion)(handler)
+
+    def register_battery_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.battery)(handler)
+
+    def register_camera_attitude_euler_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.camera_attitude_euler)(handler)
+
+    def register_camera_attitude_quaternion_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.camera_attitude_quaternion)(
+            handler
+        )
+
+    def register_distance_sensor_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.distance_sensor)(handler)
+
+    def register_fixedwing_metrics_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.fixedwing_metrics)(handler)
+
+    def register_flight_mode_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.flight_mode)(handler)
+
+    def register_gps_info_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.gps_info)(handler)
+
+    def register_ground_truth_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.ground_truth)(handler)
+
+    def register_heading_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.heading)(handler)
+
+    def register_health_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.health)(handler)
+
+    def register_health_all_ok_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.health_all_ok)(handler)
+
+    def register_home_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.home)(handler)
+
+    def register_imu_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.imu)(handler)
+
+    def register_in_air_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.in_air)(handler)
+
+    def register_landed_state_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.landed_state)(handler)
+
+    def register_odometry_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.odometry)(handler)
+
+    def register_position_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.position)(handler)
+
+    def register_position_velocity_ned_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.position_velocity_ned)(handler)
+
+    def register_raw_gps_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.raw_gps)(handler)
+
+    def register_raw_imu_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.raw_imu)(handler)
+
+    def register_rc_status_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.rc_status)(handler)
+
+    def register_scaled_imu_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.scaled_imu)(handler)
+
+    def register_scaled_pressure_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.scaled_pressure)(handler)
+
+    def register_status_text_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.status_text)(handler)
+
+    def register_unix_epoch_time_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.unix_epoch_time)(handler)
+
+    def register_velocity_ned_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.velocity_ned)(handler)
+
+    def register_vtol_state_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.telemetry.vtol_state)(handler)

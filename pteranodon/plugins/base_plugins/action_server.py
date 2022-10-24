@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
+from typing import Optional, Callable
 
 from mavsdk import System, action_server
 
@@ -147,3 +147,52 @@ class ActionServer(AbstractBasePlugin):
         :return: bool ; True if the mission is terminated, False othewise
         """
         return self._async_gen_data[self._system.action_server.terminate]
+
+    def register_arm_disarm_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.arm_disarm)(handler)
+
+    def register_flight_mode_change_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.flight_mode_change)(handler)
+
+    def register_land_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.land)(handler)
+
+    def register_reboot_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.reboot)(handler)
+
+    def register_shutdown_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.shutdown)(handler)
+
+    def register_takeoff_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.takeoff)(handler)
+
+    def register_terminate_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.action_server.terminate)(handler)

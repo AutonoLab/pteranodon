@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Callable
 
 from mavsdk import System, camera
 
@@ -34,19 +34,18 @@ class Camera(AbstractBasePlugin):
         self._submit_simple_generator(self._system.camera.capture_info)
         self._submit_simple_generator(self._system.camera.information)
         self._submit_simple_generator(self._system.camera.video_stream_info)
-
         self._submit_simple_generator(self._system.camera.status)
+        self._register_handler(self._system.camera.status)(self._update_status)
         self._submit_simple_generator(self._system.camera.mode)
-
-        @self._register_handler(self._system.camera.status)
-        def _update_camera_status(status):
-            self._status = status
-
-        @self._register_handler(self._system.camera.mode)
-        def _update_mode(mode):
-            self._mode = mode
+        self._register_handler(self._system.camera.mode)(self._update_mode)
 
         self._end_init()
+
+    def _update_status(self, status):
+        self._status = status
+
+    def _update_mode(self, mode):
+        self._mode = mode
 
     def prepare(self) -> None:
         """
@@ -330,3 +329,38 @@ class Camera(AbstractBasePlugin):
                         )
                         for options in self._possible_setting_options
                     ]
+
+    def register_capture_info_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera.capture_info)(handler)
+
+    def register_information_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera.information)(handler)
+
+    def register_video_stream_info_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera.video_stream_info)(handler)
+
+    def register_status_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera.status)(handler)
+
+    def register_mode_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera.mode)(handler)
