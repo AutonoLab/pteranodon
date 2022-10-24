@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
+from typing import Callable
 
 from mavsdk import System
 from mavsdk.component_information_server import FloatParamUpdate, FloatParam
@@ -19,10 +19,6 @@ class ComponentInformationServer(AbstractBasePlugin):
         self._float_param_update = None
         self._submit_simple_generator(
             self._system.component_information_server.float_param
-        )
-        self.register_float_param_handler = partial(
-            self._register_handler,
-            self._system.component_information_server.float_param,
         )
 
         self._end_init()
@@ -50,3 +46,10 @@ class ComponentInformationServer(AbstractBasePlugin):
         self._submit_coroutine(
             self._system.component_information_server.provide_float_param(param)
         )
+
+    def register_float_param_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.component_information_server.float_param)(handler)

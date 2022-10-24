@@ -5,7 +5,7 @@ from asyncio import AbstractEventLoop
 from concurrent import futures
 from logging import Logger
 from collections import deque, defaultdict
-from functools import partial
+from functools import partial, cached_property
 import time
 from inspect import signature
 from typing import (
@@ -70,11 +70,17 @@ class AbstractPlugin(ABC):
         """
         return self._name
 
-    @property
+    @cached_property
     def num_generators(self) -> int:
         """
         :return: int ; returns the number of generators this plugin starts
         """
+        # get the number of generators on the plugin
+        self._num_generators = len([
+            func
+            for func in dir(self)
+            if not func.startswith("_") and "register" in func and "handler" in func
+        ])
         return self._num_generators
 
     @property
@@ -90,15 +96,6 @@ class AbstractPlugin(ABC):
         """
         # call to wait on sleep so that way generators get created
         self._loop.run_until_complete(asyncio.sleep(0.05))
-
-        # get the number of generators on the plugin
-        register_methods = [
-            func
-            for func in dir(self)
-            if not func.startswith("_") and "register" in func and "handler" in func
-        ]
-        self._num_generators = len(register_methods)
-
         self._ready = True
 
     def _future_callback(

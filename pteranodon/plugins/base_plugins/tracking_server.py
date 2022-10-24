@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
-from functools import partial
+from typing import Optional, Callable
 
 from mavsdk import System
 from mavsdk.tracking_server import CommandAnswer, TrackPoint, TrackRectangle
@@ -23,24 +22,12 @@ class TrackingServer(AbstractBasePlugin):
         self._submit_simple_generator(
             self._system.tracking_server.tracking_point_command
         )
-        self.register_tracking_point_command_handler = partial(
-            self._register_handler, self._system.tracking_server.tracking_point_command
-        )
-
         self._submit_simple_generator(
             self._system.tracking_server.tracking_rectangle_command
         )
-        self.register_tracking_rectangle_command_handler = partial(
-            self._register_handler,
-            self._system.tracking_server.tracking_rectangle_command,
-        )
-
         self._submit_simple_generator(self._system.tracking_server.tracking_off_command)
         self._register_handler(self._system.tracking_server.tracking_off_command)(
             self._update_tracking_off_command
-        )
-        self.register_tracking_off_command_handler = partial(
-            self._register_handler, self._system.tracking_server.tracking_off_command
         )
 
         self._end_init()
@@ -145,3 +132,24 @@ class TrackingServer(AbstractBasePlugin):
         Returns the current tracking status
         """
         return self._tracking_active
+
+    def register_tracking_point_command_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.tracking_server.tracking_point_command)(handler)
+
+    def register_tracking_rectangle_command_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.tracking_server.tracking_rectangle_command)(handler)
+
+    def register_tracking_off_command_handler(self, handler: Callable):
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.tracking_server.tracking_off_command)(handler)

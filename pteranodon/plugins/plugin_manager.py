@@ -101,11 +101,11 @@ class PluginManager:
                 Transponder,
                 Tune,
             ],
-            key=lambda a: a.num_generators,
+            key=lambda a: self._get_num_generators(a),
             reverse=False,
         )
         ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
-            [Sensor, Relative], key=lambda a: a.num_generators, reverse=False
+            [Sensor, Relative], key=lambda a: self._get_num_generators(a), reverse=False
         )
 
         for base_type in base_plugin_types:
@@ -174,6 +174,14 @@ class PluginManager:
             )
             return True
         return False
+
+    def _get_num_generators(self, plugin_type: Union[Type[AbstractBasePlugin], Type[AbstractExtensionPlugin]]) -> int:
+        # gets the number of register_*_handler methods
+        return len([
+            func
+            for func in dir(plugin_type)
+            if not func.startswith("_") and "register" in func and "handler" in func
+        ])
 
     def cancel_all_futures(self) -> None:
         """

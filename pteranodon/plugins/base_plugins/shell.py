@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import List
-from functools import partial
+from typing import List, Callable
 
 from mavsdk import System
 
@@ -21,9 +20,6 @@ class Shell(AbstractBasePlugin):
 
         self._submit_simple_generator(self._system.shell.receive)
         self._register_handler(self._system.shell.receive)(self._update_feedback)
-        self.register_update_feedback_handler = partial(
-            self._register_handler, self._system.shell.receive
-        )
 
         self._end_init()
 
@@ -72,3 +68,10 @@ class Shell(AbstractBasePlugin):
         :return: a list of command strings
         """
         return self._cmd_history
+
+    def register_receive_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.shell.receive)(handler)

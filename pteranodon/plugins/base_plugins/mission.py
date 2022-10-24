@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
-from functools import partial
+from typing import Optional, Callable
 
 from mavsdk import System, mission
 
@@ -22,9 +21,6 @@ class Mission(AbstractBasePlugin):
         self._loop.run_until_complete(self._download_mission_with_progress())
 
         self._submit_simple_generator(self._system.mission.mission_progress)
-        self.register_mission_progress_handler = partial(
-            self._register_handler, self._system.mission.mission_progress
-        )
 
         self._end_init()
 
@@ -149,3 +145,10 @@ class Mission(AbstractBasePlugin):
         :return: mission.MissionProgress
         """
         return self._async_gen_data[self._system.mission.mission_progress]
+
+    def register_incoming_mission_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.mission.mission_progress)(handler)

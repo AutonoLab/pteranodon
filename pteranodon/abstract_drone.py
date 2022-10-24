@@ -112,26 +112,30 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # setup all plugins
-        self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
+        try:
+            # setup all plugins
+            self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
 
-        # after connection run setup, then initialize loop, run teardown during cleanup phase
-        self.setup()
-        self._loop_thread = Thread(
-            name="Loop-Thread", target=self._loop_loop, daemon=True
-        )
+            # after connection run setup, then initialize loop, run teardown during cleanup phase
+            self.setup()
+            self._loop_thread = Thread(
+                name="Loop-Thread", target=self._loop_loop, daemon=True
+            )
 
-        # finally, start the mavlink thread
-        self._mavlink_thread.start()
-        self._telemetry_thread.start()
-        self.sensor.start_all_sensors()
+            # finally, start the mavlink thread
+            self._mavlink_thread.start()
+            self._telemetry_thread.start()
+            self.sensor.start_all_sensors()
 
-        # create a list of threads in the object
-        self._threads: List[Thread] = [
-            self._loop_thread,
-            self._mavlink_thread,
-            self._telemetry_thread,
-        ]
+            # create a list of threads in the object
+            self._threads: List[Thread] = [
+                self._loop_thread,
+                self._mavlink_thread,
+                self._telemetry_thread,
+            ]
+        except Exception as e:
+            self._cleanup()
+            raise e
 
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:

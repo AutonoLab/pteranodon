@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from functools import partial
+from typing import Callable
 
 from mavsdk import System
 from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
@@ -17,9 +17,6 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._submit_simple_generator(self._system.gimbal.control)
-        self.register_control_handler = partial(
-            self._register_handler, self._system.gimbal.control
-        )
 
         self._end_init()
 
@@ -113,3 +110,10 @@ class Gimbal(AbstractBasePlugin):
         """
 
         self._submit_coroutine(self._system.gimbal.take_control(control_mode))
+
+    def register_control_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.gimbal.control)(handler)
