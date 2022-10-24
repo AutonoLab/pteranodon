@@ -198,7 +198,7 @@ class PluginManager:
                 if not func.startswith("_") and "register" in func and "handler" in func
             ]
         )
-        return (a.bandwidth, num_gens)
+        return (a.bandwidth(), num_gens)
 
     def cancel_all_futures(self) -> None:
         """

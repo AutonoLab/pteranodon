@@ -94,7 +94,6 @@ class AbstractPlugin(ABC):
         """
         return self._ready
 
-    @property
     @classmethod
     def bandwidth(cls) -> int:
         """
@@ -107,7 +106,7 @@ class AbstractPlugin(ABC):
         """
         :return: Tuple[int, int] ; returns the keys for which to sort plugin startup time via
         """
-        return (self.bandwidth, self.num_generators)
+        return (self.bandwidth(), self.num_generators)
 
     def _end_init(self) -> None:
         """
