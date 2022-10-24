@@ -5,7 +5,7 @@ from typing import Dict, Optional
 from collections import deque
 
 import numpy as np
-from mavsdk import System
+from mavsdk import System, telemetry
 
 from .abstract_custom_plugin import AbstractCustomPlugin
 
@@ -33,7 +33,11 @@ class Power(AbstractCustomPlugin):
             self._window_size = self._ext_args["power"]
 
         # Submitting Generators
-        self._submit_generator(self._battery_updates)
+        # self._submit_generator(self._battery_updates)
+
+        @self._telemetry.register_battery_handler
+        def battery_handler(battery: telemetry.Battery):
+            self._window.append((battery, time.time()))
 
         # Private vars for calculation
         self._capacity = self._param.get_param_float("BAT1_CAPACITY")
@@ -42,9 +46,11 @@ class Power(AbstractCustomPlugin):
         # Private Datastructures
         self._window: deque = deque(maxlen=self._window_size)
 
+    '''
     async def _battery_updates(self) -> None:
         async for battery in self._system.telemetry.battery():
             self._window.append((battery, time.time()))
+    '''
 
     def get_instantaneous_wattage(self) -> Optional[float]:
         """
@@ -59,7 +65,6 @@ class Power(AbstractCustomPlugin):
         return None
 
     def _average_voltage(self, window) -> float:
-        # Probably could be done with numpy mean with setting axes. Testing would need to encompass this file to tell
         return np.mean([b.voltage_v for b in list(window)])
 
     def battery_percent_usage_over_time(self) -> float:
@@ -96,8 +101,7 @@ class Power(AbstractCustomPlugin):
         slope, power_intercept = np.linalg.lstsq(
             time_array_fixed, percentage_array, rcond=None
         )[0]
-        time_intercept = -power_intercept / slope
-        return time_intercept
+        return -power_intercept / slope
 
     def total_power_consumed_to_time(self) -> float:
         """
