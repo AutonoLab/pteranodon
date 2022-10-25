@@ -75,10 +75,7 @@ class Power(AbstractCustomPlugin):
         """
         all_wattage = self.get_instantaneous_wattage()
         if all_wattage is not None:
-            return (
-                all_wattage
-                - self._tegrastats_battery_5vrail_power()
-            )
+            return all_wattage - self._tegrastats_battery_5vrail_power()
         return None
 
     def get_software_wattage(self) -> Optional[float]:
