@@ -76,7 +76,7 @@ class Power(AbstractCustomPlugin):
         all_wattage = self.get_instantaneous_wattage()
         if all_wattage is not None:
             return (
-                self.get_instantaneous_wattage()
+                all_wattage
                 - self._tegrastats_battery_5vrail_power()
             )
         return None
