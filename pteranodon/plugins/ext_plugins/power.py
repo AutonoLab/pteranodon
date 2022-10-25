@@ -46,11 +46,11 @@ class Power(AbstractCustomPlugin):
         # Private Datastructures
         self._window: deque = deque(maxlen=self._window_size)
 
-    """
-    async def _battery_updates(self) -> None:
+    '''
+        async def _battery_updates(self) -> None:
         async for battery in self._system.telemetry.battery():
             self._window.append((battery, time.time()))
-    """
+    '''
 
     def get_instantaneous_wattage(self) -> Optional[float]:
         """
