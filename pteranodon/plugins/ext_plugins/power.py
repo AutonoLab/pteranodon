@@ -3,7 +3,6 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Dict, Optional
 from collections import deque
-import os
 import subprocess
 
 import numpy as np
