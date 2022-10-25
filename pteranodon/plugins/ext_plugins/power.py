@@ -68,16 +68,19 @@ class Power(AbstractCustomPlugin):
             )
         return None
 
-    def get_hardware_wattage(self):
+    def get_hardware_wattage(self) -> Optional[float]:
         """
         Get the instantaneous wattage only from hardware components
         :return: float ; the instantaneous wattage
         """
-        return (
-            self.get_instantaneous_wattage() - self._tegrastats_battery_5vrail_power()
-        )
+        all_wattage = self.get_instantaneous_wattage()
+        if all_wattage is not None:
+            return (
+                self.get_instantaneous_wattage() - self._tegrastats_battery_5vrail_power()
+            )
+        return None
 
-    def get_software_wattage(self):
+    def get_software_wattage(self) -> Optional[float]:
         """
         Get the instantaneous wattage only from software components
         :return: float ; the instantaneous wattage
@@ -133,7 +136,7 @@ class Power(AbstractCustomPlugin):
     def _tegrastats_start(self, interval=100):
         subprocess.run(["tegrastats", "--inteval", interval])
 
-    def _tegrastats_battery_5vrail_power(self):
+    def _tegrastats_battery_5vrail_power(self) -> int:
         result = subprocess.run(
             [
                 "cat",
@@ -146,7 +149,7 @@ class Power(AbstractCustomPlugin):
             return int(result.stdout)
         return -1
 
-    def _tegrastats_battery_gpu_cpu_rail_power(self):
+    def _tegrastats_battery_gpu_cpu_rail_power(self) -> int:
         result = subprocess.run(
             [
                 "cat",
@@ -159,7 +162,7 @@ class Power(AbstractCustomPlugin):
             return int(result.stdout)
         return -1
 
-    def _tegrastats_battery_soc_rail_power(self):
+    def _tegrastats_battery_soc_rail_power(self) -> int:
         result = subprocess.run(
             [
                 "cat",
