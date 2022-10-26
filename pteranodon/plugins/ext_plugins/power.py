@@ -25,36 +25,21 @@ class Power(AbstractCustomPlugin):
         ext_args: Dict,
     ) -> None:
         super().__init__("power", system, loop, logger, base_plugins, ext_args)
-        # pulling plugins
         self._telemetry = self._base_plugins["telemetry"]
         self._param = self._base_plugins["param"]
-
-        # Starting tegrastats
-        self._tegrastats_start(self._ext_args["power"][1])
-
-        # pulling args
-        if self._ext_args["battery_information"] is not None:
+        self._capacity = self._param.get_param_float("BAT1_CAPACITY")
+        self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
+        if self._ext_args["power"] is not None:
             self._window_size = self._ext_args["power"][0]
-
-        # Submitting Generators
-        # self._submit_generator(self._battery_updates)
+            self._tegrastats_start(self._ext_args["power"][1])
+        else:
+            self._window_size = 10
+            self._tegrastats_start()
+        self._window: deque = deque(maxlen=self._window_size)
 
         @self._telemetry.register_battery_handler
         def battery_handler(battery: telemetry.Battery):
             self._window.append((battery, time.time()))
-
-        # Private vars for calculation
-        self._capacity = self._param.get_param_float("BAT1_CAPACITY")
-        self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
-
-        # Private Datastructures
-        self._window: deque = deque(maxlen=self._window_size)
-
-    """
-        async def _battery_updates(self) -> None:
-        async for battery in self._system.telemetry.battery():
-            self._window.append((battery, time.time()))
-    """
 
     def get_instantaneous_wattage(self) -> Optional[float]:
         """
