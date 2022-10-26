@@ -2,7 +2,7 @@ cd ~
 
 echo | ls
 
-DIR=./PX4-Autopilot
+DIR=~/PX4-Autopilot
 if [ -d "$DIR" ];
 then
     echo "$DIR already exists."
