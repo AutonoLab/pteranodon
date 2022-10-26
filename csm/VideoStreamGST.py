@@ -5,7 +5,7 @@ import numpy as np
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst
 
-from pteranodon.plugins.ext_plugins.sensor import AbstractSensor
+from pteranodon.plugins.extension_plugins.sensor import AbstractSensor
 
 
 # ALL CREDIT GOES TO

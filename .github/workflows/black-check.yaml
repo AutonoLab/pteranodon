@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Black Format
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
     branches:
       - main
 jobs:
-  abstract_plugin:
-    name: "Test Abstract Plugin"
+  black_check:
+    name: "Check Black Formatting"
 
     runs-on: ubuntu-latest
 
@@ -23,8 +23,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest
 
-    - name: Test Abstract Plugin
+    - name: Check Black Formatting
       run: |
-        pytest tests/unit/test_abstract_plugin.py
+        pip install black
+        
+        black --check ./pteranodon

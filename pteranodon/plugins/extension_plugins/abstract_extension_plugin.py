@@ -7,9 +7,9 @@ from mavsdk import System
 from ..abstract_plugin import AbstractPlugin
 
 
-class AbstractCustomPlugin(AbstractPlugin):
+class AbstractExtensionPlugin(AbstractPlugin):
     """
-    Base plugin functionality, no methods required to overwrite
+    Extension plugin functionality, no methods required to overwrite
     """
 
     def __init__(

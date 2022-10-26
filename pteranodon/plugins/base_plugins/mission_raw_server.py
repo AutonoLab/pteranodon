@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
+from typing import Optional, Callable
 
 from mavsdk import System, mission_raw_server
 
@@ -16,13 +16,11 @@ class MissionRawServer(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission_raw_server", system, loop, logger)
 
-        self._mission_plan: Optional[mission_raw_server.MissionPlan] = None
-        self._clear_type: Optional[int] = None
-        self._mission_item: Optional[mission_raw_server.MissionItem] = None
-
-        self._submit_generator(self._clear_all)
-        self._submit_generator(self._current_item_changed)
-        self._submit_generator(self._incoming_mission)
+        self._submit_simple_generator(self._system.mission_raw_server.clear_all)
+        self._submit_simple_generator(
+            self._system.mission_raw_server.current_item_changed
+        )
+        self._submit_simple_generator(self._system.mission_raw_server.incoming_mission)
 
         self._end_init()
 
@@ -31,48 +29,23 @@ class MissionRawServer(AbstractBasePlugin):
         """
         Returns current mission plan
         """
-        return self._mission_plan
+        return self._async_gen_data[self._system.mission_raw_server.incoming_mission]
 
     @property
     def clear_type(self) -> Optional[int]:
         """
         Returns last clear_type received
         """
-        return self._clear_type
+        return self._async_gen_data[self._system.mission_raw_server.clear_all]
 
     @property
     def mission_item(self) -> Optional[mission_raw_server.MissionItem]:
         """
         Returns current mission items
         """
-        return self._mission_item
-
-    async def _clear_all(self):
-        """
-        updates the clear_type
-        :return: None
-        """
-        async for x in self._system.mission_raw_server.clear_all():
-            if x != self.clear_type:
-                self._clear_type = x
-
-    async def _current_item_changed(self):
-        """
-        updates the current mission item
-        :return: None
-        """
-        async for x in self._system.mission_raw_server.current_item_changed():
-            if x != self.mission_item:
-                self._mission_item = x
-
-    async def _incoming_mission(self):
-        """
-        sets new mission_item
-        :return: None
-        """
-        async for x in self._system.mission_raw_server.incoming_mission():
-            if x != self.mission_plan:
-                self._mission_plan = x
+        return self._async_gen_data[
+            self._system.mission_raw_server.current_item_changed()
+        ]
 
     def set_current_item_complete(self):
         """
@@ -82,4 +55,29 @@ class MissionRawServer(AbstractBasePlugin):
         self._logger.info("Task item set to complete")
         self._submit_coroutine(
             self._system.mission_raw_server.set_current_item_complete()
+        )
+
+    def register_clear_all_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.mission_raw_server.clear_all)(handler)
+
+    def register_current_item_changed_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.mission_raw_server.current_item_changed)(
+            handler
+        )
+
+    def register_incoming_mission_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.mission_raw_server.incoming_mission)(
+            handler
         )

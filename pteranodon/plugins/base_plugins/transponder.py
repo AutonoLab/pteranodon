@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Callable
 
 from mavsdk import System, transponder
 
@@ -14,8 +15,7 @@ class Transponder(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("transponder", system, loop, logger)
 
-        self._transponder_data = None
-        self._submit_generator(self._transponder_update)
+        self._submit_simple_generator(self._system.transponder.transponder)
 
         self._end_init()
 
@@ -27,14 +27,16 @@ class Transponder(AbstractBasePlugin):
         """
         self._submit_coroutine(self._system.transponder.set_rate_transponder(rate))
 
-    async def _transponder_update(self) -> None:
-        async for transponder_val in self._system.transponder.transponder():
-            if transponder_val != self._transponder_data:
-                self._transponder_data = transponder_val
-
     def transponder(self) -> transponder.AdsbVehicle:
         """
         Subscribe to transponder updates
         :return: transponder.AdsbVehicle ; The next transponder detection
         """
-        return self._transponder_data
+        return self._async_gen_data[self._system.transponder.transponder]
+
+    def register_transponder_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.transponder.transponder)(handler)

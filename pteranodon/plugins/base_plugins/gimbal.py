@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Callable
 
 from mavsdk import System
 from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
@@ -15,19 +16,9 @@ class Gimbal(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 
-        self._control_status = None
-        self._submit_generator(self._update_control_status)
+        self._submit_simple_generator(self._system.gimbal.control)
 
         self._end_init()
-
-    async def _update_control_status(self) -> None:
-        """
-        Subscribe to control status updates. This allows a component to know if it has primary, secondary or no control
-         over the gimbal. Also, it gives the system and component ids of the other components in control (if any).
-        """
-        async for ctrl_status in self._system.gimbal.control():
-            if ctrl_status != self._control_status:
-                self._control_status = ctrl_status
 
     def control(self) -> ControlStatus:
         """
@@ -35,7 +26,7 @@ class Gimbal(AbstractBasePlugin):
 
         :return: the current control status
         """
-        return self._control_status
+        return self._async_gen_data[self._system.gimbal.control]
 
     def release_control(self) -> None:
         """
@@ -119,3 +110,10 @@ class Gimbal(AbstractBasePlugin):
         """
 
         self._submit_coroutine(self._system.gimbal.take_control(control_mode))
+
+    def register_control_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.gimbal.control)(handler)
