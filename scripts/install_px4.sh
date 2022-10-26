@@ -1,4 +1,4 @@
-cd ../..
+cd ~
 
 echo | ls
 
@@ -11,3 +11,4 @@ else
 fi
 
 
+./PX4-Autopilot/Tools/setup/ubuntu.sh
