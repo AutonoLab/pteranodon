@@ -1,8 +1,6 @@
-cd ~
+cd ../..
 
-echo | ls
-
-DIR=~/PX4-Autopilot
+DIR= /PX4-Autopilot
 if [ -d "$DIR" ];
 then
     echo "$DIR already exists."
@@ -12,3 +10,5 @@ fi
 
 
 ./PX4-Autopilot/Tools/setup/ubuntu.sh
+
+sudo reboot
