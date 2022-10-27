@@ -11,10 +11,16 @@ import sys
 import random
 import signal
 
-import uvloop
 from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
+
+try:
+    import uvloop
+
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ModuleNotFoundError:
+    pass
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
@@ -71,9 +77,6 @@ class AbstractDrone(ABC):
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
-        # set asyncio event loop policy
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
         # attatch signal handlers
         self._handle_signals_main()
 
