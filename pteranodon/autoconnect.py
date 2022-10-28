@@ -24,7 +24,10 @@ class AutoConnect:
         self._should_check_server = self._server_addr is not None
 
     async def _test_port_open(
-        self, port: int, socket_kind: socket.SocketKind, timeout: float = 1.0
+        self,
+        port: int,
+        socket_kind: int,
+        timeout: float = 1.0,
     ) -> Optional[Tuple[int, bool]]:
         """
         Attempts to connect to a port with a specified timeout and socket kind to determine if the port is open.
@@ -81,12 +84,12 @@ class AutoConnect:
         return serial_paths
 
     # Must be done in parallel, would take 17+ hours otherwise
-    def fetch_open_proto_ports(self, socket_kind: socket.SocketKind) -> List[int]:
+    def fetch_open_proto_ports(self, socket_kind: int) -> List[int]:
         """
         Fetches the open ports for the given protocol (not necessarily open for MAVSDK). Blocking.
 
         :param socket_kind: The kind of socket to test (SOCK_STREAM for TCP, SOCK_DGRAM for UDP)
-        :type socket_kind: socket.SocketKind)
+        :type socket_kind: socket.SocketKind
         :return: A list of open UDP or TCP ports
         :rtype: List[int]
         """
