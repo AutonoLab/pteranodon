@@ -10,6 +10,8 @@ Welcome to Pteranodon's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. include:: pteranodon.rst
+
 
 
 Indices and tables
