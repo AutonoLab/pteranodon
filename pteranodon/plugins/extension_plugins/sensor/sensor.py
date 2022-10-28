@@ -4,12 +4,12 @@ from typing import Dict
 
 from mavsdk import System
 
-from ..abstract_custom_plugin import AbstractCustomPlugin
+from ..abstract_extension_plugin import AbstractExtensionPlugin
 from .abstract_sensor import AbstractSensor
 from .sensor_data import SensorData
 
 
-class Sensor(AbstractCustomPlugin):
+class Sensor(AbstractExtensionPlugin):
     """
     A plugin used for collecting sensors
     """
@@ -32,6 +32,8 @@ class Sensor(AbstractCustomPlugin):
                     self._sensors[sensor.name] = sensor
         except KeyError:
             pass
+
+        self._end_init()
 
     @property
     def sensors(self) -> Dict[str, AbstractSensor]:

@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Callable
 
 from mavsdk import System, transponder
 
@@ -32,3 +33,10 @@ class Transponder(AbstractBasePlugin):
         :return: transponder.AdsbVehicle ; The next transponder detection
         """
         return self._async_gen_data[self._system.transponder.transponder]
+
+    def register_transponder_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.transponder.transponder)(handler)

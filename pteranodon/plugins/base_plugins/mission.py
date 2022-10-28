@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
+from typing import Optional, Callable
 
 from mavsdk import System, mission
 
@@ -12,6 +12,8 @@ class Mission(AbstractBasePlugin):
     Enable waypoint missions.
     """
 
+    _bandwidth: int = 0
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
 
@@ -19,6 +21,7 @@ class Mission(AbstractBasePlugin):
         self._enable_return_to_land = None
         self._mission_plan = None
         self._loop.run_until_complete(self._download_mission_with_progress())
+
         self._submit_simple_generator(self._system.mission.mission_progress)
 
         self._end_init()
@@ -73,7 +76,7 @@ class Mission(AbstractBasePlugin):
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
                 return
-            if progress.has_progress:
+            if progress.has_progress and progress.progress != 0.0:
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
@@ -144,3 +147,10 @@ class Mission(AbstractBasePlugin):
         :return: mission.MissionProgress
         """
         return self._async_gen_data[self._system.mission.mission_progress]
+
+    def register_incoming_mission_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.mission.mission_progress)(handler)
