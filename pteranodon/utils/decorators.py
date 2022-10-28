@@ -27,7 +27,7 @@ def timeit(func: Callable) -> Callable:
             func(*args, **kwargs)
             elapsed_time = time.perf_counter() - start_time
             print_str = f"{func.__name__} took: {round(elapsed_time * 1000, 1)} ms"
-            log_func: function = logger.info if logger else print
+            log_func: Callable = logger.info if logger else print  # type: ignore
             log_func(print_str)  # type: ignore
 
         return time_function
