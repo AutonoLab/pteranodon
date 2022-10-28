@@ -224,9 +224,9 @@ class AutoConnect:
         full_servers_list: List[str] = []
 
         for data_list in all_data:
-            servers_list = [get_server_value(data) for data in data_list]
-            servers_list = [
-                server for server in servers_list if server is not None
+            servers_opt_list = [get_server_value(data) for data in data_list]
+            servers_list: List[str] = [
+                server for server in servers_opt_list if server is not None
             ]  # Filter invalid servers
             full_servers_list += servers_list
 
