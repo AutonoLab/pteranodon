@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from pteranodon import AbstractDrone
-from pteranodon.utils import timeit
+from pteranodon.utils.decorators import timeit
 from RealSense import RealSense
 from hlca import FrameProcessor
 
