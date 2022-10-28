@@ -153,3 +153,19 @@ class Video(AbstractSensor):
 
     def teardown(self):
         pass
+
+if __name__ == '__main__':
+	# Create the video object
+	# Add port= if is necessary to use a different one
+	video = Video()
+	
+	while True:
+		# Wait for the next frame
+		if not video.frame_available():
+		        continue
+
+		frame = video.frame()
+		cv2.imshow('Camera', frame)
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			print("quit")
+			break
