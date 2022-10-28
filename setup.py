@@ -8,6 +8,7 @@ setup(
     author_email="jcdavis@mines.edu",
     packages=[
         "pteranodon",
+        "pteranodon.utils",
         "pteranodon.plugins",
         "pteranodon.plugins.base_plugins",
         "pteranodon.plugins.extension_plugins",
