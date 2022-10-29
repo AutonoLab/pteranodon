@@ -12,9 +12,6 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
 ![Unit Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/unit-tests.yaml/badge.svg?branch=main)
 ![Integration Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/integration-tests.yaml/badge.svg?branch=main)
 
-## Contributing
-Information TBD
-
 ## Formatting
 
 Pteranodon uses the [PEP-8 Coding Standard](https://peps.python.org/pep-0008/) with required typing through
