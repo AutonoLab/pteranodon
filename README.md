@@ -2,9 +2,6 @@
 
 <img src="https://static.wikia.nocookie.net/animals/images/a/a1/Pterathumb.png/revision/latest?cb=20200311123111" alt="drawing" width="200"/>
 
-A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
-gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative cordinate systems.
-
 ![Black Formatting Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/black-check.yaml/badge.svg?branch=main)
 ![Flake8 Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/flake8-check.yaml/badge.svg?branch=main)
 ![MyPy Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/mypy-check.yaml/badge.svg?branch=main)
