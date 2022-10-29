@@ -82,6 +82,7 @@ Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
    * `make px4_sitl`
 
 ### Using Docker
+waiting on steps from David
 
 ### Simulation Setup
 * `git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
