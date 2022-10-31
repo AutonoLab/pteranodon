@@ -1,4 +1,5 @@
 #Download and install PX4.
+# Run with: sudo bash ./install_px4.sh
 
 cd ../..
 
@@ -14,3 +15,5 @@ fi
 ./PX4-Autopilot/Tools/setup/ubuntu.sh
 
 sudo reboot
+
+echo "Installation Complete"
