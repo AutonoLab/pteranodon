@@ -3,11 +3,11 @@ from typing import List, Optional, Tuple, Any, Dict
 import os
 import re
 import socket
+from collections import defaultdict
 
 from pymavlink import mavutil
 
 
-# TODO_: Better name?
 class ServerDetector:
     """
     Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
@@ -21,6 +21,9 @@ class ServerDetector:
         :type server_ip_addr: Optional[str]
         """
         self._server_addr = server_ip_addr
+
+        # Between socket kind and ports
+        self._available_ports: Dict[int, List[int]] = defaultdict(list)
 
     async def _test_port_open(
         self,
@@ -81,18 +84,25 @@ class ServerDetector:
         return serial_paths
 
     # Must be done in parallel, would take 17+ hours otherwise
-    def fetch_open_proto_ports(self, socket_kind: int) -> List[int]:
+    def fetch_open_proto_ports(
+        self, socket_kind: int, fetch_cached: bool = False
+    ) -> List[int]:
         """
         Fetches the open ports for the given protocol (not necessarily open for MAVSDK). Blocking.
 
         :param socket_kind: The kind of socket to test (SOCK_STREAM for TCP, SOCK_DGRAM for UDP)
         :type socket_kind: socket.SocketKind
+        :param fetch_cached: Whether to search for open ports or use cached data
+        :type fetch_cached: bool
         :return: A list of open UDP or TCP ports
         :rtype: List[int]
         """
         # Only supporting TCP and UDP
         if socket_kind not in [socket.SOCK_STREAM, socket.SOCK_DGRAM]:
             return []
+
+        if fetch_cached:
+            return self._available_ports[socket_kind]
 
         port_range = range(1024, pow(2, 16))
 
@@ -109,6 +119,8 @@ class ServerDetector:
             port_tup[0] for port_tup in port_data if port_tup[1]
         ]  # Filter only open ports
         new_loop.stop()
+
+        self._available_ports[socket_kind] = open_ports
         return open_ports
 
     async def _test_server(
@@ -177,7 +189,7 @@ class ServerDetector:
 
         return f"udp:{self._server_addr}:{port}"
 
-    def get_mavsdk_servers(self) -> List[str]:
+    def get_mavsdk_servers(self, test_cached: bool = False) -> List[str]:
         """
         Fetch the list of serial devices, complete TCP paths, or complete UDP paths
         that have MAVSDK servers running on them. Blocking.
@@ -187,12 +199,16 @@ class ServerDetector:
         """
         serial_devs = ServerDetector._fetch_possible_serial_devs()
 
+        tcp_ports = self.fetch_open_proto_ports(
+            socket.SOCK_STREAM, fetch_cached=test_cached
+        )
+        udp_ports = self.fetch_open_proto_ports(
+            socket.SOCK_DGRAM, fetch_cached=test_cached
+        )
+
         serial_devs_future = asyncio.gather(
             *[self._test_server(serial_dev=dev) for dev in serial_devs]
         )
-
-        tcp_ports = self.fetch_open_proto_ports(socket.SOCK_STREAM)
-        udp_ports = self.fetch_open_proto_ports(socket.SOCK_DGRAM)
 
         tcp_ports_future = asyncio.gather(
             *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
