@@ -16,4 +16,7 @@ fi
 
 sudo reboot
 
+pip install uvloop
+pip install mavsdk
+
 echo "Installation Complete"
