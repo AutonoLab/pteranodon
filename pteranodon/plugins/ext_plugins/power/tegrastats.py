@@ -2,12 +2,20 @@ import subprocess
 
 
 class Tegrastats:
-    def __init__(self, interval=100):
+    """
+    A class for starting and parsing information from Tegrastats
+    """
 
+    def __init__(self, interval=100):
+        # TODO: CHECK IF OS IS ABLE TO CALL TEGRASTATS, CANCEL OTHERWISE
         subprocess.run(["tegrastats", "--inteval", interval])
 
     @staticmethod
     def battery_5vrail_power() -> int:
+        """
+        the power measured from the 5 volt rail
+        :return: int ; power in watts
+        """
         result = subprocess.run(
             [
                 "cat",
@@ -22,6 +30,10 @@ class Tegrastats:
 
     @staticmethod
     def battery_gpu_cpu_rail_power() -> int:
+        """
+        the power measured from the GPU and CPU rail
+        :return: int ; power in watts
+        """
         result = subprocess.run(
             [
                 "cat",
@@ -36,6 +48,10 @@ class Tegrastats:
 
     @staticmethod
     def battery_soc_rail_power() -> int:
+        """
+        the power measured from the SOC rail
+        :return: int ; power in watts
+        """
         result = subprocess.run(
             [
                 "cat",

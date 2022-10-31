@@ -8,7 +8,7 @@ import numpy as np
 from mavsdk import System, telemetry
 
 from pteranodon.plugins.ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
-import tegrastats
+from .tegrastats import Tegrastats
 
 
 class Power(AbstractCustomPlugin):
@@ -31,10 +31,10 @@ class Power(AbstractCustomPlugin):
         self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
         if self._ext_args["power"] is not None:
             self._window_size = self._ext_args["power"][0]
-            self._tegrastats = tegrastats.Tegrastats(self._ext_args["power"][1])
+            self._tegrastats = Tegrastats(self._ext_args["power"][1])
         else:
             self._window_size = 10
-            self._tegrastats = tegrastats.Tegrastats()
+            self._tegrastats = Tegrastats()
         self._window: deque = deque(maxlen=self._window_size)
 
         @self._telemetry.register_battery_handler
