@@ -7,7 +7,7 @@ from collections import deque
 import numpy as np
 from mavsdk import System, telemetry
 
-from .abstract_custom_plugin import AbstractCustomPlugin
+from pteranodon.plugins.ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
 import tegrastats
 
 

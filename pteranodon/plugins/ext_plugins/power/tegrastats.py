@@ -3,6 +3,7 @@ import subprocess
 
 class Tegrastats:
     def __init__(self, interval=100):
+
         subprocess.run(["tegrastats", "--inteval", interval])
 
     @staticmethod
