@@ -94,5 +94,5 @@ waiting on steps from David
 
 ### Multi Vehicle Simulation
 1. Tools/gazebo_sitl_multiple_run.sh [-m <model>] [-n <number_of_vehicles>] [-w <world>]
-2. Tools/gazebo_sitl_multiple_run.sh -s typhoon_h480:1,iris:1 -w baylands
+2. Tools/gazebo_sitl_multiple_run.sh -s typhoon_h480:1,iris:1 -w baylands_park
       
