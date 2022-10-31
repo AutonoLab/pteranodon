@@ -1,4 +1,4 @@
 mavsdk>=1.4.0
 numpy
-pymavlink
+pymavlink==2.4.37
 grpcio

@@ -8,12 +8,12 @@ from pymavlink import mavutil
 
 
 # TODO_: Better name?
-class AutoConnect:
+class ServerDetector:
     """
     Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
     """
 
-    def __init__(self, server_ip_addr: Optional[str]):
+    def __init__(self, server_ip_addr: str = "127.0.0.1"):
         """
         Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
 
@@ -21,7 +21,6 @@ class AutoConnect:
         :type server_ip_addr: Optional[str]
         """
         self._server_addr = server_ip_addr
-        self._should_check_server = self._server_addr is not None
 
     async def _test_port_open(
         self,
@@ -41,9 +40,6 @@ class AutoConnect:
         :return: The port tested and whether the port is open, None if invalid parameters
         :rtype: Optional[Tuple[int, bool]]
         """
-        # Must have a server address
-        if not self._should_check_server:
-            return None
 
         # Only supporting TCP and UDP
         if socket_kind not in [socket.SOCK_STREAM, socket.SOCK_DGRAM]:
@@ -58,7 +54,8 @@ class AutoConnect:
 
         return port, True
 
-    def fetch_possible_serial_devs(self) -> List[str]:
+    @staticmethod
+    def _fetch_possible_serial_devs() -> List[str]:
         """
         Fetches all the possible serial devices from /sys/class/tty while removing standard devices and virtual consoles.
 
@@ -143,7 +140,7 @@ class AutoConnect:
         if serial_dev is not None:
             conn = mavutil.mavlink_connection(device=serial_dev, baud=115200)
 
-        if port is not None and self._should_check_server:
+        if port is not None:
             prefix = "tcp" if is_tcp else "udp"
             addr = f"{prefix}:{self._server_addr}:{port}"
             conn = mavutil.mavlink_connection(addr)
@@ -164,6 +161,22 @@ class AutoConnect:
             "is_tcp": is_tcp,
         }
 
+    # For the given dictionary, get the corresponding string server path
+    def _get_server_value(self, data_dict: Optional[Dict[str, Any]]) -> Optional[str]:
+        if data_dict is None:
+            return None
+
+        serial_dev: Optional[str] = data_dict["serial_dev"]
+        port: Optional[int] = data_dict["port"]
+
+        if serial_dev is not None:
+            return serial_dev
+
+        if data_dict["is_tcp"]:
+            return f"tcp:{self._server_addr}:{port}"
+
+        return f"udp:{self._server_addr}:{port}"
+
     def get_mavsdk_servers(self) -> List[str]:
         """
         Fetch the list of serial devices, complete TCP paths, or complete UDP paths
@@ -172,59 +185,33 @@ class AutoConnect:
         :return: The list of server paths
         :rtype: List[str]
         """
-        serial_devs = self.fetch_possible_serial_devs()
+        serial_devs = ServerDetector._fetch_possible_serial_devs()
 
         serial_devs_future = asyncio.gather(
             *[self._test_server(serial_dev=dev) for dev in serial_devs]
         )
 
-        all_data_future = serial_devs_future
+        tcp_ports = self.fetch_open_proto_ports(socket.SOCK_STREAM)
+        udp_ports = self.fetch_open_proto_ports(socket.SOCK_DGRAM)
 
-        if self._should_check_server:
-            tcp_ports = self.fetch_open_proto_ports(socket.SOCK_STREAM)
-            udp_ports = self.fetch_open_proto_ports(socket.SOCK_DGRAM)
+        tcp_ports_future = asyncio.gather(
+            *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
+        )
+        udp_ports_future = asyncio.gather(
+            *[self._test_server(port=port, is_tcp=False) for port in udp_ports]
+        )
 
-            tcp_ports_future = asyncio.gather(
-                *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
-            )
-            udp_ports_future = asyncio.gather(
-                *[self._test_server(port=port, is_tcp=False) for port in udp_ports]
-            )
-
-            all_data_future = asyncio.gather(
-                serial_devs_future, tcp_ports_future, udp_ports_future
-            )
+        all_data_future = asyncio.gather(
+            serial_devs_future, tcp_ports_future, udp_ports_future
+        )
 
         new_loop = asyncio.new_event_loop()
         all_data = new_loop.run_until_complete(all_data_future)
 
-        # For the given dictionary, get the corresponding string server path
-        def get_server_value(data_dict: Optional[Dict[str, Any]]) -> Optional[str]:
-            if data_dict is None:
-                return None
-
-            serial_dev: Optional[str] = data_dict["serial_dev"]
-            port: Optional[int] = data_dict["port"]
-
-            if serial_dev is not None:
-                return serial_dev
-
-            if not self._should_check_server:
-                return None
-
-            if data_dict["is_tcp"]:
-                return f"tcp:{self._server_addr}:{port}"
-
-            return f"udp:{self._server_addr}:{port}"
-
-        # There are only serial devs, represent as a list for for-loop
-        if not self._should_check_server:
-            all_data = [all_data]
-
         full_servers_list: List[str] = []
 
         for data_list in all_data:
-            servers_opt_list = [get_server_value(data) for data in data_list]
+            servers_opt_list = [self._get_server_value(data) for data in data_list]
             servers_list: List[str] = [
                 server for server in servers_opt_list if server is not None
             ]  # Filter invalid servers
