@@ -19,13 +19,17 @@ In order to merge into the `main` branch, a contributor must satisfy these stand
 
 This can be done automatically by setting your IDE to format on save, or you can run `black --safe ./pteranodon` locally.
 
-## Description
+Description\
 A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
 gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 ---
 
 ## Requirements for Use
-Information TBD
+* mavsdk>=1.4.0
+* numpy
+* grpcio
+* PX4_Autopilot
+* Linux* (Gazebo only runs on linux, but can use WSL)
 
 ## Project Installation
 This project can be installed using WSL and Docker. Look below for instructions on both
