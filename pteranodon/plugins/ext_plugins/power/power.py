@@ -3,6 +3,7 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Dict, Optional
 from collections import deque
+from subprocess import SubprocessError
 
 import numpy as np
 from mavsdk import System, telemetry
@@ -31,10 +32,18 @@ class Power(AbstractCustomPlugin):
         self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
         if self._ext_args["power"] is not None:
             self._window_size = self._ext_args["power"][0]
-            self._tegrastats = Tegrastats(self._ext_args["power"][1])
+            try:
+                self._tegrastats = Tegrastats(self._ext_args["power"][1])
+                self._instantiated = True
+            except SubprocessError:
+                self._instantiated = False
         else:
             self._window_size = 10
-            self._tegrastats = Tegrastats()
+            try:
+                self._tegrastats = Tegrastats()
+                self._instantiated = True
+            except SubprocessError:
+                self._instantiated = False
         self._window: deque = deque(maxlen=self._window_size)
 
         @self._telemetry.register_battery_handler
@@ -58,8 +67,9 @@ class Power(AbstractCustomPlugin):
         Get the instantaneous wattage only from hardware components
         :return: float ; the instantaneous wattage
         """
+
         all_wattage = self.get_instantaneous_wattage()
-        if all_wattage is not None:
+        if all_wattage is not None and self._instantiated is True:
             return all_wattage - self._tegrastats.battery_5vrail_power()
         return None
 

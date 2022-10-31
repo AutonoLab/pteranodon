@@ -7,8 +7,10 @@ class Tegrastats:
     """
 
     def __init__(self, interval=100):
-        # TODO: CHECK IF OS IS ABLE TO CALL TEGRASTATS, CANCEL OTHERWISE
-        subprocess.run(["tegrastats", "--inteval", interval])
+        try:
+            subprocess.run(["tegrastats", "--inteval", interval], check=True)
+        except subprocess.SubprocessError as error:
+            raise error
 
     @staticmethod
     def battery_5vrail_power() -> int:
