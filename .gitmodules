@@ -5,3 +5,4 @@
 [submodule "third-party/pygazebo"]
 	path = third-party/pygazebo
 	url = https://github.com/justincdavis/pygazebo.git
+	branch = main
