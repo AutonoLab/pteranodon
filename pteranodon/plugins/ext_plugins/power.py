@@ -3,12 +3,12 @@ from asyncio import AbstractEventLoop
 from logging import Logger
 from typing import Dict, Optional
 from collections import deque
-import subprocess
 
 import numpy as np
 from mavsdk import System, telemetry
 
 from .abstract_custom_plugin import AbstractCustomPlugin
+import tegrastats
 
 
 class Power(AbstractCustomPlugin):
@@ -31,10 +31,10 @@ class Power(AbstractCustomPlugin):
         self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
         if self._ext_args["power"] is not None:
             self._window_size = self._ext_args["power"][0]
-            self._tegrastats_start(self._ext_args["power"][1])
+            self._tegrastats = tegrastats.Tegrastats(self._ext_args["power"][1])
         else:
             self._window_size = 10
-            self._tegrastats_start()
+            self._tegrastats = tegrastats.Tegrastats()
         self._window: deque = deque(maxlen=self._window_size)
 
         @self._telemetry.register_battery_handler
@@ -60,7 +60,7 @@ class Power(AbstractCustomPlugin):
         """
         all_wattage = self.get_instantaneous_wattage()
         if all_wattage is not None:
-            return all_wattage - self._tegrastats_battery_5vrail_power()
+            return all_wattage - self._tegrastats.battery_5vrail_power()
         return None
 
     def get_software_wattage(self) -> Optional[float]:
@@ -68,8 +68,9 @@ class Power(AbstractCustomPlugin):
         Get the instantaneous wattage only from software components
         :return: float ; the instantaneous wattage
         """
-        return self._tegrastats_battery_5vrail_power()
+        return self._tegrastats.battery_5vrail_power()
 
+    @staticmethod
     def _average_voltage(self, window) -> float:
         return np.mean([b.voltage_v for b in list(window)])
 
@@ -115,45 +116,3 @@ class Power(AbstractCustomPlugin):
         :return: float ; the mili-amp hours "consumed"
         """
         return self._capacity - (self._window[-1][0].remaining_percent * self._capacity)
-
-    def _tegrastats_start(self, interval=100):
-        subprocess.run(["tegrastats", "--inteval", interval])
-
-    def _tegrastats_battery_5vrail_power(self) -> int:
-        result = subprocess.run(
-            [
-                "cat",
-                "~/sys/bus/i2c/drivers/ina3221x/1-0040/iio:device0/in_power0_input",
-            ],
-            capture_output=True,
-            text=True,
-        )
-        if result.stderr is not None:
-            return int(result.stdout)
-        return -1
-
-    def _tegrastats_battery_gpu_cpu_rail_power(self) -> int:
-        result = subprocess.run(
-            [
-                "cat",
-                "~/sys/bus/i2c/drivers/ina3221x/1-0040/iio:device0/in_power1_input",
-            ],
-            capture_output=True,
-            text=True,
-        )
-        if result.stderr is not None:
-            return int(result.stdout)
-        return -1
-
-    def _tegrastats_battery_soc_rail_power(self) -> int:
-        result = subprocess.run(
-            [
-                "cat",
-                "~/sys/bus/i2c/drivers/ina3221x/1-0040/iio:device0/in_power2_input",
-            ],
-            capture_output=True,
-            text=True,
-        )
-        if result.stderr is not None:
-            return int(result.stdout)
-        return -1
