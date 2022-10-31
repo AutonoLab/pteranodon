@@ -31,7 +31,8 @@ class CameraServer(AbstractBasePlugin):
             CameraServer._default_photo_request_callback
         )
 
-        self._submit_generator(self._take_photo)
+        self._submit_simple_generator(self._system.camera_server.take_photo)
+        self._register_handler(self._system.camera_server.take_photo)(self._take_photo)
 
         self._end_init()
 
@@ -93,17 +94,22 @@ class CameraServer(AbstractBasePlugin):
 
         return TakePhotoFeedback.FAILED, capture_info
 
-    async def _take_photo(self) -> None:
-        async for capture_req_idx in self._system.camera_server.take_photo():
-            self._logger.info(
-                f"Received image capture request with index {capture_req_idx}"
-            )
+    def _take_photo(self) -> None:
+        capture_req_idx_opt = self._async_gen_data[
+            self._system.camera_server.take_photo()
+        ]
+        if capture_req_idx_opt is None:
+            return
+        capture_req_idx: int = capture_req_idx_opt
+        self._logger.info(
+            f"Received image capture request with index {capture_req_idx}"
+        )
 
-            # Uses the photo request callback to get the arguments for the response_take_photo method.
-            self.set_in_progress(True)
-            feedback_capture_tuple = self._photo_request_callback(capture_req_idx)
-            self.set_in_progress(False)
-            self._respond_take_photo(*feedback_capture_tuple)
+        # Uses the photo request callback to get the arguments for the response_take_photo method.
+        self.set_in_progress(True)
+        feedback_capture_tuple = self._photo_request_callback(capture_req_idx)
+        self.set_in_progress(False)
+        self._respond_take_photo(*feedback_capture_tuple)
 
     def set_in_progress(self, in_progress: bool) -> None:
         """
@@ -147,3 +153,10 @@ class CameraServer(AbstractBasePlugin):
         self._cam_info = cam_info
 
         self._submit_coroutine(self._system.camera_server.set_information(cam_info))
+
+    def register_take_photo_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.camera_server.take_photo)(handler)

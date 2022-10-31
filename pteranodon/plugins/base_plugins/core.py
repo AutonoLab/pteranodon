@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
+from typing import Callable
 
 from mavsdk import System, core
 
@@ -14,8 +15,7 @@ class Core(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("core", system, loop, logger)
 
-        self._connection_state = None
-        self._submit_generator(self._update_connection_state)
+        self._submit_simple_generator(self._system.core.connection_state)
 
         self._end_init()
 
@@ -31,14 +31,16 @@ class Core(AbstractBasePlugin):
         """
         self._submit_coroutine(self._system.core.set_mavlink_timeout(delay_s))
 
-    async def _update_connection_state(self) -> None:
-        async for connection_state in self._system.core.connection_state():
-            if connection_state != self._connection_state:
-                self._connection_state = connection_state
-
     def connection_state(self) -> core.ConnectionState:
         """
         Subscribe to 'connection state' updates
         :return: core.ConnectionState ; The current connection state
         """
-        return self._connection_state
+        return self._async_gen_data[self._system.core.connection_state]
+
+    def register_connection_state_handler(self, handler: Callable) -> None:
+        """
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
+        """
+        self._register_handler(self._system.core.connection_state)(handler)

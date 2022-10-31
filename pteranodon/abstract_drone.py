@@ -11,10 +11,16 @@ import sys
 import random
 import signal
 
-import uvloop
 from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
+
+try:
+    import uvloop
+
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ModuleNotFoundError:
+    pass
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
@@ -50,7 +56,7 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.ext_plugins import Sensor, Relative
+from .plugins.extension_plugins import Sensor, Relative
 
 
 class AbstractDrone(ABC):
@@ -71,9 +77,6 @@ class AbstractDrone(ABC):
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
-        # set asyncio event loop policy
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
         # attatch signal handlers
         self._handle_signals_main()
 
@@ -112,31 +115,30 @@ class AbstractDrone(ABC):
         # connect the drone
         self._connect()
 
-        # build arguments for the extension plugins
-        self._ext_args = {**kwargs}
+        try:
+            # setup all plugins
+            self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
 
-        # setup all plugins
-        self._plugins = PluginManager(
-            self._drone, self._loop, self._logger, self._ext_args, kwargs
-        )
+            # after connection run setup, then initialize loop, run teardown during cleanup phase
+            self.setup()
+            self._loop_thread = Thread(
+                name="Loop-Thread", target=self._loop_loop, daemon=True
+            )
 
-        # after connection run setup, then initialize loop, run teardown during cleanup phase
-        self.setup()
-        self._loop_thread = Thread(
-            name="Loop-Thread", target=self._loop_loop, daemon=True
-        )
+            # finally, start the mavlink thread
+            self._mavlink_thread.start()
+            self._telemetry_thread.start()
+            self.sensor.start_all_sensors()
 
-        # finally, start the mavlink thread
-        self._mavlink_thread.start()
-        self._telemetry_thread.start()
-        self.sensor.start_all_sensors()
-
-        # create a list of threads in the object
-        self._threads: List[Thread] = [
-            self._loop_thread,
-            self._mavlink_thread,
-            self._telemetry_thread,
-        ]
+            # create a list of threads in the object
+            self._threads: List[Thread] = [
+                self._loop_thread,
+                self._mavlink_thread,
+                self._telemetry_thread,
+            ]
+        except Exception as e:
+            self._cleanup()
+            raise e
 
     # setup the logger
     def _setup_logger(self, log_file_name: str) -> logging.Logger:
@@ -176,233 +178,240 @@ class AbstractDrone(ABC):
         """
         The ActionServer plugin instance
         """
-        return self._plugins.base_plugins["action_server"]
+        return self._plugins.action_server
 
     @property
     def action(self) -> Action:
         """
         The Action plugin instance
         """
-        return self._plugins.base_plugins["action"]
+        return self._plugins.action
 
     @property
     def calibration(self) -> Calibration:
         """
         The Calibration plugin instance
         """
-        return self._plugins.base_plugins["calibration"]
+        return self._plugins.calibration
 
     @property
     def camera_server(self) -> CameraServer:
         """
         The CameraServer plugin instance
         """
-        return self._plugins.base_plugins["camera_server"]
+        return self._plugins.camera_server
 
     @property
     def camera(self) -> Camera:
         """
         The Camera plugin instance
         """
-        return self._plugins.base_plugins["camera"]
+        return self._plugins.camera
 
     @property
     def component_information_server(self) -> ComponentInformationServer:
         """
         The ComponentInformationServer plugin instance
         """
-        return self._plugins.base_plugins["component_information_server"]
+        return self._plugins.component_information_server
 
     @property
     def component_information(self) -> ComponentInformation:
         """
         The ComponentInformation plugin instance
         """
-        return self._plugins.base_plugins["component_information"]
+        return self._plugins.component_information
 
     @property
     def core(self) -> Core:
         """
         The Core plugin instance
         """
-        return self._plugins.base_plugins["core"]
+        return self._plugins.core
 
     @property
     def failure(self) -> Failure:
         """
         The Failure plugin instance
         """
-        return self._plugins.base_plugins["failure"]
+        return self._plugins.failure
 
     @property
     def follow_me(self) -> FollowMe:
         """
         The FollowMe plugin instance
         """
-        return self._plugins.base_plugins["follow_me"]
+        return self._plugins.follow_me
 
     @property
     def ftp(self) -> Ftp:
         """
         The Ftp plugin instance
         """
-        return self._plugins.base_plugins["ftp"]
+        return self._plugins.ftp
 
     @property
     def geofence(self) -> Geofence:
         """
         The Geofence plugin instance
         """
-        return self._plugins.base_plugins["geofence"]
+        return self._plugins.geofence
 
     @property
     def gimbal(self) -> Gimbal:
         """
         The  plugin instance
         """
-        return self._plugins.base_plugins["gimbal"]
+        return self._plugins.gimbal
 
     @property
     def info(self) -> Info:
         """
         The Info plugin instance
         """
-        return self._plugins.base_plugins["info"]
+        return self._plugins.info
 
     @property
     def log_files(self) -> LogFiles:
         """
         The LogFiles plugin instance
         """
-        return self._plugins.base_plugins["log_files"]
+        return self._plugins.log_files
 
     @property
     def manual_control(self) -> ManualControl:
         """
         The ManualControl plugin instance
         """
-        return self._plugins.base_plugins["manual_control"]
+        return self._plugins.manual_control
 
     @property
     def mission_raw_server(self) -> MissionRawServer:
         """
         The MissionRawServer plugin instance
         """
-        return self._plugins.base_plugins["mission_raw_server"]
+        return self._plugins.mission_raw_server
 
     @property
     def mission_raw(self) -> MissionRaw:
         """
         The MissionRaw plugin instance
         """
-        return self._plugins.base_plugins["mission_raw"]
+        return self._plugins.mission_raw
 
     @property
     def mission(self) -> Mission:
         """
         The Mission plugin instance
         """
-        return self._plugins.base_plugins["mission"]
+        return self._plugins.mission
 
     @property
     def mocap(self) -> Mocap:
         """
         The Mocap plugin instance
         """
-        return self._plugins.base_plugins["mocap"]
+        return self._plugins.mocap
 
     @property
     def offboard(self) -> Offboard:
         """
         The Offboard plugin instance
         """
-        return self._plugins.base_plugins["offboard"]
+        return self._plugins.offboard
 
     @property
     def param_server(self) -> ParamServer:
         """
         The ParamServer plugin instance
         """
-        return self._plugins.base_plugins["param_server"]
+        return self._plugins.param_server
 
     @property
     def param(self) -> Param:
         """
         The Param plugin instance
         """
-        return self._plugins.base_plugins["param"]
+        return self._plugins.param
 
     @property
     def rtk(self) -> Rtk:
         """
         The Rtk plugin instance
         """
-        return self._plugins.base_plugins["rtk"]
+        return self._plugins.rtk
 
     @property
     def server_utility(self) -> ServerUtility:
         """
         The ServerUtility plugin instance
         """
-        return self._plugins.base_plugins["server_utility"]
+        return self._plugins.server_utility
 
     @property
     def shell(self) -> Shell:
         """
         The Shell plugin instance
         """
-        return self._plugins.base_plugins["shell"]
+        return self._plugins.shell
 
     @property
     def telemetry_server(self) -> TelemetryServer:
         """
         The TelemetryServer plugin instance
         """
-        return self._plugins.base_plugins["telemetry_server"]
+        return self._plugins.telemetry_server
 
     @property
     def telemetry(self) -> Telemetry:
         """
         The Telemetry plugin instance
         """
-        return self._plugins.base_plugins["telemetry"]
+        return self._plugins.telemetry
 
     @property
     def tracking_server(self) -> TrackingServer:
         """
         The TrackingServer plugin instance
         """
-        return self._plugins.base_plugins["tracking_server"]
+        return self._plugins.tracking_server
 
     @property
     def transponder(self) -> Transponder:
         """
         The Transponder plugin instance
         """
-        return self._plugins.base_plugins["transponder"]
+        return self._plugins.transponder
 
     @property
     def tune(self) -> Tune:
         """
         The Tune plugin instance
         """
-        return self._plugins.base_plugins["tune"]
+        return self._plugins.tune
 
     @property
     def sensor(self) -> Sensor:
         """
         :return: The Sensor plugin class instance
         """
-        return self._plugins.ext_plugins["sensor"]
+        return self._plugins.sensor
 
     @property
     def relative(self) -> Relative:
         """
         :return: The Relative plugin class instance
         """
-        return self._plugins.ext_plugins["relative"]
+        return self._plugins.relative
 
     # NON-PLUGIN PROPERTIES
+    @property
+    def system(self) -> System:
+        """
+        :return: The MAVSDK System instance
+        """
+        return self._drone
+
     @property
     def logger(self) -> logging.Logger:
         """
