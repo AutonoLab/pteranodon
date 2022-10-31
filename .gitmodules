@@ -2,6 +2,3 @@
 	path = third-party/gazebo-realsense
 	url = https://github.com/justincdavis/gazebo-realsense.git
 	branch = main
-[submodule "third-party/pygazebo3"]
-	path = third-party/pygazebo3
-	url = https://github.com/justincdavis/pygazebo3.git
