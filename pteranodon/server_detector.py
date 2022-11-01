@@ -65,7 +65,9 @@ class ServerDetector:
             try:
                 sock.connect((self._server_addr, port))
             except TimeoutError:
-                return port, False
+                return port, False  # Timed out
+            except ConnectionError:
+                return port, False  # Not open
 
         return port, True
 
@@ -77,6 +79,13 @@ class ServerDetector:
         :return: The paths of connected serial devices
         :rtype: List[str]
         """
+
+        if not os.path.exists("/sys/class/tty"):
+            print(
+                '"/sys/class/tty" does not exist on this file system. Could not check for serial devices'
+            )
+            return []
+
         blacklisted_devices = ["pmtx", "console", "ttyprintk"]
 
         serial_devices = os.listdir("/sys/class/tty")
@@ -119,7 +128,8 @@ class ServerDetector:
 
         new_loop = asyncio.new_event_loop()
         ports_future = asyncio.gather(
-            *[self._test_port_open(port, socket_kind) for port in all_ports]
+            *[self._test_port_open(port, socket_kind) for port in all_ports],
+            loop=new_loop,
         )
         port_data = new_loop.run_until_complete(ports_future)
 
@@ -174,6 +184,8 @@ class ServerDetector:
 
         msg = conn.recv_match(type="HEARTBEAT", blocking=True, timeout=conn_timeout)
 
+        conn.close()
+
         # Msg is None on timeout
         if msg is None:
             return None
@@ -217,22 +229,25 @@ class ServerDetector:
             socket.SOCK_DGRAM, fetch_cached=test_cached
         )
 
+        new_loop = asyncio.new_event_loop()
+
         serial_devs_future = asyncio.gather(
-            *[self._test_server(serial_dev=dev) for dev in serial_devs]
+            *[self._test_server(serial_dev=dev) for dev in serial_devs], loop=new_loop
         )
 
         tcp_ports_future = asyncio.gather(
-            *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
+            *[self._test_server(port=port, is_tcp=True) for port in tcp_ports],
+            loop=new_loop,
         )
         udp_ports_future = asyncio.gather(
-            *[self._test_server(port=port, is_tcp=False) for port in udp_ports]
+            *[self._test_server(port=port, is_tcp=False) for port in udp_ports],
+            loop=new_loop,
         )
 
         all_data_future = asyncio.gather(
-            serial_devs_future, tcp_ports_future, udp_ports_future
+            serial_devs_future, tcp_ports_future, udp_ports_future, loop=new_loop
         )
 
-        new_loop = asyncio.new_event_loop()
         all_data = new_loop.run_until_complete(all_data_future)
 
         full_servers_list: List[str] = []
