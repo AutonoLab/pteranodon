@@ -35,7 +35,7 @@ class ServerDetector:
 
         if port_range[0] < 0 or port_range[1] < 0 or port_range[0] >= port_range[1]:
             print("Invalid port range given, reverting to default (14540, 1450)")
-            self._port_range = (14540, 1450)
+            self._port_range = (14540, 14550)
 
     async def _test_port_open(
         self,
