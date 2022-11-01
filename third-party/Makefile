@@ -1,20 +1,38 @@
-SUBDIRS := $(wildcard */.)  # e.g. "foo/. bar/."
-TARGETS := install  # whatever else, but must not contain '/'
+SHELL = /bin/sh
+INSTALL = /usr/bin/install
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
 
-# foo/.all bar/.all foo/.clean bar/.clean
-SUBDIRS_TARGETS := \
-    $(foreach t,$(TARGETS),$(addsuffix $t,$(SUBDIRS)))
+DIRS = gazebo-realsense pygazebo
+# the sets of directories to do various things in
+BUILDDIRS = $(DIRS:%=build-%)
+INSTALLDIRS = $(DIRS:%=install-%)
+CLEANDIRS = $(DIRS:%=clean-%)
+TESTDIRS = $(DIRS:%=test-%)
 
-.PHONY : $(TARGETS) $(SUBDIRS_TARGETS)
+all: $(BUILDDIRS)
+$(DIRS): $(BUILDDIRS)
+$(BUILDDIRS):
+	$(MAKE) -C $(@:build-%=%)
 
-# static pattern rule, expands into:
-# all clean : % : foo/.% bar/.%
-$(TARGETS) : % : $(addsuffix %,$(SUBDIRS))
-    @echo 'Done "$*" target'
+# the utils need the libraries in dev built first
+build-utils: build-dev
 
-# here, for foo/.all:
-#   $(@D) is foo
-#   $(@F) is .all, with leading period
-#   $(@F:.%=%) is just all
-$(SUBDIRS_TARGETS) :
-    $(MAKE) -C $(@D) $(@F:.%=%)
+install: $(INSTALLDIRS) all
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install
+
+test: $(TESTDIRS) all
+$(TESTDIRS): 
+	$(MAKE) -C $(@:test-%=%) test
+
+clean: $(CLEANDIRS)
+$(CLEANDIRS): 
+	$(MAKE) -C $(@:clean-%=%) clean
+
+.PHONY: subdirs $(DIRS)
+.PHONY: subdirs $(BUILDDIRS)
+.PHONY: subdirs $(INSTALLDIRS)
+.PHONY: subdirs $(TESTDIRS)
+.PHONY: subdirs $(CLEANDIRS)
+.PHONY: all install clean test
