@@ -16,7 +16,8 @@ class ServerDetector:
     def __init__(
         self,
         server_ip_addr: str = "127.0.0.1",
-        port_range: Tuple[int, int] = (14540, 1450),
+        port_range: Tuple[int, int] = (14540, 14550),
+        serial_baud_rate: int = 115200,
     ):
         """
         Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
@@ -25,6 +26,7 @@ class ServerDetector:
         :type server_ip_addr: Optional[str]
         """
         self._server_addr = server_ip_addr
+        self._serial_baud_rate = serial_baud_rate
 
         # Between socket kind and ports
         self._available_ports: Dict[int, List[int]] = defaultdict(list)
@@ -191,7 +193,7 @@ class ServerDetector:
         port: Optional[int] = data_dict["port"]
 
         if serial_dev is not None:
-            return serial_dev
+            return f"serial://{serial_dev}:{self._serial_baud_rate}"
 
         if data_dict["is_tcp"]:
             return f"tcp://{self._server_addr}:{port}"
