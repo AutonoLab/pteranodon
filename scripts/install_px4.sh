@@ -21,4 +21,8 @@ sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 
 sudo reboot
 
+echo "Running Gazebo"
+cd ../..
+sudo make px4_sitl gazebo
+
 echo "Installation Complete"
