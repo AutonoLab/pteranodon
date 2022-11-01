@@ -12,11 +12,13 @@ else
 	git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 fi
 
-./PX4-Autopilot/Tools/setup/ubuntu.sh
-
-sudo reboot
-
+echo "Installing pip dependencies"
 pip install uvloop
 pip install mavsdk
+
+echo "Running ubuntu.sh"
+sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+
+sudo reboot
 
 echo "Installation Complete"
