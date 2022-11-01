@@ -13,7 +13,11 @@ class ServerDetector:
     Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
     """
 
-    def __init__(self, server_ip_addr: str = "127.0.0.1"):
+    def __init__(
+        self,
+        server_ip_addr: str = "127.0.0.1",
+        port_range: Tuple[int, int] = (14540, 1450),
+    ):
         """
         Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
 
@@ -24,6 +28,12 @@ class ServerDetector:
 
         # Between socket kind and ports
         self._available_ports: Dict[int, List[int]] = defaultdict(list)
+
+        self._port_range: Tuple[int, int] = port_range
+
+        if port_range[0] < 0 or port_range[1] < 0 or port_range[0] >= port_range[1]:
+            print("Invalid port range given, reverting to default (14540, 1450)")
+            self._port_range = (14540, 1450)
 
     async def _test_port_open(
         self,
@@ -83,7 +93,6 @@ class ServerDetector:
 
         return serial_paths
 
-    # Must be done in parallel, would take 17+ hours otherwise
     def fetch_open_proto_ports(
         self, socket_kind: int, fetch_cached: bool = False
     ) -> List[int]:
@@ -104,11 +113,11 @@ class ServerDetector:
         if fetch_cached:
             return self._available_ports[socket_kind]
 
-        port_range = range(1024, pow(2, 16))
+        all_ports = range(self._port_range[0], self._port_range[1] + 1)
 
         new_loop = asyncio.new_event_loop()
         ports_future = asyncio.gather(
-            *[self._test_port_open(port, socket_kind) for port in port_range]
+            *[self._test_port_open(port, socket_kind) for port in all_ports]
         )
         port_data = new_loop.run_until_complete(ports_future)
 
@@ -154,7 +163,7 @@ class ServerDetector:
 
         if port is not None:
             prefix = "tcp" if is_tcp else "udp"
-            addr = f"{prefix}:{self._server_addr}:{port}"
+            addr = f"{prefix}://{self._server_addr}:{port}"
             conn = mavutil.mavlink_connection(addr)
 
         # Invalid parameters
