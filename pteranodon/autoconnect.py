@@ -163,7 +163,7 @@ class ServerDetector:
 
         if port is not None:
             prefix = "tcp" if is_tcp else "udp"
-            addr = f"{prefix}://{self._server_addr}:{port}"
+            addr = f"{prefix}:{self._server_addr}:{port}"
             conn = mavutil.mavlink_connection(addr)
 
         # Invalid parameters
@@ -194,9 +194,9 @@ class ServerDetector:
             return serial_dev
 
         if data_dict["is_tcp"]:
-            return f"tcp:{self._server_addr}:{port}"
+            return f"tcp://{self._server_addr}:{port}"
 
-        return f"udp:{self._server_addr}:{port}"
+        return f"udp://{self._server_addr}:{port}"
 
     def get_mavsdk_servers(self, test_cached: bool = False) -> List[str]:
         """
