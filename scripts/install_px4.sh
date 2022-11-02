@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #Download and install PX4.
 # Run with: sudo bash ./install_px4.sh
 
