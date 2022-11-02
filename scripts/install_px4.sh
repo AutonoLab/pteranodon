@@ -14,11 +14,11 @@ else
 	git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 fi
 
+echo "Running ubuntu.sh..............................................................."
+sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+
 echo "Installing pip dependencies....................................................."
 pip install -r ./pteranodon/requirements.txt
-
-echo "Running ubuntu.sh"
-sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 
 echo "Running Gazebo.................................................................."
 cd ./PX4-Autopilot
