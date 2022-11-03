@@ -128,8 +128,7 @@ class ServerDetector:
 
         new_loop = asyncio.new_event_loop()
         ports_future = asyncio.gather(
-            *[self._test_port_open(port, socket_kind) for port in all_ports],
-            loop=new_loop,
+            *[self._test_port_open(port, socket_kind) for port in all_ports]
         )
         port_data = new_loop.run_until_complete(ports_future)
 
@@ -232,20 +231,18 @@ class ServerDetector:
         new_loop = asyncio.new_event_loop()
 
         serial_devs_future = asyncio.gather(
-            *[self._test_server(serial_dev=dev) for dev in serial_devs], loop=new_loop
+            *[self._test_server(serial_dev=dev) for dev in serial_devs]
         )
 
         tcp_ports_future = asyncio.gather(
-            *[self._test_server(port=port, is_tcp=True) for port in tcp_ports],
-            loop=new_loop,
+            *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
         )
         udp_ports_future = asyncio.gather(
-            *[self._test_server(port=port, is_tcp=False) for port in udp_ports],
-            loop=new_loop,
+            *[self._test_server(port=port, is_tcp=False) for port in udp_ports]
         )
 
         all_data_future = asyncio.gather(
-            serial_devs_future, tcp_ports_future, udp_ports_future, loop=new_loop
+            serial_devs_future, tcp_ports_future, udp_ports_future
         )
 
         all_data = new_loop.run_until_complete(all_data_future)
