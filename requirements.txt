@@ -1,4 +1,4 @@
 mavsdk>=1.4.0
-numpy
+numpy>=1.23.0
 pymavlink>=2.4.37
-grpcio
+grpcio>=1.47.0
