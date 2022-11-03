@@ -367,7 +367,8 @@ class Camera(AbstractBasePlugin):
         self._register_handler(self._system.camera.mode)(handler)
 
     def run(self):
-        #add connection statement
+        self._system.connect("udp://:14540")
         self._system.camera.set_mode(camera.Mode.PHOTO)
         self._system.camera.take_photo()
+        del self
 
