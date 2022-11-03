@@ -115,6 +115,7 @@ class Calibration(AbstractBasePlugin):
         self._submit_coroutine(self._calibrate_all())
 
     def run(self):
+        self._system.connect("udp://:14540")
         for progress_data in self._system.calibration.calibrate_gyro():
             print(progress_data)
         for progress_data in self._system.calibration.calibrate_accelerometer():
