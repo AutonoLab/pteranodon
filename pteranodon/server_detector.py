@@ -39,11 +39,13 @@ class ServerDetector:
         :type server_ip_addr: Optional[str]
         """
 
-        self._user_provided_logger = True
-        self._logger: Optional[logging.Logger] = logger
-        if self._logger is None:
-            self._logger = ServerDetector.setup_logger("server_detect.log")
-            self._user_provided_logger = False
+        self._user_provided_logger = logger is not None
+
+        self._logger: logging.Logger = (
+            logger
+            if self._user_provided_logger
+            else ServerDetector.setup_logger("server_detect.log")
+        )
 
         self._event_loop = asyncio.new_event_loop()
 
