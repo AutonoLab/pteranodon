@@ -16,13 +16,13 @@ fi
 
 
 echo "Installing Boost................................................................"
-sudo apt-get install libboost-all-dev
+# sudo apt-get install libboost-all-dev
 
 echo "Installing Gazebo..............................................................."
-sudo apt-get install gazebo
+# sudo apt-get install gazebo
 
-sudo apt update
-sudo apt upgrade
+# sudo apt update
+# sudo apt upgrade
 
 echo "Running ubuntu.sh..............................................................."
 sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --sim_jammy
