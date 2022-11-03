@@ -2,3 +2,4 @@ mavsdk>=1.4.0
 numpy
 pymavlink>=2.4.37
 grpcio
+pyserial>=3.5
