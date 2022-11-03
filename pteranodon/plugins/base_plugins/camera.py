@@ -370,5 +370,5 @@ class Camera(AbstractBasePlugin):
         self._system.connect("udp://:14540")
         self._system.camera.set_mode(camera.Mode.PHOTO)
         self._system.camera.take_photo()
-        del self
+        del self._system
 

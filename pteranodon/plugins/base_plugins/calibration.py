@@ -113,3 +113,14 @@ class Calibration(AbstractBasePlugin):
         :return: None
         """
         self._submit_coroutine(self._calibrate_all())
+
+    def run(self):
+        for progress_data in self._system.calibration.calibrate_gyro():
+            print(progress_data)
+        for progress_data in self._system.calibration.calibrate_accelerometer():
+            print(progress_data)
+        for progress_data in self._system.calibration.calibrate_magnetometer():
+            print(progress_data)
+        for progress_data in self._system.calibration.calibrate_level_horizon():
+            print(progress_data)
+        del self._system
