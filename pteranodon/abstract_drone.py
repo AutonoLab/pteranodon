@@ -15,12 +15,15 @@ from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
 
+
 try:
     import uvloop
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ModuleNotFoundError:
     pass
+
+from .server_detector import ServerDetector
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
@@ -82,7 +85,7 @@ class AbstractDrone(ABC):
 
         # setup the logger first
         logger_name = "mavlog.log" if log_file_name is None else log_file_name
-        self._logger = self._setup_logger(logger_name)
+        self._logger = ServerDetector.setup_logger(logger_name)
 
         # set up the instance fields
         self._stopped_mavlink = False
@@ -139,31 +142,6 @@ class AbstractDrone(ABC):
         except Exception as e:
             self._cleanup()
             raise e
-
-    # setup the logger
-    def _setup_logger(self, log_file_name: str) -> logging.Logger:
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setLevel(logging.DEBUG)
-        stdout_handler.setFormatter(formatter)
-
-        file_handler = logging.FileHandler(log_file_name)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-
-        logger.addHandler(file_handler)
-        logger.addHandler(stdout_handler)
-
-        return logger
-
-    def _close_logger(self) -> None:
-        handlers = self._logger.handlers[:]
-        for handler in handlers:
-            self._logger.removeHandler(handler)
-            handler.close()
 
     # PLUGIN PROPERTIES
     @property
@@ -632,7 +610,7 @@ class AbstractDrone(ABC):
         self._cleanup()
 
         # close logging
-        self._close_logger()
+        ServerDetector.close_logger(self._logger)
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic

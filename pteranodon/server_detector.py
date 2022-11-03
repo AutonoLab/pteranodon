@@ -6,9 +6,18 @@ import re
 import socket
 from collections import defaultdict
 from concurrent import futures
+import logging
+import sys
 
 from pymavlink import mavutil
 from serial import serialutil
+
+try:
+    import uvloop
+
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ModuleNotFoundError:
+    pass
 
 
 class ServerDetector:
@@ -21,6 +30,7 @@ class ServerDetector:
         server_ip_addr: str = "127.0.0.1",
         port_range: Tuple[int, int] = (14540, 14550),
         serial_baud_rate: int = 115200,
+        logger: Optional[logging.Logger] = None,
     ):
         """
         Searches serial devices and, if a server ip address is provided, that server for open MAV SDK servers.
@@ -28,6 +38,12 @@ class ServerDetector:
         :param server_ip_addr: The server IP address to search for MAV SDK searches, None if only serial devices should be searched.
         :type server_ip_addr: Optional[str]
         """
+
+        self._user_provided_logger = True
+        self._logger: Optional[logging.Logger] = logger
+        if self._logger is None:
+            self._logger = ServerDetector.setup_logger("server_detect.log")
+            self._user_provided_logger = False
 
         self._event_loop = asyncio.new_event_loop()
 
@@ -40,7 +56,9 @@ class ServerDetector:
         self._port_range: Tuple[int, int] = port_range
 
         if port_range[0] < 0 or port_range[1] < 0 or port_range[0] >= port_range[1]:
-            print("Invalid port range given, reverting to default (14540, 14550)")
+            self._logger.warning(
+                "Invalid port range given, reverting to default (14540, 14550)"
+            )
             self._port_range = (14540, 14550)
 
         self._loop_thread = Thread(
@@ -48,6 +66,33 @@ class ServerDetector:
             target=self._run_loop,
             daemon=True,
         )
+
+    # setup the logger
+    @staticmethod
+    def setup_logger(log_file_name: str) -> logging.Logger:
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        stdout_handler.setFormatter(formatter)
+
+        file_handler = logging.FileHandler(log_file_name)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
+        logger.addHandler(stdout_handler)
+
+        return logger
+
+    @staticmethod
+    def close_logger(logger: logging.Logger) -> None:
+        handlers = logger.handlers[:]
+        for handler in handlers:
+            logger.removeHandler(handler)
+            handler.close()
 
     def _run_loop(self):
         self._event_loop.run_forever()
@@ -86,8 +131,7 @@ class ServerDetector:
 
         return port, True
 
-    @staticmethod
-    def _fetch_possible_serial_devs() -> List[str]:
+    def _fetch_possible_serial_devs(self) -> List[str]:
         """
         Fetches all the possible serial devices from /sys/class/tty while removing standard devices and virtual consoles.
 
@@ -96,7 +140,7 @@ class ServerDetector:
         """
 
         if not os.path.exists("/sys/class/tty"):
-            print(
+            self._logger.warning(
                 '"/sys/class/tty" does not exist on this file system. Could not check for serial devices'
             )
             return []
@@ -231,7 +275,7 @@ class ServerDetector:
     async def _get_mavsdk_servers_data(
         self, test_cached: bool
     ) -> List[List[Optional[Dict]]]:
-        serial_devs = ServerDetector._fetch_possible_serial_devs()
+        serial_devs = self._fetch_possible_serial_devs()
 
         tcp_ports = await self.fetch_open_proto_ports(
             socket.SOCK_STREAM, fetch_cached=test_cached
@@ -247,6 +291,7 @@ class ServerDetector:
         tcp_ports_future = asyncio.gather(
             *[self._test_server(port=port, is_tcp=True) for port in tcp_ports]
         )
+
         udp_ports_future = asyncio.gather(
             *[self._test_server(port=port, is_tcp=False) for port in udp_ports]
         )
@@ -257,7 +302,7 @@ class ServerDetector:
 
         # This is the correct type. `gather` states that it returns lists,
         #   it returns lists in the code, but mypy believes it returns a tuple.
-        return all_data  # type: ignore
+        return [*all_data]
 
     def get_mavsdk_servers(
         self, test_cached: bool = False, timeout: float = 10.0
@@ -279,10 +324,10 @@ class ServerDetector:
         try:
             all_data: List[List[Optional[Dict[str, Any]]]] = new_future.result(timeout)
         except futures.TimeoutError:
-            print(
+            self._logger.error(
                 "Could not fetch servers before timeout. Try again with a larger timeout or a smaller port range."
             )
-            return []
+            raise TimeoutError
 
         full_servers_list: List[str] = []
 
@@ -295,4 +340,8 @@ class ServerDetector:
 
         self._event_loop.call_soon_threadsafe(self._event_loop.stop)
         self._loop_thread.join()
+
+        if not self._user_provided_logger:
+            ServerDetector.close_logger(self._logger)
+
         return full_servers_list
