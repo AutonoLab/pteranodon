@@ -14,16 +14,6 @@ else
 	git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 fi
 
-
-echo "Installing Boost................................................................"
-# sudo apt-get install libboost-all-dev
-
-echo "Installing Gazebo..............................................................."
-# sudo apt-get install gazebo
-
-# sudo apt update
-# sudo apt upgrade
-
 echo "Running ubuntu.sh..............................................................."
 sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --sim_jammy
 
