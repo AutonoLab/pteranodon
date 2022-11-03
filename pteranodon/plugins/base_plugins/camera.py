@@ -365,10 +365,3 @@ class Camera(AbstractBasePlugin):
         :param handler: A Callable which gets executed each time new data is received
         """
         self._register_handler(self._system.camera.mode)(handler)
-
-    def run(self):
-        self._system.connect("udp://:14540")
-        self._system.camera.set_mode(camera.Mode.PHOTO)
-        self._system.camera.take_photo()
-        del self._system
-

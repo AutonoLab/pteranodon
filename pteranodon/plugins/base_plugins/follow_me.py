@@ -85,8 +85,3 @@ class FollowMe(AbstractBasePlugin):
         """
         self._submit_coroutine(self._system.follow_me.start())
         self._is_active = False
-
-    '''def fly_drone(self):
-        self._system.connect("udp://:14540")
-        self._system.action.arm()
-        self._system.action.'''
