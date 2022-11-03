@@ -2,7 +2,7 @@
 # Original Found at: https://github.com/JonasVautherin/px4-gazebo-headless
 # Edited by: David Shearon
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV WORKSPACE_DIR /root
 ENV FIRMWARE_DIR ${WORKSPACE_DIR}/Firmware
