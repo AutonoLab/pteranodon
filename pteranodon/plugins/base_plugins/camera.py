@@ -136,6 +136,7 @@ class Camera(AbstractBasePlugin):
         self._submit_coroutine(self._system.camera.set_mode(mode))
         self._mode = mode
 
+
     def set_setting(
         self,
         setting: Union[camera.Setting, int],
@@ -364,3 +365,9 @@ class Camera(AbstractBasePlugin):
         :param handler: A Callable which gets executed each time new data is received
         """
         self._register_handler(self._system.camera.mode)(handler)
+
+    def run(self):
+        #add connection statement
+        self._system.camera.set_mode(camera.Mode.PHOTO)
+        self._system.camera.take_photo()
+
