@@ -28,3 +28,4 @@ jobs:
     - name: Check Black Formatting
       run: |
         black --check ./pteranodon
+        
