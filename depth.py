@@ -1,38 +1,57 @@
 import asyncio
-from struct import pack
+import base64
+
+import cv2
+import numpy as np
 
 import pygazebo
-from pygazebo.msg import imu_pb2
-from pygazebo.msg import packet_pb2
 
 
 def image_callback(data):
     print(f"Received Data of type: {type(data)}")
-    # packet = imu_pb2.IMU.FromString(data)
-    packet = packet_pb2.Packet.FromString(data)
-    print(f"Decoded packet to: {type(packet)}")
-    print(dir(packet))
-    print(f"Packet timnestamp: {packet.stamp}")
-    print(f"Packet type: {packet.type}")
-    print(f"Packet serialized data: {packet.serialized_data}")
+    data = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
+    # print(dir(data))
+    # for idx, elem in enumerate(data.image):
+    #     print(f"{idx}: {type(elem)}")
+    # print(type(data.time))
+    try:
+        img_pb2 = data.image
+        height = img_pb2.height
+        width = img_pb2.width
+        img_time = data.time
+        
+        img = np.zeros((img_pb2.height, img_pb2.width), dtype=int)
+        img_pb2 = str(img_pb2.data).strip()[2:-1].split("\\")
+        
+        # iterate over all elements
+        print("processing an image")
+        row, col  = 0, 0
+        for b in img_pb2:
+            if b == "x7f" or b == "":
+                continue
+            img[row][col] = int(b)
+            if col >= width:
+                row += 1
+                col = 0
+        print("DONE")
 
-    imu_packet = imu_pb2.IMU.FromString(packet.serialized_data)
-    print(dir(imu_packet))
+        cv2.imshow("testing", img)
+        cv2.waitKey(0)
+
+    except Exception as e:
+        print(e)
+
 
 async def publish_loop():
-    print(dir(imu_pb2))
-    print(dir(imu_pb2.IMU))
     manager = await pygazebo.connect()
 
     subscriber: pygazebo.Subscriber = await manager.subscribe(
-        '/gazebo/default/iris/imu',
-        'gazebo.msg.IMU',
+        '/gazebo/default/iris_depth_camera/depth_camera/link/depth_camera/image',
+        'gazebo.msg.ImagesStamped',
         image_callback
     )
-    print("Created subscriber")
     subscriber.wait_for_connection()
 
-    print("Starting loop")
     while True:
         await asyncio.sleep(1)
 
