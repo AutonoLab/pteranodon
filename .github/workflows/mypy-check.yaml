@@ -28,3 +28,4 @@ jobs:
     - name: Lint with mypy
       run: |
         mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --disable-error-code import
+        
