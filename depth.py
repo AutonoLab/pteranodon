@@ -21,15 +21,22 @@ def image_callback(data):
         img_time = data.time
         
         img = np.zeros((img_pb2.height, img_pb2.width), dtype=int)
-        img_pb2 = str(img_pb2.data).strip()[2:-1].split("\\")
+        # img_pb2 = str(img_pb2.data).strip()[2:-1].split("\\")
         
+        print(dir(img_pb2))
+        print(f"Height: {img_pb2.height}")
+        print(f"Width: {img_pb2.width}")
+        print(f"Step: {img_pb2.step}")
+        print(f"Pixel_format: {img_pb2.pixel_format}")
+        # decode RGB_FLOAT16 (that is pixel_format 13)
+
         # iterate over all elements
         print("processing an image")
         row, col  = 0, 0
         for b in img_pb2:
             if b == "x7f" or b == "":
                 continue
-            img[row][col] = int(b)
+            img[row][col] = int(b[1:2], 16)
             if col >= width:
                 row += 1
                 col = 0
