@@ -1,0 +1,31 @@
+name: MyPy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  mypy_check:
+    name: "MyPy linting check"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Lint with mypy
+      run: |
+        mypy ./pteranodon --no-implicit-optional --show-column-numbers --show-error-codes --disable-error-code import
+        

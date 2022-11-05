@@ -1,6 +1,6 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Optional
+from typing import Optional, Callable
 
 from mavsdk import System, mission
 
@@ -12,15 +12,17 @@ class Mission(AbstractBasePlugin):
     Enable waypoint missions.
     """
 
+    _bandwidth: int = 0
+
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("mission", system, loop, logger)
 
         self._download_progress = None
         self._enable_return_to_land = None
         self._mission_plan = None
-        self._mission_progress = None
         self._loop.run_until_complete(self._download_mission_with_progress())
-        self._submit_generator(self._update_mission_progress)
+
+        self._submit_simple_generator(self._system.mission.mission_progress)
 
         self._end_init()
 
@@ -74,7 +76,7 @@ class Mission(AbstractBasePlugin):
             if progress.has_mission:
                 self._mission_plan = progress.mission_plan
                 return
-            if progress.has_progress:
+            if progress.has_progress and progress.progress != 0.0:
                 self._logger.info(f"Mission Download at {progress.progress * 100}%")
                 self._mission_progress = progress
 
@@ -139,17 +141,16 @@ class Mission(AbstractBasePlugin):
             self._logger.error("is_mission_finished request timed out!")
         return imf_state
 
-    def mission_progress(self) -> mission.MissionProgress:
+    def mission_progress(self) -> Optional[mission.MissionProgress]:
         """
         returns the current mission progress
         :return: mission.MissionProgress
         """
-        return self._mission_progress
+        return self._async_gen_data[self._system.mission.mission_progress]
 
-    async def _update_mission_progress(self):
+    def register_incoming_mission_handler(self, handler: Callable) -> None:
         """
-        updates the mission progress
-        :return: None
+        Registers a function (Callable) to be a handler of the data stream
+        :param handler: A Callable which gets executed each time new data is received
         """
-        async for progress in self._system.mission.mission_progress():
-            self._mission_progress = progress
+        self._register_handler(self._system.mission.mission_progress)(handler)
