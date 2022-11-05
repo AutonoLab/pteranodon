@@ -1,16 +1,16 @@
 import subprocess
 
 
-class Tegrastats:
+class Tegra:
     """
-    A class for starting and parsing information from Tegrastats
+    A class for starting and parsing information from tegrastats
     """
 
-    def __init__(self, interval=100):
+    def __init__(self, interval=60):
         try:
             subprocess.run(["tegrastats", "--inteval", interval], check=True)
-        except subprocess.SubprocessError as error:
-            raise error
+        except subprocess.SubprocessError:
+            raise RuntimeError("Tegra could not be started")
 
     @staticmethod
     def battery_5vrail_power() -> int:

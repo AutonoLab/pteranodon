@@ -1,18 +1,21 @@
 import time
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, Optional
+from typing import Dict, Optional, Deque
 from collections import deque
 from subprocess import SubprocessError
 
 import numpy as np
 from mavsdk import System, telemetry
 
-from pteranodon.plugins.ext_plugins.abstract_custom_plugin import AbstractCustomPlugin
-from .tegrastats import Tegrastats
+from ..abstract_extension_plugin import AbstractExtensionPlugin
+from ....plugins.base_plugins.telemetry import Telemetry
+from ....plugins.base_plugins.param import Param
+from .tegra import Tegra
+from .rpi import RPi
 
 
-class Power(AbstractCustomPlugin):
+class Power(AbstractExtensionPlugin):
     """
     Generates battery usage information
     """
@@ -26,29 +29,59 @@ class Power(AbstractCustomPlugin):
         ext_args: Dict,
     ) -> None:
         super().__init__("power", system, loop, logger, base_plugins, ext_args)
-        self._telemetry = self._base_plugins["telemetry"]
-        self._param = self._base_plugins["param"]
+        self._telemetry: Telemetry = self._base_plugins["telemetry"]
+        self._param: Param = self._base_plugins["param"]
         self._capacity = self._param.get_param_float("BAT1_CAPACITY")
         self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
-        if self._ext_args["power"] is not None:
-            self._window_size = self._ext_args["power"][0]
-            try:
-                self._tegrastats = Tegrastats(self._ext_args["power"][1])
-                self._instantiated = True
-            except SubprocessError:
-                self._instantiated = False
-        else:
-            self._window_size = 10
-            try:
-                self._tegrastats = Tegrastats()
-                self._instantiated = True
-            except SubprocessError:
-                self._instantiated = False
-        self._window: deque = deque(maxlen=self._window_size)
 
-        @self._telemetry.register_battery_handler
-        def battery_handler(battery: telemetry.Battery):
-            self._window.append((battery, time.time()))
+        self._window_size = 10
+        self._tegra_interval = 60
+        self._rpi_interval = 60
+        if self._ext_args["power"] is not None:
+            try:
+                self._window_size = self._ext_args["power"][0]
+                self._tegra_interval = self._ext_args["power"][1]
+                self._rpi_interval = self._ext_args["power"][2]
+            except IndexError:
+                pass
+        
+        self._tegra_instantiated = False
+        try:
+            self._tegra = Tegra(self._tegra_interval)
+            self._tegra_instantiated = True
+        except SubprocessError:
+            pass
+        
+        self._rpi_instantiated = False
+        try:
+            self._rpi = RPi(self._tegra_interval)
+            self._rpi_instantiated = True
+        except SubprocessError:
+            pass
+
+        self._window: Deque[telemetry.Battery] = deque(maxlen=self._window_size)
+        self._telemetry.register_battery_handler(self._battery_handler)
+        
+    def _battery_handler(self, battery: telemetry.Battery):
+        self._window.append((battery, time.time()))
+
+    @property
+    def tegra(self) -> Optional[Tegra]:
+        """
+        Returns the instance of the Tegra class (if intialized)
+        """
+        if self._tegra_instantiated:
+            return self._tegra
+        return None
+    
+    @property
+    def rpi(self) -> Optional[RPi]:
+        """
+        Returns the instance of the RPi class (if intialized)
+        """
+        if self._rpi_instantiated:
+            return self._rpi
+        return None
 
     def get_instantaneous_wattage(self) -> Optional[float]:
         """
@@ -56,7 +89,7 @@ class Power(AbstractCustomPlugin):
         :return: float : Instantaneous battery usage, Current*Voltage, None if battery has not been polled yet
         """
         if len(self._window) > 0:
-            batt_info = self._window[-1]
+            batt_info: telemetry.Battery = self._window[-1]
             return self._param.get_param_float("BAT1_A_PER_V") * (
                 batt_info.voltage_v**2
             )
@@ -69,8 +102,11 @@ class Power(AbstractCustomPlugin):
         """
 
         all_wattage = self.get_instantaneous_wattage()
-        if all_wattage is not None and self._instantiated is True:
-            return all_wattage - self._tegrastats.battery_5vrail_power()
+        if all_wattage is not None:
+            if self._tegra_instantiated:
+                return all_wattage - self._tegra.battery_5vrail_power()
+            elif self._rpi_instantiated:
+                return None
         return None
 
     def get_software_wattage(self) -> Optional[float]:
@@ -78,7 +114,11 @@ class Power(AbstractCustomPlugin):
         Get the instantaneous wattage only from software components
         :return: float ; the instantaneous wattage
         """
-        return self._tegrastats.battery_5vrail_power()
+        if self._tegra_instantiated:
+            return self._tegra.battery_5vrail_power()
+        elif self._rpi_instantiated:
+            return None
+        return None
 
     @staticmethod
     def _average_voltage(self, window) -> float:
