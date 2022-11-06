@@ -7,17 +7,21 @@ import socket
 from collections import defaultdict
 from concurrent import futures
 import logging
-import sys
+
 
 from pymavlink import mavutil
 from serial import serialutil
 
+import pteranodon.utils.logger as log
+
+# pylint: disable=duplicate-code
 try:
     import uvloop
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ModuleNotFoundError:
     pass
+# pylint: enable=duplicate-code
 
 
 class ServerDetector:
@@ -42,9 +46,7 @@ class ServerDetector:
         self._user_provided_logger = logger is not None
 
         self._logger: logging.Logger = (
-            logger
-            if self._user_provided_logger
-            else ServerDetector.setup_logger("server_detect.log")
+            logger if logger is not None else log.setup_logger("server_detect.log")
         )
 
         self._event_loop = asyncio.new_event_loop()
@@ -68,33 +70,6 @@ class ServerDetector:
             target=self._run_loop,
             daemon=True,
         )
-
-    # setup the logger
-    @staticmethod
-    def setup_logger(log_file_name: str) -> logging.Logger:
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setLevel(logging.DEBUG)
-        stdout_handler.setFormatter(formatter)
-
-        file_handler = logging.FileHandler(log_file_name)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-
-        logger.addHandler(file_handler)
-        logger.addHandler(stdout_handler)
-
-        return logger
-
-    @staticmethod
-    def close_logger(logger: logging.Logger) -> None:
-        handlers = logger.handlers[:]
-        for handler in handlers:
-            logger.removeHandler(handler)
-            handler.close()
 
     def _run_loop(self):
         self._event_loop.run_forever()
@@ -325,11 +300,11 @@ class ServerDetector:
 
         try:
             all_data: List[List[Optional[Dict[str, Any]]]] = new_future.result(timeout)
-        except futures.TimeoutError:
+        except futures.TimeoutError as e:
             self._logger.error(
                 "Could not fetch servers before timeout. Try again with a larger timeout or a smaller port range."
             )
-            raise TimeoutError
+            raise TimeoutError from e
 
         full_servers_list: List[str] = []
 
@@ -344,6 +319,6 @@ class ServerDetector:
         self._loop_thread.join()
 
         if not self._user_provided_logger:
-            ServerDetector.close_logger(self._logger)
+            log.close_logger(self._logger)
 
         return full_servers_list

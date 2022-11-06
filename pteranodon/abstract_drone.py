@@ -23,7 +23,8 @@ try:
 except ModuleNotFoundError:
     pass
 
-from .server_detector import ServerDetector
+from pteranodon.utils.server_detector import ServerDetector
+import pteranodon.utils.logger as log
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
@@ -72,6 +73,7 @@ class AbstractDrone(ABC):
         address: str,
         log_file_name: Optional[str] = None,
         time_slice=0.050,
+        autoconnect_no_addr: bool = True,
         **kwargs,
     ):
         """
@@ -80,18 +82,32 @@ class AbstractDrone(ABC):
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
-        # attatch signal handlers
+        # attach signal handlers
         self._handle_signals_main()
 
         # setup the logger first
         logger_name = "mavlog.log" if log_file_name is None else log_file_name
-        self._logger = ServerDetector.setup_logger(logger_name)
+        self._logger = log.setup_logger(logger_name)
 
         # set up the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
         self._time_slice = time_slice
+
         self._address = address
+
+        # If address == "", and flag is not False, attempt to autoconnect
+        if len(address) == 0 and autoconnect_no_addr:
+            self._logger.info(
+                "Drone's address is empty, attempting to find existing MAVSDK servers using ServerDetector"
+            )
+            detector = ServerDetector(logger=self._logger)
+            addresses = detector.get_mavsdk_servers(timeout=20.0)
+            if len(addresses) > 0:
+                self._address = addresses[0]  # Get first detected address
+                self._logger.info(
+                    f'Successfully detected MAVSDK addresses {addresses}, using "{self._address}"'
+                )
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))
@@ -610,7 +626,7 @@ class AbstractDrone(ABC):
         self._cleanup()
 
         # close logging
-        ServerDetector.close_logger(self._logger)
+        log.close_logger(self._logger)
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
