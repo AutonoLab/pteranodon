@@ -10,7 +10,7 @@ class Tegra:
         try:
             subprocess.run(["tegrastats", "--inteval", interval], check=True)
         except subprocess.SubprocessError:
-            raise RuntimeError("Tegra could not be started")
+            raise RuntimeError("Tegra could not be started")  # pylint: disable=[W0707]
 
     @staticmethod
     def battery_5vrail_power() -> int:
@@ -25,6 +25,7 @@ class Tegra:
             ],
             capture_output=True,
             text=True,
+            check=True,
         )
         if result.stderr is not None:
             return int(result.stdout)
@@ -43,6 +44,7 @@ class Tegra:
             ],
             capture_output=True,
             text=True,
+            check=True,
         )
         if result.stderr is not None:
             return int(result.stdout)
@@ -61,6 +63,7 @@ class Tegra:
             ],
             capture_output=True,
             text=True,
+            check=True,
         )
         if result.stderr is not None:
             return int(result.stdout)

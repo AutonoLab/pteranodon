@@ -44,24 +44,24 @@ class Power(AbstractExtensionPlugin):
                 self._rpi_interval = self._ext_args["power"][2]
             except IndexError:
                 pass
-        
+
         self._tegra_instantiated = False
         try:
             self._tegra = Tegra(self._tegra_interval)
             self._tegra_instantiated = True
         except SubprocessError:
             pass
-        
+
         self._rpi_instantiated = False
         try:
-            self._rpi = RPi(self._tegra_interval)
+            self._rpi = RPi()
             self._rpi_instantiated = True
         except SubprocessError:
             pass
 
         self._window: Deque[telemetry.Battery] = deque(maxlen=self._window_size)
         self._telemetry.register_battery_handler(self._battery_handler)
-        
+
     def _battery_handler(self, battery: telemetry.Battery):
         self._window.append((battery, time.time()))
 
@@ -73,7 +73,7 @@ class Power(AbstractExtensionPlugin):
         if self._tegra_instantiated:
             return self._tegra
         return None
-    
+
     @property
     def rpi(self) -> Optional[RPi]:
         """
@@ -105,7 +105,7 @@ class Power(AbstractExtensionPlugin):
         if all_wattage is not None:
             if self._tegra_instantiated:
                 return all_wattage - self._tegra.battery_5vrail_power()
-            elif self._rpi_instantiated:
+            if self._rpi_instantiated:
                 return None
         return None
 
@@ -116,12 +116,12 @@ class Power(AbstractExtensionPlugin):
         """
         if self._tegra_instantiated:
             return self._tegra.battery_5vrail_power()
-        elif self._rpi_instantiated:
+        if self._rpi_instantiated:
             return None
         return None
 
     @staticmethod
-    def _average_voltage(self, window) -> float:
+    def _average_voltage(window) -> float:
         return np.mean([b.voltage_v for b in list(window)])
 
     def battery_percent_usage_over_time(self) -> float:
@@ -140,6 +140,8 @@ class Power(AbstractExtensionPlugin):
         The "amount" of mili-amp hours consumed during a time frame specified by battery poll rate and window size
         :return: float ; battery usage over time in mili-Amp hours
         """
+        if self._capacity is None:
+            return self.battery_percent_usage_over_time() * 5000.0
         return self.battery_percent_usage_over_time() * self._capacity
 
     def estimated_time_remaining_linear(self) -> float:
