@@ -403,7 +403,7 @@ class AbstractDrone(ABC):
         :return: The Relative plugin class instance
         """
         return self._plugins.relative
-    
+
     @property
     def power(self) -> Power:
         """

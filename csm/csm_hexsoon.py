@@ -38,7 +38,7 @@ class CSM_Hexsoon(AbstractDrone):
 
     def setup(self):
         pass
-    
+
     @timeit
     def loop(self):
         self.frame, depth_image, color_frame, depth_frame = self.cam.data.value
