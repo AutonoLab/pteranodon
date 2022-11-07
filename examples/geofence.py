@@ -20,10 +20,7 @@ def run():
 
     # Upload the geofence to your vehicle
     print("Uploading geofence...")
-    await drone.geofence.upload_geofence([polygon])
-
-    print("Uploading geofence...")
-    drone.geofence.upload_geofence()
+    drone.geofence.upload_geofence([polygon])
 
 
 if __name__ == "__main__":
