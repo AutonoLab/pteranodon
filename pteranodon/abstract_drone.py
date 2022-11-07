@@ -60,7 +60,7 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.extension_plugins import Sensor, Relative
+from .plugins.extension_plugins import Sensor, Relative, Power
 
 
 class AbstractDrone(ABC):
@@ -397,6 +397,13 @@ class AbstractDrone(ABC):
         :return: The Relative plugin class instance
         """
         return self._plugins.relative
+
+    @property
+    def power(self) -> Power:
+        """
+        :return: The Power plugin class instance
+        """
+        return self._plugins.power
 
     # NON-PLUGIN PROPERTIES
     @property
