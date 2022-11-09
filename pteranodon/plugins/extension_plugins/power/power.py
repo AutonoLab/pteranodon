@@ -37,13 +37,16 @@ class Power(AbstractExtensionPlugin):
         self._window_size = 10
         self._tegra_interval = 60
         self._rpi_interval = 60
-        if self._ext_args["power"] is not None:
-            try:
-                self._window_size = self._ext_args["power"][0]
-                self._tegra_interval = self._ext_args["power"][1]
-                self._rpi_interval = self._ext_args["power"][2]
-            except IndexError:
-                pass
+        try:
+            if self._ext_args["power"] is not None:
+                try:
+                    self._window_size = self._ext_args["power"][0]
+                    self._tegra_interval = self._ext_args["power"][1]
+                    self._rpi_interval = self._ext_args["power"][2]
+                except IndexError:
+                    pass
+        except KeyError:
+            pass
 
         self._tegra_instantiated = False
         try:
