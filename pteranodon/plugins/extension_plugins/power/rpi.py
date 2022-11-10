@@ -1,6 +1,3 @@
-import subprocess
-
-
 class RPi:
     """
     A class for acquring the power usage of a Raspberry pi 4
@@ -9,8 +6,8 @@ class RPi:
     def __init__(self):
         try:
             raise NotImplementedError
-        except NotImplementedError:
-            raise NotImplementedError("RPi not implemented yet")
+        except NotImplementedError as err:
+            raise NotImplementedError("RPi not implemented yet") from err
 
     @staticmethod
     def get_current_power() -> int:

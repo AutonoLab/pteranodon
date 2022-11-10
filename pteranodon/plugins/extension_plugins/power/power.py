@@ -1,7 +1,7 @@
 import time
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, Optional, Deque
+from typing import Dict, Optional, Deque, Tuple
 from collections import deque
 from subprocess import SubprocessError
 
@@ -66,7 +66,9 @@ class Power(AbstractExtensionPlugin):
             # Don't shut down drone if RPI not implemented
             pass
 
-        self._window: Deque[telemetry.Battery] = deque(maxlen=self._window_size)
+        self._window: Deque[Tuple[telemetry.Battery, float]] = deque(
+            maxlen=self._window_size
+        )
         self._telemetry.register_battery_handler(self._battery_handler)
 
         self._ready = self._tegra_instantiated or self._rpi_instantiated
@@ -98,7 +100,7 @@ class Power(AbstractExtensionPlugin):
         :return: float : Instantaneous battery usage, Current*Voltage, None if battery has not been polled yet
         """
         if len(self._window) > 0:
-            batt_info: telemetry.Battery = self._window[-1]
+            batt_info: telemetry.Battery = self._window[-1][0]
             return self._param.get_param_float("BAT1_A_PER_V") * (
                 batt_info.voltage_v**2
             )
@@ -131,7 +133,7 @@ class Power(AbstractExtensionPlugin):
 
     @staticmethod
     def _average_voltage(window) -> float:
-        return np.mean([b.voltage_v for b in list(window)])
+        return np.mean([b[0].voltage_v for b in list(window)])
 
     def battery_percent_usage_over_time(self) -> float:
         """
@@ -161,9 +163,9 @@ class Power(AbstractExtensionPlugin):
         """
         percentage_array = np.empty(0)
         time_array = np.empty(0)
-        for x in self._window:
-            percentage_array = np.append(percentage_array, x[0].remaining_percent)
-            time_array = np.append(time_array, x[1])
+        for bat, bat_time in self._window:
+            percentage_array = np.append(percentage_array, bat.remaining_percent)
+            time_array = np.append(time_array, bat_time)
         time_array = time_array - time_array[0]
         time_array_fixed = np.vstack([time_array, np.ones(len(time_array))]).T
         slope, power_intercept = np.linalg.lstsq(

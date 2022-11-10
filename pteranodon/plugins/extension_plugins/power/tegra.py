@@ -11,10 +11,10 @@ class Tegra:
             subprocess.run(["tegrastats", "--interval", str(interval)], check=True)
         except subprocess.SubprocessError:
             raise RuntimeError("Tegra could not be started")  # pylint: disable=[W0707]
-        except FileNotFoundError:
+        except FileNotFoundError as err:
             raise FileNotFoundError(
                 "Tegra could not be started: Tegrastats not installed"
-            )
+            ) from err
 
     @staticmethod
     def battery_5vrail_power() -> int:
