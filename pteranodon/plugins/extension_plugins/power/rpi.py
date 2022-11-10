@@ -8,9 +8,9 @@ class RPi:
 
     def __init__(self):
         try:
-            raise subprocess.SubprocessError
-        except subprocess.SubprocessError:
-            raise RuntimeError("RPi not implemented yet")  # pylint: disable=[W0707]
+            raise NotImplementedError
+        except NotImplementedError:
+            raise NotImplementedError("RPi not implemented yet")
 
     @staticmethod
     def get_current_power() -> int:

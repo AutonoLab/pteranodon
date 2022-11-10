@@ -54,16 +54,22 @@ class Power(AbstractExtensionPlugin):
             self._tegra_instantiated = True
         except SubprocessError:
             pass
+        except FileNotFoundError:
+            # Tegrastats is not installed or supported on these platforms
+            pass
 
         self._rpi_instantiated = False
         try:
             self._rpi = RPi()
             self._rpi_instantiated = True
-        except SubprocessError:
+        except NotImplementedError:
+            # Don't shut down drone if RPI not implemented
             pass
 
         self._window: Deque[telemetry.Battery] = deque(maxlen=self._window_size)
         self._telemetry.register_battery_handler(self._battery_handler)
+
+        self._ready = self._tegra_instantiated or self._rpi_instantiated
 
     def _battery_handler(self, battery: telemetry.Battery):
         self._window.append((battery, time.time()))
