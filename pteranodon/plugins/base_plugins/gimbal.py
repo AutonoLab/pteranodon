@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Callable
 
 from mavsdk import System
-from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
+from mavsdk.gimbal import ControlMode, ControlStatus, GimbalMode
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -43,7 +43,7 @@ class Gimbal(AbstractBasePlugin):
         :type gimbal_mode: GimbalMode
         """
 
-        self._submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
+        response = self._submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
 
     def set_pitch_and_yaw(self, pitch_deg: float, yaw_deg: float) -> None:
         """
