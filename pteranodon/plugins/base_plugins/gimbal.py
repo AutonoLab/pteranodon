@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Callable
 
 from mavsdk import System
-from mavsdk.gimbal import GimbalMode, ControlMode, ControlStatus
+from mavsdk.gimbal import ControlMode, ControlStatus, GimbalMode
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -16,7 +16,7 @@ class Gimbal(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 
-        self._submit_simple_generator(self._system.gimbal.control)
+        self._submit_generator(self._system.gimbal.control)
 
         self._end_init()
 
