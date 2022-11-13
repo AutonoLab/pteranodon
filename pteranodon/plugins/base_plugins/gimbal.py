@@ -43,7 +43,7 @@ class Gimbal(AbstractBasePlugin):
         :type gimbal_mode: GimbalMode
         """
 
-        response = self._submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
+        self._submit_coroutine(self._system.gimbal.set_mode(gimbal_mode))
 
     def set_pitch_and_yaw(self, pitch_deg: float, yaw_deg: float) -> None:
         """
