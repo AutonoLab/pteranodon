@@ -40,7 +40,7 @@ from .base_plugins import (
     Tune,
 )
 from .extension_plugins.abstract_extension_plugin import AbstractExtensionPlugin
-from .extension_plugins import Sensor, Relative#, Power
+from .extension_plugins import Sensor, Relative, Power
 from .custom_plugins import AbstractCustomPlugin
 
 
