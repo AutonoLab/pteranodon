@@ -106,8 +106,7 @@ class PluginManager:
             reverse=False,
         )
         ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
-            [Sensor, Relative],
-            #[Sensor, Relative, Power],
+            [Sensor, Relative, Power],
             key=self._get_sort_keys,
             reverse=False,
         )
@@ -443,9 +442,9 @@ class PluginManager:
         """
         return self.ext_plugins["relative"]  # type: ignore
 
-    # @property
-    # def power(self) -> Power:
-    #     """
-    #     :return: The Power plugin class instance
-    #     """
-    #     return self.ext_plugins["power"]  # type: ignore
+    @property
+    def power(self) -> Power:
+        """
+        :return: The Power plugin class instance
+        """
+        return self.ext_plugins["power"]  # type: ignore
