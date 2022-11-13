@@ -17,6 +17,8 @@ class Gimbal(AbstractBasePlugin):
         super().__init__("gimbal", system, loop, logger)
 
         self._submit_simple_generator(self._system.gimbal.control)
+        self._submit_simple_generator(self._system.gimbal.mode)
+        self._register_handler(self._system.gimbal.mode)(self._update_mode)
 
         self._end_init()
 
