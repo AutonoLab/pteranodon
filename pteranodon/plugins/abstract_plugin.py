@@ -197,7 +197,9 @@ class AbstractPlugin(ABC):
                     )
 
     @staticmethod
-    async def _wrap_generator(gen: Callable, ret_time: float, quit_on_error: bool = False) -> None:
+    async def _wrap_generator(
+        gen: Callable, ret_time: float, quit_on_error: bool = False
+    ) -> None:
         """
         Wraps a generator such that any grpc UNAVAILABLE errors will cause the generator to restart.
         This is the defined behavior in the grpc docs, such that an UNAVAILABLE means a packet was lost.
@@ -214,9 +216,9 @@ class AbstractPlugin(ABC):
                 else:
                     raise rpc_error
             finally:
-                if quit_on_error:
-                    break
                 await asyncio.sleep(ret_time)
+            if quit_on_error:
+                break
 
     def _submit_coroutine(
         self,
@@ -288,7 +290,8 @@ class AbstractPlugin(ABC):
         :return: The future created from the submit_coroutine call of wrap_generator
         """
         return self._submit_coroutine(
-            self._wrap_generator(generator, retry_time, quit_on_error), is_generator=True
+            self._wrap_generator(generator, retry_time, quit_on_error),
+            is_generator=True,
         )
 
     def _schedule(self, *args: Coroutine):
