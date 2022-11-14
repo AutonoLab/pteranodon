@@ -16,7 +16,7 @@ class Gimbal(AbstractBasePlugin):
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
         super().__init__("gimbal", system, loop, logger)
 
-        self._submit_generator(self._system.gimbal.control)
+        self._submit_generator(self._system.gimbal.control, quit_on_error=True)
 
         self._end_init()
 
