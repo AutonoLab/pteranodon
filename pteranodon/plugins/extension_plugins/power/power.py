@@ -71,7 +71,7 @@ class Power(AbstractExtensionPlugin):
         )
         self._telemetry.register_battery_handler(self._battery_handler)
 
-        self._ready = self._tegra_instantiated or self._rpi_instantiated
+        self._end_init(is_ready=self._tegra_instantiated or self._rpi_instantiated)
 
     def _battery_handler(self, battery: telemetry.Battery):
         self._window.append((battery, time.time()))

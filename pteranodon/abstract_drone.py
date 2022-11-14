@@ -1,5 +1,5 @@
-from threading import Thread
-from time import sleep, perf_counter
+from threading import Thread, Condition
+import time
 from collections import deque
 import asyncio
 from concurrent.futures import Future
@@ -10,6 +10,7 @@ import logging
 import sys
 import random
 import signal
+import functools
 
 from mavsdk import System
 from mavsdk.offboard import OffboardError
@@ -72,7 +73,7 @@ class AbstractDrone(ABC):
         self,
         address: str,
         log_file_name: Optional[str] = None,
-        time_slice=0.050,
+        time_slice: float = 0.050,
         autoconnect_no_addr: bool = True,
         **kwargs,
     ):
@@ -553,7 +554,7 @@ class AbstractDrone(ABC):
     def _process_command_loop(self) -> None:
         try:
             while not self._stopped_mavlink:
-                start_time = perf_counter()
+                start_time = time.perf_counter()
                 try:
                     com, handler, args, kwargs = self._queue.popleft()
                     if args is None:
@@ -572,9 +573,9 @@ class AbstractDrone(ABC):
                 except OffboardError as e:
                     self._logger.error(e)
                 finally:
-                    end_time = perf_counter() - start_time
+                    end_time = time.perf_counter() - start_time
                     if end_time < self._time_slice:
-                        sleep(self._time_slice - end_time)
+                        time.sleep(self._time_slice - end_time)
         finally:
             self._cleanup()
             pass
@@ -590,6 +591,39 @@ class AbstractDrone(ABC):
             thread.join(timeout=timeout)
         except RuntimeError:
             pass
+
+    # method which waits for a given amount of time in seconds
+    def wait(self, wait_time: float, preempt=False, command=True) -> None:
+        """
+        A method which takes a float representing the amount of time to wait in seconds. This method will block
+        a thread until the time has elapsed.
+        :param wait_time: The amount of time to wait in seconds
+        :param command: Whether or not to add this to the command queue. If false this will block the main thread.
+        """
+        if command:
+            if preempt:
+                self._queue.appendleft((time.sleep, None, [wait_time], {}))
+            else:
+                self._queue.append((time.sleep, None, [wait_time], {}))
+        else:
+            time.sleep(wait_time)
+
+    # method which will wait until the mavlink_queue is empty
+    def wait_until_queue_empty(self) -> None:
+        """
+        A method which will block until current tasks in the mavlink queue are completed.
+        """
+
+        def wait_handler(c: Condition) -> None:
+            with c:
+                c.notify()
+
+        c = Condition()
+
+        self._queue.append((lambda: None, functools.partial(wait_handler, c), [], {}))
+
+        with c:
+            c.wait()
 
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
