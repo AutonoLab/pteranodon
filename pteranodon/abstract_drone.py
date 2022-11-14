@@ -593,7 +593,7 @@ class AbstractDrone(ABC):
             pass
 
     # method which waits for a given amount of time in seconds
-    def wait(self, wait_time: float, command=True) -> None:
+    def wait(self, wait_time: float, preempt=False, command=True) -> None:
         """
         A method which takes a float representing the amount of time to wait in seconds. This method will block
         a thread until the time has elapsed.
@@ -601,7 +601,10 @@ class AbstractDrone(ABC):
         :param command: Whether or not to add this to the command queue. If false this will block the main thread.
         """
         if command:
-            self._queue.appendleft((time.sleep, None, [wait_time], {}))
+            if preempt:
+                self._queue.appendleft((time.sleep, None, [wait_time], {}))
+            else:
+                self._queue.append((time.sleep, None, [wait_time], {}))
         else:
             time.sleep(wait_time)
 
