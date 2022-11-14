@@ -14,6 +14,7 @@ setup(
         "pteranodon.plugins.extension_plugins",
         "pteranodon.plugins.extension_plugins.sensor",
         "pteranodon.plugins.extension_plugins.relative",
+        "pteranodon.plugins.extension_plugins.power",
         "pteranodon.plugins.custom_plugins",
     ],
 )
