@@ -610,6 +610,7 @@ class AbstractDrone(ABC):
         """
         A method which will block until current tasks in the mavlink queue are completed.
         """
+
         def wait_handler(c: Condition) -> None:
             with c:
                 c.notify()
