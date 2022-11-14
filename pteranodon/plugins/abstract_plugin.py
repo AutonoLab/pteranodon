@@ -108,13 +108,11 @@ class AbstractPlugin(ABC):
         """
         return (self.bandwidth(), self.num_generators)
 
-    def _end_init(self) -> None:
+    def _end_init(self, is_ready=True) -> None:
         """
         Method which should be called at the end of the __init__ method for each class which inherits this
         """
-        # call to wait on sleep so that way generators get created
-        self._loop.run_until_complete(asyncio.sleep(0.025))
-        self._ready = True
+        self._ready = is_ready
 
     def _future_callback(
         self, coroutine_name: str, is_gen: bool, future: futures.Future
