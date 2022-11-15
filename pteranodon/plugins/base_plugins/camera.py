@@ -136,7 +136,6 @@ class Camera(AbstractBasePlugin):
         self._submit_coroutine(self._system.camera.set_mode(mode))
         self._mode = mode
 
-
     def set_setting(
         self,
         setting: Union[camera.Setting, int],
