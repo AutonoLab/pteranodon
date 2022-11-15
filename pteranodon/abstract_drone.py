@@ -475,6 +475,20 @@ class AbstractDrone(ABC):
         """
         self._loop_thread.start()
 
+    def stop_loop(self, timeout: float = 1.0) -> None:
+        """
+        Stops the execution of the drone's loop method permanently. Joins the internal thread
+
+        :param timeout: The timeout for joining the thread
+        :type timeout: float
+        """
+        self._stopped_loop = True
+        self._join_thread(self._loop_thread, timeout)
+        try:
+            self._threads.remove(self._loop_thread)
+        except ValueError:
+            pass
+
     @abstractmethod
     def teardown(self) -> None:
         """
@@ -586,7 +600,7 @@ class AbstractDrone(ABC):
 
     # method which joins a thread with a timeout, used with map to close all threads\
     @staticmethod
-    def _join_thread(thread: Thread, timeout=1) -> None:
+    def _join_thread(thread: Thread, timeout: float = 1) -> None:
         try:
             thread.join(timeout=timeout)
         except RuntimeError:
@@ -655,7 +669,7 @@ class AbstractDrone(ABC):
         self._stopped_loop = True
         self._loop.stop()
 
-        # attempt to join all threads
+        # attempt to join all threads (not using self.stop_loop here since it would cause unnecessary overhead)
         self._logger.info("Attempting to join threads")
         map(self._join_thread, self._threads)
 
