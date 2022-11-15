@@ -12,17 +12,21 @@ jobs:
     name: "Test Offboard"
 
     runs-on: ubuntu-latest
+    env:
+      BRANCH_REF: "${{ github.event.pull_request.head.ref }}"
 
     steps:
       - uses: actions/checkout@v1
-      - name: Setup Dependencies
+      - name: Start docker containers
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-test.txt
+          echo "REFREF: $BRANCH_REF"
+          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services build \
+          --build-arg GIT_REF_NAME="$BRANCH_REF" --build-arg TEST_FILE="tests/integration/test_offboard.py"
+          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate
       - name: Test Abstract Plugin
         run: |
-           echo "Skipped"
+          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py
+# pytest --log-cli-level=INFO --full-trace -rP integration/test_offboard.py --hostname=tests-services_px4_docker_1
 #          pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py --hostname=px4_docker
 #    services:
 #      px4_docker:

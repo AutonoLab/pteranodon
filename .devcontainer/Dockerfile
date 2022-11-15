@@ -63,7 +63,7 @@ RUN ["/bin/bash", "-c", " \
     cd ${FIRMWARE_DIR} && \
     # chmod +x ${FIRMWARE_DIR}/Tools/setup/ubuntu.sh && \
     # bash ${FIRMWARE_DIR}/Tools/setup/ubuntu.sh && \
-    DONT_RUN=1 make px4_sitl gazebo && \
+    # DONT_RUN=1 make px4_sitl gazebo && \
     DONT_RUN=1 make px4_sitl gazebo \
 "]
 

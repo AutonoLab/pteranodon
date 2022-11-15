@@ -116,6 +116,8 @@ class ServerDetector:
         :rtype: List[str]
         """
 
+        return []
+
         if not os.path.exists("/sys/class/tty"):
             self._logger.warning(
                 '"/sys/class/tty" does not exist on this file system. Could not check for serial devices'

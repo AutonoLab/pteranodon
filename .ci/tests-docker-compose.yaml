@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  px4_docker:
+    image: jonasvautherin/px4-gazebo-headless:1.13.0
+
+    ports:
+      - "50051:50051"
+      - "14540:14540/udp"
+
+  test:
+    build: .
+    depends_on:
+      - px4_docker
+    command: sh -c "/wait && echo Done"
+    environment:
+      - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30

@@ -5,6 +5,7 @@ import pytest
 
 from .helpers import PluginTaskFetcher
 from pteranodon.simple_drone import SimpleDrone
+from pteranodon.utils import ServerDetector
 from pteranodon.plugins.base_plugins import Offboard
 from threading import Condition
 
@@ -19,6 +20,7 @@ from threading import Condition
 def test_drone(hostname) -> SimpleDrone:
     # Setup
     print("Setup")
+    print(hostname)
     test_drone = SimpleDrone(f"udp://{hostname}:14540")
 
     yield test_drone
