@@ -1,5 +1,5 @@
-from threading import Thread
-from time import sleep, perf_counter
+from threading import Thread, Condition
+import time
 from collections import deque
 import asyncio
 from concurrent.futures import Future
@@ -10,10 +10,12 @@ import logging
 import sys
 import random
 import signal
+import functools
 
 from mavsdk import System
 from mavsdk.offboard import OffboardError
 from mavsdk.action import ActionError
+
 
 try:
     import uvloop
@@ -21,6 +23,9 @@ try:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ModuleNotFoundError:
     pass
+
+from pteranodon.utils.server_detector import ServerDetector
+import pteranodon.utils.logger as log
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (
@@ -56,7 +61,7 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.extension_plugins import Sensor, Relative
+from .plugins.extension_plugins import Sensor, Relative, Power
 
 
 class AbstractDrone(ABC):
@@ -68,7 +73,8 @@ class AbstractDrone(ABC):
         self,
         address: str,
         log_file_name: Optional[str] = None,
-        time_slice=0.050,
+        time_slice: float = 0.050,
+        autoconnect_no_addr: bool = True,
         **kwargs,
     ):
         """
@@ -77,18 +83,32 @@ class AbstractDrone(ABC):
         :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
         in the maneuver_to method
         """
-        # attatch signal handlers
+        # attach signal handlers
         self._handle_signals_main()
 
         # setup the logger first
         logger_name = "mavlog.log" if log_file_name is None else log_file_name
-        self._logger = self._setup_logger(logger_name)
+        self._logger = log.setup_logger(logger_name)
 
         # set up the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
         self._time_slice = time_slice
+
         self._address = address
+
+        # If address == "", and flag is not False, attempt to autoconnect
+        if len(address) == 0 and autoconnect_no_addr:
+            self._logger.info(
+                "Drone's address is empty, attempting to find existing MAVSDK servers using ServerDetector"
+            )
+            detector = ServerDetector(logger=self._logger)
+            addresses = detector.get_mavsdk_servers(timeout=20.0)
+            if len(addresses) > 0:
+                self._address = addresses[0]  # Get first detected address
+                self._logger.info(
+                    f'Successfully detected MAVSDK addresses {addresses}, using "{self._address}"'
+                )
 
         # setup resources for drone control, mavsdk.System, deque, thread, etc..
         self._drone = System(port=random.randint(1000, 65535))
@@ -139,31 +159,6 @@ class AbstractDrone(ABC):
         except Exception as e:
             self._cleanup()
             raise e
-
-    # setup the logger
-    def _setup_logger(self, log_file_name: str) -> logging.Logger:
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setLevel(logging.DEBUG)
-        stdout_handler.setFormatter(formatter)
-
-        file_handler = logging.FileHandler(log_file_name)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-
-        logger.addHandler(file_handler)
-        logger.addHandler(stdout_handler)
-
-        return logger
-
-    def _close_logger(self) -> None:
-        handlers = self._logger.handlers[:]
-        for handler in handlers:
-            self._logger.removeHandler(handler)
-            handler.close()
 
     # PLUGIN PROPERTIES
     @property
@@ -404,6 +399,13 @@ class AbstractDrone(ABC):
         """
         return self._plugins.relative
 
+    @property
+    def power(self) -> Power:
+        """
+        :return: The Power plugin class instance
+        """
+        return self._plugins.power
+
     # NON-PLUGIN PROPERTIES
     @property
     def system(self) -> System:
@@ -552,7 +554,7 @@ class AbstractDrone(ABC):
     def _process_command_loop(self) -> None:
         try:
             while not self._stopped_mavlink:
-                start_time = perf_counter()
+                start_time = time.perf_counter()
                 try:
                     com, handler, args, kwargs = self._queue.popleft()
                     if args is None:
@@ -571,9 +573,9 @@ class AbstractDrone(ABC):
                 except OffboardError as e:
                     self._logger.error(e)
                 finally:
-                    end_time = perf_counter() - start_time
+                    end_time = time.perf_counter() - start_time
                     if end_time < self._time_slice:
-                        sleep(self._time_slice - end_time)
+                        time.sleep(self._time_slice - end_time)
         finally:
             self._cleanup()
             pass
@@ -589,6 +591,39 @@ class AbstractDrone(ABC):
             thread.join(timeout=timeout)
         except RuntimeError:
             pass
+
+    # method which waits for a given amount of time in seconds
+    def wait(self, wait_time: float, preempt=False, command=True) -> None:
+        """
+        A method which takes a float representing the amount of time to wait in seconds. This method will block
+        a thread until the time has elapsed.
+        :param wait_time: The amount of time to wait in seconds
+        :param command: Whether or not to add this to the command queue. If false this will block the main thread.
+        """
+        if command:
+            if preempt:
+                self._queue.appendleft((time.sleep, None, [wait_time], {}))
+            else:
+                self._queue.append((time.sleep, None, [wait_time], {}))
+        else:
+            time.sleep(wait_time)
+
+    # method which will wait until the mavlink_queue is empty
+    def wait_until_queue_empty(self) -> None:
+        """
+        A method which will block until current tasks in the mavlink queue are completed.
+        """
+
+        def wait_handler(c: Condition) -> None:
+            with c:
+                c.notify()
+
+        c = Condition()
+
+        self._queue.append((lambda: None, functools.partial(wait_handler, c), [], {}))
+
+        with c:
+            c.wait()
 
     # method to stop the thread for processing mavlink commands
     def stop(self) -> None:
@@ -632,7 +667,7 @@ class AbstractDrone(ABC):
         self._cleanup()
 
         # close logging
-        self._close_logger()
+        log.close_logger(self._logger)
 
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic

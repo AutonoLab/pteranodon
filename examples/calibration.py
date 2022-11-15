@@ -4,17 +4,20 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("-- Starting gyroscope calibration")
+    drone.logger.info("-- Starting gyroscope calibration")
     drone.calibration.calibrate_gyro()
 
-    print("-- Starting accelerometer calibration")
+    drone.logger.info("-- Starting accelerometer calibration")
     drone.calibration.calibrate_accelerometer()
 
-    print("-- Starting magnetometer calibration")
+    drone.logger.info("-- Starting magnetometer calibration")
     drone.calibration.calibrate_magnetometer()
 
-    print("-- Starting board level horizon calibration")
+    drone.logger.info("-- Starting board level horizon calibration")
     drone.calibration.calibrate_level_horizon()
+
+
+    drone.stop()
 
 
 if __name__ == "__main__":

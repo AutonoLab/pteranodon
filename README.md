@@ -86,7 +86,8 @@ Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
    * `make px4_sitl`
 
 ### Using Docker
-waiting on steps from David
+To build the docker file, type `docker build -t imagename .` inside the docker folder. This process should take 30 minutes.\
+To run, type `docker run imagename`
 
 ### Simulation Setup
 * `git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
