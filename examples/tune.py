@@ -20,4 +20,11 @@ def run():
     tune_description = TuneDescription(song_elements, 200)
     drone.tune.play_tune(tune_description)
 
+    drone.wait_until_queue_empty()
+    drone.stop()
+
+
+if __name__ == "__main__":
+    run()
+
 

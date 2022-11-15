@@ -10,6 +10,8 @@ def run():
     latitude = drone.telemetry.home.latitude_deg
     longitude = drone.telemetry.home.longitude_deg
 
+    drone.wait(1)
+
     p1 = Point(latitude - 0.0001, longitude - 0.0001)
     p2 = Point(latitude + 0.0001, longitude - 0.0001)
     p3 = Point(latitude + 0.0001, longitude + 0.0001)
@@ -22,6 +24,7 @@ def run():
     drone.logger.info("Uploading geofence...")
     drone.geofence.upload_geofence([polygon])
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

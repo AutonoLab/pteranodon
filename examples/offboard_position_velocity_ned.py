@@ -19,9 +19,11 @@ def run():
     # await drone.offboard.set_position_velocity_ned(PositionNedYaw(0.0, 0.0, -10.0, 0.0),VelocityNedYaw(0.0,0.0,
     # -1.0,0.0))
     drone.offboard.set_position_ned(PositionNedYaw(0.0, 0.0, -10.0, 0.0))
+    drone.wait(10)
 
     drone.logger.info("-- Go 10m North, 0m East, 0m Down within local coordinate system")
     drone.offboard.set_position_ned(PositionNedYaw(50.0, 0.0, -10.0, 0.0))
+    drone.wait(20)
     # await drone.offboard.set_position_velocity_ned(PositionNedYaw(50.0, 0.0, -10.0, 0.0),VelocityNedYaw(1.0,0.0,
     # 0.0,0.0))
 
@@ -30,6 +32,7 @@ def run():
     drone.logger.info("-- Stopping offboard")
     drone.offboard.stop()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

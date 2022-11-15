@@ -7,6 +7,7 @@ def run():
     drone.logger.info("-- Getting transponder")
     drone.transponder.transponder()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

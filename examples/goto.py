@@ -13,9 +13,9 @@ def run():
 
     drone.logger.info("-- Taking off")
     drone.action.takeoff()
+    drone.wait(1)
 
-    drone.wait()
-
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

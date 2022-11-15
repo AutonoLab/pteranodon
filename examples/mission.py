@@ -54,6 +54,7 @@ def run():
     drone.logger.info("-- Starting mission")
     drone.mission_raw.start_mission()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

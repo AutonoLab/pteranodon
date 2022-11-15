@@ -8,6 +8,7 @@ def run():
     drone.logger.info(f"{len(mission_import_data.mission_items)} mission items imported")
     drone.mission_raw.upload_mission(mission_import_data.mission_items)
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

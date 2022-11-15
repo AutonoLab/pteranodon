@@ -7,6 +7,7 @@ def run():
     info = drone.info.get_version()
     drone.logger.info(info)
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

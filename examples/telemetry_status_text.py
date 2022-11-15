@@ -7,6 +7,7 @@ def run():
     for status_text in drone.telemetry.status_text():
         print("Statustext:", status_text)
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

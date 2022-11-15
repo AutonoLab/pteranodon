@@ -16,6 +16,7 @@ def run():
     drone.logger.info("--- View position")
     drone.telemetry.position()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

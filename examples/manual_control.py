@@ -9,10 +9,12 @@ def run():
 
     drone.logger.info("-- Taking off")
     drone.action.takeoff()
+    drone.wait(5)
 
     drone.logger.info("-- Starting manual control")
     drone.manual_control.start_position_control()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

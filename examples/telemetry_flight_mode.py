@@ -7,6 +7,7 @@ def run():
     for flight_mode in drone.telemetry.flight_mode():
         drone.logger.info("FlightMode:", flight_mode)
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

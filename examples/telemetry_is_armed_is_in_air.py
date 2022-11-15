@@ -10,6 +10,7 @@ def run():
     for is_in_air in drone.telemetry.in_air():
         drone.logger.info("Is_in_air:", is_in_air)
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

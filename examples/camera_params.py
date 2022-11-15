@@ -15,6 +15,7 @@ def run():
     drone.logger.info("Display possible setting options")
     drone.camera.possible_settings_options()
 
+    drone.wait_until_queue_empty()
     drone.stop()
 
 
