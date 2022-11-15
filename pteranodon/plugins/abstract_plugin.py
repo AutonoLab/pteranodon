@@ -215,10 +215,11 @@ class AbstractPlugin(ABC):
                         pass
                 else:
                     raise rpc_error
+            except Exception:
+                if quit_on_error:
+                    break
             finally:
                 await asyncio.sleep(ret_time)
-            if quit_on_error:
-                break
 
     def _submit_coroutine(
         self,
