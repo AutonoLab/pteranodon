@@ -197,7 +197,9 @@ class AbstractPlugin(ABC):
                     )
 
     @staticmethod
-    async def _wrap_generator(gen: Callable, ret_time: float):
+    async def _wrap_generator(
+        gen: Callable, ret_time: float, quit_on_error: bool = False
+    ) -> None:
         """
         Wraps a generator such that any grpc UNAVAILABLE errors will cause the generator to restart.
         This is the defined behavior in the grpc docs, such that an UNAVAILABLE means a packet was lost.
@@ -213,6 +215,9 @@ class AbstractPlugin(ABC):
                         pass
                 else:
                     raise rpc_error
+            except Exception:
+                if quit_on_error:
+                    break
             finally:
                 await asyncio.sleep(ret_time)
 
@@ -252,6 +257,7 @@ class AbstractPlugin(ABC):
         generator: Callable,
         should_compute_rate: bool = False,
         retry_time: float = 0.5,
+        quit_on_error: bool = False,
     ) -> futures.Future:
         """
         Wrapper for the body expressions of the async generators used to read MAVSDK data.
@@ -268,10 +274,11 @@ class AbstractPlugin(ABC):
         return self._submit_generator(
             functools.partial(self._async_gen_wrapper, generator, should_compute_rate),
             retry_time=retry_time,
+            quit_on_error=quit_on_error,
         )
 
     def _submit_generator(
-        self, generator: Callable, retry_time: float = 0.5
+        self, generator: Callable, retry_time: float = 0.5, quit_on_error: bool = False
     ) -> futures.Future:
 
         """
@@ -284,7 +291,8 @@ class AbstractPlugin(ABC):
         :return: The future created from the submit_coroutine call of wrap_generator
         """
         return self._submit_coroutine(
-            self._wrap_generator(generator, retry_time), is_generator=True
+            self._wrap_generator(generator, retry_time, quit_on_error),
+            is_generator=True,
         )
 
     def _schedule(self, *args: Coroutine):
