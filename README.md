@@ -20,6 +20,7 @@ In order to merge into the `main` branch, a contributor must satisfy these stand
 [Black Code Style](https://black.readthedocs.io/en/stable/).
 
 This can be done automatically by setting your IDE to format on save, or you can run `black --safe ./pteranodon` locally.
+
 ---
 
 ## Requirements for Use
