@@ -45,14 +45,16 @@ def run():
                                                                                        float('nan'))]
 
     mission_plan = MissionPlan(mission_items)
-    print("-- Uploading mission")
+    drone.logger.info("-- Uploading mission")
     drone.mission_raw.upload_mission(mission_plan)
 
-    print("-- Arming")
+    drone.logger.info("-- Arming")
     drone.action.arm()
 
-    print("-- Starting mission")
+    drone.logger.info("-- Starting mission")
     drone.mission_raw.start_mission()
+
+    drone.stop()
 
 
 if __name__ == "__main__":

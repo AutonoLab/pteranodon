@@ -4,14 +4,16 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("-- Arming")
+    drone.logger.info("-- Arming")
     drone.action.arm()
 
-    print("-- Taking off")
+    drone.logger.info("-- Taking off")
     drone.action.takeoff()
 
-    print("-- Landing")
+    drone.logger.info("-- Landing")
     drone.action.land()
+
+    drone.stop()
 
 
 if __name__ == "__main__":

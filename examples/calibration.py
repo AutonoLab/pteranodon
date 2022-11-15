@@ -16,7 +16,7 @@ def run():
     drone.logger.info("-- Starting board level horizon calibration")
     drone.calibration.calibrate_level_horizon()
 
-
+    drone.wait_until_queue_empty()
     drone.stop()
 
 

@@ -4,17 +4,19 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("--- View battery")
+    drone.logger.info("--- View battery")
     drone.telemetry.battery()
 
-    print("--- View gps info")
+    drone.logger.info("--- View gps info")
     drone.telemetry.gps_info()
 
-    print("--- View telemetry in air")
+    drone.logger.info("--- View telemetry in air")
     drone.telemetry.in_air()
 
-    print("--- View position")
+    drone.logger.info("--- View position")
     drone.telemetry.position()
+
+    drone.stop()
 
 
 if __name__ == "__main__":

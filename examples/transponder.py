@@ -4,8 +4,10 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("-- Getting transponder")
+    drone.logger.info("-- Getting transponder")
     drone.transponder.transponder()
+
+    drone.stop()
 
 
 if __name__ == "__main__":

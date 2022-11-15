@@ -6,7 +6,7 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("Fetching home location coordinates...")
+    drone.logger.info("Fetching home location coordinates...")
     latitude = drone.telemetry.home.latitude_deg
     longitude = drone.telemetry.home.longitude_deg
 
@@ -19,8 +19,10 @@ def run():
     polygon = Polygon([p1, p2, p3, p4], Polygon.FenceType.INCLUSION)
 
     # Upload the geofence to your vehicle
-    print("Uploading geofence...")
+    drone.logger.info("Uploading geofence...")
     drone.geofence.upload_geofence([polygon])
+
+    drone.stop()
 
 
 if __name__ == "__main__":

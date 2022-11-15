@@ -6,7 +6,6 @@ def run():
 
     drone.logger.info("Setting mode to 'PHOTO'")
     drone.camera.set_mode(drone.camera.mode.PHOTO)
-    dr
 
     drone.logger.info("Taking a photo")
     drone.camera.take_photo()

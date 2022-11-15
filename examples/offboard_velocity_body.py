@@ -6,47 +6,49 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    print("-- Arming")
+    drone.logger.info("-- Arming")
     drone.action.arm()
 
-    print("-- Setting initial setpoint")
+    drone.logger.info("-- Setting initial setpoint")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
-    print("-- Starting offboard")
+    drone.logger.info("-- Starting offboard")
     drone.offboard.start()
 
-    print("-- Turn clock-wise and climb")
+    drone.logger.info("-- Turn clock-wise and climb")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, -1.0, 60.0))
 
-    print("-- Turn back anti-clockwise")
+    drone.logger.info("-- Turn back anti-clockwise")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, 0.0, -60.0))
 
-    print("-- Wait for a bit")
+    drone.logger.info("-- Wait for a bit")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
-    print("-- Fly a circle")
+    drone.logger.info("-- Fly a circle")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(5.0, 0.0, 0.0, 30.0))
 
-    print("-- Wait for a bit")
+    drone.logger.info("-- Wait for a bit")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
-    print("-- Fly a circle sideways")
+    drone.logger.info("-- Fly a circle sideways")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, -5.0, 0.0, 30.0))
 
-    print("-- Wait for a bit")
+    drone.logger.info("-- Wait for a bit")
     drone.offboard.set_velocity_body(
         VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
-    print("-- Stopping offboard")
+    drone.logger.info("-- Stopping offboard")
     drone.offboard.stop()
 
-    
+    drone.stop()
+
+
 if __name__ == "__main__":
     run()
