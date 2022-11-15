@@ -93,6 +93,7 @@ class AbstractDrone(ABC):
         # set up the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
+        self._loop_is_paused = False
         self._time_slice = time_slice
 
         self._address = address
@@ -467,6 +468,9 @@ class AbstractDrone(ABC):
 
     def _loop_loop(self) -> None:
         while not self._stopped_loop:
+            if self._loop_is_paused:
+                # The while-loop must continue execution in order to resume later
+                continue
             self.loop()
 
     def start_loop(self) -> None:
@@ -488,6 +492,25 @@ class AbstractDrone(ABC):
             self._threads.remove(self._loop_thread)
         except ValueError:
             pass
+
+    def pause_loop(self) -> None:
+        """
+        Pauses the execution of the drone's loop without destroying the thread.
+        """
+        self._loop_is_paused = True
+        if self._stopped_loop:
+            self._logger.error("Could not pause loop! The loop is not running!")
+            raise RuntimeError("Could not pause loop! The loop is not running!")
+
+    def resume_loop(self) -> None:
+        """
+        Resumes execution of the drone's loop. Does not start the loop from the stopped state.
+         Use `start_loop` for that purpose.
+        """
+        self._loop_is_paused = False
+        if self._stopped_loop:
+            self._logger.error("Could not resume loop! Loop is permanently stopped!")
+            raise RuntimeError("Could not resume loop! Loop is permanently stopped!")
 
     @abstractmethod
     def teardown(self) -> None:
