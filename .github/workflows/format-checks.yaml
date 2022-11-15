@@ -121,4 +121,4 @@ jobs:
         # Useless parent or super() delegation 
 
         pylint ./pteranodon --disable=C0303,C0114,W0401,R0902,R0904,C0305,W0703,C0200,R0913,R0914,W0107,W1203,W0246
-        
+
