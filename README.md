@@ -7,6 +7,10 @@
 ![Integration Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/integration-tests.yaml/badge.svg?branch=main)
 ![PyPI Build](https://github.com/AutonoLab/pteranodon/actions/workflows/build-check.yaml/badge.svg?branch=main)
 
+
+A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
+gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
+
 ## Formatting
 
 Pteranodon uses the [PEP-8 Coding Standard](https://peps.python.org/pep-0008/) with required typing through
@@ -16,10 +20,6 @@ In order to merge into the `main` branch, a contributor must satisfy these stand
 [Black Code Style](https://black.readthedocs.io/en/stable/).
 
 This can be done automatically by setting your IDE to format on save, or you can run `black --safe ./pteranodon` locally.
-
-Description\
-A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
-gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 ---
 
 ## Requirements for Use
