@@ -15,6 +15,11 @@ def run():
     drone.logger.info("-- Landing")
     drone.action.land()
 
+    drone.logger.info(drone.telemetry.position)
+
+    drone.logger.info(drone.telemetry.flight_mode)
+
+    drone.logger.info(drone.telemetry.in_air)
     drone.wait_until_queue_empty()
     drone.stop()
 
