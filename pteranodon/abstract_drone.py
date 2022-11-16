@@ -93,6 +93,7 @@ class AbstractDrone(ABC):
         # set up the instance fields
         self._stopped_mavlink = False
         self._stopped_loop = False
+        self._loop_is_paused = False
         self._time_slice = time_slice
 
         self._address = address
@@ -115,6 +116,7 @@ class AbstractDrone(ABC):
         self._queue: deque = deque()
         self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
+        self._loop_condition = Condition()
         self._mavlink_thread = Thread(
             name="Mavlink-Command-Thread",
             target=self._process_command_loop,
@@ -467,6 +469,9 @@ class AbstractDrone(ABC):
 
     def _loop_loop(self) -> None:
         while not self._stopped_loop:
+            if self._loop_is_paused:
+                with self._loop_condition:
+                    self._loop_condition.wait()
             self.loop()
 
     def start_loop(self) -> None:
@@ -474,6 +479,41 @@ class AbstractDrone(ABC):
         Begins the execution of the loop method. Starts the internal thread.
         """
         self._loop_thread.start()
+
+    def stop_loop(self, timeout: float = 1.0) -> None:
+        """
+        Stops the execution of the drone's loop method permanently. Joins the internal thread
+
+        :param timeout: The timeout for joining the thread
+        :type timeout: float
+        """
+        self._stopped_loop = True
+        self._join_thread(self._loop_thread, timeout)
+        try:
+            self._threads.remove(self._loop_thread)
+        except ValueError:
+            pass
+
+    def pause_loop(self) -> None:
+        """
+        Pauses the execution of the drone's loop without destroying the thread.
+        """
+        self._loop_is_paused = True
+        if self._stopped_loop:
+            self._logger.error("Could not pause loop! The loop is not running!")
+            raise RuntimeError("Could not pause loop! The loop is not running!")
+
+    def resume_loop(self) -> None:
+        """
+        Resumes execution of the drone's loop. Does not start the loop from the stopped state.
+         Use `start_loop` for that purpose.
+        """
+        self._loop_is_paused = False
+        with self._loop_condition:
+            self._loop_condition.notify()
+        if self._stopped_loop:
+            self._logger.error("Could not resume loop! Loop is permanently stopped!")
+            raise RuntimeError("Could not resume loop! Loop is permanently stopped!")
 
     @abstractmethod
     def teardown(self) -> None:
@@ -586,7 +626,7 @@ class AbstractDrone(ABC):
 
     # method which joins a thread with a timeout, used with map to close all threads\
     @staticmethod
-    def _join_thread(thread: Thread, timeout=1) -> None:
+    def _join_thread(thread: Thread, timeout: float = 1) -> None:
         try:
             thread.join(timeout=timeout)
         except RuntimeError:
@@ -655,7 +695,7 @@ class AbstractDrone(ABC):
         self._stopped_loop = True
         self._loop.stop()
 
-        # attempt to join all threads
+        # attempt to join all threads (not using self.stop_loop here since it would cause unnecessary overhead)
         self._logger.info("Attempting to join threads")
         map(self._join_thread, self._threads)
 
