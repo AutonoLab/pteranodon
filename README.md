@@ -2,12 +2,14 @@
 
 <img src="https://static.wikia.nocookie.net/animals/images/a/a1/Pterathumb.png/revision/latest?cb=20200311123111" alt="drawing" width="200"/>
 
-![Black Formatting Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/black-check.yaml/badge.svg?branch=main)
-![Flake8 Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/flake8-check.yaml/badge.svg?branch=main)
-![MyPy Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/mypy-check.yaml/badge.svg?branch=main)
-![PyLint Badge](https://github.com/AutonoLab/pteranodon/actions/workflows/pylint-check.yaml/badge.svg?branch=main)
+![Formatting](https://github.com/AutonoLab/pteranodon/actions/workflows/format-check.yaml/badge.svg?branch=main)
 ![Unit Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/unit-tests.yaml/badge.svg?branch=main)
 ![Integration Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/integration-tests.yaml/badge.svg?branch=main)
+![PyPI Build](https://github.com/AutonoLab/pteranodon/actions/workflows/build-check.yaml/badge.svg?branch=main)
+
+
+A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
+gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 
 ## Formatting
 
@@ -19,9 +21,6 @@ In order to merge into the `main` branch, a contributor must satisfy these stand
 
 This can be done automatically by setting your IDE to format on save, or you can run `black --safe ./pteranodon` locally.
 
-Description\
-A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
-gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 ---
 
 ## Requirements for Use
