@@ -2,8 +2,6 @@
 
 FROM ubuntu:20.04
 
-ARG PX4_HOSTNAME
-ARG TEST_FILE
 ARG GIT_REF_NAME
 
 ENV WORKSPACE_DIR /root
@@ -30,4 +28,4 @@ RUN git -C ${PTERANODON_DIR} submodule update --init --recursive # Future proofi
 RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
 RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 
-#WORKDIR "${PTERANODON_DIR}/tests"
+WORKDIR "${PTERANODON_DIR}"

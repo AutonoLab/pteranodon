@@ -12,7 +12,7 @@ from threading import Condition
 # To run docker container:
 # docker run --rm -it jonasvautherin/px4-gazebo-headless:1.13.0
 
-# To run tests
+# To run testsg
 # pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py
 
 

@@ -17,15 +17,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Start docker containers
+      - name: Build Docker Containers
         run: |
-          echo "REFREF: $BRANCH_REF"
-          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services build \
-          --build-arg GIT_REF_NAME="$BRANCH_REF" --build-arg TEST_FILE="tests/integration/test_offboard.py"
-          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+      - name: Run Docker Containers
+        run: |
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
       - name: Test Abstract Plugin
         run: |
-          docker-compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py px4
+          
+          
+
+# docker network inspect -v tests-services_default
 # pytest --log-cli-level=INFO --full-trace -rP integration/test_offboard.py --hostname=tests-services_px4_docker_1
 #          pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py --hostname=px4_docker
 #    services:
