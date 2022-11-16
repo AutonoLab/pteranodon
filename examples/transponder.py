@@ -10,6 +10,8 @@ def run():
     drone.wait_until_queue_empty()
     drone.stop()
 
+    drone.logger_info(drone.transponder.transponder)
+
 
 if __name__ == "__main__":
     run()
