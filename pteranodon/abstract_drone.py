@@ -116,6 +116,7 @@ class AbstractDrone(ABC):
         self._queue: deque = deque()
         self._task_cache: deque = deque(maxlen=10)
         self._loop = asyncio.get_event_loop()
+        self._loop_condition = Condition()
         self._mavlink_thread = Thread(
             name="Mavlink-Command-Thread",
             target=self._process_command_loop,
@@ -469,8 +470,8 @@ class AbstractDrone(ABC):
     def _loop_loop(self) -> None:
         while not self._stopped_loop:
             if self._loop_is_paused:
-                # The while-loop must continue execution in order to resume later
-                continue
+                with self._loop_condition:
+                    self._loop_condition.wait()
             self.loop()
 
     def start_loop(self) -> None:
@@ -508,6 +509,8 @@ class AbstractDrone(ABC):
          Use `start_loop` for that purpose.
         """
         self._loop_is_paused = False
+        with self._loop_condition:
+            self._loop_condition.notify()
         if self._stopped_loop:
             self._logger.error("Could not resume loop! Loop is permanently stopped!")
             raise RuntimeError("Could not resume loop! Loop is permanently stopped!")
