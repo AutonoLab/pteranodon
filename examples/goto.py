@@ -16,7 +16,7 @@ def run():
     drone.wait(1)
 
     flying_alt = 20.0
-    drone.action.goto_location(47.397606, 8.543060, flying_alt, 0)
+    drone.put(drone.action.goto_location, 47.397606, 8.543060, flying_alt, 0)
 
     drone.wait_until_queue_empty()
     drone.stop()
