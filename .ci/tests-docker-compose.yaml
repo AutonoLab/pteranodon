@@ -5,23 +5,24 @@ services:
     image: jonasvautherin/px4-gazebo-headless:1.13.0
     ports:
       - "50051:50051"
+      - "14540:14580"
       - "14540:14540"
       - "14550:14550"
     #command: apt-get install netcat && cd /root && ./entrypoint.sh
-    healthcheck:
-          test: ["CMD", "curl", "-f", "0.0.0.0:4560"]
-          interval: 60s
-          retries: 100
-          start_period: 30s
-          timeout: 100s
+#    healthcheck:
+#          test: ["CMD", "curl", "-f", "0.0.0.0:4560"]
+#          interval: 60s
+#          retries: 100
+#          start_period: 30s
+#          timeout: 100s
 
   test:
     build: .
-#    depends_on:
-#      - px4_docker
+    depends_on:
+      - "px4_docker"
     links:
       - "px4_docker:px4"
-    command: sh -c "echo Done"
+    command: ["./wait-for-serv.sh", "px4_docker", "echo YES"]
 #    environment:
 #      - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
 #      - WAIT_HOSTS_TIMEOUT=300
