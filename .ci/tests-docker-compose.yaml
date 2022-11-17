@@ -9,11 +9,11 @@ services:
       - "14550:14550"
     command: apt-get install netcat && cd /root && ./entrypoint.sh
     healthcheck:
-          test: (nc -uvz 0.0.0.0 14580 > /dev/null 2>&1) && exit 0 || exit 1
-          interval: 60s
+          test: ["CMD", "curl", "-f", "0.0.0.0:4560"]
+          interval: 30s
           retries: 100
           start_period: 30s
-          timeout: 100s
+          timeout: 30s
 
   test:
     build: .
