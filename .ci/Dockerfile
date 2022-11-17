@@ -8,9 +8,9 @@ ENV WORKSPACE_DIR /root
 ENV PTERANODON_DIR ${WORKSPACE_DIR}/pteranodon
 
 # Add docker-compose-wait tool -------------------
-ENV WAIT_VERSION 2.7.2
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
-RUN chmod +x /wait
+#ENV WAIT_VERSION 2.7.2
+#ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
+#RUN chmod +x /wait
 
 # Install deps
 RUN apt-get update && \
