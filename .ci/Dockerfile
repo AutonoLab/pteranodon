@@ -28,4 +28,6 @@ RUN git -C ${PTERANODON_DIR} submodule update --init --recursive # Future proofi
 RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
 RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 
+COPY wait-for-serv.sh /root/wait-for-serv.sh
+
 WORKDIR "${PTERANODON_DIR}"

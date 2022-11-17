@@ -6,7 +6,7 @@ services:
     ports:
       - "50051:50051"
       - "14540:14580"
-      - "14540:14540"
+#      - "14540:14540"
       - "14550:14550"
     #command: apt-get install netcat && cd /root && ./entrypoint.sh
 #    healthcheck:
@@ -22,7 +22,7 @@ services:
       - "px4_docker"
     links:
       - "px4_docker:px4"
-    command: ["./wait-for-serv.sh", "px4_docker", "echo YES"]
+    command: ["/root/wait-for-serv.sh", "px4_docker", "echo YES"]
 #    environment:
 #      - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
 #      - WAIT_HOSTS_TIMEOUT=300
