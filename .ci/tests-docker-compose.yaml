@@ -22,7 +22,7 @@ services:
       - "px4_docker"
     links:
       - "px4_docker:px4"
-    command: ["./wait-for-serv.sh", "px4_docker", "echo YES"]
+    command: []
 #    environment:
 #      - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
 #      - WAIT_HOSTS_TIMEOUT=300

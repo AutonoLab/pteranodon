@@ -30,4 +30,6 @@ RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 
 COPY wait-for-serv.sh /root/wait-for-serv.sh
 
+CMD /root/wait-for-serv.sh px4_docker echo YES
+
 WORKDIR "${PTERANODON_DIR}"
