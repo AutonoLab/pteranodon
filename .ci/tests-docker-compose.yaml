@@ -1,4 +1,4 @@
-version: "3.7"
+version: "2.4"
 
 services:
   px4_docker:
@@ -10,9 +10,9 @@ services:
     healthcheck:
           test: ss -tulpn | grep LISTEN | grep gzserver
           interval: 60s
+          timeout: 100s
           retries: 100
           start_period: 30s
-          timeout: 100s
 
   test:
     build: .
