@@ -14,7 +14,7 @@ ENV PTERANODON_DIR ${WORKSPACE_DIR}/pteranodon
 
 # Install deps
 RUN apt-get update && \
-    apt-get install -y curl git python3-pip && \
+    apt-get install -y curl git python3-pip netcat&& \
     apt-get -y autoremove && \
     apt-get clean autoclean && \
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
@@ -30,6 +30,6 @@ RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 
 COPY wait-for-serv.sh /root/wait-for-serv.sh
 
-CMD /root/wait-for-serv.sh px4_docker echo YES
+CMD /root/wait-for-serv.sh px4 echo YES
 
 WORKDIR "${PTERANODON_DIR}"
