@@ -72,10 +72,12 @@ Xvfb :99 -screen 0 1600x1200x24+32 &
 ${SITL_RTSP_PROXY}/build/sitl_rtsp_proxy &
 
 source ${WORKSPACE_DIR}/edit_rcS.bash ${IP_API} ${IP_QGC} &&
-cd ${FIRMWARE_DIR} && python3 ./scripts/parallel_test.py
+cd ${FIRMWARE_DIR} && 
 
 if [ "$headless" -eq 1 ]; then
     HEADLESS=1 make px4_sitl gazebo_${vehicle}__${world}
 elif [ "$headless" -eq 0 ]; then
     make px4_sitl gazebo_${vehicle}__${world};
 fi
+
+python3 ./scripts/parallel_test.py
