@@ -7,8 +7,9 @@ services:
       - "50051:50051"
       - "14540:14540"
       - "14550:14550"
+    command: apt-get install netcat && cd /root && ./entrypoint.sh
     healthcheck:
-          test: ss -tulpn | grep LISTEN | grep gzserver
+          test: (nc -uvz 0.0.0.0 14580 > /dev/null 2>&1) && exit 0 || exit 1
           interval: 60s
           retries: 100
           start_period: 30s
