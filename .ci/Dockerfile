@@ -1,6 +1,6 @@
 # Tests Dockerfile
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG GIT_REF_NAME
 
@@ -13,9 +13,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 RUN chmod +x /wait
 
 # Install deps
-RUN apt-get install python3.7 && \
-# | echo y && \ 
-    apt-get install -y curl git python3-pip && \
+RUN apt-get install -y curl git python3-pip && \
     apt-get update && \
     apt-get -y autoremove && \
     apt-get clean autoclean && \

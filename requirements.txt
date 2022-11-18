@@ -1,5 +1,5 @@
-mavsdk
-numpy
-pymavlink
-grpcio
-pyserial>=2.5
+mavsdk>=1.4.0
+numpy>=1.23.0
+pymavlink>=2.4.37
+grpcio>=1.47.0
+pyserial>=3.5
