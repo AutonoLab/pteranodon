@@ -13,11 +13,11 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 RUN chmod +x /wait
 
 # Install deps
-RUN apt-get install -y curl git python3-pip && \
+RUN apt-get install python3.7 | echo y && \ 
+    apt-get install -y curl git python3.7-pip && \
     #apt-get update && \
     apt-get -y autoremove && \
     apt-get clean autoclean && \
-    apt-get install python3.7 | echo y && \ 
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
 # Checkout current version of pteranodon
