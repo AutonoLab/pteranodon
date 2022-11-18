@@ -16,19 +16,19 @@ def run():
     drone.offboard.start()
 
     drone.logger.info("-- Go 0m North, 0m East, -5m Down within local coordinate system")
-    drone.offboard.set_position_ned(PositionNedYaw(0.0, 0.0, -5.0, 0.0))
+    drone.put(drone.offboard.set_position_ned, PositionNedYaw(0.0, 0.0, -5.0, 0.0))
     drone.wait(10)
 
     drone.logger.info("-- Go 5m North, 0m East, -5m Down within local coordinate system, turn to face East")
-    drone.offboard.set_position_ned(PositionNedYaw(5.0, 0.0, -5.0, 90.0))
+    drone.put(drone.offboard.set_position_ned, PositionNedYaw(5.0, 0.0, -5.0, 90.0))
     drone.wait(10)
 
     drone.logger.info("-- Go 5m North, 10m East, -5m Down within local coordinate system")
-    drone.offboard.set_position_ned(PositionNedYaw(5.0, 10.0, -5.0, 90.0))
+    drone.put(drone.offboard.set_position_ned, PositionNedYaw(5.0, 10.0, -5.0, 90.0))
     drone.wait(15)
 
     drone.logger.info("-- Go 0m North, 10m East, 0m Down within local coordinate system, turn to face South")
-    drone.offboard.set_position_ned(PositionNedYaw(0.0, 10.0, 0.0, 180.0))
+    drone.put(drone.offboard.set_position_ned, PositionNedYaw(0.0, 10.0, 0.0, 180.0))
     drone.wait(10)
 
     drone.logger.info("-- Stopping offboard")
