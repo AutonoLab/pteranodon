@@ -17,36 +17,35 @@ def run():
     drone.offboard.start()
 
     drone.logger.info("-- Go up 2 m/s")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, -2.0, 0.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(0.0, 0.0, -2.0, 0.0))
     drone.wait(4)
 
     drone.logger.info("-- Go North 2 m/s, turn to face East")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(2.0, 0.0, 0.0, 90.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(2.0, 0.0, 0.0, 90.0))
     drone.wait(4)
 
     drone.logger.info("-- Go South 2 m/s, turn to face West")
-    drone.offboard.set_velocity_ned(
-        VelocityNedYaw(-2.0, 0.0, 0.0, 270.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(-2.0, 0.0, 0.0, 270.0))
     drone.wait(4)
 
     drone.logger.info("-- Go West 2 m/s, turn to face East")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, -2.0, 0.0, 90.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(0.0, -2.0, 0.0, 90.0))
     drone.wait(4)
 
     drone.logger.info("-- Go East 2 m/s")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 2.0, 0.0, 90.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(0.0, 2.0, 0.0, 90.0))
     drone.wait(4)
 
     drone.logger.info("-- Turn to face South")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, 180.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(0.0, 0.0, 0.0, 180.0))
     drone.wait(2)
 
     drone.logger.info("-- Go down 1 m/s, turn to face North")
-    drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 1.0, 0.0))
+    drone.put(drone.offboard.set_velocity_ned, VelocityNedYaw(0.0, 0.0, 1.0, 0.0))
     drone.wait(4)
 
     drone.logger.info("-- Stopping offboard")
-    drone.offboard.stop()
+    drone.drone.offboard.stop()
 
     drone.wait_until_queue_empty()
     drone.stop()
