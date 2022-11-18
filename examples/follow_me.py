@@ -20,19 +20,23 @@ def run():
     drone.follow_me.set_config(conf)
 
     drone.logger.info("-- Taking off")
-    drone.action.takeoff()
+    # drone.action.takeoff()  - not needed
+    drone.put(drone.action.takeoff)
     drone.wait(8)
 
     drone.logger.info("-- Starting Follow Me Mode")
-    drone.follow_me.start()
+    # drone.follow_me.start() - not needed
+    drone.put(drone.follow_me.start)
     drone.wait(8)
 
     drone.logger.info("-- Stopping Follow Me Mode")
-    drone.follow_me.stop()
+    # drone.follow_me.stop() - not needed
+    drone.put(drone.follow_me.stop)
     drone.wait(8)
 
     drone.logger.info("-- Landing")
-    drone.action.land()
+    # drone.action.land()
+    drone.put(drone.action.land)
 
     drone.wait_until_queue_empty()
     drone.stop()
