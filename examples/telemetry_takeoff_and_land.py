@@ -8,12 +8,12 @@ def run():
     drone.action.arm()
 
     drone.logger.info("-- Taking off")
-    drone.action.set_takeoff_altitude(10.0)
+    drone.put(drone.action.set_takeoff_altitude, 10.0)
     drone.action.takeoff()
     drone.wait(10)
 
     drone.logger.info("-- Landing")
-    drone.action.land()
+    drone.put(drone.action.land)
 
     drone.logger.info(drone.telemetry.position)
 
