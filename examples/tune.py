@@ -20,7 +20,7 @@ def run():
     tune_description = TuneDescription(song_elements, 200)
     drone.tune.play_tune(tune_description)
 
-    drone.wait(SongElement.DURATION_32)
+    drone.wait(32)
     drone.wait_until_queue_empty()
     drone.stop()
 

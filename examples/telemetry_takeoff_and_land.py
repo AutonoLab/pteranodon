@@ -15,9 +15,9 @@ def run():
     drone.logger.info("-- Landing")
     drone.put(drone.action.land)
 
-    drone.logger.info(drone.telemetry.position)
+    drone.telemetry.register_position_handler(print)
 
-    drone.logger.info(drone.telemetry.flight_mode)
+    drone.telemetry.register_flight_mode_handler(print)
 
     drone.logger.info(drone.telemetry.in_air)
     drone.wait_until_queue_empty()

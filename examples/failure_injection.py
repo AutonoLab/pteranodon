@@ -10,10 +10,10 @@ def run():
     drone.param.set_param_int('SYS_FAILURE_EN', 1)
 
     drone.logger.info("-- Arming")
-    drone.action.arm()
+    drone.arm()
 
     drone.logger.info("-- Taking off")
-    drone.action.takeoff()
+    drone.takeoff()
 
     drone.wait(5)
     goto_lat = 0.0
@@ -22,7 +22,7 @@ def run():
 
     drone.logger.info("-- Flying up")
     flying_alt = goto_alt + 20.0  # To fly drone 20m above the ground plane
-    drone.action.goto_location(goto_lat, goto_lon, flying_alt, 0)
+    drone.put(drone.action.goto_location, goto_lat, goto_lon, flying_alt, 0)
 
     drone.wait(5)
 

@@ -5,10 +5,10 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     drone.logger.info("-- Arming")
-    drone.action.arm()
+    drone.arm()
 
     drone.logger.info("-- Taking off")
-    drone.put(drone.action.takeoff)
+    drone.takeoff()
     drone.wait(5)
 
     drone.logger.info("-- Starting manual control")

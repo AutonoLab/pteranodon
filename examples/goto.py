@@ -9,10 +9,10 @@ def run():
     drone.telemetry.home()
 
     drone.logger.info("-- Arming")
-    drone.action.arm()
+    drone.arm()
 
     drone.logger.info("-- Taking off")
-    drone.action.takeoff()
+    drone.takeoff()
     drone.wait(1)
 
     flying_alt = 20.0

@@ -4,7 +4,7 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    drone.shell.register_receive_handler()
+    drone.shell.register_receive_handler(print)
 
     drone.shell.send("command")
 

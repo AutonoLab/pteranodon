@@ -7,7 +7,7 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     drone.logger.info("-- Arming")
-    drone.action.arm()
+    drone.arm()
 
     drone.logger.info("-- Setting initial setpoint")
     drone.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.0))
