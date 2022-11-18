@@ -14,7 +14,7 @@ RUN chmod +x /wait
 
 # Install deps
 RUN apt-get update && \
-    apt-get install python3.7 &&  echo y \ 
+    apt-get install python3.7 | echo y && \ 
     apt-get install -y curl git python3-pip && \
     apt-get -y autoremove && \
     apt-get clean autoclean && \
