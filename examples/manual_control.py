@@ -8,7 +8,7 @@ def run():
     drone.action.arm()
 
     drone.logger.info("-- Taking off")
-    drone.action.takeoff()
+    drone.put(drone.action.takeoff)
     drone.wait(5)
 
     drone.logger.info("-- Starting manual control")
