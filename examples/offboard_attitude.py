@@ -13,19 +13,19 @@ def run():
     drone.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.0))
 
     drone.logger.info("-- Go up at 70% thrust")
-    drone.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.7))
+    drone.put(drone.offboard.set_attitude, Attitude(0.0, 0.0, 0.0, 0.7))
     drone.wait(2)
 
     drone.logger.info("-- Roll 30 at 60% thrust")
-    drone.offboard.set_attitude(Attitude(30.0, 0.0, 0.0, 0.6))
+    drone.put(drone.offboard.set_attitude, Attitude(30.0, 0.0, 0.0, 0.6))
     drone.wait(2)
 
     drone.logger.info("-- Roll -30 at 60% thrust")
-    drone.offboard.set_attitude(Attitude(-30.0, 0.0, 0.0, 0.6))
+    drone.put(drone.offboard.set_attitude, Attitude(-30.0, 0.0, 0.0, 0.6))
     drone.wait(2)
 
     drone.logger.info("-- Hover at 60% thrust")
-    drone.offboard.set_attitude(Attitude(0.0, 0.0, 0.0, 0.6))
+    drone.put(drone.offboard.set_attitude, Attitude(0.0, 0.0, 0.0, 0.6))
     drone.wait(2)
 
     drone.wait_until_queue_empty()
