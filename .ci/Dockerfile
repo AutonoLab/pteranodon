@@ -13,8 +13,8 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 RUN chmod +x /wait
 
 # Install deps
-RUN apt-get install -y curl git python3-pip && \
-    apt-get update && \
+RUN apt-get update && \
+    apt-get install -y curl git python3-pip && \
     apt-get -y autoremove && \
     apt-get clean autoclean && \
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
