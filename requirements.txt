@@ -2,4 +2,4 @@ mavsdk
 numpy
 pymavlink
 grpcio
-pyserial
+pyserial>=3.5
