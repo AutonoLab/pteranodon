@@ -20,9 +20,15 @@ jobs:
       - name: Build Docker Containers
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+      - name: Check Running Containers 0 
+        run: |
+          docker ps -a
       - name: Run Docker Containers
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
+      - name: Check Running Containers 0 
+        run: |
+          docker ps -a
       - name: Test Abstract Plugin
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py px4

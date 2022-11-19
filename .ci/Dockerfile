@@ -29,3 +29,4 @@ RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
 RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 
 WORKDIR "${PTERANODON_DIR}"
+CMD tail -f /dev/null
