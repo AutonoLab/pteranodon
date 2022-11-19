@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   px4_docker:
-    image: jonasvautherin/px4-gazebo-headless:1.13.0
+    image: jonasvautherin/px4-gazebo-headless
     ports:
       - "50051:50051"
       - "14540:14540"
@@ -11,7 +11,7 @@ services:
           test: ss -tulpn | grep LISTEN | grep gzserver
           interval: 60s
           timeout: 100s
-          retries: 100
+          retries: 3
           start_period: 30s
 
   test:
@@ -20,7 +20,7 @@ services:
       - px4_docker
     links:
       - "px4_docker:px4"
-    command: sh -c "/wait && echo Done"
+    command: sh -c "./wait && echo Done"
     environment:
       - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
       - WAIT_HOSTS_TIMEOUT=300
