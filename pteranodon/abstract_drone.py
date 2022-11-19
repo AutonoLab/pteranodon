@@ -615,15 +615,8 @@ class AbstractDrone(ABC):
                     if kwargs is None:
                         kwargs = {}
 
-                    # Reorder according to priority (highest priority at the end of the queue)
-                    # Sorted function keeps order within same priorities
-                    self._queue = deque(
-                        sorted(
-                            self._queue,
-                            key=lambda cmd_tup: cmd_tup[0].priority,
-                            reverse=True,
-                        )
-                    )
+                    self._priority_sort_queue()
+
                     self._process_command(command_obj, args, kwargs)
                 # TODO, perform logging on these exceptions
                 except IndexError as e:
@@ -735,6 +728,17 @@ class AbstractDrone(ABC):
         # close logging
         log.close_logger(self._logger)
 
+    def _priority_sort_queue(self):
+        # Reorder according to priority (highest priority at the end of the queue)
+        # Sorted function keeps order within same priorities
+        self._queue = deque(
+            sorted(
+                self._queue,
+                key=lambda cmd_tup: cmd_tup[0].priority,
+                reverse=True,
+            )
+        )
+
     # method for queueing mavlink commands
     # TODO, implement a clear queue or priority flag. using deque allows these operations to be deterministic
 
@@ -765,6 +769,8 @@ class AbstractDrone(ABC):
             self._queue.appendleft((command_obj, args, kwargs))
         else:
             self._queue.append((command_obj, args, kwargs))
+
+        self._priority_sort_queue()
 
     ##################################################
     # TODO, implement the flag for put in these methods
