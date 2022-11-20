@@ -27,9 +27,21 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS): 
 	$(MAKE) -C $(@:clean-%=%) clean
 
+init::
+	@echo "Initializing submodules..."
+	git submodule init
+	git pull --recurse-submodules
+	@echo "   Done."
+
+update: 
+	@echo "Updating submodules..."
+	git submodule update --init
+	git add . && git commit -m 'Update submodules to latest revisions'
+	@echo "   Done."
+
 .PHONY: subdirs $(DIRS)
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(INSTALLDIRS)
 .PHONY: subdirs $(TESTDIRS)
 .PHONY: subdirs $(CLEANDIRS)
-.PHONY: all install clean test
+.PHONY: all install clean test update
