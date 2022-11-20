@@ -15,15 +15,23 @@ These methods include:
 **Base Plugins**
 - `Action.arm` &#8594; `AbstractDrone.arm` 
 - `Action.disarm` &#8594; `AbstractDrone.disarm`
+- `Action.do_orbit` &#8594; `AbstractDrone.do_orbit`
+- `Action.goto_location` &#8594; `AbstractDrone.goto_location`
 - `Action.hold` &#8594; `AbstractDrone.hold` 
+- `Action.kill` &#8594; `AbstractDrone.kill`
 - `Action.land` &#8594; `AbstractDrone.land` 
+- `Action.reboot` &#8594; `AbstractDrone.reboot`
 - `Action.return_to_launch` &#8594; `AbstractDrone.return_to_launch` 
+- `Action.set_actuator` &#8594; `AbstractDrone.set_actuator`
+- `Action.set_current_speed` &#8594; `AbstractDrone.set_current_speed`
 - `Action.set_maximum_speed` &#8594; `AbstractDrone.set_maximum_speed`
 - `Action.set_return_to_launch_altitude` &#8594; `AbstractDrone.set_return_to_launch_altitude`
 - `Action.set_takeoff_altitude` &#8594; `AbstractDrone.set_takeoff_altitude`
 - `Action.shutdown` &#8594; `AbstractDrone.shutdown`
 - `Action.takeoff` &#8594; `AbstractDrone.takeoff`
-- `Action.land` &#8594; `AbstractDrone.land`
+- `Action.terminate` &#8594; `AbstractDrone.terminate`
+- `Action.transition_to_fixedwing` &#8594; `AbstractDrone.transition_to_fixedwing`
+- `Action.transition_to_multicopter` &#8594; `AbstractDrone.transition_to_multicopter`
 
 **Extension Plugins**
 - `Relative.maneuver_to` &#8594; `AbstractDrone.maneuver_to`
