@@ -764,6 +764,9 @@ class AbstractDrone(ABC):
         else:
             command_obj = obj
 
+        if command_obj.preempt:
+            command_obj.priority = 1
+
         self._logger.info(f"User called: {command_obj}, putting call in queue")
         if command_obj.preempt:
             self._queue.appendleft((command_obj, args, kwargs))
