@@ -38,7 +38,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set the acceleration in NED coordinates
         :param accel_ned: The NED coordinates describing accelerating
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_acceleration_ned(accel_ned))
 
@@ -46,7 +45,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set direct actuator control values to groups #0 and #1
         :param act_ctrl: offboard.ActuatorControl ; Actuator control values
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_actuator_control(act_ctrl))
 
@@ -54,7 +52,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set the attitude in terms of roll, pitch in degrees with thrust
         :param attitude: offboard.Attitude ; Attitude role, pitch and yaw with trust
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_attitude(attitude))
 
@@ -62,7 +59,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set the attitude in terms of roll, pitch and yaw alog with thrust
         :param attitude_rate: offboard.AttitudeRate ; Attitude rate roll, pitch and yaw angular rate along with thrust
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_attitude_rate(attitude_rate))
 
@@ -70,7 +66,6 @@ class Offboard(AbstractBasePlugin):
         """
         set the position in Global coordinates (latitude, longitude, altitude) and yaw
         :param pos_global: offboard.PositionGlobalYaw ; Position and yaw
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_position_global(pos_global))
 
@@ -78,7 +73,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set the position in Ned coordinates and yaw
         :param pos_ned: offboard.PositionNedYaw ; Position and yaw
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_position_ned(pos_ned))
 
@@ -89,7 +83,6 @@ class Offboard(AbstractBasePlugin):
         Set the positionin NED coordinates, with the velocity to be used as feed-forward.
         :param pos: offboard.PositionNedYaw ; Position and yaw
         :param vel: offboard.VelocityNedYaw ; Velocity and yaw
-        :return: None
         """
         self._submit_coroutine(
             self._system.offboard.set_position_velocity_ned(pos, vel)
@@ -99,7 +92,6 @@ class Offboard(AbstractBasePlugin):
         """
         Set the velocity in body coordinates and yaw angular rate. Not available for fixed-wing aircraft
         :param vel_body: offboard.VelocityBodyYawspeed ; Velocity and yaw angular rate
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_velocity_body(vel_body))
 
@@ -107,14 +99,12 @@ class Offboard(AbstractBasePlugin):
         """
         Set the velocity in NED coordinates and yaw. Not available for fixed-wing aircraft.
         :param vel_ned: offboard.VelocityNedYaw ; Velocity and yaw
-        :return: None
         """
         self._submit_coroutine(self._system.offboard.set_velocity_ned(vel_ned))
 
     def start(self) -> None:
         """
         Start offboard control.
-        :return: None
         """
         self._is_active = True
         self._schedule(
@@ -128,7 +118,6 @@ class Offboard(AbstractBasePlugin):
     def stop(self) -> None:
         """
         Stop offboard control
-        :return: None
         """
         self._is_active = False
         self._submit_coroutine(self._system.offboard.stop())
@@ -136,6 +125,5 @@ class Offboard(AbstractBasePlugin):
     def hold(self) -> None:
         """
         Hold until the drone is at the altitude defined by set_attitude
-        :return: None
         """
         self.set_velocity_body(offboard.VelocityBodyYawspeed(0, 0, 0, 0))

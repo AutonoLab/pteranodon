@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from mavsdk import System
 from mavsdk.offboard import OffboardError
-from mavsdk.action import ActionError
+from mavsdk.action import ActionError, OrbitYawBehavior
 
 
 try:
@@ -778,8 +778,6 @@ class AbstractDrone(ABC):
 
     # START PLUGIN QUEUE WRAPPED METHODS
 
-    from mavsdk import action
-
     def arm(self) -> None:
         """
         Arms the drone.
@@ -794,37 +792,37 @@ class AbstractDrone(ABC):
 
     def do_orbit(
         self,
-        radius_m: float,
-        velocity_ms: float,
-        yaw_behavior: action.OrbitYawBehavior,
+        radius: float,
+        velocity: float,
+        yaw_behavior: OrbitYawBehavior,
         latitude_deg: float,
         longitude_deg: float,
-        absolute_altitude_m: float,
+        absolute_altitude: float,
     ) -> None:
         """
         Send command do orbit to the drone.
 
-        :param radius_m: Radius of circle (in meters)
-        :type radius_m:  float
-        :param velocity_ms: Tangential velocity (in m/s)
-        :type velocity_ms: float
+        :param radius: Radius of circle (in meters)
+        :type radius:  float
+        :param velocity: Tangential velocity (in m/s)
+        :type velocity: float
         :param yaw_behavior: Yaw behavior of vehicle (ORBIT_YAW_BEHAVIOUR)
         :type yaw_behavior: mavsdk.action.OrbitYawBehavior
         :param latitude_deg: Center point latitude in degrees. NAN: use current latitude for center
         :type latitude_deg: float
         :param longitude_deg: Center point longitude in degrees. NAN: use current longitude for center
         :type longitude_deg: float
-        :param absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
-        :type absolute_altitude_m: float
+        :param absolute_altitude: Center point altitude in meters. NAN: use current altitude for center
+        :type absolute_altitude: float
         """
         self.put(
             self.action.do_orbit,
-            radius_m,
-            velocity_ms,
+            radius,
+            velocity,
             yaw_behavior,
             latitude_deg,
             longitude_deg,
-            absolute_altitude_m,
+            absolute_altitude,
         )
 
     def goto_location(
