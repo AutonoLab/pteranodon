@@ -37,7 +37,7 @@ jobs:
 
       - name: Restart containers 
         run: | #Restart containers
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services-test restart -t tests-services-px4_docker-1
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services-test restart -t 60 tests-services-px4_docker-1
 
       - name: Check Running Containers 2 
         run: | #List running containers
