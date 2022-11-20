@@ -6,7 +6,9 @@
 in the order they are called. To allow for a delay in processing between commands in the queue, a time slice
 can be set either in the initializer or after the fact. 
 
-All plugin based commands that are called directly through the `AbstractDrone` object are added directly to the queue. 
+All plugin based commands that are called directly through the `AbstractDrone` object are added directly to the queue.
+Methods are wrapped and pushed to the queue inside `AbstractDrone` for commands which under typical circumstances should
+be run in a specific order. All other methods can be added to the queue or called directly.
 
 These methods include:
 
@@ -24,8 +26,8 @@ These methods include:
 - `Action.land` &#8594; `AbstractDrone.land`
 
 **Extension Plugins**
-- `Relative.maneuver_to` &#8594; `Relative.maneuver_to`
-- `Relative.create_geofence` &#8594; `Relative.create_geofence`
+- `Relative.maneuver_to` &#8594; `AbstractDrone.maneuver_to`
+- `Relative.create_geofence` &#8594; `AbstractDrone.create_geofence`
 
 Other plugin methods can be manually added to the queue using the `AbstractDrone.put` method. Methods can be directly
 passed in as the `Callable` type for simple control, or can be wrapped in the `AbstractDrone.Command` dataclass for more

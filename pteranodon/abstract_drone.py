@@ -689,7 +689,6 @@ class AbstractDrone(ABC):
         """
         Clears the command queue, attempts to disarm the drone, closes all telemetry readings, stops the loop method
         execution, stops the mavlink command loop, and then joins the mavlink thread.
-        :return: None
         """
         if self._ran_stop:
             return
@@ -754,7 +753,6 @@ class AbstractDrone(ABC):
         :type obj: Union[Callable, AbstractDrone.Command]
         :param args: The arguments for the function/method
         :param kwargs: The keyword arguments for the function/method
-        :return: None
         """
 
         command_obj: AbstractDrone.Command
@@ -777,96 +775,233 @@ class AbstractDrone(ABC):
 
     ##################################################
     # TODO, implement the flag for put in these methods
+
+    # START PLUGIN QUEUE WRAPPED METHODS
+
+    from mavsdk import action
+
     def arm(self) -> None:
         """
         Arms the drone.
-        :return: None
         """
         self.put(self.action.arm)
 
     def disarm(self) -> None:
         """
         Disarms the drone.
-        :return: None
         """
         self.put(self.action.disarm)
+
+    def do_orbit(
+        self,
+        radius_m: float,
+        velocity_ms: float,
+        yaw_behavior: action.OrbitYawBehavior,
+        latitude_deg: float,
+        longitude_deg: float,
+        absolute_altitude_m: float,
+    ) -> None:
+        """
+        Send command do orbit to the drone.
+
+        :param radius_m: Radius of circle (in meters)
+        :type radius_m:  float
+        :param velocity_ms: Tangential velocity (in m/s)
+        :type velocity_ms: float
+        :param yaw_behavior: Yaw behavior of vehicle (ORBIT_YAW_BEHAVIOUR)
+        :type yaw_behavior: mavsdk.action.OrbitYawBehavior
+        :param latitude_deg: Center point latitude in degrees. NAN: use current latitude for center
+        :type latitude_deg: float
+        :param longitude_deg: Center point longitude in degrees. NAN: use current longitude for center
+        :type longitude_deg: float
+        :param absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
+        :type absolute_altitude_m: float
+        """
+        self.put(
+            self.action.do_orbit,
+            radius_m,
+            velocity_ms,
+            yaw_behavior,
+            latitude_deg,
+            longitude_deg,
+            absolute_altitude_m,
+        )
+
+    def goto_location(
+        self,
+        latitude_deg: float,
+        longitude_deg: float,
+        absolute_altitude_m: float,
+        yaw: float,
+    ) -> None:
+        """
+        Send command to move the vehicle to a specific global position.
+
+        The latitude and longitude are given in degrees (WGS84 frame) and the altitude in meters AMSL
+        (above mean sea level).
+
+        :param latitude_deg: Latitude (in degrees)
+        :type latitude_deg: float
+        :param longitude_deg: Longitude (in degrees)
+        :type longitude_deg: float
+        :param absolute_altitude_m: Altitude AMSL (in meters)
+        :type absolute_altitude_m: float
+        :param yaw: Yaw angle (in degrees, frame is NED, 0 is North, positive is clockwise)
+        :type yaw: float
+        """
+        self.put(
+            self.action.goto_location,
+            latitude_deg,
+            longitude_deg,
+            absolute_altitude_m,
+            yaw,
+        )
 
     def hold(self) -> None:
         """
         Send command to hold current position
         Note: this command is specific to the PX4 Autopilot flight stack as it implies a change to a PX4-specific mode.
-        :return: None
         """
         self.put(self.action.hold)
+
+    def kill(self) -> None:
+        """
+        Send command to kill the drone.
+
+        This will disarm a drone irrespective of whether it is landed or flying. Note that the drone will fall out of the sky
+        if this command is used while flying.
+        """
+        self.put(self.action.kill)
 
     def land(self) -> None:
         """
         Send command to land the drone
-        :return: None
         """
         self.put(self.action.land)
+
+    def reboot(self) -> None:
+        """
+        Send command to reboot the drone components.
+
+        This will reboot the autopilot, companion computer, camera and gimbal.
+        """
+        self.put(self.action.reboot)
 
     def return_to_launch(self) -> None:
         """
         Send command to return to launch (takeoff) position and land.
-        :return: None
         """
         self.put(self.action.return_to_launch)
 
-    def set_maximum_speed(self, *args: float, **kwargs: float) -> None:
+    def set_actuator(self, index: int, value: float) -> None:
+        """
+        Send command to set the value of an actuator.
+
+        :param index: Index of the actuator
+        :type index: int
+        :param value: Value to set
+        :type value: value
+        """
+        self.put(self.action.set_actuator, index, value)
+
+    def set_current_speed(self, speed_m_s: float) -> None:
+        """
+        Set current speed.
+
+        This will set the speed during a mission, reposition, and similar. It is ephemeral, so not stored on the drone
+        and does not survive a reboot.
+
+        :param speed_m_s: The speed to set in meters per second
+        :type speed_m_s: float
+        """
+        self.put(self.action.set_current_speed, speed_m_s)
+
+    def set_maximum_speed(self, speed: float) -> None:
         """
         Set vehicle maximum speed (in metres/second).
-        :param speed: Maximum speed in m/s
-        :return:None
-        """
-        self.put(self.action.set_maximum_speed, *args, **kwargs)
 
-    def set_return_to_launch_altitude(self, *args: float, **kwargs: float) -> None:
+        :param speed: Maximum speed in m/s
+        :type speed: float
+        """
+        self.put(self.action.set_maximum_speed, speed)
+
+    def set_return_to_launch_altitude(self, relative_altitude: float) -> None:
         """
         Set the return to launch minimum return altitude (in meters).
-        :param relative_altitude_m: Altitude relative to takeoff location
-        :return: None
-        """
-        self.put(self.action.set_return_to_launch_altitude, *args, **kwargs)
 
-    def set_takeoff_altitude(self, *args: float, **kwargs: float) -> None:
+        :param relative_altitude: Altitude relative to takeoff location
+        :type relative_altitude: float
+        """
+        self.put(self.action.set_return_to_launch_altitude, relative_altitude)
+
+    def set_takeoff_altitude(self, altitude: float) -> None:
         """
         Set takeoff altitude (in meters above ground).
+
         :param altitude: Takeoff altitude relative to ground/takeoff location
-        :return: None
+        :type altitude: float
         """
-        self.put(self.action.set_takeoff_altitude, *args, **kwargs)
+        self.put(self.action.set_takeoff_altitude, altitude)
 
     def shutdown(self) -> None:
         """
         Send command to shut down the drone components.
-        :return: None
         """
         self.put(self.action.shutdown)
 
     def takeoff(self) -> None:
         """
         Send command to take off and hover.
-        :return: None
         """
         self.put(self.action.takeoff)
+
+    def terminate(self) -> None:
+        """
+        Send command to terminate the drone.
+
+        This will run the terminate routine as configured on the drone (e.g. disarm and open the parachute).
+        """
+        self.put(self.action.terminate)
+
+    def transition_to_fixedwing(self) -> None:
+        """
+        Send command to transition the drone to fixedwing.
+
+        The associated action will only be executed for VTOL vehicles (on other vehicle types the command will fail).
+        The command will succeed if called when the vehicle is already in fixedwing mode.
+        """
+        self.put(self.action.transition_to_fixedwing)
+
+    def transition_to_multicopter(self) -> None:
+        """
+        Send command to transition the drone to multicopter.
+
+        The associated action will only be executed for VTOL vehicles (on other vehicle types the command will fail).
+        The command will succeed if called when the vehicle is already in multicopter mode.
+        """
+        self.put(self.action.transition_to_multicopter)
 
     def maneuver_to(
         self,
         front: float,
         right: float,
         down: float,
-        on_dimensions: Tuple = (True, True, True),
+        on_dimensions: Tuple[bool, bool, bool] = (True, True, True),
         test_min: bool = False,
     ):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
+
         :param front: Relative distance in front of drone
+        :type front: float
         :param right: Relative distance to the right of drone
+        :type right: float
         :param down: Relative distance below the drone
-        :param on_dimensions: A tuple of 3 boolean values. In order they represent if the drone will move
+        :type down: float
+        :param on_dimensions: A tuple of 3 boolean values. In order, they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
+        :type on_dimensions: Tuple[bool, bool, bool]
         """
         self.put(self.relative.maneuver_to, front, right, down, on_dimensions, test_min)
 
@@ -874,7 +1009,11 @@ class AbstractDrone(ABC):
         """
         Creates a relative inclusive geofence around the drones home coordinates. The geofence is defined as a square
         where the distance parameter is equal to half the side length.
+
         :param distance: The meters from home the drone can maneuver
-        :return: None
+        :type distance: float
         """
         self.put(self.relative.create_geofence, distance)
+
+
+# END PLUGIN QUEUE WRAPPED METHODS
