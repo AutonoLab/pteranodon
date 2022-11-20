@@ -36,7 +36,7 @@ class Action(AbstractBasePlugin):
         Send command to arm the drone.
         Arming a drone normally causes motors to spin at idle. Before arming take all safety precautions and stand clear
         of the drone
-        :return: None
+
         """
         self._submit_coroutine(self._system.action.arm())
 
@@ -58,20 +58,22 @@ class Action(AbstractBasePlugin):
         longitude_deg: float,
         absolute_altitude_m: float,
     ) -> None:
-
         """
         Send command do orbit to the drone.
 
-        This will run the orbit routine with the given parameters.
-        Args:
-            radius_m: Radius of circle (in meters)
-            velocity_ms: Tangential velocity (in m/s)
-            yaw_behavior: Yaw behavior of vehicle (ORBIT_YAW_BEHAVIOUR)
-            latitude_deg: Center point latitude in degrees. NAN: use current latitude for center
-            longitude_deg: Center point longitude in degrees. NAN: use current longitude for center
-            absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
+        :param radius_m: Radius of circle (in meters)
+        :type radius_m:  float
+        :param velocity_ms: Tangential velocity (in m/s)
+        :type velocity_ms: float
+        :param yaw_behavior: Yaw behavior of vehicle (ORBIT_YAW_BEHAVIOUR)
+        :type yaw_behavior: mavsdk.action.OrbitYawBehavior
+        :param latitude_deg: Center point latitude in degrees. NAN: use current latitude for center
+        :type latitude_deg: float
+        :param longitude_deg: Center point longitude in degrees. NAN: use current longitude for center
+        :type longitude_deg: float
+        :param absolute_altitude_m: Center point altitude in meters. NAN: use current altitude for center
+        :type absolute_altitude_m: float
         """
-
         self._submit_coroutine(
             self._system.action.do_orbit(
                 radius_m,
@@ -111,19 +113,21 @@ class Action(AbstractBasePlugin):
         absolute_altitude_m: float,
         yaw: float,
     ) -> None:
-
         """
         Send command to move the vehicle to a specific global position.
 
         The latitude and longitude are given in degrees (WGS84 frame) and the altitude in meters AMSL
         (above mean sea level).
-        Args:
-            latitude_deg: Latitude (in degrees)
-            longitude_deg:  Longitude (in degrees)
-            absolute_altitude_m: Altitude AMSL (in meters)
-            yaw: Yaw angle (in degrees, frame is NED, 0 is North, positive is clockwise)
-        """
 
+        :param latitude_deg: Latitude (in degrees)
+        :type latitude_deg: float
+        :param longitude_deg: Longitude (in degrees)
+        :type longitude_deg: float
+        :param absolute_altitude_m: Altitude AMSL (in meters)
+        :type absolute_altitude_m: float
+        :param yaw: Yaw angle (in degrees, frame is NED, 0 is North, positive is clockwise)
+        :type yaw: float
+        """
         self._submit_coroutine(
             self._system.action.goto_location(
                 latitude_deg, longitude_deg, absolute_altitude_m, yaw
@@ -180,14 +184,15 @@ class Action(AbstractBasePlugin):
 
         self._submit_coroutine(self._system.action.return_to_launch())
 
-    def set_acuator(self, index: int, value: float) -> None:
+    def set_actuator(self, index: int, value: float) -> None:
         """
         Send command to set the value of an actuator.
-        Args:
-            index:
-            value:
-        """
 
+        :param index: Index of the actuator
+        :type index: int
+        :param value: Value to set
+        :type value: value
+        """
         self._submit_coroutine(self._system.action.set_actuator(index, value))
 
     def set_current_speed(self, speed_m_s: float) -> None:
@@ -196,17 +201,18 @@ class Action(AbstractBasePlugin):
 
         This will set the speed during a mission, reposition, and similar. It is ephemeral, so not stored on the drone
         and does not survive a reboot.
-        Args:
-            speed_m_s:
-        """
 
+        :param speed_m_s: The speed to set in meters per second
+        :type speed_m_s: float
+        """
         self._submit_coroutine(self._system.action.set_current_speed(speed_m_s))
 
     def set_maximum_speed(self, speed_m_s: float) -> None:
         """
         Set vehicle maximum speed (in metres/second).
-        Args:
-            speed_m_s:
+
+        :param speed_m_s: The maximum speed in meters per second
+        :type speed_m_s: float
         """
 
         self._submit_coroutine(self._system.action.set_maximum_speed(speed_m_s))
@@ -215,8 +221,9 @@ class Action(AbstractBasePlugin):
     def set_return_to_launch_altitude(self, relative_altitude_m: float) -> None:
         """
         Set the return to launch minimum return altitude (in meters).
-        Args:
-            relative_altitude_m:
+
+        :param relative_altitude_m: The relative return to launch altitude in meters
+        :type relative_altitude_m: float
         """
 
         self._submit_coroutine(
@@ -227,8 +234,9 @@ class Action(AbstractBasePlugin):
     def set_takeoff_altitude(self, relative_altitude_m: float) -> None:
         """
         Set takeoff altitude (in meters above ground).
-        Args:
-            relative_altitude_m:
+
+        :param relative_altitude_m: The relative takeoff altitude in meters
+        :type relative_altitude_m: float
         """
 
         self._submit_coroutine(
