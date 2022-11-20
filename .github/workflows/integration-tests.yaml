@@ -18,22 +18,26 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Build Docker Containers
-        run: | #Build Docker Container
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+      # - name: Build Docker Containers
+      #   run: | #Build Docker Container
+      #     docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
 
-      - name: Check Running Containers 0 
-        run: | #List running containers
-          docker ps -a
+      # - name: Check Running Containers 0 
+      #   run: | #List running containers
+      #     docker ps -a
 
-      - name: Run Docker Containers
-        run: | #Run container
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate
-        #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
+      # - name: Run Docker Containers
+      #   run: | #Run container
+      #     docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate
+      #   #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
 
-      - name: Check Running Containers 1 
-        run: | #List running containers
-          docker ps -a
+      # - name: Check Running Containers 1 
+      #   run: | #List running containers
+      #     docker ps -a
+
+      name: Run docker
+        run: | #Run test code
+          docker run --rm -it jonasvautherin/px4-gazebo-headless:1.13.0
 
       - name: Test Abstract Plugin
         run: | #Run test code
