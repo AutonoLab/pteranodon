@@ -33,7 +33,7 @@ jobs:
 
       - name: Wait 
         run: | #List running containers
-          sleep(40)
+          sleep 40
 
       - name: Check Running Containers 1 
         run: | #List running containers
