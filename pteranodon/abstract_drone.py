@@ -14,7 +14,17 @@ import functools
 from dataclasses import dataclass
 
 from mavsdk import System
-from mavsdk.offboard import OffboardError
+from mavsdk.offboard import (
+    OffboardError,
+    AccelerationNed,
+    ActuatorControl,
+    Attitude,
+    AttitudeRate,
+    PositionGlobalYaw,
+    PositionNedYaw,
+    VelocityBodyYawspeed,
+    VelocityNedYaw,
+)
 from mavsdk.action import ActionError, OrbitYawBehavior
 
 
@@ -776,7 +786,7 @@ class AbstractDrone(ABC):
     ##################################################
     # TODO, implement the flag for put in these methods
 
-# START PLUGIN QUEUE WRAPPED METHODS
+    # START PLUGIN QUEUE WRAPPED METHODS
 
     # START ACTION
 
@@ -985,88 +995,88 @@ class AbstractDrone(ABC):
 
     # START OFFBOARD
 
-    def set_acceleration_ned(self, accel_ned: offboard.AccelerationNed) -> None:
+    def set_acceleration_ned(self, accel_ned: AccelerationNed) -> None:
         """
         Set the acceleration in NED coordinates
 
         :param accel_ned: The NED coordinates describing accelerating
-        :type accel_ned: offboard.AccelerationNed
+        :type accel_ned: mavsdk.offboard.AccelerationNed
         """
         self.put(self.offboard.set_acceleration_ned, accel_ned)
 
-    def set_actuator_control(self, act_ctrl: offboard.ActuatorControl) -> None:
+    def set_actuator_control(self, act_ctrl: ActuatorControl) -> None:
         """
         Set direct actuator control values to groups #0 and #1
 
         :param act_ctrl: Actuator control values
-        :type act_ctrl: offboard.ActuatorControl
+        :type act_ctrl: mavsdk.offboard.ActuatorControl
         """
         self.put(self.offboard.set_actuator_control, act_ctrl)
 
-    def set_attitude(self, attitude: offboard.Attitude) -> None:
+    def set_attitude(self, attitude: Attitude) -> None:
         """
         Set the attitude in terms of roll, pitch in degrees with thrust
 
         :param attitude: Attitude role, pitch and yaw with trust
-        :type attitude: offboard.Attitude
+        :type attitude: mavsdk.offboard.Attitude
         """
         self.put(self.offboard.set_attitude, attitude)
 
-    def set_attitude_rate(self, attitude_rate: offboard.AttitudeRate) -> None:
+    def set_attitude_rate(self, attitude_rate: AttitudeRate) -> None:
         """
         Set the attitude in terms of roll, pitch and yaw alog with thrust
 
         :param attitude_rate: Attitude rate roll, pitch and yaw angular rate along with thrust
-        :type attitude_rate: offboard.AttitudeRate
+        :type attitude_rate: mavsdk.offboard.AttitudeRate
         """
         self.put(self.offboard.set_attitude_rate, attitude_rate)
 
-    def set_position_global(self, pos_global: offboard.PositionGlobalYaw) -> None:
+    def set_position_global(self, pos_global: PositionGlobalYaw) -> None:
         """
         set the position in Global coordinates (latitude, longitude, altitude) and yaw
 
         :param pos_global: Position and yaw
-        :type pos_global: offboard.PositionGlobalYaw
+        :type pos_global: mavsdk.offboard.PositionGlobalYaw
         """
         self.put(self.offboard.set_position_global, pos_global)
 
-    def set_position_ned(self, pos_ned: offboard.PositionNedYaw) -> None:
+    def set_position_ned(self, pos_ned: PositionNedYaw) -> None:
         """
         Set the position in Ned coordinates and yaw
 
         :param pos_ned: Position and yaw
-        :type pos_ned: offboard.PositionNedYaw
+        :type pos_ned: mavsdk.offboard.PositionNedYaw
         """
         self.put(self.offboard.set_position_ned, pos_ned)
 
     def set_position_velocity_ned(
-        self, pos: offboard.PositionNedYaw, vel: offboard.VelocityNedYaw
+        self, pos: PositionNedYaw, vel: VelocityNedYaw
     ) -> None:
         """
         Set the position NED coordinates, with the velocity to be used as feed-forward.
 
         :param pos: Position and yaw
-        :type pos: offboard.PositionNedYaw
+        :type pos: mavsdk.offboard.PositionNedYaw
         :param vel: Velocity and yaw
-        :type vel: offboard.VelocityNedYaw
+        :type vel: mavsdk.offboard.VelocityNedYaw
         """
         self.put(self.offboard.set_position_velocity_ned, pos, vel)
 
-    def set_velocity_body(self, vel_body: offboard.VelocityBodyYawspeed) -> None:
+    def set_velocity_body(self, vel_body: VelocityBodyYawspeed) -> None:
         """
         Set the velocity in body coordinates and yaw angular rate. Not available for fixed-wing aircraft
 
         :param vel_body: Velocity and yaw angular rate
-        :type vel_body: offboard.VelocityBodyYawspeed
+        :type vel_body: mavsdk.offboard.VelocityBodyYawspeed
         """
         self.put(self.offboard.set_velocity_body, vel_body)
 
-    def set_velocity_ned(self, vel_ned: offboard.VelocityNedYaw) -> None:
+    def set_velocity_ned(self, vel_ned: VelocityNedYaw) -> None:
         """
         Set the velocity in NED coordinates and yaw. Not available for fixed-wing aircraft.
 
         :param vel_ned: Velocity and yaw
-        :type vel_ned: offboard.VelocityNedYaw
+        :type vel_ned: mavsdk.offboard.VelocityNedYaw
         """
         self.put(self.offboard.set_velocity_ned, vel_ned)
 
@@ -1115,6 +1125,7 @@ class AbstractDrone(ABC):
         self.put(self.relative.create_geofence, distance)
 
     # END EXTENSION PLUGINS
+
 
 # END PLUGIN QUEUE WRAPPED METHODS
 
