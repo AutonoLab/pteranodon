@@ -11,26 +11,32 @@ jobs:
   offboard:
     name: "Test Offboard"
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       BRANCH_REF: "${{ github.event.pull_request.head.ref }}"
 
     steps:
       - uses: actions/checkout@v1
+
       - name: Build Docker Containers
-        run: |
+        run: | #Build Docker Container
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+
       - name: Check Running Containers 0 
-        run: |
+        run: | #List running containers
           docker ps -a
+
       - name: Run Docker Containers
-        run: |
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
+        run: | #Run container
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate
+        #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
+
       - name: Check Running Containers 0 
-        run: |
+        run: | #List running containers
           docker ps -a
+
       - name: Test Abstract Plugin
-        run: |
+        run: | #Run test code
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py px4
           
           
