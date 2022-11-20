@@ -39,12 +39,20 @@ jobs:
         run: | #List running containers
           docker ps -a
 
+      - name: Restart containers 
+        run: | #Restart containers
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services restart tests-services-px4_docker-1
+
+      - name: Check Running Containers 2 
+        run: | #List running containers
+          docker ps -a
+
       - name: Test Abstract Plugin
         run: | #Run test code
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec tests-services-px4_docker-1 python3 test_script.py px4
         #docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test python3 test_script.py px4
      
-      - name: Check Running Containers 2 
+      - name: Check Running Containers 3 
         run: | #List running containers
           docker ps -a
           
