@@ -98,7 +98,7 @@ class AbstractDrone(ABC):
         self._time_slice = time_slice
 
         self._address = address
-        self.is_remote = ServerDetector.addr_is_remote(self._address)
+        self._is_remote = ServerDetector.addr_is_remote(self._address)
 
         # If address == "", and flag is not False, attempt to autoconnect
         if len(address) == 0 and autoconnect_no_addr:
@@ -429,8 +429,17 @@ class AbstractDrone(ABC):
     def address(self) -> str:
         """
         :return: The address used to connect in mavsdk.System.connect
+        :rtype: str
         """
         return self._address
+
+    @property
+    def is_remote(self) -> bool:
+        """
+        :return: Whether the address of this drone is remote (TCP/UDP) or remote (serial)
+        :rtype: bool
+        """
+        return self._is_remote
 
     @property
     def time_slice(self) -> float:
