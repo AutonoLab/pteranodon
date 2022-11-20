@@ -82,7 +82,7 @@ class PluginManager:
                 FollowMe,
                 Ftp,
                 Geofence,
-                # Gimbal,
+                Gimbal,
                 Info,
                 LogFiles,
                 ManualControl,

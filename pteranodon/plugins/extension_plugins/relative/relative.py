@@ -57,19 +57,22 @@ class Relative(AbstractExtensionPlugin):
         front: float,
         right: float,
         down: float,
-        on_dimensions: Tuple = (True, True, True),
+        on_dimensions: Tuple[bool, bool, bool] = (True, True, True),
         test_min: bool = False,
     ):
         """
         A movement command for moving relative to the drones current position. The front direction is aligned directly with
         the drones front as defined in the configuration.
-        :param test_min:
-        :type test_min:
+
         :param front: Relative distance in front of drone
+        :type front: float
         :param right: Relative distance to the right of drone
+        :type right: float
         :param down: Relative distance below the drone
+        :type down: float
         :param on_dimensions: A tuple of 3 boolean values. In order, they represent if the drone will move
         (front, right, down). If set to False the drone will not move in that direction
+        :type on_dimensions: Tuple[bool, bool, bool]
         """
         self._submit_coroutine(
             self._maneuver_to(front, right, down, on_dimensions, test_min)
