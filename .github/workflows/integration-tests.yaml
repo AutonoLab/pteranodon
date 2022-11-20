@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Docker Containers
         run: | #Run container
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate
         #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
 
       - name: Check Running Containers 1 
