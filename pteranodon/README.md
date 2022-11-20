@@ -12,7 +12,9 @@ be run in a specific order. All other methods can be added to the queue or calle
 
 These methods include:
 
-**Base Plugins**
+### Base Plugins
+
+**Action**
 - `Action.arm` &#8594; `AbstractDrone.arm` 
 - `Action.disarm` &#8594; `AbstractDrone.disarm`
 - `Action.do_orbit` &#8594; `AbstractDrone.do_orbit`
@@ -33,7 +35,19 @@ These methods include:
 - `Action.transition_to_fixedwing` &#8594; `AbstractDrone.transition_to_fixedwing`
 - `Action.transition_to_multicopter` &#8594; `AbstractDrone.transition_to_multicopter`
 
-**Extension Plugins**
+**Offboard**
+- `Offboard.set_acceleration_ned` &#8594; `AbstractDrone.set_acceleration_ned`
+- `Offboard.set_actuator_control` &#8594; `AbstractDrone.set_actuator_control`
+- `Offboard.set_attitude` &#8594; `AbstractDrone.set_attitude`
+- `Offboard.set_attitude_rate` &#8594; `AbstractDrone.set_attitude_rate`
+- `Offboard.set_position_global` &#8594; `AbstractDrone.set_position_global`
+- `Offboard.set_position_ned` &#8594; `AbstractDrone.set_position_ned`
+- `Offboard.set_position_velocity_ned` &#8594; `AbstractDrone.set_position_velocity_ned`
+- `Offboard.set_velocity_body` &#8594; `AbstractDrone.set_velocity_body`
+- `Offboard.set_velocity_ned` &#8594; `AbstractDrone.set_velocity_ned`
+- `Offboard.offboard_hold` &#8594; `AbstractDrone.offboard_hold`
+
+### Extension Plugins
 - `Relative.maneuver_to` &#8594; `AbstractDrone.maneuver_to`
 - `Relative.create_geofence` &#8594; `AbstractDrone.create_geofence`
 
