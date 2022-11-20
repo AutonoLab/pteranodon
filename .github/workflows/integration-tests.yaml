@@ -37,7 +37,7 @@ jobs:
 
       - name: Run docker
         run: | #Run test code
-          docker run -it jonasvautherin/px4-gazebo-headless
+          docker run jonasvautherin/px4-gazebo-headless
 
       - name: Test Abstract Plugin
         run: | #Run test code
