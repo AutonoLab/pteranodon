@@ -1,7 +1,13 @@
-.PHONY: submodule
+.PHONY: submodule-init submodule-update submodule-build
 
-submodule: 
-	@echo "Updating submodules..."
-	git submodule update --init --recursive
-	git add . && git commit -m 'Update submodules to latest revisions' && git push
-	@echo "   Done."
+# call the init target in third-party/Makefile
+submodule-init:
+	$(MAKE) -C third-party init
+
+# call the update target in third-party/Makefile
+submodule-update:
+	$(MAKE) -C third-party update
+
+# call the all target in third-party/Makefile
+submodule-build:
+	$(MAKE) -C third-party
