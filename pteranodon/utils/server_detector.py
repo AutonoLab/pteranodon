@@ -322,3 +322,15 @@ class ServerDetector:
             log.close_logger(self._logger)
 
         return full_servers_list
+
+    @staticmethod
+    def addr_is_remote(address: str) -> bool:
+        split_list = address.split("://")
+        if len(split_list) < 2:
+            return False
+
+        proto = split_list[0]
+        if proto == "serial":
+            return False
+
+        return True

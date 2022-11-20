@@ -98,6 +98,7 @@ class AbstractDrone(ABC):
         self._time_slice = time_slice
 
         self._address = address
+        self.is_remote = ServerDetector.addr_is_remote(self._address)
 
         # If address == "", and flag is not False, attempt to autoconnect
         if len(address) == 0 and autoconnect_no_addr:
