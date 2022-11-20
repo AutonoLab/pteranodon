@@ -322,3 +322,23 @@ class ServerDetector:
             log.close_logger(self._logger)
 
         return full_servers_list
+
+    @staticmethod
+    def addr_is_remote(address: str) -> bool:
+        """
+        Calculates whether an address is remote (TCP/UDP) or local (serial)
+
+        :param address: The address (with protocol) to compute
+        :type address: str
+        :return: Whether the address is remote or not
+        :rtype: bool
+        """
+        split_list = address.split("://")
+        if len(split_list) < 2:
+            return False
+
+        proto = split_list[0]
+        if proto == "serial":
+            return False
+
+        return True
