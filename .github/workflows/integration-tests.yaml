@@ -28,18 +28,10 @@ jobs:
 
       - name: Run Docker Containers
         run: | #Run container
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate && docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec tests-services-px4_docker-1 python3 test_script.py px4
         #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
 
       - name: Check Running Containers 1 
-        run: | #List running containers
-          docker ps -a
-
-      - name: Restart containers 
-        run: | #Restart containers
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services-test restart -t 60 tests-services-px4_docker-1 && docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec tests-services-px4_docker-1 python3 test_script.py px4
-
-      - name: Check Running Containers 2 
         run: | #List running containers
           docker ps -a
 
