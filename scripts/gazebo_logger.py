@@ -9,7 +9,7 @@ drone = SimpleDrone("udp://:14540")
 print("Waitiing for the drone to connect...")
 
 
-if drone.core.connection_state() == state.is_connected:
+if drone.core.connection_state().is_connected:
     print("Drone CONNECTED")
 
 
