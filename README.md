@@ -2,7 +2,7 @@
 
 <img src="https://static.wikia.nocookie.net/animals/images/a/a1/Pterathumb.png/revision/latest?cb=20200311123111" alt="drawing" width="200"/>
 
-![Formatting](https://github.com/AutonoLab/pteranodon/actions/workflows/format-check.yaml/badge.svg?branch=main)
+![Formatting](https://github.com/AutonoLab/pteranodon/actions/workflows/format-checks.yaml/badge.svg?branch=main)
 ![Unit Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/unit-tests.yaml/badge.svg?branch=main)
 ![Integration Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/integration-tests.yaml/badge.svg?branch=main)
 ![PyPI Build](https://github.com/AutonoLab/pteranodon/actions/workflows/build-check.yaml/badge.svg?branch=main)
