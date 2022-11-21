@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build Docker Containers
-      - if: ${{ env.BRANCH_REF != ""}}
+      - if: env.BRANCH_REF != ""
         run: docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
-      - if: ${{ env.BRANCH_REF == ""}}
+      - if: env.BRANCH_REF == ""
         run: docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="main"
       - name: Run Docker Containers
         run: |
