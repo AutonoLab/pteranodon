@@ -2,14 +2,15 @@ import os
 
 from pteranodon import SimpleDrone
 
+print("Initiating drone...")
+
 drone = SimpleDrone("udp://:14540")
 
 print("Waitiing for the drone to connect...")
 
-for state in drone.core.connection_state():
-    if state.is_connected:
-        print("Drone CONNECTED")
-        break
+
+if drone.core.connection_state() == state.is_connected:
+    print("Drone CONNECTED")
 
 
 
