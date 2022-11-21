@@ -1,5 +1,5 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean ci pip-deps test test-unit test-integration docs
+.PHONY: help clean install ci pip-deps test test-unit test-integration docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -8,6 +8,7 @@ help:
 	@echo "  submodule-build       to build the submodules"
 	@echo "  submodule-clean       to clean the submodules"
 	@echo "  clean                 to clean the project"
+	@echo "  install               to install the project"
 	@echo "  ci                    to run the CI"
 	@echo "  pip-deps              to install the pip dependencies"
 	@echo "  test                  to run the tests"
@@ -19,6 +20,9 @@ clean:
 	rm -rf build
 	rm -rf pteranodon.egg-info
 	rm -rf .pytest_cache
+
+install:
+	pip3 install .
 
 # call the init target in third-party/Makefile
 submodule-init:
