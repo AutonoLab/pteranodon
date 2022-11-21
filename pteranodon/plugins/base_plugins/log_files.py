@@ -17,7 +17,7 @@ class LogFiles(AbstractBasePlugin):
     """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__("LogFiles", system, loop, logger)
+        super().__init__("log_files", system, loop, logger)
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
