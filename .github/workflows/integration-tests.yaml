@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Docker Containers
         run: | #Run container
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate | echo "commander takeoff"
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate --wait | echo "commander takeoff"
           sleep 10
           docker ps -a
         #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
