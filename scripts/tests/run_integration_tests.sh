@@ -4,5 +4,5 @@
 for FILE in tests/integration/test_*.py;
 do
     # run the file
-    python3 -m pytest $FILE
+    python3 -m pytest --log-cli-level=INFO --full-trace -rP $FILE
 done
