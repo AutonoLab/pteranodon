@@ -7,14 +7,6 @@ print("Initiating drone...")
 
 drone = SimpleDrone("udp://:14540")
 
-print("Waitiing for the drone to connect...")
-
-
-while (not drone.core.connection_state().is_connected):
-    time.sleep(2)
-        
-print("Drone CONNECTED")
-
 entries = drone.log_files.get_entries()
 
 
