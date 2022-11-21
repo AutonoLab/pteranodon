@@ -1,17 +1,24 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean ci pip-deps test docs
+.PHONY: help clean ci pip-deps test test-unit test-integration docs
 
 help:
-	@echo "submodule-init - initialize submodules"
-	@echo "submodule-update - update submodules"
-	@echo "submodule-build - build submodules"
-	@echo "submodule-clean - clean submodules"
-	@echo "clean - remove build artifacts"
-	@echo "ci - run continuous integration"
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  submodule-init        to initialize the submodules"
+	@echo "  submodule-update      to update the submodules"
+	@echo "  submodule-build       to build the submodules"
+	@echo "  submodule-clean       to clean the submodules"
+	@echo "  clean                 to clean the project"
+	@echo "  ci                    to run the CI"
+	@echo "  pip-deps              to install the pip dependencies"
+	@echo "  test                  to run the tests"
+	@echo "  test-unit             to run the unit tests"
+	@echo "  test-integration      to run the integration tests"
+	@echo "  docs                  to build the documentation"
 
 clean:
 	rm -rf build
 	rm -rf pteranodon.egg-info
+	rm -rf .pytest_cache
 
 # call the init target in third-party/Makefile
 submodule-init:
@@ -36,9 +43,13 @@ ci:
 	python3 -m pip install -r requirements-dev.txt -q
 	./scripts/run_ci.sh
 
-test:
-	python3 -m pip install -r requirements-test.txt -q
-	./scripts/run_tests.sh
+test: test-unit test-integration
+
+test-unit:
+	./scripts/tests/run_unit_tests.sh
+
+test-integration:
+	./scripts/tests/run_integration_tests.sh
 
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
