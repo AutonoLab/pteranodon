@@ -46,8 +46,7 @@ jobs:
       - name: Check Running Containers 2 
         run: | #List running containers
           docker ps -a
-          
-jobs:
+
   background:
     name: "Build & Run PX4"
 
