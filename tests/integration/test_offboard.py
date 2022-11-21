@@ -56,7 +56,7 @@ def test_hold(test_drone):
 
     test_drone.put(test_drone.action.arm)
 
-    # Running on offboard plugin so that the task cache is updated in real time.
+    # Running on offboard plugin so that the task cache is updated in real time
     test_drone.put(offboard_plugin.start)
 
     task_fetcher = PluginTaskFetcher(offboard_plugin)
