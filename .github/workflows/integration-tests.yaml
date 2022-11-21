@@ -17,9 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build Docker Containers
+        if: ${{ github.event.pull_request.head.ref != '' }}
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
-      - name: Run Docker Containers
+      - name: Build Docker Containers
+        if: ${{ github.event.pull_request.head.ref == '' }}
+        run: |
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="main"
+      - name: Bring Docker Containers Up
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --wait
           sleep 30s

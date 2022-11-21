@@ -713,7 +713,7 @@ class AbstractDrone(ABC):
         if self._ran_stop:
             return
         self._ran_stop = True
-
+        self.teardown()
         # shutdown any generators (yield) which are running
         # don't save the Future since cleaning and shutting down anyways
         self._logger.info("Closing async generators")
@@ -738,8 +738,14 @@ class AbstractDrone(ABC):
         map(self._join_thread, self._threads)
 
         # run teardown (queue should be clean from the clear before disarm)
-        self._logger.info("Running remaining async Tasks/Future, and MAVSDK commands")
-        asyncio.get_event_loop().run_until_complete(self._teardown())
+        try:
+            self._logger.info(
+                "Running remaining async Tasks/Future, and MAVSDK commands"
+            )
+            asyncio.get_event_loop().run_until_complete(self._teardown())
+        except RuntimeError:
+            self._logger.warning("Failed to empty queue on drone.stop()")
+            pass
 
         # cleanup the mavsdk.System instance
         self._cleanup()
