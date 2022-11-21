@@ -18,9 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      # - name: Build Docker Containers
-      #   run: | #Build Docker Container
-      #     docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+      - name: Build Docker Containers
+        run: | #Build Docker Container
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
 
       - name: Check Running Containers 0 
         run: | #List running containers
@@ -29,6 +29,8 @@ jobs:
       - name: Run Docker Containers
         run: | #Run container
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services up --no-recreate
+          sleep 10
+          docker ps -a
         #docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --no-recreate --wait
 
       - name: Check Running Containers 1 
