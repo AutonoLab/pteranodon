@@ -9,9 +9,9 @@ services:
       - "14550:14550"
     healthcheck:
           test: ss -tulpn | grep LISTEN | grep gzserver
-          interval: 60s
-          timeout: 10s
-          retries: 10
+          interval: 5s
+          timeout: 5s
+          retries: 2
           start_period: 30s
 
   test:
@@ -23,6 +23,6 @@ services:
     command: sh -c "./wait && echo Done"
     environment:
       - WAIT_HOSTS=px4_docker:50051,px4_docker:14540
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - WAIT_HOSTS_TIMEOUT=5
+      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOST_CONNECT_TIMEOUT=5
