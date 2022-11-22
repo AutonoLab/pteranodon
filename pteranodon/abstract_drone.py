@@ -35,8 +35,8 @@ try:
 except ModuleNotFoundError:
     pass
 
-from pteranodon.utils.server_detector import ServerDetector
-import pteranodon.utils.logger as log
+from pteranodon.tools.server_detector import ServerDetector
+import pteranodon.tools.logger as log
 
 from .plugins import PluginManager
 from .plugins.base_plugins import (

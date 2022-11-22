@@ -12,7 +12,7 @@ import logging
 from pymavlink import mavutil
 from serial import serialutil
 
-import pteranodon.utils.logger as log
+import pteranodon.tools.logger as log
 
 # pylint: disable=duplicate-code
 try:

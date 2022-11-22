@@ -5,7 +5,7 @@ import pytest
 
 from .helpers import PluginTaskFetcher
 from pteranodon.simple_drone import SimpleDrone
-from pteranodon.utils import ServerDetector
+from pteranodon.tools import ServerDetector
 from pteranodon.plugins.base_plugins import Offboard
 from threading import Condition
 

@@ -35,8 +35,13 @@ init::
 
 update: 
 	@echo "Updating submodules..."
-	git submodule update --init
-	git add . && git commit -m 'Update submodules to latest revisions'
+	git submodule update --init --recursive
+	@echo "   Done."
+
+update-modules:
+	@echo "Updating submodules..."
+	git submodule update --init --recursive
+	git add . && git commit -m "Update submodules"
 	@echo "   Done."
 
 .PHONY: subdirs $(DIRS)
