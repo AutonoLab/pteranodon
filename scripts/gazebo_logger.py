@@ -19,7 +19,7 @@ if(len(entries) != 0):
 count = 0
 
 for entry in entries:
-    drone.log_files.download_log_file(entry, str(DIR + str(count) + ".txt"))
+    drone.log_files.download_log_file(entry, str(DIR + str(count) + ".txt"), 5.0)
     count = count + 1
 
 
