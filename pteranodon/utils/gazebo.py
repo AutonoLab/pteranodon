@@ -13,4 +13,3 @@ def kill_gazebo() -> None:
     """Kill all gzserver and gzclient processes."""
     kill_gz_server()
     kill_gz_client()
-    
