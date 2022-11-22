@@ -1,5 +1,5 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean install ci pip-deps test test-unit test-integration docs
+.PHONY: help clean install build-all ci pip-deps test test-unit test-integration docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -9,6 +9,7 @@ help:
 	@echo "  submodule-clean       to clean the submodules"
 	@echo "  clean                 to clean the project"
 	@echo "  install               to install the project"
+	@echo "  build-all             to build the project and all submodules"
 	@echo "  ci                    to run the CI"
 	@echo "  pip-deps              to install the pip dependencies"
 	@echo "  test                  to run the tests"
@@ -23,6 +24,12 @@ clean:
 
 install:
 	pip3 install .
+
+build-all: submodule-init submodule-update
+	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
+	submodule-build
+	pip-deps
+	install
 
 # call the init target in third-party/Makefile
 submodule-init:
@@ -41,11 +48,11 @@ submodule-clean:
 	$(MAKE) -C third-party clean
 
 pip-deps:
-	./scripts/install_pip_dependencies.sh
+	./scripts/tools/install_pip_dependencies.sh
 
 ci:
 	python3 -m pip install -r requirements-dev.txt -q
-	./scripts/run_ci.sh
+	./scripts/tools/run_ci.sh
 
 test: test-unit test-integration
 

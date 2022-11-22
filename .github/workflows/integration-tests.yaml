@@ -30,25 +30,4 @@ jobs:
           sleep 30s
       - name: Test Abstract Plugin
         run: |
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py
-
-          
-          
-
-# docker network inspect -v tests-services_default
-# pytest --log-cli-level=INFO --full-trace -rP integration/test_offboard.py --hostname=tests-services_px4_docker_1
-#          pytest --log-cli-level=INFO --full-trace -rP tests/integration/test_offboard.py --hostname=px4_docker
-#    services:
-#      px4_docker:
-#        image: jonasvautherin/px4-gazebo-headless:1.13.0
-#
-#        ports:
-#          - "50051:50051"
-#          - "14540:14540/udp"
-#
-#        options: >-
-#          --health-cmd "ss --all | grep 14280"
-#          --health-interval 5s
-#          --health-timeout 100s
-#          --health-retries 5
-#          --health-start-period 500s
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test scripts/tests/run_integration_tests.sh
