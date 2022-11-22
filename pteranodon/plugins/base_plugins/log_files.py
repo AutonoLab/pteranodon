@@ -27,7 +27,7 @@ class LogFiles(AbstractBasePlugin):
 
         self._end_init()
 
-    def download_log_file(
+    async def download_log_file(
         self, entry: Entry, path: str, timeout: float = 1.0
     ) -> Optional[ProgressData]:
         """
@@ -45,7 +45,7 @@ class LogFiles(AbstractBasePlugin):
         #     self._system.log_files.download_log_file(entry, path),
         #     timeout=timeout,
         # )
-        self._download_progress = self._system.log_files.download_log_file(entry, path)
+        await self._system.log_files.download_log_file(entry, path)
 
         if self._download_progress is None:
             self._logger.error(
