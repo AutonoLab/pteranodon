@@ -1,5 +1,5 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean install build-all ci pip-deps test test-unit test-integration docs
+.PHONY: help clean install build-all ci pip-deps test test-unit test-integration test-examples docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -15,6 +15,7 @@ help:
 	@echo "  test                  to run the tests"
 	@echo "  test-unit             to run the unit tests"
 	@echo "  test-integration      to run the integration tests"
+	@echo "  test-examples         to run the examples tests"
 	@echo "  docs                  to build the documentation"
 
 clean:
@@ -62,6 +63,9 @@ test-unit:
 
 test-integration:
 	./scripts/tests/run_integration_tests.sh
+
+test-examples:
+	./scripts/tests/run_example_tests.sh
 
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
