@@ -1,9 +1,24 @@
 import os
 import time
+import pandas as pd
+import pyulog
+from pyulog import ULog
+
+def read_ulog(ulog_filename, messages=None):
+    """
+    Convert ulog to pandas dataframe.
+    """
+    log = pyulog.ULog(ulog_filename, messages)
+
+    for msg in log.data_list:
+        msg_data = pd.DataFrame.from_dict(msg.data)
+
+    return log
+
 
 from pteranodon import SimpleDrone
 
-DIR = "../gazebo_logfiles/raw/"
+DIR = "../gazebo_logfiles/"
 
 print("Initiating drone...")
 
@@ -15,4 +30,10 @@ if(len(entries) != 0):
         os.makedirs(DIR)
 
 for count in range(len(entries)):
-    drone.log_files.download_log_file(entries[count], str(DIR + str(count) + ".txt"), 5.0)
+    filename = "log_" + str(count)
+    
+    try:
+        drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 15.0)
+        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + " " + DIR + "RAW/" + filename + ".txt")
+    except:
+        print("File not converted")
