@@ -18,6 +18,7 @@ help:
 	@echo "  clean                 to clean the project"
 	@echo "  clean-all             to clean the project and submodules"
 	@echo "  install               to install the project"
+	@echo "  install-px4-prereqs   to install the px4 prerequisites"
 	@echo "  build-all             to build the project and all submodules"
 	@echo "  ci                    to run the CI"
 	@echo "  pip-deps              to install the pip dependencies"
