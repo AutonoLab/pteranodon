@@ -29,9 +29,10 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-build-all: submodule-init submodule-update
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
-	submodule-build pip-deps install
+install-prereqs: 
+	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx
+
+build-all: submodule-clone install-prereqs submodule-build pip-deps install
 
 submodule-init:
 	git submodule init
@@ -39,6 +40,8 @@ submodule-init:
 
 submodule-update:
 	git submodule update --init --recursive
+
+submodule-clone: submodule-init submodule-update
 
 submodule-build:
 	$(MAKE) -C third-party
