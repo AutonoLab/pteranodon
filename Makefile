@@ -1,5 +1,12 @@
-.PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean install build-all ci pip-deps test test-unit test-integration test-examples docs
+.PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
+.PHONY: help 
+.PHONY: clean clean-all 
+.PHONY: install install-px4-prereqs
+.PHONY: build-all 
+.PHONY: ci 
+.PHONY: pip-deps 
+.PHONY: test test-unit test-integration test-examples 
+.PHONY: docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -7,8 +14,11 @@ help:
 	@echo "  submodule-update      to update the submodules"
 	@echo "  submodule-build       to build the submodules"
 	@echo "  submodule-clean       to clean the submodules"
+	@echo "  submodule-clone       to intialize, update, and clone the submodules"
 	@echo "  clean                 to clean the project"
+	@echo "  clean-all             to clean the project and submodules"
 	@echo "  install               to install the project"
+	@echo "  install-px4-prereqs   to install the px4 prerequisites"
 	@echo "  build-all             to build the project and all submodules"
 	@echo "  ci                    to run the CI"
 	@echo "  pip-deps              to install the pip dependencies"
@@ -23,29 +33,28 @@ clean:
 	rm -rf pteranodon.egg-info
 	rm -rf .pytest_cache
 
+clean-all: clean submodule-clean
+
 install:
 	pip3 install .
 
-build-all: submodule-init
-	submodule-update
+install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
-	submodule-build
-	pip-deps
-	install
 
-# call the init target in third-party/Makefile
+build-all: submodule-clone install-px4-prereqs submodule-build pip-deps install
+
 submodule-init:
-	$(MAKE) -C third-party init
+	git submodule init
+	git pull --recurse-submodules
 
-# call the update target in third-party/Makefile
 submodule-update:
-	$(MAKE) -C third-party update
+	git submodule update --init --recursive
 
-# call the all target in third-party/Makefile
+submodule-clone: submodule-init submodule-update
+
 submodule-build:
 	$(MAKE) -C third-party
 
-# call the clean target in third-party/Makefile
 submodule-clean:
 	$(MAKE) -C third-party clean
 
