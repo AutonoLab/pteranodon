@@ -1,7 +1,7 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
 .PHONY: help 
 .PHONY: clean clean-all 
-.PHONY: install .install-px4-prereqs
+.PHONY: install install-px4-prereqs
 .PHONY: build-all 
 .PHONY: ci 
 .PHONY: pip-deps 
@@ -37,8 +37,8 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-.install-px4-prereqs: 
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx
+install-px4-prereqs: 
+	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
 
 build-all: submodule-clone .install-px4-prereqs submodule-build pip-deps install
 
