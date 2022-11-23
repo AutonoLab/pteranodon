@@ -30,13 +30,12 @@ install:
 	pip3 install .
 
 build-all: 
-	sudo echo "Building all targets"
-	submodule-init
-	submodule-update
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
-	submodule-build
-	pip-deps
-	install
+	$(MAKE) submodule-init
+	$(MAKE) submodule-update
+	./third-party/px4-autopilot/Tools/setup/ubuntu.sh \
+	$(MAKE) submodule-build
+	$(MAKE) pip-deps
+	$(MAKE) install
 
 submodule-init:
 	git submodule init
