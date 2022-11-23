@@ -29,9 +29,14 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-build-all: submodule-init submodule-update
+build-all: 
+	sudo echo "Building all targets"
+	submodule-init
+	submodule-update
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
-	submodule-build pip-deps install
+	submodule-build
+	pip-deps
+	install
 
 submodule-init:
 	git submodule init
