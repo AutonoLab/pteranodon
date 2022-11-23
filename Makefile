@@ -1,13 +1,5 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help 
-.PHONY: clean clean-all 
-.PHONY: install 
-.PHONY: build-all 
-.PHONY: ci 
-.PHONY: pip-deps 
-.PHONY: test test-unit test-integration test-examples 
-.PHONY: docs
-.PHONY: .build-all-1 .build-all-2 .build-all-3
+.PHONY: help clean clean-all install build-all ci pip-deps test test-unit test-integration test-examples docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -37,19 +29,13 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-.build-all-1: 
-	submodule-init
-	submodule-update
-	
-.build-all-2:
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx --no-sim-nuttx
-	
-.build-all-3:
-	submodule-build
-	pip-deps
-	install
-
-build-all: .build-all-1 .build-all-2 .build-all-3
+build-all: 
+	$(MAKE) submodule-init
+	$(MAKE) submodule-update
+	./third-party/px4-autopilot/Tools/setup/ubuntu.sh \
+	$(MAKE) submodule-build
+	$(MAKE) pip-deps
+	$(MAKE) install
 
 submodule-init:
 	git submodule init
