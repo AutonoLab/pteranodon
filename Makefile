@@ -1,5 +1,12 @@
-.PHONY: submodule-init submodule-update submodule-build submodule-clean
-.PHONY: help clean clean-all install build-all ci pip-deps test test-unit test-integration test-examples docs
+.PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
+.PHONY: help 
+.PHONY: clean clean-all 
+.PHONY: install .install-px4-prereqs
+.PHONY: build-all 
+.PHONY: ci 
+.PHONY: pip-deps 
+.PHONY: test test-unit test-integration test-examples 
+.PHONY: docs
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -7,6 +14,7 @@ help:
 	@echo "  submodule-update      to update the submodules"
 	@echo "  submodule-build       to build the submodules"
 	@echo "  submodule-clean       to clean the submodules"
+	@echo "  submodule-clone       to intialize, update, and clone the submodules"
 	@echo "  clean                 to clean the project"
 	@echo "  clean-all             to clean the project and submodules"
 	@echo "  install               to install the project"
@@ -29,10 +37,10 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-install-prereqs: 
+.install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx
 
-build-all: submodule-clone install-prereqs submodule-build pip-deps install
+build-all: submodule-clone .install-prereqs submodule-build pip-deps install
 
 submodule-init:
 	git submodule init
