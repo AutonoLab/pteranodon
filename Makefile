@@ -37,12 +37,17 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
-.build-all-1: submodule-init submodule-update
+.build-all-1: 
+	submodule-init
+	submodule-update
 	
 .build-all-2:
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx --no-sim-nuttx
 	
-.build-all-3: submodule-build pip-deps install
+.build-all-3:
+	submodule-build
+	pip-deps
+	install
 
 build-all: .build-all-1 .build-all-2 .build-all-3
 
