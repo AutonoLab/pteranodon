@@ -40,7 +40,7 @@ install:
 .install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh --no-ros --no-jmavsim --no-nuttx
 
-build-all: submodule-clone .install-prereqs submodule-build pip-deps install
+build-all: submodule-clone .install-px4-prereqs submodule-build pip-deps install
 
 submodule-init:
 	git submodule init
