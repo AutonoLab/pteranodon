@@ -20,6 +20,7 @@ class Mission(AbstractBasePlugin):
         self._download_progress = None
         self._enable_return_to_land = None
         self._mission_plan = None
+        self._mission_progress = None
         self._end_init()
 
 
