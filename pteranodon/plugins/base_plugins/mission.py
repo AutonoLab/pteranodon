@@ -23,7 +23,6 @@ class Mission(AbstractBasePlugin):
         self._mission_progress = None
         self._end_init()
 
-
     def start_mission(self) -> None:
         """
         Starts the current mission
@@ -122,18 +121,24 @@ class Mission(AbstractBasePlugin):
         """
         self._logger.info("Uploading mission plan")
         self._submit_coroutine(self._system.mission.upload_mission(mission_plan))
-    
-    async def _upload_mission_with_progress(self, mission_plan: mission.MissionPlan) -> None:
+
+    async def _upload_mission_with_progress(
+        self, mission_plan: mission.MissionPlan
+    ) -> None:
         """
         updates mission progress, and when complete returns the current mission plan
         :return: None
         """
-        async for progress in self._system.mission.upload_mission_with_progress(mission_plan):
+        async for progress in self._system.mission.upload_mission_with_progress(
+            mission_plan
+        ):
             if progress.has_progress and progress.progress != 0.0:
                 self._logger.info(f"Mission Upload at {progress.progress * 100}%")
                 self._mission_progress = progress
-    
-    def upload_mission_with_progress(self, mission_plan: mission.MissionPlan, timeout: float = 1.0) -> None:
+
+    def upload_mission_with_progress(
+        self, mission_plan: mission.MissionPlan, timeout: float = 1.0
+    ) -> None:
         """
         Uploads a mission plan with progress information
         :return: None
