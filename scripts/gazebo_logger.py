@@ -38,7 +38,7 @@ for count in range(len(entries)):
             time.sleep(10)
             break
         except:
-            time.sleep(1)
+            time.sleep(15)
 
     
     os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
