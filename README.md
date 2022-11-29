@@ -53,8 +53,6 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
    * `cd pteranodon`
    * `make build-all`
 
-This project can also be installed from source with simulation capabilities on any system running Ubuntu 20.04, this includes installs using WSL and Docker.
-
 ## Usage
 
 For more information on the setup and usage of pteranodon, please refer to [USAGE.md](USAGE.md)
