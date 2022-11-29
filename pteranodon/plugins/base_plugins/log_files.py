@@ -22,7 +22,7 @@ class LogFiles(AbstractBasePlugin):
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
         self._entry_list = self._loop.run_until_complete(
-            self._entry_list = self._system.log_files.get_entries()
+            self._system.log_files.get_entries()
         )
 
         self._end_init()
