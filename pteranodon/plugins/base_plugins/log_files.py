@@ -21,12 +21,9 @@ class LogFiles(AbstractBasePlugin):
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
-        #self._entry_list = self._loop.run_until_complete(
-        try:
+        self._entry_list = self._loop.run_until_complete(
             self._entry_list = self._system.log_files.get_entries()
-        except self.log_files.NO_LOGFILES:
-            self.logger.info("No Logfiles Found!")
-        #)
+        )
 
         self._end_init()
 
