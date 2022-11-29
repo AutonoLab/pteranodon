@@ -35,3 +35,5 @@ Will spawn one `typhoon_h480` and one `iris` drone in the `baylands_park` world.
 
 [PX4 Multi-Spawn Documentation](http://docs.px4.io/main/en/simulation/multi_vehicle_simulation_gazebo.html)
 
+## Basic Drone Control
+
