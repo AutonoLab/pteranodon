@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
-#Download and install PX4.
-# Run with: sudo bash ./install_px4.sh
+# Download and install PX4.
+# Run with: sudo ./install_px4.sh
 
-cd ../..
+# Work as if inside misc folder, no matter where it is called from.
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+cd "$parent_path"
 
 DIR= /PX4-Autopilot
+
 if [ -d "$DIR" ];
 then
     echo "$DIR already exists."
@@ -15,10 +19,13 @@ else
 fi
 
 echo "Running ubuntu.sh..............................................................."
-sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --sim_jammy
+sudo ./PX4-Autopilot/Tools/setup/ubuntu.sh --sim_jammy
+
+# ubuntu.sh modifies this file, re-login
+source ~/.profile
 
 echo "Installing pip dependencies....................................................."
-pip install -r ./pteranodon/requirements.txt
+pip install -r ../../requirements.txt
 
 
 echo "Running Gazebo.................................................................."

@@ -11,97 +11,66 @@
 A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls,
 gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems.
 
-## Formatting
-
-Pteranodon uses the [PEP-8 Coding Standard](https://peps.python.org/pep-0008/) with required typing through
-[MyPy](https://mypy.readthedocs.io/en/stable/).
-
-In order to merge into the `main` branch, a contributor must satisfy these standards as well as the
-[Black Code Style](https://black.readthedocs.io/en/stable/).
-
-This can be done automatically by setting your IDE to format on save, or you can run `black --safe ./pteranodon` locally.
-
 ---
 
 ## Requirements for Use
-* mavsdk>=1.4.0
+* python 3.9
+* mavsdk >= 1.4.0
 * numpy
 * grpcio
-* PX4_Autopilot
-* Linux* (Gazebo only runs on linux, but can use WSL)
+* pymavlink
+* pyserial
+* PX4_Autopilot (either local or remote)
+
+
+## Platform Compatibility
+
+### Ubuntu (Most Supported)
+   * **Supported for development and visual simulation**
+   * Gazebo simulator (non-headless) requires Ubuntu 
+   * PX4 has wider compatibility between Unix systems including Ubuntu
+
+### Windows/WSL (Supported)
+   * **Supported for development and visual simulation**
+   * WSL Ubuntu 20.0.4 container
+   * Gazebo simulator's window can be passed through
+   * PX4 compatible
+
+### macOS (Least Supported)
+   * **Supported for development and *headless* simulation**
+   * [PX4 Gazebo Headless](https://github.com/JonasVautherin/px4-gazebo-headless) Docker container allows for the running of the PX4 drone in the background.
+   * Gazebo visualization in docker with X-server forwarding is possible, but not successfully reproduced yet.
 
 ## Project Installation
-`pip install pteranodon` or `pip3 install pteranodon`
 
-This project can also be installed from source with simulation capabilties on any system running Ubuntu 20.04, this includes installs using WSL and Docker.
-### Install Locally
+`pip install pteranodon`
+
+### Installation from source
+
 1. Download pteranodon source code using `git`:
    * `git clone https://github.com/Autonolab/pteranodon.git`
 2. Run the `build-all` target from the Makefile:
    * `cd pteranodon`
    * `make build-all`
 
-### WSL Method
-#### Intall WSL2
-To install WSL2 with the default Ubuntu distribution on a new installation of Windows 11:
-1. Open cmd.exe as administrator. This can be done by pressing the start key, typing cmd, right klicking on the Command prompt entry and selecting Run as administrator.
-2. Execute the command wsl --install to run the installation routine for WSL.
-3. Reboot the computer.
-4. Open cmd again as a normal user (not as administrator). This can be done by pressing the Start key, typing cmd and pressing Enter.
-5. Execute the command wsl to access the WSL shell.
-6. WSL will prompt you for a user name and password for the Ubuntu installation. Record these credentials as you will need them later on!
+This project can also be installed from source with simulation capabilities on any system running Ubuntu 20.04, this includes installs using WSL and Docker.
 
-#### Opening a WSL Shell
-All operations to install and build PX4 must be done within a WSL Shell (you can use the same shell that was used to install WSL2 or open a new one).
-1. Open a command prompt:
-   * Press the Windows Start key.
-   * Type cmd and press Enter to open the prompt.
-4. To start WSL and access the WSL shell, execute the command:
-   * `wsl`
+## Usage
 
-Note: Enter the following commands to first close the WSL shell, and then shut down WSL:
-* `exit`
-* `wsl --shutdown`
+For more information on the setup and usage of pteranodon, please refer to [USAGE.md](USAGE.md)
 
-Alternatively, after entering exit you can just close the prompt
+## Contributing
 
-#### Install PX4 Toolchain
+Welcome and thank you very much for your contribution. For the process of submitting PR, please refer to [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-Next we download the PX4 source code within the WSL2 environment, and use the normal Ubuntu installer script to to set up the developer environment. This will install the toolchain for Gazebo simulation, JMAVSim simulation and Pixhawk/NuttX hardware.
 
-To install the development toolchain:
-1. Open a WSL2 Shell (if it is still open you can use the same one that was used to install WSL2).
-2. Execute the command `cd ~` to switch to the home folder of WSL for the next steps.
+### Contributors
 
-Warning: This is important! If you work from a location outside of the WSL file system you'll run into issues such as very slow execution and access right/permission errors.
+This project exists thanks to all the people who contribute. [Contribute](CONTRIBUTING.md).
 
-1. Download PX4 source code using `git` (which is already installed in WSL2):
-   * `git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
-2. Run the ubuntu.sh installer script and acknowledge any prompts as the script progresses:
-   * `bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
+<a href="https://github.com/AutonoLab/pteranodon/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=AutonoLab/pteranodon"/>
+</a>
 
-Note: This installs tools to build PX4 for Pixhawk, Gazebo and JMAVSim targets:
-* You can use the `--no-nuttx` and `--no-sim-tools` options to omit the NuttX and/or simulation tools.
-* Other Linux build targets are untested (you can try these by entering the appropriate commands in Ubuntu Development Environment into the WSL shell).
 
-1. Restart the "WSL computer" after the script completes (exit the shell, shutdown WSL, and restart WSL):
-   * `exit`
-   * `wsl --shutdown`
-   * `wsl`
-2. Switch to the PX4 repository in the WSL home folder:
-   * `cd ~/PX4-Autopilot`
-3. Build the PX4 SITL target and test your environment:
-   * `make px4_sitl`
-
-### Using Docker
-To build the docker file, type `docker build -t imagename .` inside the docker folder. This process should take 30 minutes.\
-To run, type `docker run imagename`
-
-### Simulation Setup
-* `git clone https://github.com/PX4/PX4-Autopilot.git --recursive`
-* `bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
-
-### Multi Vehicle Simulation
-1. Tools/gazebo_sitl_multiple_run.sh [-m <model>] [-n <number_of_vehicles>] [-w <world>]
-2. Tools/gazebo_sitl_multiple_run.sh -s typhoon_h480:1,iris:1 -w baylands_park
       
