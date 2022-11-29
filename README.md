@@ -49,9 +49,9 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
 
 1. Download pteranodon source code using `git`:
    * `git clone https://github.com/Autonolab/pteranodon.git`
-2. Run the `build-all` target from the Makefile:
+2. Run the `build` target from the Makefile:
    * `cd pteranodon`
-   * `make build-all`
+   * `make build`
 
 ## Usage
 

@@ -11,8 +11,9 @@ Next we download the PX4 source code and use the normal Ubuntu installer script 
 
 To install the development toolchain:
 1. Open your shell environment (`bash`, `zsh`, WSL shell)
-2. Run the installation script.
-   * `sudo ~/path/to/pteranodon/scripts/misc/install_px4.sh`
+2. Run the `build-all` target from the Makefile:
+   * `cd ~/path/to/pteranodon`
+   * `make build-all`
 
 ### Run PX4 Docker Container (All platforms, required for macOS testing)
 
