@@ -40,15 +40,10 @@ class LogFiles(AbstractBasePlugin):
         """
         self._logger.info(f"Downloading log file with id: {entry.id}")
 
-        try:
-            self._download_progress = self._submit_blocking_coroutine(
-                self._system.log_files.download_log_file(entry, path),
-                timeout=timeout,
-            )
-        except:
-            self._logger.error(
-                "Log Downloading Error!"
-            )
+        self._download_progress = self._submit_blocking_coroutine(
+            self._system.log_files.download_log_file(entry, path),
+            timeout=timeout,
+        )
 
         if self._download_progress is None:
             self._logger.error(
