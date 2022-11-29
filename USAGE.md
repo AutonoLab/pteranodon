@@ -3,7 +3,7 @@
 
 ## Drone Server Setup
 
-**If you have a PX4/MAVSDK server instance running on an external device the below steps are not necessary.**
+_**If you have a PX4/MAVSDK server instance running on an external device the below steps are not necessary.**_
 
 ### Install PX4 Toolchain (Ubuntu/WSL only)
 
