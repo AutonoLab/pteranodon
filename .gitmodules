@@ -1,0 +1,11 @@
+[submodule "third-party/gazebo-realsense"]
+	path = third-party/gazebo-realsense
+	url = https://github.com/justincdavis/gazebo-realsense.git
+	branch = main
+[submodule "third-party/pygazebo"]
+	path = third-party/pygazebo
+	url = https://github.com/justincdavis/pygazebo.git
+	branch = main
+[submodule "third-party/px4-autopilot"]
+	path = third-party/px4-autopilot
+	url = https://github.com/PX4/PX4-Autopilot.git

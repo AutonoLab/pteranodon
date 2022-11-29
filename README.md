@@ -2,7 +2,7 @@
 
 <img src="https://static.wikia.nocookie.net/animals/images/a/a1/Pterathumb.png/revision/latest?cb=20200311123111" alt="drawing" width="200"/>
 
-![Formatting](https://github.com/AutonoLab/pteranodon/actions/workflows/format-check.yaml/badge.svg?branch=main)
+![Formatting](https://github.com/AutonoLab/pteranodon/actions/workflows/format-checks.yaml/badge.svg?branch=main)
 ![Unit Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/unit-tests.yaml/badge.svg?branch=main)
 ![Integration Tests](https://github.com/AutonoLab/pteranodon/actions/workflows/integration-tests.yaml/badge.svg?branch=main)
 ![PyPI Build](https://github.com/AutonoLab/pteranodon/actions/workflows/build-check.yaml/badge.svg?branch=main)
@@ -31,7 +31,16 @@ This can be done automatically by setting your IDE to format on save, or you can
 * Linux* (Gazebo only runs on linux, but can use WSL)
 
 ## Project Installation
-This project can be installed using WSL and Docker. Look below for instructions on both
+`pip install pteranodon` or `pip3 install pteranodon`
+
+This project can also be installed from source with simulation capabilties on any system running Ubuntu 20.04, this includes installs using WSL and Docker.
+### Install Locally
+1. Download pteranodon source code using `git`:
+   * `git clone https://github.com/Autonolab/pteranodon.git`
+2. Run the `build-all` target from the Makefile:
+   * `cd pteranodon`
+   * `make build-all`
+
 ### WSL Method
 #### Intall WSL2
 To install WSL2 with the default Ubuntu distribution on a new installation of Windows 11:

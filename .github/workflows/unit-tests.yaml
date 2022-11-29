@@ -27,4 +27,4 @@ jobs:
 
     - name: Test Abstract Plugin
       run: |
-        pytest tests/unit/test_abstract_plugin.py
+        scripts/tests/run_unit_tests.sh

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 shopt -s nullglob
 for file in /sys/bus/i2c/drivers/ina3221x/7-0040/iio:device0/*; do

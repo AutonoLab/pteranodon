@@ -1,0 +1,59 @@
+# Adapted from: https://github.com/AeroRust/mav/blob/main/docker-compose.yml
+version: '3.8'
+
+services:
+  px4-gazebo-headless:
+    image: jonasvautherin/px4-gazebo-headless:latest
+    container_name: px4-gazebo-headless
+    environment:
+      - NO_PXH=1
+      - VERBOSE=1
+      - VERBOSE_SIM=1
+    ports:
+      # for MAVLINK API/Offboard and MAVSDK
+      - "14540-14549:14540-14549"
+      # for MAVLINK QGroundControl
+      - "14550:14550"
+      # simulator
+      - "4560:4560"
+      # For Video Stream
+      # try the RTSP port https://github.com/JonasVautherin/px4-gazebo-headless/blob/master/sitl_rtsp_proxy/main.cpp#L12
+      - "8554:8554"
+      # try default UDP Gazebo port https://dev.px4.io/master/en/simulation/gazebo.html#video-streaming
+      - "5600:5600/udp"
+      # default gazebo port for conecting with client
+      - "11345:11345"
+    networks:
+      internal-ip:
+          ipv4_address: 172.20.0.5
+      internal:
+      external:
+    stdin_open: true
+    tty: true
+    command: 172.20.0.6 # The IP address of the pteranodon tests
+  test:
+    depends_on:
+      - px4-gazebo-headless
+    build: .
+    container_name: test
+    ports:
+      - "4000:4000"
+    networks:
+      internal-ip:
+          ipv4_address: 172.20.0.6
+      internal:
+      external:
+    stdin_open: true
+    tty: true
+
+networks:
+  internal:
+    internal: true
+  external:
+  internal-ip:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.0/24
+      
