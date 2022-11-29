@@ -135,6 +135,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# If cloned in this repo
-PX4-Autopilot
