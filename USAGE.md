@@ -24,7 +24,7 @@ If you do not need a visual simulation or are running on macOS, you must run thi
 
 ### Multi Vehicle Simulation (Optional)
 
-When using the Ubuntu/WSL PX4 Toolchain, multiple vehicles can be simulated in a world by running the below command.
+When using the PX4 Toolchain, multiple vehicles can be simulated in a world by running the below command.
 
 `Tools/gazebo_sitl_multiple_run.sh [-m <model>] [-n <number_of_vehicles>] [-w <world>] [-s <script>] [-t <target>] [-l <label>]`
 
