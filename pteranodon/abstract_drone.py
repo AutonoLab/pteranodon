@@ -679,8 +679,8 @@ class AbstractDrone(ABC):
         :param command: Whether to add this to the command queue. If false this will block the main thread.
         """
         if command:
-            cmd_obj = self.Command(asyncio.sleep, preempt=preempt)
-            self.put(cmd_obj, [wait_time])
+            cmd_obj = self.Command(time.sleep, preempt=preempt)
+            self.put(cmd_obj, wait_time)
         else:
             time.sleep(wait_time)
 
