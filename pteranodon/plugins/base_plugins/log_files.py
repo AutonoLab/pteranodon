@@ -8,6 +8,7 @@ from mavsdk.log_files import Entry, ProgressData
 
 from .abstract_base_plugin import AbstractBasePlugin
 
+
 class LogFiles(AbstractBasePlugin):
     """
     Allow to download log files from the vehicle after a flight is complete. For log streaming during flight check the
@@ -25,7 +26,9 @@ class LogFiles(AbstractBasePlugin):
 
         self._end_init()
 
-    def download_log_file(self, entry: Entry, path: str, timeout: float = 10.0) -> Optional[ProgressData]:
+    def download_log_file(
+        self, entry: Entry, path: str, timeout: float = 10.0
+    ) -> Optional[ProgressData]:
         """
         Download log file synchronously.
 
