@@ -18,7 +18,8 @@ def read_ulog(ulog_filename, messages=None):
 
 from pteranodon import SimpleDrone
 
-DIR = "../gazebo_logfiles/"
+# DIR = "../gazebo_logfiles/"
+DIR = "./"
 
 print("Initiating drone...")
 
