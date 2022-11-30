@@ -37,10 +37,6 @@ if(len(sys.argv) == 1):
         except: #cleanup
             drone.wait_until_queue_empty()
             drone.stop()
-        
-        #Wait just in case
-        while(drone.log_files.get_download_progress().progress != 1.0):
-            time.sleep(5)
 
         #Convert to CSV
         os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
@@ -58,10 +54,6 @@ elif(len(sys.argv) == 2):
         drone.wait_until_queue_empty()
         drone.stop()
 
-    #Wait just in case
-    while(drone.log_files.get_download_progress().progress != 1.0):
-        time.sleep(5)
-    
     #Convert to CSV
     os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
 
