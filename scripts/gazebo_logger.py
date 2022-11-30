@@ -27,8 +27,10 @@ drone = SimpleDrone("udp://:14540")
 entries = drone.log_files.get_entries()
 
 if(len(entries) != 0):
-    if not os.path.exists(DIR):
-        os.makedirs(DIR)
+    if not os.path.exists(DIR + "RAW/"):
+        os.makedirs(DIR + "RAW/")
+    if not os.path.exists(DIR + "CSVs/"):
+        os.makedirs(DIR + "CSVs/")
 
 for count in range(len(entries)):
     filename = "log_" + str(count)
