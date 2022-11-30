@@ -24,7 +24,7 @@ def read_ulog(ulog_filename, messages=None):
 from pteranodon import SimpleDrone
 
 #Output directory. Contains date so logs aren't overwritten
-DIR = "../gazebo_logfiles-" + str(datetime.now().year) + "-" + str(datetime.now().month) + "-" + str(datetime.now().day) + "--" + str(datetime.now().hour) + ":" + str(datetime.now().minute) + "/"
+DIR = "../gazebo_logfiles/" + str(datetime.now().year) + "-" + str(datetime.now().month) + "-" + str(datetime.now().day) + "--" + str(datetime.now().hour) + ":" + str(datetime.now().minute) + "/"
 
 
 print("Initiating drone...")
