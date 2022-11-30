@@ -9,18 +9,6 @@ from pyulog import ULog
 
 """ python3 ./gazebo_logger.py [entry of individual index to download] """
 
-def read_ulog(ulog_filename, messages=None):
-    """
-    Convert ulog to pandas dataframe.
-    """
-    log = pyulog.ULog(ulog_filename, messages)
-
-    for msg in log.data_list:
-        msg_data = pd.DataFrame.from_dict(msg.data)
-
-    return log
-
-
 from pteranodon import SimpleDrone
 
 #Output directory. Contains date so logs aren't overwritten
