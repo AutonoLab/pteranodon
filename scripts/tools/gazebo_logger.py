@@ -50,7 +50,10 @@ if(len(sys.argv) == 1):
         drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)   
         
         #Wait
-        while(drone.log_files.get_download_progress() != None and drone.log_files.get_download_progress().progress != 1.0):
+        while(drone.log_files.get_download_progress() == None):
+            drone.sleep(5)
+
+        while(drone.log_files.get_download_progress().progress != 1.0):
             drone.sleep(5)
 
         #Convert to CSV
@@ -65,8 +68,11 @@ elif(len(sys.argv) == 2):
     #Download
     drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 330)   
 
-    #Wait
-    while(drone.log_files.get_download_progress() != None and drone.log_files.get_download_progress().progress != 1.0):
+    #Wait    
+    while(drone.log_files.get_download_progress() == None):
+        drone.sleep(5)
+    
+    while(drone.log_files.get_download_progress() == None and drone.log_files.get_download_progress().progress != 1.0):
         drone.sleep(5)
     
     #Convert to CSV
