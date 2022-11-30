@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from time import sleep
+import time
 import sys
 import pandas as pd
 import pyulog
@@ -51,10 +51,11 @@ if(len(sys.argv) == 1):
         
         #Wait
         while(drone.log_files.get_download_progress() == None):
-            drone.wait(5)
+            drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)  
+            time.sleep(5)
 
         while(drone.log_files.get_download_progress().progress != 1.0):
-            drone.wait(5)
+            time.sleep(5)
 
         #Convert to CSV
         os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
@@ -70,10 +71,11 @@ elif(len(sys.argv) == 2):
 
     #Wait    
     while(drone.log_files.get_download_progress() == None):
-        drone.wait(5)
+        drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 330)  
+        time.sleep(5)
     
     while(drone.log_files.get_download_progress().progress != 1.0):
-        drone.wait(5)
+        time.sleep(5)
     
     #Convert to CSV
     os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
