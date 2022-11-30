@@ -2,9 +2,6 @@ import os
 from datetime import datetime
 import time
 import sys
-import pandas as pd
-import pyulog
-from pyulog import ULog
 
 
 """ python3 ./gazebo_logger.py [entry of individual index to download] """
