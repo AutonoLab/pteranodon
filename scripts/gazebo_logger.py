@@ -48,10 +48,8 @@ if(len(sys.argv) == 1):
         drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)   
         
         #Convert to CSV
-        try:
-            os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
-        except Exception as exception:
-            drone.logger.error(exception)
+        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+
 
 elif(len(sys.argv) == 2):
     entry = entries[int(sys.argv[1])]
@@ -62,10 +60,8 @@ elif(len(sys.argv) == 2):
     drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 330)   
     
     #Convert to CSV
-    try:
-        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
-    except Exception as exception:
-        drone.logger.error(exception)
+    os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+
 
 else:
     sys.exit("ERROR: Too many arguments, expected <= 1")
