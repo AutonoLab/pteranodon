@@ -3,3 +3,4 @@ numpy>=1.23.0
 pymavlink>=2.4.37
 grpcio>=1.47.0
 pyserial>=3.5
+opencv-python>=4.5.0
