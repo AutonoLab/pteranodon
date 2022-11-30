@@ -51,10 +51,10 @@ if(len(sys.argv) == 1):
         
         #Wait
         while(drone.log_files.get_download_progress() == None):
-            drone.sleep(5)
+            drone.wait(5)
 
         while(drone.log_files.get_download_progress().progress != 1.0):
-            drone.sleep(5)
+            drone.wait(5)
 
         #Convert to CSV
         os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
@@ -70,10 +70,10 @@ elif(len(sys.argv) == 2):
 
     #Wait    
     while(drone.log_files.get_download_progress() == None):
-        drone.sleep(5)
+        drone.wait(5)
     
-    while(drone.log_files.get_download_progress() == None and drone.log_files.get_download_progress().progress != 1.0):
-        drone.sleep(5)
+    while(drone.log_files.get_download_progress().progress != 1.0):
+        drone.wait(5)
     
     #Convert to CSV
     os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
