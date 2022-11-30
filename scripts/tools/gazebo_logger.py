@@ -49,12 +49,6 @@ if(len(sys.argv) == 1):
         #Download
         drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 500)   
         
-        #Retry
-        while(drone.log_files.get_download_progress() == None):
-            os.system("rm " +  str(DIR + "RAW/" + filename + ".txt"))
-            drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 500)  
-            time.sleep(5)
-
         #Wait
         while(drone.log_files.get_download_progress().progress != 1.0):
             time.sleep(5)
@@ -71,12 +65,6 @@ elif(len(sys.argv) == 2):
     #Download
     drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 500)   
 
-    #Retry    
-    while(drone.log_files.get_download_progress() == None):
-        os.system("rm " +  str(DIR + "RAW/" + filename + ".txt"))
-        drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 500)  
-        time.sleep(5)
-    
     #Wait
     while(drone.log_files.get_download_progress().progress != 1.0):
         time.sleep(5)
