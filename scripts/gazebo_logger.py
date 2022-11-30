@@ -1,5 +1,5 @@
 import os
-import time
+from datetime import datetime
 import pandas as pd
 import pyulog
 from pyulog import ULog
@@ -18,7 +18,7 @@ def read_ulog(ulog_filename, messages=None):
 
 from pteranodon import SimpleDrone
 
-DIR = "../gazebo_logfiles/"
+DIR = "../gazebo_logfiles-" + str(datetime.now().year) + "-" + str(datetime.now().month) + "-" + str(datetime.now().day) + "--" + str(datetime.now().hour) + ":" + str(datetime.now().minute) + "/"
 
 print("Initiating drone...")
 
