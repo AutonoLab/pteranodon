@@ -47,11 +47,12 @@ if(len(sys.argv) == 1):
         filename = "log_" + str(count)
         
         #Download
-        while(drone.log_files.get_download_progress() != None):
-            sleep(1)
-
         drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)   
         
+        #Wait
+        while(drone.log_files.get_download_progress() != None):
+            sleep(5)
+
         #Convert to CSV
         os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
 
@@ -62,7 +63,6 @@ elif(len(sys.argv) == 2):
     filename = "log_" + str(sys.argv[1])
         
     #Download
-    drone.log_files.get_download_progress()
     drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 330)   
     
     #Convert to CSV
