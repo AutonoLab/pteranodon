@@ -33,11 +33,7 @@ drone = SimpleDrone("udp://:14540")
 entries = drone.log_files.get_entries()
 
 if(len(sys.argv) == 2):
-    if(type(sys.argv[1]) == int):
-        entries = entries[int(sys.argv[1])]
-    else:
-        sys.exit("ERROR: Command line argument must be of type 'integer'")
-
+    entries = entries[int(sys.argv[1])]
 elif(len(sys.argv) > 2):
     sys.exit("ERROR: Too many arguments, expected <= 1")
 
