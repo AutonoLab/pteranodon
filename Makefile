@@ -74,7 +74,7 @@ test-integration:
 	./scripts/tests/run_integration_tests.sh
 
 test-examples:
-	./scripts/tests/run_example_tests.sh
+	./scripts/tests/run_examples.sh
 
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
