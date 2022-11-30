@@ -32,8 +32,10 @@ drone = SimpleDrone("udp://:14540")
 
 entries = drone.log_files.get_entries()
 
+print(sys.argv)
+
 if(len(sys.argv) == 2):
-    entries = entries[int(sys.argv[1])]
+    entries = entries[int(sys.argv[0])]
 elif(len(sys.argv) > 2):
     sys.exit("ERROR: Too many arguments, expected <= 1")
 
