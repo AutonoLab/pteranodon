@@ -32,14 +32,6 @@ drone = SimpleDrone("udp://:14540")
 
 entries = drone.log_files.get_entries()
 
-print(sys.argv)
-
-if(len(sys.argv) == 2):
-    entries = entries[int(sys.argv[0])]
-elif(len(sys.argv) > 2):
-    sys.exit("ERROR: Too many arguments, expected <= 1")
-
-
 #If entries present
 if(len(entries) != 0):
     if not os.path.exists(DIR + "RAW/"):
@@ -47,15 +39,33 @@ if(len(entries) != 0):
     if not os.path.exists(DIR + "CSVs/"):
         os.makedirs(DIR + "CSVs/")
 
-#Download and convert all logs to CSV
-for count in range(len(entries)):
-    filename = "log_" + str(count)
-    
+if(len(sys.argv) == 1):
+    #Download and convert all logs to CSV
+    for count in range(len(entries)):
+        filename = "log_" + str(count)
+        
+        #Download
+        drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)   
+        
+        #Convert to CSV
+        try:
+            os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+        except Exception as exception:
+            drone.logger.error(exception)
+
+elif(len(sys.argv) == 2):
+    entry = entries[int(sys.argv[1])]
+
+    filename = "log_" + sys.argv[1]
+        
     #Download
-    drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 330)   
+    drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 330)   
     
     #Convert to CSV
     try:
         os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
     except Exception as exception:
         drone.logger.error(exception)
+
+else:
+    sys.exit("ERROR: Too many arguments, expected <= 1")
