@@ -1,11 +1,11 @@
-import gi
-import cv2
 import numpy as np
 from gi.repository import Gst
 
+from ..plugins.extension_plugins.sensor import AbstractSensor
 
-class VideoStreamGST:
-    """BlueRov video capture class constructor
+
+class VideoStreamGST(AbstractSensor):
+    """Class for reading a GST video stream over a given port into opencv-python
     Attributes:
         port (int): Video UDP port
         video_codec (string): Source h264 parser
@@ -137,19 +137,10 @@ class VideoStreamGST:
 
         return Gst.FlowReturn.OK
 
+    def update_data(self):
+        """Update data"""
+        self.data.update(self._frame)
 
-if __name__ == "__main__":
-    # Create the video object
-    # Add port= if is necessary to use a different one
-    video = VideoStreamGST()
-
-    while True:
-        # Wait for the next frame
-        if not video.frame_available():
-            continue
-
-        frame = video.frame()
-        cv2.imshow("Golden Drone Monkey Cam", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            print("quit")
-            break
+    def teardown(self):
+        """Teardown"""
+        pass

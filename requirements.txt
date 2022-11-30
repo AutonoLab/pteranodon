@@ -4,3 +4,4 @@ pymavlink>=2.4.37
 grpcio>=1.47.0
 pyserial>=3.5
 opencv-python>=4.5.0
+pyrealsense2>=2.48.0
