@@ -32,7 +32,7 @@ if(len(sys.argv) == 1):
         filename = "log_" + str(count)
         
         #Download
-        drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 1000)   
+        drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"), 4000)   
         
         #Wait
         while(drone.log_files.get_download_progress().progress != 1.0):
@@ -48,7 +48,7 @@ elif(len(sys.argv) == 2):
     filename = "log_" + str(sys.argv[1])
         
     #Download
-    drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 1000)   
+    drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 4000)   
 
     #Wait
     while(drone.log_files.get_download_progress().progress != 1.0):
