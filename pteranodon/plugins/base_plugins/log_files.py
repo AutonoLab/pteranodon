@@ -6,9 +6,7 @@ from functools import partial
 from mavsdk import System
 from mavsdk.log_files import Entry, ProgressData
 
-
 from .abstract_base_plugin import AbstractBasePlugin
-
 
 class LogFiles(AbstractBasePlugin):
     """
