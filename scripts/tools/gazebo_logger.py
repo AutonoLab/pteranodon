@@ -39,10 +39,7 @@ if(len(sys.argv) == 1):
             time.sleep(5)
 
         #Convert to CSV
-        try:
-            os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
-        except:
-            print("An error occured.")
+        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
 
 
 elif(len(sys.argv) == 2):
@@ -58,11 +55,11 @@ elif(len(sys.argv) == 2):
         time.sleep(5)
     
     #Convert to CSV
-    try:
-        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
-    except:
-        print("An error occured.")
+    os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
 
 
 else:
     sys.exit("ERROR: Too many arguments, expected <= 1")
+
+drone.wait_until_queue_empty()
+drone.stop()
