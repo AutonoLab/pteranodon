@@ -39,7 +39,10 @@ if(len(sys.argv) == 1):
             time.sleep(5)
 
         #Convert to CSV
-        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+        try:
+            os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+        except:
+            print("An error occured.")
 
 
 elif(len(sys.argv) == 2):
@@ -55,7 +58,10 @@ elif(len(sys.argv) == 2):
         time.sleep(5)
     
     #Convert to CSV
-    os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+    try:
+        os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
+    except:
+        print("An error occured.")
 
 
 else:
