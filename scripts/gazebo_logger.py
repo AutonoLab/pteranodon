@@ -18,8 +18,7 @@ def read_ulog(ulog_filename, messages=None):
 
 from pteranodon import SimpleDrone
 
-# DIR = "../gazebo_logfiles/"
-DIR = "./"
+DIR = "../gazebo_logfiles/"
 
 print("Initiating drone...")
 
@@ -34,14 +33,6 @@ if(len(entries) != 0):
 
 for count in range(len(entries)):
     filename = "log_" + str(count)
-    
-    # while True:
-    #     try:
-    #         drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"))
-    #         time.sleep(10)
-    #         break
-    #     except:
-    #         time.sleep(15)
     
     print("drone.log_files.download_log_file(entries[" + str(count) + "], " + str(DIR + 'RAW/' + filename + '.txt') + ")")
     drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"))   

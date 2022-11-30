@@ -27,7 +27,7 @@ class LogFiles(AbstractBasePlugin):
 
         self._end_init()
 
-    def download_log_file(self, entry: Entry, path: str, timeout: float = 80.0) -> Optional[ProgressData]:
+    def download_log_file(self, entry: Entry, path: str, timeout: float = 100.0) -> Optional[ProgressData]:
         """
         Download log file synchronously.
 
