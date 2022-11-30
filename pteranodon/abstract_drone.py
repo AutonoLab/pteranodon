@@ -612,7 +612,7 @@ class AbstractDrone(ABC):
             )
             new_future.add_done_callback(
                 lambda f: self._logger.info(
-                    f"Completed: {f.__module__}.{f.__qualname__} with args: {args} and kwargs: {kwargs}"  # type: ignore
+                    f"Completed: {command_obj} with args: {args} and kwargs: {kwargs}"  # type: ignore
                 )
             )
             self._task_cache.append(new_future)
@@ -680,7 +680,7 @@ class AbstractDrone(ABC):
         """
         if command:
             cmd_obj = self.Command(time.sleep, preempt=preempt)
-            self.put(cmd_obj, [wait_time])
+            self.put(cmd_obj, wait_time)
         else:
             time.sleep(wait_time)
 
