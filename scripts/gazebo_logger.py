@@ -41,6 +41,7 @@ for count in range(len(entries)):
     #     except:
     #         time.sleep(15)
 
-    drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"))    
+    drone.log_files.download_log_file(entries[count], str(DIR + "RAW/" + filename + ".txt"))   
+    print("drone.log_files.download_log_file(entries[" + str(count) + "], " + str(DIR + 'RAW/' + filename + '.txt') + ")")
     os.system("ulog2csv -o " + DIR + "CSVs/" + filename + ".csv " + DIR + "RAW/" + filename + ".txt")
 
