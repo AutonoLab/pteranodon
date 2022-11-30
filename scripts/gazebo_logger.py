@@ -6,7 +6,7 @@ import pyulog
 from pyulog import ULog
 
 
-""" ./python3 gazebo_logger.py [entry of individual index to download] """
+""" python3 ./gazebo_logger.py [entry of individual index to download] """
 
 def read_ulog(ulog_filename, messages=None):
     """
@@ -34,11 +34,12 @@ entries = drone.log_files.get_entries()
 
 if(len(sys.argv) == 2):
     if(type(sys.argv[1]) == int):
-        entries = entries[sys.argv[1]]
+        entries = entries[int(sys.argv[1])]
     else:
-        print("ERROR: Command line argument must be of type 'integer'")
+        sys.exit("ERROR: Command line argument must be of type 'integer'")
+
 elif(len(sys.argv) > 2):
-    print("ERROR: Too many arguments, expected <= 1")
+    sys.exit("ERROR: Too many arguments, expected <= 1")
 
 
 #If entries present
