@@ -40,8 +40,23 @@ input("\ndrone.geofence.clear_geofence()\n")
 drone.geofence.clear_geofence()
 
 time.sleep(2)
-input("\ndrone.put(drone.action.goto_location, 47, 8, 20, 0)\n")
-drone.maneuver_to(10, 0, 0)
+position = drone.telemetry.home
+
+time.sleep(2)
+input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
+drone.put(drone.action.goto_location, position["latitude_deg"] + 0.0001, position["longitude_deg"], 4, 0)
+
+time.sleep(2)
+input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
+drone.put(drone.action.goto_location, position["latitude_deg"], position["longitude_deg"] + 0.0001, 4, 0)
+
+time.sleep(2)
+input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
+drone.put(drone.action.goto_location, position["latitude_deg"] + 0.0001, position["longitude_deg"] + 0.0001, 4, 0)
+
+time.sleep(2)
+input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
+drone.put(drone.action.goto_location, position["latitude_deg"], position["longitude_deg"], 4, 0)
 
 time.sleep(2)
 input("\ndrone.land()\n")
