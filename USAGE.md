@@ -56,6 +56,7 @@ $ python3
 >>> drone = SimpleDrone("udp://:14540")
 >>> drone.arm()                            # Arm the drone
 >>> drone.takeoff()                        # Takeoff from the ground
+>>> drone.land()                           # Required to disarm the drone
 >>> drone.disarm()                         # Disarm the drone
 >>> drone.stop()                           # Stop the drone and end program execution
 ```
@@ -73,6 +74,7 @@ $ python3
 >>> drone.maneuver_to(0, 10, 0)            # Move to the right 10
 >>> drone.maneuver_to(-10, 0, 0)           # Move back 10
 >>> drone.maneuver_to(0, -10, 0)           # Move to the left 10 (ending in the start position)
+>>> drone.land()                           # Required to disarm the drone
 >>> drone.disarm()                         # Disarm the drone
 >>> drone.stop()                           # Stop the drone and end program execution
 ```
@@ -105,6 +107,7 @@ $ python3
 >>> drone.put(drone.relative.maneuver_to, 0, 10, 0)            # Move to the right 10
 >>> drone.put(drone.relative.maneuver_to, -10, 0, 0)           # Move back 10
 >>> drone.put(drone.relative.maneuver_to, 0, -10, 0)           # Move to the left 10 (ending in the start position)
+>>> drone.land()                                               # Required to disarm the drone
 >>> drone.disarm()                                             # Disarm the drone
 >>> drone.stop()                                               # Stop the drone and end program execution
 ```
