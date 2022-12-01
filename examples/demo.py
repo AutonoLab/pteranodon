@@ -23,10 +23,6 @@ input("\ndrone.gimbal.set_mode(GimbalMode.YAW_FOLLOW)\n")
 drone.gimbal.set_mode(GimbalMode.YAW_FOLLOW)
 
 time.sleep(2)
-input("\ndrone.put(drone.gimbal.set_pitch_and_yaw, 0, 0)\n")
-drone.put(drone.gimbal.set_pitch_and_yaw, 0, 0)
-
-time.sleep(2)
 input("\ndrone.put(drone.gimbal.set_pitch_and_yaw, -90, 0)\n")
 drone.put(drone.gimbal.set_pitch_and_yaw, -90, 0)
 
@@ -43,20 +39,20 @@ time.sleep(2)
 position = drone.telemetry.home
 
 time.sleep(2)
-input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
-drone.put(drone.action.goto_location, position["latitude_deg"] + 0.0001, position["longitude_deg"], 4, 0)
+input("\ndrone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)\n")
+drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg, 4, 0)
 
 time.sleep(2)
 input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
-drone.put(drone.action.goto_location, position["latitude_deg"], position["longitude_deg"] + 0.0001, 4, 0)
+drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg + 0.0001, 4, 0)
 
 time.sleep(2)
 input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
-drone.put(drone.action.goto_location, position["latitude_deg"] + 0.0001, position["longitude_deg"] + 0.0001, 4, 0)
+drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 0)
 
 time.sleep(2)
 input("\ndrone.put(drone.action.goto_location, position['latitude_deg'], position['longitude_deg'], 4, 0)\n")
-drone.put(drone.action.goto_location, position["latitude_deg"], position["longitude_deg"], 4, 0)
+drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)
 
 time.sleep(2)
 input("\ndrone.land()\n")
