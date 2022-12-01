@@ -102,7 +102,7 @@ class Power(AbstractExtensionPlugin):
         if len(self._window) > 0:
             batt_info: telemetry.Battery = self._window[-1][0]
             return self._param.get_param_float("BAT1_A_PER_V") * (
-                batt_info.voltage_v**2
+                batt_info.voltage_v ** 2
             )
         return None
 

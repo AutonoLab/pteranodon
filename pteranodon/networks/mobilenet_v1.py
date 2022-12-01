@@ -9,8 +9,16 @@ class MobileNetV1:
     """
     Class which wraps the CNN used for detecting quadcopters in a common interface.
     """
-    def __init__(self, modelPath='./droneInfGraph867503/frozen_inference_graph.pb', frameShape=(480, 640),
-                 min_score_threshold=0.25, diff_threshold=0.2, filter_frames=False, filter_jumps=False):
+
+    def __init__(
+        self,
+        modelPath="./models/networks/mobilenet_v1/frozen_inference_graph.pb",
+        frameShape=(480, 640),
+        min_score_threshold=0.25,
+        diff_threshold=0.2,
+        filter_frames=False,
+        filter_jumps=False,
+    ):
         # try:
         #     tf.enable_eager_execution()
         # except AttributeError:
@@ -32,8 +40,16 @@ class MobileNetV1:
         self.scores = list()
 
     def init(self) -> None:
-        self.mobilenet = MobileNetV1.load_frozen_model(self.modelPath, inputs=["image_tensor:0", ],
-                                                     outputs=["detection_boxes:0", "detection_scores:0", ], )
+        self.mobilenet = MobileNetV1.load_frozen_model(
+            self.modelPath,
+            inputs=[
+                "image_tensor:0",
+            ],
+            outputs=[
+                "detection_boxes:0",
+                "detection_scores:0",
+            ],
+        )
         self.initialized = True
 
     def reset(self) -> None:
@@ -52,12 +68,14 @@ class MobileNetV1:
         """
 
         def _imports_graph_def():
-            tf.compat.v1.import_graph_def(graph_def, name='')
+            tf.compat.v1.import_graph_def(graph_def, name="")
 
         wrapped_import = tf.compat.v1.wrap_function(_imports_graph_def, [])
         import_graph = wrapped_import.graph
-        return wrapped_import.prune(tf.nest.map_structure(import_graph.as_graph_element, inputs),
-                                    tf.nest.map_structure(import_graph.as_graph_element, outputs), )
+        return wrapped_import.prune(
+            tf.nest.map_structure(import_graph.as_graph_element, inputs),
+            tf.nest.map_structure(import_graph.as_graph_element, outputs),
+        )
 
     @staticmethod
     def load_frozen_model(model_path: str, inputs: List[str], outputs: List[str]):
@@ -66,12 +84,19 @@ class MobileNetV1:
         graph_def.ParseFromString(open(model_path, "rb").read())
         return MobileNetV1.wrap_frozen_graph(graph_def, inputs=inputs, outputs=outputs)
 
-    def updateFrame(self, frame) -> None:  # TODO, can port color conversion to VPI, but slower
-        self.frame = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), (self.frameShape[1], self.frameShape[0]))
+    def updateFrame(
+        self, frame
+    ) -> None:  # TODO, can port color conversion to VPI, but slower
+        self.frame = cv2.resize(
+            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
+            (self.frameShape[1], self.frameShape[0]),
+        )
         input_frame = np.expand_dims(frame, axis=0)
         self.tensor = tf.convert_to_tensor(input_frame, dtype=tf.uint8)
 
-    def run(self, frame: Union[np.ndarray, None] = None) -> Tuple[bool, Tuple[int, int, int, int]]:
+    def run(
+        self, frame: Union[np.ndarray, None] = None
+    ) -> Tuple[bool, Tuple[int, int, int, int]]:
         assert self.initialized
         if frame is not None:
             self.updateFrame(frame)
@@ -81,7 +106,12 @@ class MobileNetV1:
         if self.bounding_box is None:
             self.success = False
         else:
-            self.bounding_box = (self.bounding_box[1], self.bounding_box[0], self.bounding_box[3], self.bounding_box[2])
+            self.bounding_box = (
+                self.bounding_box[1],
+                self.bounding_box[0],
+                self.bounding_box[3],
+                self.bounding_box[2],
+            )
         return self.success, self.bounding_box
 
     def processBoundingBoxes(self):
@@ -108,9 +138,12 @@ class MobileNetV1:
 
                     # checking size of bounding box compared to the previous box
                     if self.previous_box.any():
-                        curr_area = (curr_box[2] - curr_box[1]) * (curr_box[3] - curr_box[0])
-                        prev_area = (self.previous_box[2] - self.previous_box[1]) *\
-                                    (self.previous_box[3] - self.previous_box[0])
+                        curr_area = (curr_box[2] - curr_box[1]) * (
+                            curr_box[3] - curr_box[0]
+                        )
+                        prev_area = (self.previous_box[2] - self.previous_box[1]) * (
+                            self.previous_box[3] - self.previous_box[0]
+                        )
                         diff = abs(curr_area - prev_area)
 
                     # Justin Davis:
@@ -134,7 +167,7 @@ class MobileNetV1:
                 # default is the first box since it will have the best accuracy
                 if chosen_index > -1:
                     for element in boxes[0, chosen_index, 0:4]:
-                        if abs(element) > .01:
+                        if abs(element) > 0.01:
                             noisy = False
 
             # check if we chose a box and score mets threshold
@@ -145,13 +178,27 @@ class MobileNetV1:
                 if not noisy:
                     best_bound = np.multiply(
                         boxes[0, chosen_index, 0:4],
-                        np.array([self.frameShape[0], self.frameShape[1], self.frameShape[0], self.frameShape[1]])
+                        np.array(
+                            [
+                                self.frameShape[0],
+                                self.frameShape[1],
+                                self.frameShape[0],
+                                self.frameShape[1],
+                            ]
+                        ),
                     )
                     self.previous_box = boxes[0, chosen_index, 0:4]
                 else:
                     best_bound = np.multiply(
                         self.previous_box,
-                        np.array([self.frameShape[0], self.frameShape[1], self.frameShape[0], self.frameShape[1]])
+                        np.array(
+                            [
+                                self.frameShape[0],
+                                self.frameShape[1],
+                                self.frameShape[0],
+                                self.frameShape[1],
+                            ]
+                        ),
                     )
                 self.bounding_box = best_bound.astype(int)
                 return self.bounding_box, self.previous_box
@@ -163,7 +210,14 @@ class MobileNetV1:
                 boxes = self.bounding_boxes.numpy()
                 self.bounding_box = np.multiply(
                     boxes[0, 0, 0:4],
-                    np.array([self.frameShape[0], self.frameShape[1], self.frameShape[0], self.frameShape[1]]),
+                    np.array(
+                        [
+                            self.frameShape[0],
+                            self.frameShape[1],
+                            self.frameShape[0],
+                            self.frameShape[1],
+                        ]
+                    ),
                 ).astype(int)
                 return self.bounding_box, self.previous_box
             else:
@@ -174,8 +228,13 @@ class MobileNetV1:
         drawing = self.frame.copy()
 
         if self.bounding_box is not None:
-            cv2.rectangle(drawing, (self.bounding_box[1], self.bounding_box[0]),
-                          (self.bounding_box[3], self.bounding_box[2]), (255, 0, 0), 3)
+            cv2.rectangle(
+                drawing,
+                (self.bounding_box[1], self.bounding_box[0]),
+                (self.bounding_box[3], self.bounding_box[2]),
+                (255, 0, 0),
+                3,
+            )
 
         if show:
             cv2.imshow("Detected Drone By Mobilenet", drawing)
