@@ -7,7 +7,7 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     drone.logger.info("-- Enabling failure injection")
-    drone.param.set_param_int('SYS_FAILURE_EN', 1)
+    drone.param.set_param_int("SYS_FAILURE_EN", 1)
 
     drone.logger.info("-- Arming")
     drone.arm()
@@ -30,7 +30,7 @@ def run():
     drone.failure.inject(FailureUnit.SENSOR_GPS, FailureType.OFF, instance=0)
 
     drone.logger.info("-- Disabling failure injection")
-    drone.param.set_param_int('SYS_FAILURE_EN', 0)
+    drone.param.set_param_int("SYS_FAILURE_EN", 0)
 
     drone.wait_until_queue_empty()
     drone.stop()

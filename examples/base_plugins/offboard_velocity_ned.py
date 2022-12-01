@@ -10,8 +10,7 @@ def run():
     drone.action.arm()
 
     drone.logger.info("-- Setting initial setpoint")
-    drone.offboard.set_velocity_body(
-        VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+    drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
     drone.logger.info("-- Starting offboard")
     drone.offboard.start()
