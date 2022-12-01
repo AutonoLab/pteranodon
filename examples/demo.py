@@ -39,19 +39,20 @@ position = drone.telemetry.home
 
 time.sleep(1)
 input("\ndrone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)\n")
-drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg, 4, 0)
+drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg, 4, -90)
 
 time.sleep(1)
 input("\ndrone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg + 0.0001, 4, 0)\n")
 drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg + 0.0001, 4, 0)
 
 time.sleep(1)
-input("\ndrone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 0)\n")
-drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 0)
+input("\ndrone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)\n")
+drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 90)
 
 time.sleep(1)
-input("\ndrone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)\n")
-drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_deg, 4, 0)
+input("\ndrone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 0)\n")
+drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 180s)
+
 
 time.sleep(1)
 input("\ndrone.land()\n")
