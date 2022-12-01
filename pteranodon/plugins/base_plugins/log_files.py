@@ -6,7 +6,6 @@ from functools import partial
 from mavsdk import System
 from mavsdk.log_files import Entry, ProgressData
 
-
 from .abstract_base_plugin import AbstractBasePlugin
 
 
@@ -17,7 +16,7 @@ class LogFiles(AbstractBasePlugin):
     """
 
     def __init__(self, system: System, loop: AbstractEventLoop, logger: Logger) -> None:
-        super().__init__("LogFiles", system, loop, logger)
+        super().__init__("log_files", system, loop, logger)
 
         self._download_progress: Optional[ProgressData] = None
         self._entry_list: List[Entry] = []
@@ -28,7 +27,7 @@ class LogFiles(AbstractBasePlugin):
         self._end_init()
 
     def download_log_file(
-        self, entry: Entry, path: str, timeout: float = 1.0
+        self, entry: Entry, path: str, timeout: float = 10.0
     ) -> Optional[ProgressData]:
         """
         Download log file synchronously.
@@ -41,6 +40,7 @@ class LogFiles(AbstractBasePlugin):
         :rtype: ProgressData
         """
         self._logger.info(f"Downloading log file with id: {entry.id}")
+
         self._download_progress = self._submit_blocking_coroutine(
             self._system.log_files.download_log_file(entry, path),
             timeout=timeout,

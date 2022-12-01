@@ -67,7 +67,7 @@ class PluginManager:
 
         # Relatively sorted by amount of data being requested during init
         # Lowest to the highest generators, Highest to the lowest bandwidth in __init__
-        # TODO: Gimbal, CameraServer, ComponentInformation, ComponentInformationServer # pylint: disable=fixme
+        # TODO:CameraServer, ComponentInformation, ComponentInformationServer # pylint: disable=fixme
         base_plugin_types: List[Type[AbstractBasePlugin]] = sorted(
             [
                 ActionServer,
