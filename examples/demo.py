@@ -51,7 +51,7 @@ drone.put(drone.action.goto_location, position.latitude_deg, position.longitude_
 
 time.sleep(1)
 input("\ndrone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 0)\n")
-drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 180s)
+drone.put(drone.action.goto_location, position.latitude_deg + 0.0001, position.longitude_deg + 0.0001, 4, 180)
 
 
 time.sleep(1)
