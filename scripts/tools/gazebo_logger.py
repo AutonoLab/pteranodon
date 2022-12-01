@@ -50,7 +50,7 @@ elif(len(sys.argv) == 2):
     #Download
     try:
         drone.log_files.download_log_file(entry, str(DIR + "RAW/" + filename + ".txt"), 4000)   
-    except: #cleanup
+    except Exception: #cleanup
         drone.wait_until_queue_empty()
         drone.stop()
 
