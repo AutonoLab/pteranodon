@@ -150,6 +150,8 @@ in the `AbstractDrone`'s method documentation.
    - Because of this, it is better to put any plugin or sensor setup/initialization in this method rather than the initializer. 
 2.  `loop()`
    - Each call of this function represents an iteration inside the drone's background "loop thread".
+   - The loop thread is not started on initialization. You must call `self.start_loop()` from either inside or outside the
+class to begin iterating the `loop()` function.
    - Because this function is called in a separate thread than main or the command threads, stalling inside this function
       will not cause commands to stop their execution. 
      - If this is the intended result and the command is being executed in the command thread, it is much better to call
@@ -162,3 +164,85 @@ in the `AbstractDrone`'s method documentation.
    - Use this method to perform any necessary teardown for custom plugins, sensors, or anything else before shutdown.
 
 
+Now that the structure has been covered, we can create a fully custom implementation.
+
+```python
+from pteranodon import AbstractDrone
+import time
+from typing import List, Tuple
+
+class CustomDrone(AbstractDrone):
+   
+    def __init__(self, address: str):
+       # Initialize the superclass, don't attempt auto-connection with empty address
+        super().__init__(address=address, autoconnect_no_addr=False) 
+        
+       # Move forward 10, right 10, back 10, to the left 10
+        self._xy_dirs : List[Tuple[float, float]] = [(10, 0),
+                                                     (0, 10),
+                                                     (-10, 0),
+                                                     (0, -10)]
+        self._dir_idx = 0
+        
+        # You can start the loop automatically in the initializer or in your calls to this drone object.
+        self.start_loop()
+
+    def setup(self):
+        self.arm()
+        
+        self.set_maximum_speed(20.0)
+        self.set_current_speed(10.0)
+        self.takeoff()
+        return
+
+    def loop(self):
+        # Move in currently selected direction
+        #   For example: self._dir_idx = 1, move forward 0, move to the right 10, move down 0.
+        self.maneuver_to(*self._xy_dirs[self._dir_idx], 0)
+        
+        time.sleep(5.0) # Wait for the drone to finish moving
+        
+        # Cycle through direction index
+        self._dir_idx += 1
+        if self._dir_idx >= len(self._xy_dirs):
+           self._dir_idx = 0
+        return
+
+    def teardown(self):
+        self.return_to_launch()
+        self.wait(5.0) # Wait for the drone to return to launch
+        
+        self.land()
+        self.disarm()
+        return
+```
+
+As you can see above, even without introducing custom plugins or sensors we can make our `CustomDrone` do many things.
+
+At a high level, this drone (once instantiated) will take off and start moving at 10 m/s in a 10-meter square. 
+Remember, since neither the commands nor the `loop` function are being executed on the main thread, your REPL or file
+will still have complete access to the drone as it is executing these actions.
+
+At this point, when the movement becomes boring, simply run `drone.stop()` and this drone will return to launch, land, and disarm.
+
+_Note:_ Since all of these methods are places in the command queue, the `time.sleep` calls are not strictly necessary,
+however, I added them to not `put` commands faster than the action could be performed, leading to some lost calls
+(The queue has a max size of 10).
+
+An example of this custom class being used in the REPL is below
+
+```bash
+$ python3
+>>> from custom_drone import CustomDrone
+>>> drone = CustomDrone("udp://:14540")
+.
+.
+.
+.
+.
+.
+.
+.
+.
+>>> drone.stop()
+```

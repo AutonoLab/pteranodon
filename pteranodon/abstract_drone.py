@@ -723,7 +723,7 @@ class AbstractDrone(ABC):
         )  # shutdown_asyncgens is a coroutine
 
         # on a stop call put a disarm call in the empty queue
-        self._queue.clear()
+        # self._queue.clear()
 
         # Likely not needed
         # self.put(self.action.disarm)
@@ -743,8 +743,10 @@ class AbstractDrone(ABC):
                 "Running remaining async Tasks/Future, and MAVSDK commands"
             )
             asyncio.get_event_loop().run_until_complete(self._teardown())
-        except RuntimeError:
-            self._logger.warning("Failed to empty queue on drone.stop()")
+        except RuntimeError as err:
+            self._logger.warning(
+                f"Failed to empty queue on drone.stop() with error: {err}"
+            )
             pass
 
         # cleanup the mavsdk.System instance
