@@ -12,9 +12,6 @@ class SimpleDrone(AbstractDrone):
     def setup(self):
         pass
 
-    def start_loop(self):
-        pass
-
     def loop(self):
         pass
 

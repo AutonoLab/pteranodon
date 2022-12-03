@@ -114,4 +114,51 @@ $ python3
 
 ### Custom Drone Objects
 
-TEST
+As previously mentioned, `AbstractDrone` is the required super-class of any custom drone implementations. 
+In the previous section, we used the `SimpleDrone` class which is a basic implementation that does not provide any
+extra functionality beyond what is present in `AbstractDrone`.
+
+In this section we will explore how to accomplish more complex implementations.
+
+```python
+from pteranodon import AbstractDrone
+
+class CustomDrone(AbstractDrone):
+   
+    def __init__(self, address: str):
+       # Initialize the superclass, don't attempt auto-connection with empty address
+        super().__init__(address=address, autoconnect_no_addr=False) 
+
+    def setup(self):
+        return
+
+    def loop(self):
+        return
+
+    def teardown(self):
+        return
+```
+
+The above implementation is not very different from the `SimpleDrone` implementation, but we can use it to illustrate the overall structure.
+
+If you are familiar with the format of [Arduino](https://www.arduino.cc/reference/en/language/structure/sketch/loop/)
+code, the functions inside this file may look similar. We'll break these down in this file, but they are detailed further
+in the `AbstractDrone`'s method documentation.
+
+1.  `setup()`
+   - This is one of the first methods called and is called inside the `AbstractDrone` initializer. 
+   - Because of this, it is better to put any plugin or sensor setup/initialization in this method rather than the initializer. 
+2.  `loop()`
+   - Each call of this function represents an iteration inside the drone's background "loop thread".
+   - Because this function is called in a separate thread than main or the command threads, stalling inside this function
+      will not cause commands to stop their execution. 
+     - If this is the intended result and the command is being executed in the command thread, it is much better to call
+         `self.wait(10.0, preempt=True)` to wait before executing the next command for 10 seconds.
+   - If you want execution of this function to pause, you can pause the loop thread with `self.pause_loop()` and resume
+      the thread with `self.resume_loop()`
+     - _Note:_ If you call `self.stop_loop()` the loop thread will be stopped permanently.
+3.  `teardown()`
+   - This function is called when `AbstractDrone`'s `stop()` method is called. 
+   - Use this method to perform any necessary teardown for custom plugins, sensors, or anything else before shutdown.
+
+
