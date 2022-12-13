@@ -1,28 +1,37 @@
 #!/usr/bin/env bash
 
-#Download and install PX4.
-# Run with: sudo bash ./install_px4.sh
+# Download and install PX4.
+# Run with: sudo ./install_px4.sh
 
-cd ../..
+# Work as if inside misc folder, no matter where it is called from.
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-DIR= /PX4-Autopilot
+cd "$parent_path"
+cd ../.. # Change directory to pteranodon root
+
+DIR=./third-party/px4-autopilot/Tools/
+
 if [ -d "$DIR" ];
 then
     echo "$DIR already exists."
 else
-    echo "$DIR does not exists, cloning."
-	git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+    echo "$DIR does not exists, cloning submodules"
+    make submodule-init
+    make submodule-update
 fi
 
 echo "Running ubuntu.sh..............................................................."
-sudo bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --sim_jammy
+sudo ./third-party/px4-autopilot/Tools/setup/ubuntu.sh --sim_jammy
+
+# ubuntu.sh modifies this file, re-login
+source ~/.profile
 
 echo "Installing pip dependencies....................................................."
-pip install -r ./pteranodon/requirements.txt
+pip install -r ./requirements.txt
 
 
 echo "Running Gazebo.................................................................."
-cd ./PX4-Autopilot
+cd ./third-party/px4-autopilot/
 sudo make px4_sitl gazebo
 
 status=$?
