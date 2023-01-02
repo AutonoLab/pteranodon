@@ -41,6 +41,8 @@ install:
 install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
 
+build: pip-deps install
+
 build-all: submodule-clone install-px4-prereqs submodule-build pip-deps install
 
 submodule-init:
