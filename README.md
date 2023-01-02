@@ -14,14 +14,14 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
 ---
 
 ## Requirements for Use
-* python 3.9
-* mavsdk >= 1.4.0
-* numpy
-* grpcio
-* pymavlink
-* pyserial
+* python 3.8+
 * PX4_Autopilot (either local or remote)
-
+* mavsdk>=1.4.0
+* numpy>=1.23.0
+* pymavlink>=2.4.37
+* grpcio>=1.47.0
+* pyserial>=3.5
+* Additional requirements needed for code in the implementations module
 
 ## Platform Compatibility
 

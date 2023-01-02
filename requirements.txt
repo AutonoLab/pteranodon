@@ -3,7 +3,3 @@ numpy>=1.23.0
 pymavlink>=2.4.37
 grpcio>=1.47.0
 pyserial>=3.5
-opencv-python>=4.5.0
-pygobject>=3.38.0
-pyrealsense2>=2.48.0
-tensorflow>=2.6.0
