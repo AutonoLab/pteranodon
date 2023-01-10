@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 
-# find all files that start with 'test_' in the tests/unit/ directory
-for FILE in examples/*.py;
+# Run all the examples in the examples directory
+for FILE in examples/base_plugins/*.py;
+do
+    # run the file if it is not the __init__.py file
+    if [ "$FILE" != "examples/__init__.py" ]; then
+        python3 $FILE
+    fi
+done
+
+for FILE in examples/extension_plugins/*.py;
 do
     # run the file if it is not the __init__.py file
     if [ "$FILE" != "examples/__init__.py" ]; then

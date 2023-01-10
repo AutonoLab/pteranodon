@@ -5,7 +5,8 @@
 .PHONY: build-all 
 .PHONY: ci 
 .PHONY: pip-deps 
-.PHONY: test test-unit test-integration test-examples 
+.PHONY: test test-unit test-integration 
+.PHONY: run-examples 
 .PHONY: docs
 
 help:
@@ -75,8 +76,8 @@ test-unit:
 test-integration:
 	./scripts/tests/run_integration_tests.sh
 
-test-examples:
-	./scripts/tests/run_example_tests.sh
+run-examples:
+	./scripts/tests/run_examples.sh
 
 docs:
 	python3 -m pip install -r requirements-docs.txt -q

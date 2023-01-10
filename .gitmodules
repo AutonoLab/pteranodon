@@ -7,5 +7,5 @@
 	url = https://github.com/justincdavis/pygazebo.git
 	branch = main
 [submodule "third-party/px4-autopilot"]
-	path = third-party/px4-autopilot
+	path = third-party/PX4-Autopilot
 	url = https://github.com/PX4/PX4-Autopilot.git
