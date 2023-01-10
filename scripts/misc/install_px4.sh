@@ -29,10 +29,16 @@ source ~/.profile
 echo "Installing pip dependencies....................................................."
 pip install -r ./requirements.txt
 
-
 echo "Running Gazebo.................................................................."
 cd ./third-party/px4-autopilot/
+sudo make px4_sitl_default
 sudo make px4_sitl gazebo
+
+# call make one each call for px4_sitl gazebo_*
+for TARGET in [gazebo_iris_opt_flow gazebo_solo gazebo_typhoon_h480 gazebo_plane gazebo_plane_catapult gazebo_standard_vtol gazebo_tailsitter gazebo_cloudship]
+do
+    sudo make px4_sitl $TARGET
+done
 
 status=$?
 [ $status -eq 0 ] && echo "Installation Complete..........................................................." || echo "Installation Incomplete........................................................."
