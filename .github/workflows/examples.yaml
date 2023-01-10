@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Examples
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
     branches:
       - main
 jobs:
-  tests:
-    name: "Test All"
+  examples:
+    name: "Run Examples"
     runs-on: ubuntu-latest
     env:
       BRANCH_REF: "${{ github.event.pull_request.head.ref }}"
@@ -28,6 +28,6 @@ jobs:
         run: |
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --wait
           sleep 30s
-      - name: Testing
+      - name: Running Examples
         run: |
-          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test scripts/tests/run_integration_tests.sh
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test scripts/tests/run_examples.sh

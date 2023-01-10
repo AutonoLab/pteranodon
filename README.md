@@ -57,10 +57,13 @@ gives the end users an arduino-eqsue interface, and provides movement and utilit
 
 For more information on the setup and usage of pteranodon, please refer to [USAGE.md](USAGE.md)
 
+## Running Simulations
+
+For more information on the usage of pteranodon in simulations environments, please refer to [SIMULATION.md](SIMULATION.md)
+
 ## Contributing
 
 Welcome and thank you very much for your contribution. For the process of submitting PR, please refer to [CONTRIBUTING.md](CONTRIBUTING.md)。
-
 
 ### Contributors
 
