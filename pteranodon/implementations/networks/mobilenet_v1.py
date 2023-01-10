@@ -84,7 +84,7 @@ class MobileNetV1:
         graph_def.ParseFromString(open(model_path, "rb").read())
         return MobileNetV1.wrap_frozen_graph(graph_def, inputs=inputs, outputs=outputs)
 
-    def updateFrame(
+    def update_frame(
         self, frame
     ) -> None:  # TODO, can port color conversion to VPI, but slower
         self.frame = cv2.resize(
@@ -99,9 +99,9 @@ class MobileNetV1:
     ) -> Tuple[bool, Tuple[int, int, int, int]]:
         assert self.initialized
         if frame is not None:
-            self.updateFrame(frame)
+            self.update_frame(frame)
         self.bounding_boxes, self.scores = self.mobilenet(self.tensor)
-        self.bounding_box, self.previous_box = self.processBoundingBoxes()
+        self.bounding_box, self.previous_box = self.process_bounding_boxes()
         self.success = True
         if self.bounding_box is None:
             self.success = False
@@ -114,7 +114,7 @@ class MobileNetV1:
             )
         return self.success, self.bounding_box
 
-    def processBoundingBoxes(self):
+    def process_bounding_boxes(self):
         if self.previous_box is None:
             self.previous_box = np.array(0)
         if self.filterFrame:

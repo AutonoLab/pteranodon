@@ -1,5 +1,6 @@
-from pteranodon import SimpleDrone
 import time
+
+from pteranodon import SimpleDrone
 from mavsdk.gimbal import ControlMode, GimbalMode
 
 
