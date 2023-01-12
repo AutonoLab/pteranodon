@@ -25,6 +25,7 @@ RUN echo "REF ${GIT_REF_NAME}"
 RUN git -C ${PTERANODON_DIR} checkout "${GIT_REF_NAME}"
 RUN git -C ${PTERANODON_DIR} submodule update --init --recursive # Future proofing
 
+
 RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
 RUN pip3 install -r ${PTERANODON_DIR}/requirements-test.txt
 

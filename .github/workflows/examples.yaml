@@ -30,4 +30,5 @@ jobs:
           sleep 30s
       - name: Running Examples
         run: |
+          pip3 install .
           docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test scripts/tests/run_examples.sh
