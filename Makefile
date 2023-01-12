@@ -1,7 +1,7 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
 .PHONY: help 
 .PHONY: clean clean-all 
-.PHONY: install install-px4-prereqs
+.PHONY: install install-deps install-px4-prereqs
 .PHONY: build-all 
 .PHONY: ci 
 .PHONY: pip-deps 
@@ -39,12 +39,15 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
+install-deps:
+	./scripts/install.sh
+
 install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
 
 build: pip-deps install
 
-build-all: submodule-clone install-px4-prereqs submodule-build pip-deps install
+build-all: submodule-clone install-deps install-px4-prereqs submodule-build pip-deps install
 
 submodule-init:
 	git submodule init
