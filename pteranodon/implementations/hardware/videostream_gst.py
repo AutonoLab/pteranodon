@@ -1,7 +1,7 @@
 import numpy as np
 from gi.repository import Gst
 
-from ..plugins.extension_plugins.sensor import AbstractSensor
+from ...plugins.extension_plugins.sensor import AbstractSensor
 
 
 class VideoStreamGST(AbstractSensor):
@@ -21,6 +21,7 @@ class VideoStreamGST(AbstractSensor):
         Args:
             port (int, optional): UDP port
         """
+        super().__init__(f"VideoStreamGST:{port}")
 
         Gst.init(None)
 
@@ -29,7 +30,7 @@ class VideoStreamGST(AbstractSensor):
 
         # [Software component diagram](https://www.ardusub.com/software/components.html)
         # UDP video stream (:5600)
-        self.video_source = "udpsrc port={}".format(self.port)
+        self.video_source = f"udpsrc port={self.port}"
         # print(f"Video source: {self.video_source}")
         # [Rasp raw image](http://picamera.readthedocs.io/en/release-0.7/recipes2.html#raw-image-capture-yuv-format)
         # Cam -> CSI-2 -> H264 Raw (YUV 4-4-4 (12bits) I420)
@@ -114,7 +115,7 @@ class VideoStreamGST(AbstractSensor):
         Returns:
             bool: true if frame is available
         """
-        return type(self._frame) != type(None)
+        return not isinstance(type(self._frame), type(None))
 
     def run(self):
         """Get frame to update _frame"""

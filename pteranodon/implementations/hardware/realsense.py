@@ -1,8 +1,7 @@
 import pyrealsense2 as rs
 import numpy as np
-import cv2
 
-from pteranodon.plugins.ext_plugins.sensor import AbstractSensor
+from ...plugins.extension_plugins.sensor import AbstractSensor
 
 
 class RealSense(AbstractSensor):
@@ -31,11 +30,11 @@ class RealSense(AbstractSensor):
         # sensor.update(data)
         return color_image, depth_image, color_frame, depth_frame
 
-    def deproj_pixel_to_point(self, depth_frame, frame_width, frame_height, x, y):
+    def deproj_pixel_to_point(self, depth_frame, frame_width, frame_height, cx, cy):
         """Deproject pixel to point in 3D space"""
         # convert center offset pixels to absolute offset from (0,0)
-        x = frame_width / 2 + cnn_x
-        y = frame_height / 2 + cnn_y
+        x = frame_width / 2 + cx
+        y = frame_height / 2 + cy
 
         # get focal length intrinsic
         depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
