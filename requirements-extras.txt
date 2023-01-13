@@ -1,0 +1,4 @@
+tensorflow>=2.10.0
+opencv-python>=4.6
+PyGObject>=3.30.0
+pycairo>=1.16.0

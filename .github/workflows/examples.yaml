@@ -1,0 +1,34 @@
+name: Examples
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  examples:
+    name: "Run Examples"
+    runs-on: ubuntu-latest
+    env:
+      BRANCH_REF: "${{ github.event.pull_request.head.ref }}"
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build Docker Containers
+        if: ${{ github.event.pull_request.head.ref != '' }}
+        run: |
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="$BRANCH_REF"
+      - name: Build Docker Containers
+        if: ${{ github.event.pull_request.head.ref == '' }}
+        run: |
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services build --build-arg GIT_REF_NAME="main"
+      - name: Bring Docker Containers Up
+        run: |
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services up -d --wait
+          sleep 30s
+      - name: Running Examples
+        run: |
+          pip3 install .
+          docker compose -f .ci/tests-docker-compose.yaml -p tests-services exec -T test scripts/tests/run_examples.sh

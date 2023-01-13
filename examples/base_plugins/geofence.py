@@ -1,0 +1,36 @@
+from mavsdk.geofence import Point, Polygon
+
+from pteranodon import SimpleDrone
+
+
+def run():
+    drone = SimpleDrone("udp://:14540")
+
+    drone.logger.info("Fetching home location coordinates...")
+    # wait for home to not be None
+    while drone.telemetry.home is None:
+        drone.wait(0.1, command=False)
+
+    latitude = drone.telemetry.home.latitude_deg
+    longitude = drone.telemetry.home.longitude_deg
+
+    drone.wait(1)
+
+    p1 = Point(latitude - 0.0001, longitude - 0.0001)
+    p2 = Point(latitude + 0.0001, longitude - 0.0001)
+    p3 = Point(latitude + 0.0001, longitude + 0.0001)
+    p4 = Point(latitude - 0.0001, longitude + 0.0001)
+
+    # Create a polygon object using your points
+    polygon = Polygon([p1, p2, p3, p4], Polygon.FenceType.INCLUSION)
+
+    # Upload the geofence to your vehicle
+    drone.logger.info("Uploading geofence...")
+    drone.geofence.upload_geofence([polygon])
+
+    drone.wait_until_queue_empty()
+    drone.stop()
+
+
+if __name__ == "__main__":
+    run()

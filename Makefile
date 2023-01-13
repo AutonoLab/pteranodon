@@ -1,11 +1,12 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
 .PHONY: help 
 .PHONY: clean clean-all 
-.PHONY: install install-px4-prereqs
+.PHONY: install install-deps install-px4-prereqs
 .PHONY: build-all 
 .PHONY: ci 
 .PHONY: pip-deps 
-.PHONY: test test-unit test-integration test-examples 
+.PHONY: test test-unit test-integration 
+.PHONY: run-examples 
 .PHONY: docs
 
 help:
@@ -38,12 +39,15 @@ clean-all: clean submodule-clean
 install:
 	pip3 install .
 
+install-deps:
+	./scripts/install.sh
+
 install-px4-prereqs: 
 	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
 
 build: pip-deps install
 
-build-all: submodule-clone install-px4-prereqs submodule-build pip-deps install
+build-all: submodule-clone install-deps install-px4-prereqs submodule-build pip-deps install
 
 submodule-init:
 	git submodule init
@@ -75,8 +79,8 @@ test-unit:
 test-integration:
 	./scripts/tests/run_integration_tests.sh
 
-test-examples:
-	./scripts/tests/run_example_tests.sh
+run-examples:
+	./scripts/tests/run_examples.sh
 
 docs:
 	python3 -m pip install -r requirements-docs.txt -q

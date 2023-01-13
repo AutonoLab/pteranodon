@@ -21,9 +21,11 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        ./scripts/install.sh
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install -r requirements-extras.txt
 
     - name: Check Black Formatting
       run: |
@@ -42,9 +44,11 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        ./scripts/install.sh
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install -r requirements-extras.txt
 
     - name: Lint with flake8
       run: |
@@ -78,9 +82,11 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        ./scripts/install.sh
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install -r requirements-extras.txt
 
     - name: Lint with mypy
       run: |
@@ -99,9 +105,11 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        ./scripts/install.sh
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install -r requirements-extras.txt
 
     - name: Lint with pylint
       run: |

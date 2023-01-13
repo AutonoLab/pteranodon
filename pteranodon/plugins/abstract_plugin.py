@@ -141,7 +141,11 @@ class AbstractPlugin(ABC):
             try:
                 self._result_cache.append((coroutine_name, future.result()))
             except Exception as e:
-                if len(str(e)) > 0:
+                if "MultiThreadedRendezvous" in str(e):
+                    self._logger.error(
+                        f"Task failed: {coroutine_name} -> {e} (grpc error)"
+                    )
+                elif len(str(e)) > 0:
                     self._logger.error(f"{coroutine_name} -> {e}")
         except Exception as e:
             self._logger.error(f"Callback failed: {coroutine_name} -> {e}")
