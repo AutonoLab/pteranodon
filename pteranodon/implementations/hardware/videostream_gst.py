@@ -1,5 +1,5 @@
 import numpy as np
-from gi.repository import Gst  # pylint: disable=import-error
+from gi.repository import Gst  # pylint: disable=no-name-in-module
 
 from ...plugins.extension_plugins.sensor import AbstractSensor
 
