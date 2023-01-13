@@ -1,5 +1,4 @@
 from mavsdk.failure import FailureUnit, FailureType
-
 from pteranodon import SimpleDrone
 
 

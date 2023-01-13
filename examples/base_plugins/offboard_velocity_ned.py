@@ -44,7 +44,7 @@ def run():
     drone.wait(4)
 
     drone.logger.info("-- Stopping offboard")
-    drone.drone.offboard.stop()
+    drone.offboard.stop()
 
     drone.wait_until_queue_empty()
     drone.stop()

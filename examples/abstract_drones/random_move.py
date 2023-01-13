@@ -2,8 +2,8 @@ from typing import Optional
 import random
 
 from pteranodon import AbstractDrone
-from pteranodon.implementations import VideoStreamGST
-from pteranodon.networks import MobileNetV1
+from pteranodon.implementations.hardware import VideoStreamGST
+from pteranodon.implementations.networks import MobileNetV1
 
 
 class RandomMove(AbstractDrone):
@@ -14,12 +14,13 @@ class RandomMove(AbstractDrone):
     """
 
     def __init__(self, mobilenet_path: Optional[str] = None):
-        self._cam = VideoStreamGST()
+        self._cam = VideoStreamGST(port=5600)
         if mobilenet_path is None:
             self._nn = MobileNetV1()
         else:
             self._nn = MobileNetV1(mobilenet_path)
         self._nn.init()  # here instead of setup due to threading stuff
+
         super().__init__("RandomMove", sensor={"cam": self._cam})
 
     def setup(self):

@@ -1,3 +1,4 @@
+from mavsdk.camera import Mode
 from pteranodon import SimpleDrone
 
 
@@ -5,7 +6,7 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     drone.logger.info("Setting mode to 'PHOTO'")
-    drone.camera.set_mode(drone.camera.mode.PHOTO)
+    drone.camera.set_mode(Mode.PHOTO)
     drone.wait(2)
 
     drone.logger.info("Taking a photo")

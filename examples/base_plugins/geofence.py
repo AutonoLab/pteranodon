@@ -7,6 +7,10 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     drone.logger.info("Fetching home location coordinates...")
+    # wait for home to not be None
+    while drone.telemetry.home is None:
+        drone.wait(0.1, command=False)
+
     latitude = drone.telemetry.home.latitude_deg
     longitude = drone.telemetry.home.longitude_deg
 

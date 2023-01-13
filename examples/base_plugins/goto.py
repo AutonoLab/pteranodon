@@ -4,9 +4,14 @@ from pteranodon import SimpleDrone
 def run():
     drone = SimpleDrone("udp://:14540")
 
-    drone.telemetry.health()
+    # wait for telemetry to be present
+    while drone.telemetry.health is None:
+        drone.wait(0.1, command=False)
 
-    drone.telemetry.home()
+    health = drone.telemetry.health
+    while not health.is_global_position_ok and not health.is_home_position_ok:
+        health = drone.telemetry.health
+        drone.wait(0.01, command=False)
 
     drone.logger.info("-- Arming")
     drone.arm()

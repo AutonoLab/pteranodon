@@ -5,7 +5,7 @@ def run():
     drone = SimpleDrone("udp://:14540")
 
     mission_import_data = drone.mission_raw.import_qgroundcontrol_mission(
-        "example-mission.plan"
+        "examples/base_plugins/example-mission.plan"
     )
     drone.logger.info(
         f"{len(mission_import_data.mission_items)} mission items imported"

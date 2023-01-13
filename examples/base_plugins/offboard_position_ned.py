@@ -42,6 +42,9 @@ def run():
     drone.logger.info("-- Stopping offboard")
     drone.put(drone.offboard.stop)
 
+    drone.action.return_to_launch()
+    drone.wait(1)
+
     drone.wait_until_queue_empty()
     drone.stop()
 
