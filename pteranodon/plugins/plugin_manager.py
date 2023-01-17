@@ -40,7 +40,7 @@ from .base_plugins import (
     Tune,
 )
 from .extension_plugins.abstract_extension_plugin import AbstractExtensionPlugin
-from .extension_plugins import Sensor, Relative, Power
+from .extension_plugins import Config, Sensor, Relative, Power
 from .custom_plugins import AbstractCustomPlugin
 
 
@@ -106,7 +106,7 @@ class PluginManager:
             reverse=False,
         )
         ext_plugin_types: List[Type[AbstractExtensionPlugin]] = sorted(
-            [Sensor, Relative, Power],
+            [Config, Sensor, Relative, Power],
             key=self._get_sort_keys,
             reverse=False,
         )
@@ -427,6 +427,13 @@ class PluginManager:
         The Tune plugin instance
         """
         return self.base_plugins["tune"]  # type: ignore
+
+    @property
+    def config(self) -> Config:
+        """
+        The Config plugin instance
+        """
+        return self.ext_plugins["config"]  # type: ignore
 
     @property
     def sensor(self) -> Sensor:
