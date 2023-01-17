@@ -32,6 +32,13 @@ class Config(AbstractExtensionPlugin):
 
         atexit.register(self.reset)
 
+        try:
+            if self._ext_args["config_file"] is not None:
+                self._config_file = self._ext_args["config_file"]
+                self.from_file(self._config_file)
+        except KeyError:
+            pass
+
         self._end_init()
 
     def set_param(self, param_name: str, param_value: Union[float, int, str]) -> None:
@@ -96,7 +103,12 @@ class Config(AbstractExtensionPlugin):
         with open(file_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if len(line) == 0 or line.startswith("#") or line.startswith(":") or line.startswith("//"):
+                if (
+                    len(line) == 0
+                    or line.startswith("#")
+                    or line.startswith(":")
+                    or line.startswith("//")
+                ):
                     continue
                 if ":" not in line:
                     self._logger.error(f"Invalid line: {line}")

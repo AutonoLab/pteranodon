@@ -12,7 +12,7 @@ class MobileNetV1:
 
     def __init__(
         self,
-        model_path="./models/networks/mobilenet_v1/frozen_inference_graph.pb",
+        model_path="models/networks/mobilenet_v1/frozen_inference_graph.pb",
         frame_shape=(480, 640),
         min_score_threshold=0.25,
         diff_threshold=0.2,

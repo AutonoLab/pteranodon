@@ -35,22 +35,21 @@ class Power(AbstractExtensionPlugin):
         self._num_cells = self._param.get_param_int("BAT1_N_CELLS")
 
         self._window_size = 10
-        self._tegra_interval = 60
-        self._rpi_interval = 60
+        self._interval = 60
         try:
             if self._ext_args["power"] is not None:
-                try:
-                    self._window_size = self._ext_args["power"][0]
-                    self._tegra_interval = self._ext_args["power"][1]
-                    self._rpi_interval = self._ext_args["power"][2]
-                except IndexError:
-                    pass
+                if not (isinstance(self._ext_args["power"], tuple) or isinstance(self._ext_args["power"], list)):
+                    raise TypeError("power argument must be a tuple or list")
+                if len(self._ext_args["power"]) != 2:
+                    raise ValueError("power argument must be a tuple or list of length 2")
+                self._window_size = self._ext_args["power"][0]
+                self._interval = self._ext_args["power"][1]
         except KeyError:
             pass
 
         self._tegra_instantiated = False
         try:
-            self._tegra = Tegra(self._tegra_interval)
+            self._tegra = Tegra(self._interval)
             self._tegra_instantiated = True
         except SubprocessError:
             pass
