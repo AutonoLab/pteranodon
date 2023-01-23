@@ -80,6 +80,10 @@ class Config(AbstractExtensionPlugin):
             self._from_ini(file_path)
         elif file_path.endswith(".txt"):
             self._from_txt(file_path)
+        elif file_path.endswith(".conf"):
+            self._from_conf(file_path)
+        elif file_path.endswith(".cfg"):
+            self._from_cfg(file_path)
         else:
             self._logger.error(f"Unsupported filetype: {file_path}")
             raise ValueError(f"Unsupported filetype: {file_path}")
@@ -115,3 +119,11 @@ class Config(AbstractExtensionPlugin):
                     raise ValueError(f"Invalid line: {line}")
                 param_name, param_value = line.split(":")
                 self.set_param(param_name, param_value)
+
+    def _from_conf(self, file_path: str) -> None:
+        """Sets the configuration of the drone from a conf file."""
+        self._from_ini(file_path)
+    
+    def _from_cfg(self, file_path: str) -> None:
+        """Sets the configuration of the drone from a cfg file."""
+        self._from_ini(file_path)
