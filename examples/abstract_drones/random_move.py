@@ -16,7 +16,7 @@ class RandomMove(AbstractDrone):
     def __init__(
         self,
         mobilenet_path: Optional[str] = None,
-        config_path: Optional[str] = "examples/abstract_drones/random_move_config.json",
+        config_path: Optional[str] = "examples/abstract_drones/random_move.cfg",
     ):
         self._cam = VideoStreamGST(port=5600)
         if mobilenet_path is None:

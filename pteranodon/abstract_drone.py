@@ -87,11 +87,11 @@ class AbstractDrone(ABC):
         log_file_name: Optional[str] = None,
         time_slice: float = 0.050,
         autoconnect_no_addr: bool = True,
-        log_level: int = logging.INFO,
+        log_level: int = logging.DEBUG,
         log_stdout_level: int = logging.DEBUG,
         log_file_level: int = logging.DEBUG,
         custom_plugins: Optional[
-            List[AbstractCustomPlugin, Type[AbstractCustomPlugin]]
+            List[Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]]
         ] = None,
         **kwargs,
     ):
