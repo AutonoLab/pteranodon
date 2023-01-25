@@ -13,7 +13,11 @@ class RandomMove(AbstractDrone):
     Assumed to be run from the root of the pteranodon repository
     """
 
-    def __init__(self, mobilenet_path: Optional[str] = None):
+    def __init__(
+        self,
+        mobilenet_path: Optional[str] = None,
+        config_path: Optional[str] = "examples/abstract_drones/random_move_config.json",
+    ):
         self._cam = VideoStreamGST(port=5600)
         if mobilenet_path is None:
             self._nn = MobileNetV1()
@@ -21,7 +25,9 @@ class RandomMove(AbstractDrone):
             self._nn = MobileNetV1(mobilenet_path)
         self._nn.init()  # here instead of setup due to threading stuff
 
-        super().__init__("RandomMove", sensor={"cam": self._cam})
+        super().__init__(
+            "RandomMove", sensors=[self._cam], config_file=config_path
+        )
 
     def setup(self):
         """Setup drone"""

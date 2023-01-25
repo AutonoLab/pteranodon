@@ -72,7 +72,7 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.extension_plugins import Sensor, Relative, Power
+from .plugins.extension_plugins import Config, Sensor, Relative, Power
 
 
 class AbstractDrone(ABC):
@@ -398,6 +398,13 @@ class AbstractDrone(ABC):
         The Tune plugin instance
         """
         return self._plugins.tune
+
+    @property
+    def config(self) -> Config:
+        """
+        The Config plugin instance
+        """
+        return self._plugins.config
 
     @property
     def sensor(self) -> Sensor:
