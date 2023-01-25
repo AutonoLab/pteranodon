@@ -5,7 +5,7 @@ import asyncio
 from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
-from typing import Any, List, Tuple, Callable, Dict, Optional, Union
+from typing import Any, List, Tuple, Callable, Dict, Optional, Union, Type
 import logging
 import sys
 import random
@@ -73,6 +73,7 @@ from .plugins.base_plugins import (
     Tune,
 )
 from .plugins.extension_plugins import Config, Sensor, Relative, Power
+from .plugins.custom_plugins import AbstractCustomPlugin
 
 
 class AbstractDrone(ABC):
@@ -86,6 +87,9 @@ class AbstractDrone(ABC):
         log_file_name: Optional[str] = None,
         time_slice: float = 0.050,
         autoconnect_no_addr: bool = True,
+        custom_plugins: Optional[
+            List[AbstractCustomPlugin, Type[AbstractCustomPlugin]]
+        ] = None,
         **kwargs,
     ):
         """
@@ -152,6 +156,11 @@ class AbstractDrone(ABC):
         try:
             # setup all plugins
             self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
+
+            # setup custom plugins if given
+            if custom_plugins is not None:
+                for plugin in custom_plugins:
+                    self._plugins.add_plugin(plugin)
 
             # after connection run setup, then initialize loop, run teardown during cleanup phase
             self.setup()

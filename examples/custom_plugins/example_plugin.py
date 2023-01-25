@@ -4,7 +4,7 @@ from typing import Dict
 
 from mavsdk import System
 
-from pteranodon import AbstractCustomPlugin
+from pteranodon import AbstractDrone, AbstractCustomPlugin
 from pteranodon.plugins.base_plugins import Telemetry, Param
 from pteranodon.plugins.extension_plugins import Relative
 
@@ -37,3 +37,17 @@ class ExamplePlugin(AbstractCustomPlugin):
         self._logger.debug(f"{self._param.get_param_int('NAV_RCL_ACT')}")
 
         self._relative.maneuver_to(0, 0, 0)
+
+
+def main():
+    """Example of how to use custom plugins"""
+    drone = AbstractDrone("udp://:14540", custom_plugins=[ExamplePlugin])
+    drone.stop()
+
+    drone = AbstractDrone("udp://:14540")
+    drone.plugins.add_plugin(ExamplePlugin)
+    drone.stop()
+
+
+if __name__ == "__main__":
+    main()
