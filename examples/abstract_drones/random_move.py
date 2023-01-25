@@ -25,9 +25,7 @@ class RandomMove(AbstractDrone):
             self._nn = MobileNetV1(mobilenet_path)
         self._nn.init()  # here instead of setup due to threading stuff
 
-        super().__init__(
-            "RandomMove", sensors=[self._cam], config_file=config_path
-        )
+        super().__init__("RandomMove", sensors=[self._cam], config_file=config_path)
 
     def setup(self):
         """Setup drone"""

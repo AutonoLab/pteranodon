@@ -38,10 +38,15 @@ class Power(AbstractExtensionPlugin):
         self._interval = 60
         try:
             if self._ext_args["power"] is not None:
-                if not (isinstance(self._ext_args["power"], tuple) or isinstance(self._ext_args["power"], list)):
+                if not (
+                    isinstance(self._ext_args["power"], tuple)
+                    or isinstance(self._ext_args["power"], list)
+                ):
                     raise TypeError("power argument must be a tuple or list")
                 if len(self._ext_args["power"]) != 2:
-                    raise ValueError("power argument must be a tuple or list of length 2")
+                    raise ValueError(
+                        "power argument must be a tuple or list of length 2"
+                    )
                 self._window_size = self._ext_args["power"][0]
                 self._interval = self._ext_args["power"][1]
         except KeyError:
