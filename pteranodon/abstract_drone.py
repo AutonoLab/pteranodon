@@ -87,6 +87,9 @@ class AbstractDrone(ABC):
         log_file_name: Optional[str] = None,
         time_slice: float = 0.050,
         autoconnect_no_addr: bool = True,
+        log_level: int = logging.INFO,
+        log_stdout_level: int = logging.DEBUG,
+        log_file_level: int = logging.DEBUG,
         custom_plugins: Optional[
             List[AbstractCustomPlugin, Type[AbstractCustomPlugin]]
         ] = None,
@@ -94,16 +97,19 @@ class AbstractDrone(ABC):
     ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
+        :param log_file_name: The file name of the log file
         :param time_slice: The interval to process commands in the queue
-        :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
-        in the maneuver_to method
+        :param autoconnect_no_addr: If True, attempt to autoconnect to a drone
+        :param log_level: The level of the logger
+        :param log_stdout_level: The level of the logger for STDOUT
+        :param log_file_level: The level of the logger for the log file
+        :param custom_plugins: A list of custom plugins to add to the drone
         """
         # attach signal handlers
         self._handle_signals_main()
 
         # setup the logger first
-        logger_name = "mavlog.log" if log_file_name is None else log_file_name
-        self._logger = log.setup_logger(logger_name)
+        self._logger = log.setup_logger(log_level, log_stdout_level, log_file_level, log_file_name)
 
         # set up the instance fields
         self._stopped_mavlink = False
