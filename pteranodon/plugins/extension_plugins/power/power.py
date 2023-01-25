@@ -38,10 +38,7 @@ class Power(AbstractExtensionPlugin):
         self._interval = 60
         try:
             if self._ext_args["power"] is not None:
-                if not (
-                    isinstance(self._ext_args["power"], tuple)
-                    or isinstance(self._ext_args["power"], list)
-                ):
+                if not isinstance(self._ext_args["power"], (list, tuple)):
                     raise TypeError("power argument must be a tuple or list")
                 if len(self._ext_args["power"]) != 2:
                     raise ValueError(

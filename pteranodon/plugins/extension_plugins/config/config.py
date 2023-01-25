@@ -1,11 +1,10 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, Union, Callable, Tuple
+from typing import Dict, Union, Callable, Tuple, Deque
 from collections import deque
 from functools import partial
 import atexit
 import os
-import json
 import configparser
 
 from mavsdk import System
@@ -30,7 +29,7 @@ class Config(AbstractExtensionPlugin):
 
         self._param: Param = self._base_plugins["param"]
         self._telemetry: Telemetry = self._base_plugins["telemetry"]
-        self._stack: deque[Callable] = deque()
+        self._stack: Deque[Callable] = deque()
 
         atexit.register(self.reset)
 
@@ -46,21 +45,29 @@ class Config(AbstractExtensionPlugin):
     def set_param(self, param_name: str, param_value: Union[float, int, str]) -> None:
         """Sets the parameter of the drone and adds it to the stack of changes to be undone on exit."""
         param_setter, old_param = self._get_type_call(param_name, param_value)
+        if param_setter is None:
+            self._logger.error(
+                f"Unsupported type: {type(param_value)}. Supported types: float, int, str"
+            )
+            raise TypeError(
+                f"Unsupported type: {type(param_value)}. Supported types: float, int, str"
+            )
         self._stack.appendleft(partial(param_setter, old_param))
         param_setter(param_name, param_value)
 
     def _get_type_call(
         self, param_name: str, param_value: Union[float, int, str]
-    ) -> Tuple[Callable, Union[float, int, str]]:
+    ) -> Tuple[Union[Callable, None], Union[float, int, str, None]]:
         """Returns the appropriate method call to Param to undo and the previous value of the parameter."""
         if isinstance(param_value, float):
             return self._param.set_param_float, self._param.get_param_float(param_name)
-        elif isinstance(param_value, int):
+        if isinstance(param_value, int):
             return self._param.set_param_int, self._param.get_param_int(param_name)
-        elif isinstance(param_value, str):
+        if isinstance(param_value, str):
             return self._param.set_param_custom, self._param.get_param_custom(
                 param_name
             )
+        return None, None
 
     def reset(self) -> None:
         """Resets the drone to its original configuration."""
@@ -97,6 +104,6 @@ class Config(AbstractExtensionPlugin):
                     try:
                         attr = getattr(self._telemetry, key)
                         attr(value)
-                    except AttributeError:
+                    except AttributeError as exc:
                         self._logger.error(f"Invalid telemetry attribute: {key}")
-                        raise AttributeError(f"Invalid telemetry attribute: {key}")
+                        raise exc
