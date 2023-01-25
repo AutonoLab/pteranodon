@@ -738,6 +738,7 @@ class AbstractDrone(ABC):
             return
         self._ran_stop = True
         self.teardown()
+
         # shutdown any generators (yield) which are running
         # don't save the Future since cleaning and shutting down anyways
         self._logger.info("Closing async generators")
@@ -746,11 +747,15 @@ class AbstractDrone(ABC):
             self._loop.shutdown_asyncgens(), loop=self._loop
         )  # shutdown_asyncgens is a coroutine
 
-        # on a stop call put a disarm call in the empty queue
-        # self._queue.clear()
+        # clear the queue
+        self._queue.clear()
 
-        # Likely not needed
-        # self.put(self.action.disarm)
+        # get whether the drone is in the air
+        in_air = self.telemetry.in_air
+        if in_air:
+            self.action.clear_results()
+            self.put(self.action.return_to_launch)
+            self.wait_until_queue_empty()
 
         # shutdown any asyncgens that have been opened
         self._stopped_mavlink = True
