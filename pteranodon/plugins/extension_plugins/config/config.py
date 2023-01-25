@@ -90,15 +90,33 @@ class Config(AbstractExtensionPlugin):
             self._logger.error(f"Unsupported filetype: {file_path}")
             raise ValueError(f"Unsupported filetype: {file_path}")
 
+    @staticmethod
+    def _convert_str(param_value: str, section: str) -> Union[float, int, str]:
+        """Converts a string to a float, int, or str."""
+        if section == "int_params":
+            return int(param_value)
+        if section == "float_params":
+            return float(param_value)
+        return param_value
+
     def _from_cfg(self, file_path: str) -> None:
         """Sets the configuration of the drone from a cfg file."""
         config = configparser.ConfigParser()
         config.read(file_path)
         for section in config.sections():
+            if section not in [
+                "int_params",
+                "float_params",
+                "custom_params",
+                "telemetry",
+            ]:
+                raise ValueError(f"Invalid section: {section}")
+
             if section != "telemetry":
                 for key, value in config.items(section):
-                    self.set_param(key, value)
-                    self._logger.info(f"Set {key} to {value}")
+                    param_val = Config._convert_str(value, section)
+                    self.set_param(key, param_val)
+                    self._logger.info(f"Set {key} to {param_val}")
             else:
                 for key, value in config.items(section):
                     try:
