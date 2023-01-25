@@ -12,6 +12,7 @@ from mavsdk import System
 
 from ..abstract_extension_plugin import AbstractExtensionPlugin
 from ...base_plugins.param import Param
+from ...base_plugins.telemetry import Telemetry
 
 
 class Config(AbstractExtensionPlugin):
@@ -28,6 +29,7 @@ class Config(AbstractExtensionPlugin):
         super().__init__("config", system, loop, logger, base_plugins, ext_args)
 
         self._param: Param = self._base_plugins["param"]
+        self._telemetry: Telemetry = self._base_plugins["telemetry"]
         self._stack: deque[Callable] = deque()
 
         atexit.register(self.reset)
@@ -68,62 +70,33 @@ class Config(AbstractExtensionPlugin):
     def from_file(self, file_path: str) -> None:
         """
         Sets the configuration of the drone from a file.
-        Supported filetypes: json, ini, txt with param_name:param_value format"""
+        Supported filetypes: cfg
+        """
         # check that the file exists
         if not os.path.isfile(file_path):
             self._logger.error(f"File {file_path} not found.")
             raise FileNotFoundError(f"File {file_path} not found.")
         # check filetype
-        if file_path.endswith(".json"):
-            self._from_json(file_path)
-        elif file_path.endswith(".ini"):
-            self._from_ini(file_path)
-        elif file_path.endswith(".txt"):
-            self._from_txt(file_path)
-        elif file_path.endswith(".conf"):
-            self._from_conf(file_path)
-        elif file_path.endswith(".cfg"):
+        if file_path.endswith(".cfg"):
             self._from_cfg(file_path)
         else:
             self._logger.error(f"Unsupported filetype: {file_path}")
             raise ValueError(f"Unsupported filetype: {file_path}")
 
-    def _from_json(self, file_path: str) -> None:
-        """Sets the configuration of the drone from a json file."""
-        with open(file_path, "r") as f:
-            config = json.load(f)
-            for param_name, param_value in config.items():
-                self.set_param(param_name, param_value)
-
-    def _from_ini(self, file_path: str) -> None:
-        """Sets the configuration of the drone from an ini file."""
-        config = configparser.ConfigParser()
-        config.read(file_path)
-        for param_name, param_value in config.items():
-            self.set_param(param_name, param_value)
-
-    def _from_txt(self, file_path: str) -> None:
-        """Sets the configuration of the drone from a txt file."""
-        with open(file_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if (
-                    len(line) == 0
-                    or line.startswith("#")
-                    or line.startswith(":")
-                    or line.startswith("//")
-                ):
-                    continue
-                if ":" not in line:
-                    self._logger.error(f"Invalid line: {line}")
-                    raise ValueError(f"Invalid line: {line}")
-                param_name, param_value = line.split(":")
-                self.set_param(param_name, param_value)
-
-    def _from_conf(self, file_path: str) -> None:
-        """Sets the configuration of the drone from a conf file."""
-        self._from_ini(file_path)
-    
     def _from_cfg(self, file_path: str) -> None:
         """Sets the configuration of the drone from a cfg file."""
-        self._from_ini(file_path)
+        config = configparser.ConfigParser()
+        config.read(file_path)
+        for section in config.sections():
+            if section != "telemetry":
+                for key, value in config.items(section):
+                    self.set_param(key, value)
+                    self._logger.info(f"Set {key} to {value}")
+            else:
+                for key, value in config.items(section):
+                    try:
+                        attr = getattr(self._telemetry, key)
+                        attr(value)
+                    except AttributeError:
+                        self._logger.error(f"Invalid telemetry attribute: {key}")
+                        raise AttributeError(f"Invalid telemetry attribute: {key}")
