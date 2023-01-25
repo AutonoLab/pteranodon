@@ -109,7 +109,9 @@ class AbstractDrone(ABC):
         self._handle_signals_main()
 
         # setup the logger first
-        self._logger = log.setup_logger(log_level, log_stdout_level, log_file_level, log_file_name)
+        self._logger = log.setup_logger(
+            log_level, log_stdout_level, log_file_level, log_file_name
+        )
 
         # set up the instance fields
         self._stopped_mavlink = False
