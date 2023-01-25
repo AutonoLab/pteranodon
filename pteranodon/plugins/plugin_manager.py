@@ -41,6 +41,8 @@ from .base_plugins import (
 )
 from .extension_plugins.abstract_extension_plugin import AbstractExtensionPlugin
 from .extension_plugins import Config, Sensor, Relative, Power
+from .meta_plugins.abstract_meta_plugin import AbstractMetaPlugin
+from .meta_plugins import Ros
 from .custom_plugins import AbstractCustomPlugin
 
 
