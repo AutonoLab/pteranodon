@@ -5,8 +5,6 @@ from typing import Dict
 from mavsdk import System
 
 from ..abstract_meta_plugin import AbstractMetaPlugin
-from ...base_plugins.param import Param
-from ...base_plugins.telemetry import Telemetry
 
 
 class Ros(AbstractMetaPlugin):
@@ -21,6 +19,14 @@ class Ros(AbstractMetaPlugin):
         ext_plugins: Dict,
         ext_args: Dict,
     ) -> None:
-        super().__init__("config", system, loop, logger, base_plugins, ext_args)
+        super().__init__("ros", system, loop, logger, base_plugins, ext_plugins, ext_args)
 
         self._end_init()
+
+    def start(self):
+        """Starts the ROS2 node."""
+        pass
+
+    def stop(self):
+        """Stops the ROS2 node."""
+        pass
