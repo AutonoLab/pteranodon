@@ -43,7 +43,7 @@ install-deps:
 	./scripts/install.sh
 
 install-px4-prereqs: 
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
+	./third-party/PX4-Autopilot/Tools/setup/ubuntu.sh
 
 build: pip-deps install
 
