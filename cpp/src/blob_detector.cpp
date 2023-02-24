@@ -1,8 +1,10 @@
+#include "../include/detectors/blob_detector.hpp"
+
 #include <iterator>
 
-#include "detectors/blob_detector.hpp"
-
-BlobDetector::BlobDetector()
+BlobDetector::BlobDetector(bool filter_blobs, bool merge_blobs) :
+    m_filter_blobs(filter_blobs),
+    m_merge_blobs(merge_blobs)
 {
 }
 
@@ -14,8 +16,12 @@ std::vector<cv::Rect> BlobDetector::detect(cv::Mat& t_image)
 {
     preprocess(t_image);
     std::vector<cv::Rect> blobs = generateBlobs(t_image);
-    filterBlobs(t_image, blobs);
-    mergeBlobs(t_image, blobs);
+    if (m_filter_blobs) {
+        filterBlobs(t_image, blobs);
+    }
+    if (m_merge_blobs) {
+        mergeBlobs(t_image, blobs);
+    }
     return blobs;
 }
 
@@ -23,8 +29,12 @@ cv::Rect BlobDetector::detect(cv::Mat& t_image, cv::Rect& t_anchor)
 {
     preprocess(t_image);
     std::vector<cv::Rect> blobs = generateBlobs(t_image);
-    filterBlobs(t_image, blobs);
-    mergeBlobs(t_image, blobs);
+    if (m_filter_blobs) {
+        filterBlobs(t_image, blobs);
+    }
+    if (m_merge_blobs) {
+        mergeBlobs(t_image, blobs);
+    }
     std::vector<float> scores = scoreBlobs(t_image, t_anchor, blobs);
 
     // get the index of the highest score
