@@ -12,7 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/../bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/../bin)
 
-find_library(PTERANODON_EXT_LIB pteranodon_ext HINTS /usr/local/lib/)
+find_library(PTERANODON_EXT_LIB pteranodon_ext HINTS "${CMAKE_PREFIX_PATH}/curl/lib")
 
 add_executable(test_detectors src/test_detectors.cpp)
 

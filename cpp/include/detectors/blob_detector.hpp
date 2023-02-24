@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 
 class BlobDetector 
 {
@@ -26,7 +27,9 @@ private:
     std::vector<float> scoreBlobs(cv::Mat& t_image, cv::Rect& t_anchor, std::vector<cv::Rect>& t_blobs) const;
 
     // utility methods
-    int compareRects(cv::Rect& t_rect1, cv::Rect& t_rect2) const;
-}
+    static int compareRects(cv::Rect& t_rect1, cv::Rect& t_rect2) {
+        return t_rect1.size().area() - t_rect2.size().area();
+    }
+};
 
 #endif  // BLOB_DETECTOR_H

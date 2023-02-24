@@ -59,7 +59,9 @@ std::vector<cv::Rect> BlobDetector::generateBlobs(cv::Mat& t_image) const
 {
     // find the contours in the image
     std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(t_image, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+    // perform findContours
+    cv::findContours(t_image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
     // create a vector of bounding boxes
     std::vector<cv::Rect> blobs;
@@ -97,7 +99,7 @@ void BlobDetector::filterBlobs(cv::Mat& t_image, std::vector<cv::Rect>& t_blobs)
         int b_height = blob.height;
 
         // get the area of the blob
-        int b_area = width * height;
+        int b_area = b_width * b_height;
 
         // ratio of the blob area to the image area
         float area_ratio = (float)b_area / (float)i_area;
@@ -190,14 +192,11 @@ std::vector<float> BlobDetector::scoreBlobs(cv::Mat& t_image, cv::Rect& t_anchor
             continue;
         }
 
+        float score = area * distance;
+
         // add the score to the vector
         scores.push_back(score);
     }
 
     return scores;
-}
-
-int BlobDetector::compareRects(cv::Rect& t_rect1, cv::Rect& t_rect2) const
-{
-    return t_rect1.size() - t_rect2.size();
 }
