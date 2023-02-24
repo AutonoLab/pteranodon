@@ -85,3 +85,8 @@ run-examples:
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
+
+.PHONY: extensions
+
+extensions:
+	mkdir -p build && cmake -S ../ -B ./ && make
