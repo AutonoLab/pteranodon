@@ -14,6 +14,9 @@ BlobDetector::~BlobDetector()
 
 std::vector<cv::Rect> BlobDetector::detect(cv::Mat& t_image)
 {
+    // store the original image since we will be modifying it
+    cv::Mat saved_image = t_image.clone();
+
     preprocess(t_image);
     std::vector<cv::Rect> blobs = generateBlobs(t_image);
     if (m_filter_blobs) {
@@ -22,11 +25,18 @@ std::vector<cv::Rect> BlobDetector::detect(cv::Mat& t_image)
     if (m_merge_blobs) {
         mergeBlobs(t_image, blobs);
     }
+
+    // restore the original image
+    t_image = saved_image;
+
     return blobs;
 }
 
 cv::Rect BlobDetector::detect(cv::Mat& t_image, cv::Rect& t_anchor)
 {
+    // store the original image since we will be modifying it
+    cv::Mat saved_image = t_image.clone();
+
     preprocess(t_image);
     std::vector<cv::Rect> blobs = generateBlobs(t_image);
     if (m_filter_blobs) {
@@ -39,6 +49,9 @@ cv::Rect BlobDetector::detect(cv::Mat& t_image, cv::Rect& t_anchor)
 
     // get the index of the highest score
     int max_index = std::distance(scores.begin(), std::max_element(scores.begin(), scores.end()));
+
+    // restore the original image
+    t_image = saved_image;
 
     return blobs[max_index];
 }
@@ -105,7 +118,7 @@ void BlobDetector::filterBlobs(cv::Mat& t_image, std::vector<cv::Rect>& t_blobs)
         float area_ratio = (float)b_area / (float)i_area;
 
         // check if the area_ratio is small enough (i.e. the blob is not the entire image)
-        if (area_ratio < 0.90)
+        if (area_ratio > 0.90)
         {
             continue;
         }

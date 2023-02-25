@@ -7,4 +7,4 @@ clean:
 	rm -rf build
 
 run:
-	./build/test_detectors
+	./build/test_pteranodon_ext

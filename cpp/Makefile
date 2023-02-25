@@ -5,3 +5,6 @@ all:
 
 clean:
 	rm -rf build
+
+install:
+	cd build && make install

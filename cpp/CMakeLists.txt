@@ -1,47 +1,34 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.4)
+project(pteranodon_ext VERSION 0.1.0)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(pteranodon_ext VERSION 0.1.0)
+include(CTest)
+enable_testing()
 
-# find OpenCV
-find_package(OpenCV REQUIRED)
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
 
-# Include dir
 include_directories(/usr/local/include)
 
-# Src
-AUX_SOURCE_DIRECTORY(src SRC_FILES)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-# Headers
-set(PROJECT_SOURCE_DIR "src")
-set(PROJECT_INCLUDE_DIR "include/detectors")
+set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/headers)
 
-# Source files
-set(SOURCE_FILES
-    ${PROJECT_INCLUDE_DIR}/blob_detector.hpp
-    ${PROJECT_SOURCE_DIR}/blob_detector.cpp
-)
+file(GLOB_RECURSE headers CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/include/headers/*.hpp)
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-# Set up such that XCode organizes the files correctly
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${sources} ${headers})
 
-# Add library
-add_library(pteranodon_ext SHARED ${SOURCE_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_INCLUDE_DIR})
 
-# Include directories
-target_include_directories(pteranodon_ext PRIVATE include/detectors)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
-# Install
-install(TARGETS pteranodon_ext DESTINATION lib)
-
-# Install the headers
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 install(FILES include/pteranodon_ext DESTINATION include)
-
-# Create base directory
-install(DIRECTORY include/detectors DESTINATION include)
-
-# Link libraries
-target_link_libraries(pteranodon_ext ${OpenCV_LIBS})
+install(DIRECTORY include/headers DESTINATION include)

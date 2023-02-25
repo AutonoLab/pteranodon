@@ -2,7 +2,7 @@
 
 namespace py = pybind11;
 
-void init_motorcycle(py::module &);
+void init_blob_detector(py::module &);
 
 namespace mcl {
 
@@ -12,4 +12,4 @@ PYBIND11_MODULE(pteranodon_ext, m) {
     init_blob_detector(m);
 }
 
-}
+}  // namespace mcl

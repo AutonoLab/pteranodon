@@ -89,4 +89,4 @@ docs:
 .PHONY: extensions
 
 extensions:
-	mkdir -p build && cmake -S ../ -B ./ && make
+	mkdir -p build && cd build && cmake -S ../ -B ./ && make
