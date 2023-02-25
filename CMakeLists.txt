@@ -33,9 +33,6 @@ file (GLOB SOURCE_FILES "cpp/src/*.cpp")
 file (GLOB HEADER_FILES "cpp/include/detectors/*.hpp")
 file (GLOB PYTHON_FILES "python/*.cpp" "python/*.hpp")
 
-# Set up such that XCode organizes the files
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${HEADER_FILES} ${PYTHON_FILES} )
-
 find_package(pybind11 REQUIRED)
 
 include(pybind11.cmake)
