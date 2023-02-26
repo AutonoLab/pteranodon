@@ -86,7 +86,7 @@ docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
 
-.PHONY: extensions
+.PHONY: extensions_clean extensions
 
 extensions:
 	mkdir -p build && cd build && cmake -S ../ -B ./ && make

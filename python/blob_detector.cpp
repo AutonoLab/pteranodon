@@ -5,6 +5,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+#include "cvnp/cvnp.h"
+
 namespace py = pybind11;
 
 void init_blob_detector(py::module &m) {
