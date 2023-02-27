@@ -11,7 +11,7 @@ public:
     ~BlobDetector();
 
     std::vector<cv::Rect> detect(cv::Mat& image);
-    cv::Rect detect(cv::Mat& image, cv::Rect& anchor);
+    cv::Rect detectAnchor(cv::Mat& image, cv::Rect& anchor);
 
 private:
     // configuration

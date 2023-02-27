@@ -15,3 +15,6 @@
 [submodule "extern/pybind11"]
 	path = extern/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "extern/pybind11_opencv_numpy"]
+	path = extern/pybind11_opencv_numpy
+	url = https://github.com/edmBernard/pybind11_opencv_numpy.git

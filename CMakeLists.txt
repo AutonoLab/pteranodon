@@ -15,7 +15,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/cvnp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
 
 file (GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpp/src/*.cpp)
@@ -29,7 +28,18 @@ pybind11_add_module(pteranodon_ext
 )
 
 target_link_libraries(pteranodon_ext PUBLIC)
-target_link_libraries(pteranodon_ext PRIVATE cvnp)
+
+find_package(PythonInterp 3 REQUIRED)
+find_package(PythonLibs 3 REQUIRED)
+
+exec_program(${PYTHON_EXECUTABLE}
+             ARGS "-c \"import numpy; print(numpy.get_include())\""
+             OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
+             RETURN_VALUE NUMPY_NOT_FOUND
+            )
+if(NUMPY_NOT_FOUND)
+    message(FATAL_ERROR "NumPy headers not found")
+endif()
 
 install(TARGETS pteranodon_ext
   COMPONENT python

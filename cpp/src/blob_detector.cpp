@@ -32,7 +32,7 @@ std::vector<cv::Rect> BlobDetector::detect(cv::Mat& t_image)
     return blobs;
 }
 
-cv::Rect BlobDetector::detect(cv::Mat& t_image, cv::Rect& t_anchor)
+cv::Rect BlobDetector::detectAnchor(cv::Mat& t_image, cv::Rect& t_anchor)
 {
     // store the original image since we will be modifying it
     cv::Mat saved_image = t_image.clone();
