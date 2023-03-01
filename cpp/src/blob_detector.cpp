@@ -1,4 +1,4 @@
-#include "../include/detectors/blob_detector.hpp"
+#include "../include/headers/blob_detector.hpp"
 
 #include <iterator>
 
