@@ -16,9 +16,11 @@ std::vector<cv::Rect> BlobDetector::detect(cv::Mat& image)
 {
     // store the original image since we will be modifying it
     cv::Mat saved_image = image.clone();
-
+    
     preprocess(image);
+
     std::vector<cv::Rect> blobs = generateBlobs(image);
+
     if (m_filter_blobs) {
         filterBlobs(image, blobs);
     }
@@ -137,27 +139,27 @@ void BlobDetector::mergeBlobs(cv::Mat& t_image, std::vector<cv::Rect>& t_blobs) 
     // sort the blobs by size
     std::sort(t_blobs.begin(), t_blobs.end(), compareRects);
 
-    for (int i = 0; i < t_blobs.size(); i++) {
-        for (int j = i; j < t_blobs.size(); j++) {
-            // get the current blob
-            cv::Rect blob1 = t_blobs[i];
+    // iterate over the blobs
+    // if the current blob contains the next blob, merge them
+    for (int i = 0; i < t_blobs.size(); i++){
+        auto bigBlob = t_blobs[i];
+        // iterate over the blobs remaining in the vector excluding the current blob
+        for (int j = i + 1; j < t_blobs.size(); j++){
+            auto smallBlob = t_blobs[j];
+            // check if the current blob contains the next blob
+            bool contains = bigBlob.contains(smallBlob.tl()) && bigBlob.contains(smallBlob.br());
 
-            // get the next blob
-            cv::Rect blob2 = t_blobs[j];
+            // check if the blobs are roughly the same size
+            bool same_size = (smallBlob.area() / bigBlob.area()) > 0.9;
 
-            if (blob1 == blob2)
-            {
-                continue;
-            }
+            // if the current blob contains the next blob, merge them
+            if (contains && same_size){
+                // get the top left and bottom right points of the merged blob
+                cv::Point tl = cv::Point(std::min(bigBlob.tl().x, smallBlob.tl().x), std::min(bigBlob.tl().y, smallBlob.tl().y));
+                cv::Point br = cv::Point(std::max(bigBlob.br().x, smallBlob.br().x), std::max(bigBlob.br().y, smallBlob.br().y));
 
-            // check if blob2 (the smaller one) is contained inside of blob1
-            // and the sizes are roughly the same
-            if (blob1.contains(blob2.tl()) && 
-                blob1.contains(blob2.br()) &&
-                blob1.size().area() / blob2.size().area() < 1.5)
-            {
-                // merge the blobs
-                cv::Rect merged_blob = blob1 | blob2;
+                // create a new blob from the top left and bottom right points
+                cv::Rect merged_blob = cv::Rect(tl, br);
 
                 // add the merged blob to the vector
                 merged_blobs.push_back(merged_blob);
@@ -212,4 +214,12 @@ std::vector<float> BlobDetector::scoreBlobs(cv::Mat& t_image, cv::Rect& t_anchor
     }
 
     return scores;
+}
+
+// operator definitions
+std::ostream& operator<<(std::ostream& t_out, const BlobDetector& t_detector){
+    t_out << "BlobDetector: " << std::endl;
+    t_out << "Filter Blobs: " << t_detector.m_filter_blobs << std::endl;
+    t_out << "Merge Blobs: " << t_detector.m_merge_blobs << std::endl;
+    return t_out;
 }

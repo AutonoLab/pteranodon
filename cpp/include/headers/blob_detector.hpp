@@ -13,6 +13,9 @@ public:
     std::vector<cv::Rect> detect(cv::Mat& image);
     cv::Rect detectAnchor(cv::Mat& image, cv::Rect& anchor);
 
+    // operators
+    friend std::ostream& operator<<(std::ostream& t_out, const BlobDetector& t_detector);
+
 private:
     // configuration
     const bool m_filter_blobs;
