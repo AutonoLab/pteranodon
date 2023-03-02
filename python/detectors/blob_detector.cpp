@@ -6,7 +6,6 @@
 #include <pybind11/numpy.h>
 
 namespace py = pybind11;
-
 void init_blob_detector(py::module &m) {
     py::class_<BlobDetector>(m, "BlobDetector")
         .def(py::init<>())

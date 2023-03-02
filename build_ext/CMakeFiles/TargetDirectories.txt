@@ -1,0 +1,13 @@
+/home/justin/pteranodon/build_ext/CMakeFiles/pteranodon_ext.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/edit_cache.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/rebuild_cache.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/list_install_components.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/install.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/install/local.dir
+/home/justin/pteranodon/build_ext/CMakeFiles/install/strip.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/edit_cache.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/rebuild_cache.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/list_install_components.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/install.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/install/local.dir
+/home/justin/pteranodon/build_ext/extern/pybind11/CMakeFiles/install/strip.dir

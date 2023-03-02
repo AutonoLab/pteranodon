@@ -88,10 +88,13 @@ docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
 
-.PHONY: extensions-clean extensions
+.PHONY: extensions-clean extensions-install extensions
 
 extensions:
-	mkdir -p build && cd build && cmake -S ../ -B ./ && make
+	mkdir -p build_ext && cd build_ext && cmake -S ../ -B ./ && make
 
 extensions-clean:
-	rm -rf build
+	rm -rf build_ext
+
+extensions-install:
+	cd build_ext && sudo make install

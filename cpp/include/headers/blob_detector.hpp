@@ -1,5 +1,4 @@
-#ifndef BLOB_DETECTOR_H
-#define BLOB_DETECTOR_H
+#pragma once
 
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -33,5 +32,3 @@ private:
         return t_rect1.size().area() - t_rect2.size().area();
     }
 };
-
-#endif  // BLOB_DETECTOR_H
