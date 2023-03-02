@@ -16,6 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11_opencv_numpy)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})

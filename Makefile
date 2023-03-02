@@ -28,6 +28,8 @@ help:
 	@echo "  test-integration      to run the integration tests"
 	@echo "  test-examples         to run the examples tests"
 	@echo "  docs                  to build the documentation"
+	@echo "  extensions            to build the extensions"
+	@echo "  extensions-clean      to clean the extensions"
 
 clean:
 	rm -rf build
@@ -86,7 +88,7 @@ docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
 
-.PHONY: extensions_clean extensions
+.PHONY: extensions-clean extensions
 
 extensions:
 	mkdir -p build && cd build && cmake -S ../ -B ./ && make
