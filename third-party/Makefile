@@ -3,7 +3,7 @@ INSTALL = /usr/bin/install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
-DIRS = PX4-Autopilot gazebo-realsense pygazebo
+DIRS = PX4-Autopilot
 # the sets of directories to do various things in
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
