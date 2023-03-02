@@ -90,3 +90,6 @@ docs:
 
 extensions:
 	mkdir -p build && cd build && cmake -S ../ -B ./ && make
+
+extensions-clean:
+	rm -rf build
