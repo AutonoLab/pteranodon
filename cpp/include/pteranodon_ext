@@ -1,6 +1,6 @@
 #ifndef PTERANODON_EXT_LIBRARY_H
 #define PTERANODON_EXT_LIBRARY_H
 
-#include "detectors/blob_detector.hpp"
+#include "headers/blob_detector.hpp"
 
 #endif

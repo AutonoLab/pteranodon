@@ -8,10 +8,10 @@
 int main() {
     cv::Mat image = cv::imread("data/test.png");
     cv::Rect anchor = cv::Rect(0, 0, 100, 100);
-    BlobDetector detector = BlobDetector(true, false);
+    BlobDetector detector(true, false);
     
     // detect with an anchor box
-    cv::Rect blob = detector.detect(image, anchor);
+    cv::Rect blob = detector.detectAnchor(image, anchor);
     std::cout << "Results from detect with anchor: " << std::endl;
     std::cout << blob << std::endl;
 

@@ -1,4 +1,4 @@
-#include "../include/detectors/blob_detector.hpp"
+#include "../include/headers/blob_detector.hpp"
 
 #include <iterator>
 
@@ -12,46 +12,46 @@ BlobDetector::~BlobDetector()
 {
 }
 
-std::vector<cv::Rect> BlobDetector::detect(cv::Mat& t_image)
+std::vector<cv::Rect> BlobDetector::detect(cv::Mat& image)
 {
     // store the original image since we will be modifying it
-    cv::Mat saved_image = t_image.clone();
+    cv::Mat saved_image = image.clone();
 
-    preprocess(t_image);
-    std::vector<cv::Rect> blobs = generateBlobs(t_image);
+    preprocess(image);
+    std::vector<cv::Rect> blobs = generateBlobs(image);
     if (m_filter_blobs) {
-        filterBlobs(t_image, blobs);
+        filterBlobs(image, blobs);
     }
     if (m_merge_blobs) {
-        mergeBlobs(t_image, blobs);
+        mergeBlobs(image, blobs);
     }
 
     // restore the original image
-    t_image = saved_image;
+    image = saved_image;
 
     return blobs;
 }
 
-cv::Rect BlobDetector::detectAnchor(cv::Mat& t_image, cv::Rect& t_anchor)
+cv::Rect BlobDetector::detectAnchor(cv::Mat& image, cv::Rect& anchor)
 {
     // store the original image since we will be modifying it
-    cv::Mat saved_image = t_image.clone();
+    cv::Mat saved_image = image.clone();
 
-    preprocess(t_image);
-    std::vector<cv::Rect> blobs = generateBlobs(t_image);
+    preprocess(image);
+    std::vector<cv::Rect> blobs = generateBlobs(image);
     if (m_filter_blobs) {
-        filterBlobs(t_image, blobs);
+        filterBlobs(image, blobs);
     }
     if (m_merge_blobs) {
-        mergeBlobs(t_image, blobs);
+        mergeBlobs(image, blobs);
     }
-    std::vector<float> scores = scoreBlobs(t_image, t_anchor, blobs);
+    std::vector<float> scores = scoreBlobs(image, anchor, blobs);
 
     // get the index of the highest score
     int max_index = std::distance(scores.begin(), std::max_element(scores.begin(), scores.end()));
 
     // restore the original image
-    t_image = saved_image;
+    image = saved_image;
 
     return blobs[max_index];
 }

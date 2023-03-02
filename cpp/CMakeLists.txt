@@ -12,6 +12,8 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+add_compile_options(-o3 -Wall)
+
 include_directories(/usr/local/include)
 
 find_package(OpenCV REQUIRED)
