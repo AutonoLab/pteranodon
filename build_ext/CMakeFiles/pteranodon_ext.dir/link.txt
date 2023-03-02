@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O3 -O3 -flto -shared  -o pteranodon_ext.cpython-310-x86_64-linux-gnu.so CMakeFiles/pteranodon_ext.dir/cpp/src/blob_detector.cpp.o CMakeFiles/pteranodon_ext.dir/python/converters/ndarray_converter.cpp.o CMakeFiles/pteranodon_ext.dir/python/detectors/blob_detector.cpp.o CMakeFiles/pteranodon_ext.dir/python/pteranodon_ext.cpp.o 
