@@ -28,11 +28,11 @@ public:
 
     PYBIND11_TYPE_CASTER(cv::Mat, _("numpy.ndarray"));
 
-    inline bool load(handle src, bool /* convert */) {
+    bool load(handle src, bool /* convert */) {
         return NDArrayConverter::toMat(src.ptr(), value);
     }
 
-    inline static handle cast(const cv::Mat &m, return_value_policy, handle defval) {
+    static handle cast(const cv::Mat &m, return_value_policy, handle defval) {
         return handle(NDArrayConverter::toNDArray(m));
     }
 };
