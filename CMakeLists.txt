@@ -16,6 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/cvnp)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -30,7 +31,7 @@ pybind11_add_module(pteranodon_ext
 	${PYTHON_FILES}
 )
 
-target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} ${PTERANODON_EXT})
+target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} PRIVATE cvnp pybind11::pybind11)
 
 find_package(PythonInterp 3 REQUIRED)
 find_package(PythonLibs 3 REQUIRED)

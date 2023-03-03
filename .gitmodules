@@ -4,3 +4,6 @@
 [submodule "extern/pybind11"]
 	path = extern/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "extern/cvnp"]
+	path = extern/cvnp
+	url = https://github.com/pthom/cvnp.git
