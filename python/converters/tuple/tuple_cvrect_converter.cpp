@@ -1,9 +1,6 @@
-#pragma once
-
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include "../../../extern/cvnp/cvnp/cvnp.h"
-
 #include <opencv2/core/core.hpp>
 
 namespace py = pybind11;
@@ -33,4 +30,4 @@ struct type_caster<cv::Rect>{
     }
 };
 
-}} //!  end namespace pybind11::detail
+}} // namespace pybind11::detail
