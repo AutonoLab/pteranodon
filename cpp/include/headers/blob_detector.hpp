@@ -7,7 +7,7 @@ class BlobDetector
 {
 public:
     BlobDetector(bool filter_blobs = true, bool merge_blobs = false);
-    ~BlobDetector();
+    virtual ~BlobDetector();
 
     std::vector<cv::Rect> detect(cv::Mat& image);
     cv::Rect detectAnchor(cv::Mat& image, cv::Rect& anchor);

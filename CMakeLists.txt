@@ -34,7 +34,7 @@ pybind11_add_module(pteranodon_ext
 	${PYTHON_FILES}
 )
 
-target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} PRIVATE cvnp)
+target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} pybind11::pybind11 cvnp)
 
 find_package(PythonInterp 3 REQUIRED)
 find_package(PythonLibs 3 REQUIRED)
