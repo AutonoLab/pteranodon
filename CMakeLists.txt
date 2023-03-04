@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CTest)
+enable_testing()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -31,7 +34,7 @@ pybind11_add_module(pteranodon_ext
 	${PYTHON_FILES}
 )
 
-target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} PRIVATE cvnp pybind11::pybind11)
+target_link_libraries(pteranodon_ext PUBLIC ${OPENCV_LIBS} PRIVATE cvnp)
 
 find_package(PythonInterp 3 REQUIRED)
 find_package(PythonLibs 3 REQUIRED)
@@ -48,4 +51,8 @@ endif()
 install(TARGETS pteranodon_ext
   COMPONENT python
   LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
+)
+
+add_test(NAME pteranodon_ext_test
+  COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext"
 )
