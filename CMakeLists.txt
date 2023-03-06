@@ -71,6 +71,9 @@ install(TARGETS pteranodon_ext
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
-add_test(NAME pteranodon_ext_test
+add_test(NAME import_test
   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext"
+)
+add_test(NAME dir_test
+  COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; print(dir(pteranodon_ext))"
 )
