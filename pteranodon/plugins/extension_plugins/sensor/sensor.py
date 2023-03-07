@@ -27,8 +27,10 @@ class Sensor(AbstractExtensionPlugin):
         self._sensors: Dict[str, AbstractSensor] = {}
 
         try:
-            if self._ext_args["sensor"] is not None:
-                for sensor in self._ext_args["sensor"]:
+            if self._ext_args["sensors"] is not None:
+                if not isinstance(self._ext_args["sensors"], list):
+                    raise TypeError("Sensors must be a list of sensor objects")
+                for sensor in self._ext_args["sensors"]:
                     self._sensors[sensor.name] = sensor
         except KeyError:
             pass

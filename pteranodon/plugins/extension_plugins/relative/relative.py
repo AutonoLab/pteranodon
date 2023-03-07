@@ -29,8 +29,8 @@ class Relative(AbstractExtensionPlugin):
         self._min_follow_distance = 10.0
 
         try:
-            if self._ext_args["relative"] is not None:
-                self._min_follow_distance = self._ext_args["relative"]
+            if self._ext_args["min_follow_distance"] is not None:
+                self._min_follow_distance = self._ext_args["min_follow_distance"]
         except KeyError:
             pass
 

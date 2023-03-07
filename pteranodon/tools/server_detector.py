@@ -46,7 +46,9 @@ class ServerDetector:
         self._user_provided_logger = logger is not None
 
         self._logger: logging.Logger = (
-            logger if logger is not None else log.setup_logger("server_detect.log")
+            logger
+            if logger is not None
+            else log.setup_logger(log_file_name="server_detect.log")
         )
 
         self._event_loop = asyncio.new_event_loop()

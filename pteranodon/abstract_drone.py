@@ -5,7 +5,7 @@ import asyncio
 from concurrent.futures import Future
 import atexit
 from abc import abstractmethod, ABC
-from typing import Any, List, Tuple, Callable, Dict, Optional, Union
+from typing import Any, List, Tuple, Callable, Dict, Optional, Union, Type
 import logging
 import sys
 import random
@@ -72,7 +72,8 @@ from .plugins.base_plugins import (
     Transponder,
     Tune,
 )
-from .plugins.extension_plugins import Sensor, Relative, Power
+from .plugins.extension_plugins import Config, Sensor, Relative, Power
+from .plugins.custom_plugins import AbstractCustomPlugin
 
 
 class AbstractDrone(ABC):
@@ -86,20 +87,31 @@ class AbstractDrone(ABC):
         log_file_name: Optional[str] = None,
         time_slice: float = 0.050,
         autoconnect_no_addr: bool = True,
+        log_level: int = logging.DEBUG,
+        log_stdout_level: int = logging.DEBUG,
+        log_file_level: int = logging.DEBUG,
+        custom_plugins: Optional[
+            List[Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]]
+        ] = None,
         **kwargs,
     ):
         """
         :param address: Connection address for use with mavsdk.System.connect method
+        :param log_file_name: The file name of the log file
         :param time_slice: The interval to process commands in the queue
-        :param min_follow_distance: The minimum distance a point must be from the drone, for a movement to take place
-        in the maneuver_to method
+        :param autoconnect_no_addr: If True, attempt to autoconnect to a drone
+        :param log_level: The level of the logger
+        :param log_stdout_level: The level of the logger for STDOUT
+        :param log_file_level: The level of the logger for the log file
+        :param custom_plugins: A list of custom plugins to add to the drone
         """
         # attach signal handlers
         self._handle_signals_main()
 
         # setup the logger first
-        logger_name = "mavlog.log" if log_file_name is None else log_file_name
-        self._logger = log.setup_logger(logger_name)
+        self._logger = log.setup_logger(
+            log_level, log_stdout_level, log_file_level, log_file_name
+        )
 
         # set up the instance fields
         self._stopped_mavlink = False
@@ -152,6 +164,11 @@ class AbstractDrone(ABC):
         try:
             # setup all plugins
             self._plugins = PluginManager(self._drone, self._loop, self._logger, kwargs)
+
+            # setup custom plugins if given
+            if custom_plugins is not None:
+                for plugin in custom_plugins:
+                    self._plugins.add_plugin(plugin)
 
             # after connection run setup, then initialize loop, run teardown during cleanup phase
             self.setup()
@@ -398,6 +415,13 @@ class AbstractDrone(ABC):
         The Tune plugin instance
         """
         return self._plugins.tune
+
+    @property
+    def config(self) -> Config:
+        """
+        The Config plugin instance
+        """
+        return self._plugins.config
 
     @property
     def sensor(self) -> Sensor:
@@ -714,6 +738,7 @@ class AbstractDrone(ABC):
             return
         self._ran_stop = True
         self.teardown()
+
         # shutdown any generators (yield) which are running
         # don't save the Future since cleaning and shutting down anyways
         self._logger.info("Closing async generators")
@@ -722,11 +747,15 @@ class AbstractDrone(ABC):
             self._loop.shutdown_asyncgens(), loop=self._loop
         )  # shutdown_asyncgens is a coroutine
 
-        # on a stop call put a disarm call in the empty queue
-        # self._queue.clear()
+        # clear the queue
+        self._queue.clear()
 
-        # Likely not needed
-        # self.put(self.action.disarm)
+        # get whether the drone is in the air
+        in_air = self.telemetry.in_air
+        if in_air:
+            self.action.clear_results()
+            self.put(self.action.return_to_launch)
+            self.wait_until_queue_empty()
 
         # shutdown any asyncgens that have been opened
         self._stopped_mavlink = True
