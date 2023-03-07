@@ -77,3 +77,12 @@ add_test(NAME import_test
 add_test(NAME dir_test
   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; print(dir(pteranodon_ext))"
 )
+add_test(NAME cvnp_test_1
+  COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; pteranodon_ext.list_types_synonyms()"
+)
+add_test(NAME cvnp_test_2
+  COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; pteranodon_ext.print_types_synonyms()"
+)
+add_test(NAME blob_detector_import_test
+  COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; from pteranodon_ext import BlobDetector"
+)
