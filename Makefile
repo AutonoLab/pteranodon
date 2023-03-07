@@ -8,6 +8,7 @@
 .PHONY: test test-unit test-integration 
 .PHONY: run-examples 
 .PHONY: docs
+.PHONY: extensions-all extensions-test extensions-clean extensions-install extensions
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -28,6 +29,11 @@ help:
 	@echo "  test-integration      to run the integration tests"
 	@echo "  test-examples         to run the examples tests"
 	@echo "  docs                  to build the documentation"
+	@echo "  extensions            to build the extensions"
+	@echo "  extensions-clean      to clean the extensions"
+	@echo "  extensions-install    to install the extensions"
+	@echo "  extensions-test       to test the extensions"
+	@echo "  extensions-all        to build, clean, install, and test the extensions"
 
 clean:
 	rm -rf build
@@ -43,7 +49,7 @@ install-deps:
 	./scripts/install.sh
 
 install-px4-prereqs: 
-	./third-party/px4-autopilot/Tools/setup/ubuntu.sh
+	./third-party/PX4-Autopilot/Tools/setup/ubuntu.sh
 
 build: pip-deps install
 
@@ -85,3 +91,17 @@ run-examples:
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
+
+extensions:
+	mkdir -p build_ext && cd build_ext && cmake -S ../ -B ./ && make
+
+extensions-clean:
+	rm -rf build_ext
+
+extensions-install:
+	cd build_ext && sudo make install
+
+extensions-test:
+	cd build_ext && make test
+
+extensions-all: extensions-clean extensions extensions-install extensions-test

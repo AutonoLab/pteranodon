@@ -1,3 +1,6 @@
+# build_ext folder for extensions
+build_ext/
+
 # .idea folders
 .idea/
 
