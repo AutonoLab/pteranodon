@@ -28,17 +28,8 @@ int benchmarkDetectors() {
     //     std::cout << "Detector " << i << ": " << detectors[i] << std::endl;
     // }
 
-    // load a video
-    cv::VideoCapture cap("depth_1.mp4");
-
-    // check if video is loaded
-    if (!cap.isOpened()) {
-        std::cout << "Error opening video stream or file" << std::endl;
-        return -1;
-    }
-
-    // get the first frame
-    cv::Mat frame;
+    // load the frame, test.png
+    cv::Mat frame = cv::imread("data/test.png");
 
     auto anchor = cv::Rect(50, 50, 50, 50);
 
@@ -49,14 +40,7 @@ int benchmarkDetectors() {
     std::cout << "   Iterating over " << detectors.size() << " detectors..." << std::endl;
 
     // iterate over loading frames
-    while (1) {
-        // load the next frame
-        cap >> frame;
-
-        // check if frame is empty
-        if (frame.empty())
-            break;
-
+    while (counter < 100){
         // run detect and detectAnchor on each detector in the vector detectors
         // store the time it takes to run each detector
         for(int i = 0; i < detectors.size(); i++){
