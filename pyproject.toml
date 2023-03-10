@@ -1,8 +1,12 @@
 [build-system]
 requires = [
-  "hatchling",
+    "setuptools",
+    "scikit-build>=0.13",
+    "cmake",
+    "ninja",
+    "pybind11",
 ]
-build-backend = "hatchling.build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pteranodon"
@@ -10,20 +14,11 @@ version = "0.0.1.1"
 authors = [
   { name="Justin Davis", email="jcdavis@mines.edu" },
 ]
-description = "A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls, gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems"
 readme = "README.md"
-requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-]
-dependencies = [
-    "mavsdk>=1.4.0",
-    "numpy>=1.23.0",
-    "pymavlink>=2.4.37",
-    "grpcio>=1.47.0",
-    "pyserial>=3.5",
 ]
 
 [project.urls]
