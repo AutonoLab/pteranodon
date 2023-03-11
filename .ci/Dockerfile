@@ -19,6 +19,9 @@ RUN apt-get update && \
     apt-get clean autoclean && \
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
+# Install extensions deps
+RUN ${PTERANODON_DIR}/scripts/install.sh
+
 # Checkout current version of pteranodon
 RUN git clone https://github.com/AutonoLab/pteranodon.git ${PTERANODON_DIR}
 RUN echo "REF ${GIT_REF_NAME}"
