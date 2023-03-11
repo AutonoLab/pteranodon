@@ -61,7 +61,6 @@ class Telemetry(AbstractBasePlugin):
             self._submit_simple_generator(func, should_compute_rate=True)
 
     def _get_getter_data(self, func_name: str, timeout: float) -> Any:
-
         current_getter_data = self._getter_data[func_name]
         if current_getter_data is None:
             return current_getter_data

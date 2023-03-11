@@ -146,7 +146,6 @@ class Relative(AbstractExtensionPlugin):
         self._submit_coroutine(self._create_geofence(distance))
 
     async def _create_geofence(self, distance: float) -> None:
-
         home_opt = self._telemetry.home
         if home_opt is None:
             return None

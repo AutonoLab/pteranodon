@@ -161,7 +161,6 @@ class AbstractPlugin(ABC):
             if comp_rate:
                 current_time = time.perf_counter()
                 try:
-
                     prev_time = self._rate_last_times[gen]
 
                     delta_secs = current_time - prev_time
@@ -284,7 +283,6 @@ class AbstractPlugin(ABC):
     def _submit_generator(
         self, generator: Callable, retry_time: float = 0.5, quit_on_error: bool = False
     ) -> futures.Future:
-
         """
         Wrapper for the body expressions of the async generators used to read MAVSDK data.
 

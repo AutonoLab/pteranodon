@@ -53,6 +53,6 @@ class Tune(AbstractBasePlugin):
         elif note.upper() == "B":
             tune_description.song_elements.append(SongElement.NOTE_B)
         else:
-            raise Exception("Unkown note type")
+            raise ValueError("Unkown note type")
 
         self._submit_coroutine(self._system.tune.play_tune(tune_description))

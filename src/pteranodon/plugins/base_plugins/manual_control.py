@@ -15,7 +15,6 @@ class ManualControl(AbstractBasePlugin):
         self._end_init()
 
     def set_manual_control_input(self, x: float, y: float, z: float, r: float):
-
         """
         The manual contrl input needs to be sent at a rate high enough to prevent triggering of RC loss, a good
         minium rate is 10 Hz.
@@ -31,7 +30,6 @@ class ManualControl(AbstractBasePlugin):
         )
 
     def start_altitude_control(self):
-
         """
         Requires manual control input to be sent regularly already. Does not require a valid position ex: GPS
         """

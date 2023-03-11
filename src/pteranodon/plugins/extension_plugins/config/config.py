@@ -44,7 +44,16 @@ class Config(AbstractExtensionPlugin):
 
     def set_param(self, param_name: str, param_value: Union[float, int, str]) -> None:
         """Sets the parameter of the drone and adds it to the stack of changes to be undone on exit."""
-        param_setter, old_param = self._get_type_call(param_name, param_value)
+        try:
+            param_setter, old_param = self._get_type_call(
+                param_name.lower(), param_value
+            )
+        except (
+            KeyError
+        ):  # checks if the parameter is all caps vs. all lower case, no mixed in PX4
+            param_setter, old_param = self._get_type_call(
+                param_name.upper(), param_value
+            )
         if param_setter is None:
             self._logger.error(
                 f"Unsupported type: {type(param_value)}. Supported types: float, int, str"
@@ -114,9 +123,12 @@ class Config(AbstractExtensionPlugin):
 
             if section != "telemetry":
                 for key, value in config.items(section):
-                    param_val = Config._convert_str(value, section)
-                    self.set_param(key, param_val)
-                    self._logger.info(f"Set {key} to {param_val}")
+                    try:
+                        param_val = Config._convert_str(value, section)
+                        self.set_param(key, param_val)
+                        self._logger.info(f"Set {key} to {param_val}")
+                    except KeyError:
+                        self._logger.warning(f"Invalid parameter name: {key}")
             else:
                 for key, value in config.items(section):
                     try:
@@ -124,4 +136,4 @@ class Config(AbstractExtensionPlugin):
                         attr(value)
                     except AttributeError as exc:
                         self._logger.error(f"Invalid telemetry attribute: {key}")
-                        raise exc
+                        self._logger.error(exc)

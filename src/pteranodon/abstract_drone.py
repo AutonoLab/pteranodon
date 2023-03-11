@@ -624,7 +624,6 @@ class AbstractDrone(ABC):
             return f"{self.cmd_func.__module__}.{self.cmd_func.__qualname__}"
 
     def _process_command(self, command_obj: Command, args: List, kwargs: Dict) -> None:
-
         self._logger.info(
             f"Processing: {command_obj} with args: {args} and kwargs: {kwargs}"
         )
