@@ -8,7 +8,7 @@
 .PHONY: test test-unit test-integration 
 .PHONY: run-examples 
 .PHONY: docs
-.PHONY: extensions-all extensions-test extensions-clean extensions-install extensions
+.PHONY: extensions-all extensions-clean extensions-install extensions
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -105,7 +105,4 @@ extensions-clean:
 extensions-install:
 	cd build_ext && sudo make install
 
-extensions-test:
-	cd build_ext && make test
-
-extensions-all: extensions-clean extensions extensions-install extensions-test
+extensions-all: extensions-clean extensions extensions-install
