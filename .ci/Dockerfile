@@ -19,14 +19,14 @@ RUN apt-get update && \
     apt-get clean autoclean && \
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
-# Install extensions deps
-RUN ${PTERANODON_DIR}/scripts/install.sh
-
 # Checkout current version of pteranodon
 RUN git clone https://github.com/AutonoLab/pteranodon.git ${PTERANODON_DIR}
 RUN echo "REF ${GIT_REF_NAME}"
 RUN git -C ${PTERANODON_DIR} checkout "${GIT_REF_NAME}"
 RUN git -C ${PTERANODON_DIR} submodule update --init --recursive # Future proofing
+
+# Install extensions deps
+RUN ${PTERANODON_DIR}/scripts/install.sh
 
 RUN pip3 install ${PTERANODON_DIR}/.
 RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
