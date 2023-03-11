@@ -23,7 +23,9 @@ RUN apt-get update && \
 RUN git clone https://github.com/AutonoLab/pteranodon.git ${PTERANODON_DIR}
 RUN echo "REF ${GIT_REF_NAME}"
 RUN git -C ${PTERANODON_DIR} checkout "${GIT_REF_NAME}"
-RUN git -C ${PTERANODON_DIR} submodule update --init --recursive # Future proofing
+RUN git -C ${PTERANODON_DIR} submodule init
+RUN git -C ${PTERANODON_DIR} pull --recurse-submodules
+RUN git -C ${PTERANODON_DIR} submodule update --init --recursive
 
 # Install extensions deps
 RUN ${PTERANODON_DIR}/scripts/install.sh
