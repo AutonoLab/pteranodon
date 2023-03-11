@@ -1,18 +1,16 @@
-cmake_minimum_required(VERSION 3.4)
-project(pteranodon_ext VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.15)
+project(${SKBUILD_PROJECT_NAME} 
+  VERSION ${SKBUILD_PROJECT_VERSION}
+  LANGUAGES CXX
+)  
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(CTest)
-enable_testing()
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-
-include(GNUInstallDirs)
 
 set(CMAKE_CXX_FLAGS "-O3 -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -22,6 +20,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/cvnp)
+
+exec_program(${PYTHON_EXECUTABLE}
+             ARGS "-c \"import sysconfig; print(sysconfig.get_paths()['purelib'])\""
+             OUTPUT_VARIABLE PYTHON_LIBRARY_DIR
+             RETURN_VALUE PYTHON_LIBRARY_DIR_NOT_FOUND
+            )
+if(PYTHON_LIBRARY_DIR_NOT_FOUND)
+    message(FATAL_ERROR "Python library directory not found")
+endif()
 
 set(NUMPY_INCLUDE_DIR "" CACHE FILEPATH "Path to numpy header if cmake can't find them.")
 if (NOT ${NUMPY_INCLUDE_DIR} STREQUAL "")
@@ -59,32 +66,6 @@ pybind11_add_module(${python_module_name} MODULE
 )
 
 target_link_libraries(${python_module_name} PRIVATE cvnp pybind11::pybind11 ${OpenCV_LIBS})
+target_compile_definitions(${python_module_name} PRIVATE VERSION_INFO="${PROJECT_VERSION}")
 
-exec_program(${PYTHON_EXECUTABLE}
-             ARGS "-c \"import sysconfig; print(sysconfig.get_paths()['purelib'])\""
-             OUTPUT_VARIABLE PYTHON_LIBRARY_DIR
-             RETURN_VALUE PYTHON_LIBRARY_DIR_NOT_FOUND
-            )
-if(PYTHON_LIBRARY_DIR_NOT_FOUND)
-    message(FATAL_ERROR "Python library directory not found")
-endif()
-
-install(TARGETS ${python_module_name}
-  DESTINATION pteranodon/ext
-  )
-
-# add_test(NAME import_test
-#   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext"
-# )
-# add_test(NAME dir_test
-#   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; print(dir(pteranodon_ext))"
-# )
-# add_test(NAME cvnp_test_1
-#   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; pteranodon_ext.list_types_synonyms()"
-# )
-# add_test(NAME cvnp_test_2
-#   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; pteranodon_ext.print_types_synonyms()"
-# )
-# add_test(NAME blob_detector_import_test
-#   COMMAND ${PYTHON_EXECUTABLE} -c "import pteranodon_ext; from pteranodon_ext import BlobDetector"
-# )
+install(TARGETS ${python_module_name} DESTINATION pteranodon)

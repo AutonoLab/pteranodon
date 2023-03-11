@@ -1,6 +1,6 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
 .PHONY: help 
-.PHONY: clean clean-all 
+.PHONY: clean clean-all remove-untracked
 .PHONY: install install-deps install-px4-prereqs
 .PHONY: build-all 
 .PHONY: ci 
@@ -19,6 +19,7 @@ help:
 	@echo "  submodule-clone       to intialize, update, and clone the submodules"
 	@echo "  clean                 to clean the project"
 	@echo "  clean-all             to clean the project and submodules"
+	@echo "  remove-untracked      to remove all untracked files/directories"
 	@echo "  install               to install the project"
 	@echo "  install-px4-prereqs   to install the px4 prerequisites"
 	@echo "  build-all             to build the project and all submodules"
@@ -41,6 +42,9 @@ clean:
 	rm -rf .pytest_cache
 
 clean-all: clean submodule-clean
+
+remove-untracked:
+	git clean -fdx
 
 install:
 	pip3 install .

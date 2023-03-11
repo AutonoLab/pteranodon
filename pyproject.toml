@@ -1,12 +1,6 @@
 [build-system]
-requires = [
-    "setuptools",
-    "scikit-build>=0.13",
-    "cmake",
-    "ninja",
-    "pybind11",
-]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.2.1", "pybind11"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "pteranodon"
@@ -20,7 +14,17 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+requires-python=">=3.8"
 
 [project.urls]
 "Homepage" = "https://github.com/AutonoLab/pteranodon"
 "Bug Tracker" = "https://github.com/AutonoLab/pteranodon/issues"
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
+
+[tool.cibuildwheel]
+test-command = "pytest {project}/tests"
+test-extras = ["test"]
+test-skip = ["*universal2:arm64"]
+build-verbosity = 1
