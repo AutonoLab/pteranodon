@@ -21,7 +21,23 @@ requires-python=">=3.8"
 "Bug Tracker" = "https://github.com/AutonoLab/pteranodon/issues"
 
 [tool.scikit-build]
+cmake.minimum-version = "3.15"
+ninja.minimum-version = "1.5"
+ninja.make-fallback = true
+cmake.args = []
+cmake.verbose = false
+cmake.build-type = "Release"
+logging.level = "WARNING"
+sdist.include = []
+sdist.exclude = []
+sdist.reproducible = true
+wheel.packages = ["src/pteranodon"]
+wheel.py-api = "cp38"
 wheel.expand-macos-universal-tags = true
+backport.find-python = "3.26"
+experimental = false
+strict-config = true
+minimum-version = "0.2.1"
 
 [tool.cibuildwheel]
 test-command = "pytest {project}/tests"

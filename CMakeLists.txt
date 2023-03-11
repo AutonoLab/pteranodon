@@ -15,8 +15,8 @@ endif()
 set(CMAKE_CXX_FLAGS "-O3 -fopenmp -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fopenmp")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/pteranodon/ext/cpp/include/headers)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/pteranodon/ext/python)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/cvnp)
@@ -48,9 +48,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS}/opencv4)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-file (GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpp/src/*.cpp)
-file (GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers/*.hpp)
-file (GLOB_RECURSE PYTHON_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/python/*.hpp)
+file (GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/pteranodon/ext/cpp/src/*.cpp)
+file (GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/pteranodon/ext/cpp/include/headers/*.hpp)
+file (GLOB_RECURSE PYTHON_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/pteranodon/ext/python/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/python/*.hpp)
 
 LINK_DIRECTORIES(
   ${OpenCV_LIB_DIR}
@@ -67,4 +67,4 @@ pybind11_add_module(${python_module_name} MODULE
 target_link_libraries(${python_module_name} PRIVATE cvnp pybind11::pybind11 ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
 target_compile_definitions(${python_module_name} PRIVATE VERSION_INFO="${PROJECT_VERSION}")
 
-install(TARGETS ${python_module_name} DESTINATION pteranodon)
+install(TARGETS ${python_module_name} DESTINATION pteranodon/ext)
