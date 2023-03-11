@@ -12,8 +12,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS "-O3 -fopenmp -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fopenmp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp/include/headers)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python)
@@ -39,9 +39,8 @@ if (NOT ${NUMPY_INCLUDE_DIR} STREQUAL "")
   include_directories(${NUMPY_INCLUDE_DIR})
 endif()
 
-find_package(PythonInterp 3 REQUIRED)
-find_package(PythonLibs 3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(OpenMP REQUIRED)
 
 include_directories(${pybind11_INCLUDE_DIR})
 include_directories(${PYTHON_INCLUDE_DIRS})
@@ -65,7 +64,7 @@ pybind11_add_module(${python_module_name} MODULE
 	${PYTHON_FILES}
 )
 
-target_link_libraries(${python_module_name} PRIVATE cvnp pybind11::pybind11 ${OpenCV_LIBS})
+target_link_libraries(${python_module_name} PRIVATE cvnp pybind11::pybind11 ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
 target_compile_definitions(${python_module_name} PRIVATE VERSION_INFO="${PROJECT_VERSION}")
 
 install(TARGETS ${python_module_name} DESTINATION pteranodon)
