@@ -19,6 +19,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Install Dependencies
+      run: ./scripts/install.sh
+
     - name: Build SDist
       run: pipx run build --sdist
 
