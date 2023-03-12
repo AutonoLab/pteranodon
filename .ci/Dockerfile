@@ -27,8 +27,10 @@ RUN git -C ${PTERANODON_DIR} submodule init
 RUN git -C ${PTERANODON_DIR} pull --recurse-submodules
 RUN git -C ${PTERANODON_DIR} submodule update --init --recursive
 
-# Install extensions deps
-RUN ${PTERANODON_DIR}/scripts/install.sh
+RUN apt install -y git-all
+RUN apt install -y libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
+RUN apt install -y python3-gi python3-gi-cairo gir1.2-gtk-3.0
+RUN apt install -y libopencv-dev
 
 RUN pip3 install ${PTERANODON_DIR}/.
 RUN pip3 install -r ${PTERANODON_DIR}/requirements.txt
