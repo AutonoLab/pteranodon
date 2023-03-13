@@ -14,7 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Set up Python 3.9
       uses: actions/setup-python@v1
       with:
@@ -22,19 +24,6 @@ jobs:
     - name: Install dependencies
       run: |
         ./scripts/install.sh
-
-    - name: Clone Submodules
-        if: ${{ github.event.pull_request.head.ref != '' }}
-        run: |
-          git submodule init
-          git pull origin $BRANCH_REF --recurse-submodules
-          git submodule update --init --resursive
-    - name: Clone Submodules
-        if: ${{ github.event.pull_request.head.ref == '' }}
-        run: |
-          git submodule init
-          git pull origin main --recurse-submodules
-          git submodule update --init --resursive
 
     - name: Install build
       run: |

@@ -15,7 +15,9 @@ jobs:
       BRANCH_REF: "${{ github.event.pull_request.head.ref }}"
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+      with:
+        submodules: true
       - name: Build Docker Containers
         if: ${{ github.event.pull_request.head.ref != '' }}
         run: |
