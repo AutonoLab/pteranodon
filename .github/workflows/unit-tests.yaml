@@ -22,9 +22,15 @@ jobs:
     - name: Install dependencies
       run: |
         ./scripts/install.sh
+
+        git submodule init
+        git pull --recurse-submodules
+        git submodule update --init --recursive
+
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-test.txt
+        
         pip install .
 
     - name: Test Abstract Plugin
