@@ -23,15 +23,25 @@ jobs:
       run: |
         ./scripts/install.sh
 
-        git submodule init
-        git pull --recurse-submodules
-        git submodule update --init --recursive
+    - name: Clone Submodules
+        if: ${{ github.event.pull_request.head.ref != '' }}
+        run: |
+          git submodule init
+          git pull origin $BRANCH_REF --recurse-submodules
+          git submodule update --init --resursive
+    - name: Clone Submodules
+        if: ${{ github.event.pull_request.head.ref == '' }}
+        run: |
+          git submodule init
+          git pull origin main --recurse-submodules
+          git submodule update --init --resursive
 
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-test.txt
-        
-        pip install .
+    - name: Install pteranodon
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+          pip install .
 
     - name: Test Abstract Plugin
       run: |
