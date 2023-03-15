@@ -7,6 +7,9 @@ ARG GIT_REF_NAME
 ENV WORKSPACE_DIR /root
 ENV PTERANODON_DIR ${WORKSPACE_DIR}/pteranodon
 
+ENV TZ=Etc/UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Add docker-compose-wait tool -------------------
 #ENV WAIT_VERSION 2.7.2
 #ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
