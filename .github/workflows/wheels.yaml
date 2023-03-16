@@ -56,6 +56,9 @@ jobs:
       run: git diff --exit-code
       shell: bash
 
+    - name: Install dependencies
+      run: ./scripts/install.sh
+
     - uses: actions/upload-artifact@v3
       with:
         path: wheelhouse/*.whl
