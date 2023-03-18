@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["scikit-build-core>=0.2.1", "pybind11"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "pteranodon"
@@ -8,22 +8,39 @@ version = "0.0.1.1"
 authors = [
   { name="Justin Davis", email="jcdavis@mines.edu" },
 ]
-description = "A framework to built on top of MAVSDK which provides physical/virtual drone abstraction, abstraction for all async calls, gives the end users an arduino-eqsue interface, and provides movement and utility methods based on relative coordinate systems"
 readme = "README.md"
-requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "mavsdk>=1.4.0",
-    "numpy>=1.23.0",
-    "pymavlink>=2.4.37",
-    "grpcio>=1.47.0",
-    "pyserial>=3.5",
-]
+requires-python=">=3.8"
 
 [project.urls]
 "Homepage" = "https://github.com/AutonoLab/pteranodon"
 "Bug Tracker" = "https://github.com/AutonoLab/pteranodon/issues"
+
+[tool.scikit-build]
+cmake.minimum-version = "3.15"
+ninja.minimum-version = "1.5"
+ninja.make-fallback = true
+cmake.args = []
+cmake.verbose = false
+cmake.build-type = "Release"
+logging.level = "WARNING"
+sdist.include = []
+sdist.exclude = []
+sdist.reproducible = true
+wheel.packages = ["src/pteranodon"]
+wheel.py-api = "cp38"
+wheel.expand-macos-universal-tags = true
+backport.find-python = "3.26"
+experimental = false
+strict-config = true
+minimum-version = "0.2.1"
+
+[tool.cibuildwheel]
+test-command = "pytest {project}/tests"
+test-extras = ["test"]
+test-skip = ["*universal2:arm64"]
+build-verbosity = 1

@@ -1,6 +1,6 @@
 .PHONY: submodule-init submodule-update submodule-build submodule-clean submodule-clone
 .PHONY: help 
-.PHONY: clean clean-all 
+.PHONY: clean clean-all remove-untracked
 .PHONY: install install-deps install-px4-prereqs
 .PHONY: build-all 
 .PHONY: ci 
@@ -8,6 +8,7 @@
 .PHONY: test test-unit test-integration 
 .PHONY: run-examples 
 .PHONY: docs
+.PHONY: extensions-all extensions-clean extensions-install extensions
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -18,6 +19,7 @@ help:
 	@echo "  submodule-clone       to intialize, update, and clone the submodules"
 	@echo "  clean                 to clean the project"
 	@echo "  clean-all             to clean the project and submodules"
+	@echo "  remove-untracked      to remove all untracked files/directories"
 	@echo "  install               to install the project"
 	@echo "  install-px4-prereqs   to install the px4 prerequisites"
 	@echo "  build-all             to build the project and all submodules"
@@ -28,6 +30,11 @@ help:
 	@echo "  test-integration      to run the integration tests"
 	@echo "  test-examples         to run the examples tests"
 	@echo "  docs                  to build the documentation"
+	@echo "  extensions            to build the extensions"
+	@echo "  extensions-clean      to clean the extensions"
+	@echo "  extensions-install    to install the extensions"
+	@echo "  extensions-test       to test the extensions"
+	@echo "  extensions-all        to build, clean, install, and test the extensions"
 
 clean:
 	rm -rf build
@@ -35,6 +42,9 @@ clean:
 	rm -rf .pytest_cache
 
 clean-all: clean submodule-clean
+
+remove-untracked:
+	git clean -fdx
 
 install:
 	pip3 install .
@@ -85,3 +95,14 @@ run-examples:
 docs:
 	python3 -m pip install -r requirements-docs.txt -q
 	$(MAKE) -C docs dirhtml
+
+extensions:
+	mkdir -p build_ext && cd build_ext && cmake -S ../ -B ./ && make
+
+extensions-clean:
+	rm -rf build_ext
+
+extensions-install:
+	cd build_ext && sudo make install
+
+extensions-all: extensions-clean extensions extensions-install

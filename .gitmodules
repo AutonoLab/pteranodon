@@ -1,11 +1,9 @@
-[submodule "third-party/gazebo-realsense"]
-	path = third-party/gazebo-realsense
-	url = https://github.com/justincdavis/gazebo-realsense.git
-	branch = main
-[submodule "third-party/pygazebo"]
-	path = third-party/pygazebo
-	url = https://github.com/justincdavis/pygazebo.git
-	branch = main
 [submodule "third-party/px4-autopilot"]
 	path = third-party/PX4-Autopilot
 	url = https://github.com/PX4/PX4-Autopilot.git
+[submodule "extern/pybind11"]
+	path = extern/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "extern/cvnp"]
+	path = extern/cvnp
+	url = https://github.com/pthom/cvnp.git
