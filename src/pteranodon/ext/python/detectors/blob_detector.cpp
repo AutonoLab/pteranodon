@@ -6,5 +6,6 @@ void init_blob_detector(py::module &m) {
     py::class_<BlobDetector>(m, "BlobDetector")
         .def(py::init<>())
         .def("detect", &BlobDetector::detect)
-        .def("detectAnchor", &BlobDetector::detectAnchor);
+        .def("detectAnchor", &BlobDetector::detectAnchor)
+        .def("getBestScore", &BlobDetector::getBestScore);
 }

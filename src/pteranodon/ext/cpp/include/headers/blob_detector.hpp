@@ -11,6 +11,7 @@ public:
 
     std::vector<cv::Rect> detect(cv::Mat& image);
     cv::Rect detectAnchor(cv::Mat& image, cv::Rect& anchor);
+    float getBestScore() const { return best_score; }
 
     // operators
     friend std::ostream& operator<<(std::ostream& t_out, const BlobDetector& t_detector);
@@ -19,6 +20,8 @@ private:
     // configuration
     const bool m_filter_blobs;
     const bool m_merge_blobs;
+
+    float best_score = 0.0f;
 
     // detection methods
     void preprocess(cv::Mat& t_image) const;

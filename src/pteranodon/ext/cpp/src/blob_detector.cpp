@@ -52,6 +52,9 @@ cv::Rect BlobDetector::detectAnchor(cv::Mat& image, cv::Rect& anchor)
     // get the index of the highest score
     int max_index = std::distance(scores.begin(), std::max_element(scores.begin(), scores.end()));
 
+    // save the best score
+    best_score = scores[max_index];
+
     // restore the original image
     image = saved_image;
 
@@ -194,23 +197,22 @@ std::vector<float> BlobDetector::scoreBlobs(cv::Mat& t_image, cv::Rect& t_anchor
         // get the area of the blob
         float area = blob.area();
 
-        // calculate the score
+        // calculate the difference in area
         float area_diff = (float)anchor_area / (float)area;
 
-        if (area_diff < 0.9 || area_diff > 1.1)
-        {
-            continue;
-        }
-
-        if (distance > 100)
-        {
-            continue;
-        }
-
-        float score = area * distance;
+        // compute the score
+        float score = area_diff * distance;
 
         // add the score to the vector
         scores.push_back(score);
+    }
+
+    // normalize the scores againist the maximum score
+    // then invert the scores, to become bigger is better metric
+    float max_score = *std::max_element(scores.begin(), scores.end());
+    for (auto& score : scores)
+    {
+        score = 1 - (score / max_score);
     }
 
     return scores;
