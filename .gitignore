@@ -1,3 +1,7 @@
+# build_ext folder for extensions
+build_ext/
+_skbuild/
+
 # .idea folders
 .idea/
 
