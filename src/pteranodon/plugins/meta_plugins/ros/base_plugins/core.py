@@ -8,7 +8,7 @@ from pteranodon.plugins.base_plugins.core import Core
 
 PREFIX = "drone/mavsdk/pteranodon/"
 
-def ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -> None:
+def _ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -> None:
     """
     Takes input of Publisher, and ConnectionState, consisting of:
         bool is_connected
@@ -19,12 +19,12 @@ def ros_publish_connection_state(publisher: Publisher, data: ConnectionState) ->
     msg.data = data.is_connected
     publisher.publish(msg)
 
-def handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
+def _handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
     """Create a publisher and pair it with a method to publish different mavsdk data types"""
     publisher = node.create_publisher(data_type, name, 10)
     return partial(method, publisher)
 
-def register_core_publishers(node: Node, core: Core):
+def register_core_publishers(node: Node, core: Core) -> None:
     core.register_connection_state_handler(
-        handle_publisher(node, PREFIX + 'connection_state', Bool, ros_publish_connection_state)
+        _handle_publisher(node, PREFIX + 'connection_state', Bool, _ros_publish_connection_state)
     )

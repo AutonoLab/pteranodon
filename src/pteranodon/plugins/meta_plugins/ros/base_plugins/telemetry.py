@@ -16,14 +16,14 @@ from pteranodon.plugins.base_plugins.telemetry import Telemetry
 PREFIX = "drone/mavsdk/pteranodon/"
 
 # bool
-def ros_publish_bool(publisher: Publisher, data: bool):
+def _ros_publish_bool(publisher: Publisher, data: bool):
     """Takes input of Publisher, and bool, publishes Bool to ros topic"""
     msg = Bool()
     msg.data = data
     publisher.publish(msg)
 
 # str or unhandled type conversion
-def ros_publish_string(publisher: Publisher, data) -> None:
+def _ros_publish_string(publisher: Publisher, data) -> None:
     """Takes input of Publisher, and str, publishes String to ros topic"""
     msg = String()
     msg.data = str(data)
@@ -31,7 +31,7 @@ def ros_publish_string(publisher: Publisher, data) -> None:
     # ros_node.get_logger().info(f"{msg.data}")
 
 # ActuatorControlTarget
-def ros_publish_actuator_control_target(publisher: Publisher, data: ActuatorControlTarget) -> None:
+def _ros_publish_actuator_control_target(publisher: Publisher, data: ActuatorControlTarget) -> None:
     """ No test data
     Takes input of Publisher, and ActuatorControlTarget, consisting of:
         int32 group,
@@ -45,7 +45,7 @@ def ros_publish_actuator_control_target(publisher: Publisher, data: ActuatorCont
 
 
 # AngularVelocityBody
-def ros_publish_velocity_body(publisher: Publisher, data: AngularVelocityBody) -> None:
+def _ros_publish_velocity_body(publisher: Publisher, data: AngularVelocityBody) -> None:
     """
     Takes input of Publisher, and AngularVelocityBody, consisting of:
         float roll_rad_s,
@@ -58,7 +58,7 @@ def ros_publish_velocity_body(publisher: Publisher, data: AngularVelocityBody) -
     publisher.publish(msg)
 
 # EulerAngle
-def ros_publish_euler(publisher: Publisher, data: EulerAngle) -> None:
+def _ros_publish_euler(publisher: Publisher, data: EulerAngle) -> None:
     """
     Takes input of Publisher, and EulerAngle, consisting of:
         float roll_deg,
@@ -71,7 +71,7 @@ def ros_publish_euler(publisher: Publisher, data: EulerAngle) -> None:
     publisher.publish(msg)
 
 # Quaternion
-def ros_publish_quaternion(publisher: Publisher, data: Quaternion) -> None:
+def _ros_publish_quaternion(publisher: Publisher, data: Quaternion) -> None:
     """
     Takes input of Publisher, and AngularVelocityBody, consisting of:
         float w,
@@ -86,7 +86,7 @@ def ros_publish_quaternion(publisher: Publisher, data: Quaternion) -> None:
     publisher.publish(msg)
 
 # Battery
-def ros_publish_battery(publisher: Publisher, data: Battery) -> None:
+def _ros_publish_battery(publisher: Publisher, data: Battery) -> None:
     """
     Takes input of Publisher, and Battery, consisting of:
         float voltage_v,
@@ -99,7 +99,7 @@ def ros_publish_battery(publisher: Publisher, data: Battery) -> None:
     publisher.publish(msg)
 
 # DistanceSensor
-def ros_publish_distance(publisher: Publisher, data: DistanceSensor) -> None:
+def _ros_publish_distance(publisher: Publisher, data: DistanceSensor) -> None:
     """
     Takes input of Publisher, and DistanceSensor, consisting of:
         float minimum_distance_m,
@@ -112,7 +112,7 @@ def ros_publish_distance(publisher: Publisher, data: DistanceSensor) -> None:
     publisher.publish(msg)
 
 # FixedwingMetrics <-- probably not necessary for drone use
-def ros_publish_fixedwing(publisher: Publisher, data: FixedwingMetrics) -> None:
+def _ros_publish_fixedwing(publisher: Publisher, data: FixedwingMetrics) -> None:
     """
     Takes input of Publisher, and AngularVelocityBody, consisting of:
         float airspeed_m_s,
@@ -125,7 +125,7 @@ def ros_publish_fixedwing(publisher: Publisher, data: FixedwingMetrics) -> None:
     publisher.publish(msg)
 
 # FlightMode (ENUM)
-def ros_publish_flight_mode(publisher: Publisher, data: FlightMode) -> None:
+def _ros_publish_flight_mode(publisher: Publisher, data: FlightMode) -> None:
     """
     Takes input of Publisher, and FlightMode, enum:
         UNKNOWN
@@ -150,7 +150,7 @@ def ros_publish_flight_mode(publisher: Publisher, data: FlightMode) -> None:
     publisher.publish(msg)
 
 # GPSInfo
-def ros_publish_gps_info(publisher: Publisher, data: GpsInfo) -> None:
+def _ros_publish_gps_info(publisher: Publisher, data: GpsInfo) -> None:
     """
     Takes input of Publisher, and GpsInfo, consisting of:
         int32 num_satellites
@@ -169,7 +169,7 @@ def ros_publish_gps_info(publisher: Publisher, data: GpsInfo) -> None:
     publisher.publish(msg)
 
 # GroundTruth
-def ros_publish_ground_truth(publisher: Publisher, data:GroundTruth) -> None:
+def _ros_publish_ground_truth(publisher: Publisher, data:GroundTruth) -> None:
     """
     Takes input of Publisher, and GroundTruth, consisting of:
         double latitude_deg,
@@ -182,7 +182,7 @@ def ros_publish_ground_truth(publisher: Publisher, data:GroundTruth) -> None:
     publisher.publish(msg)
 
 # Heading
-def ros_publish_heading(publisher: Publisher, data: Heading) -> None:
+def _ros_publish_heading(publisher: Publisher, data: Heading) -> None:
     """
     Takes input of Publisher, and AngularVelocityBody, consisting of:
         double heading_deg
@@ -193,7 +193,7 @@ def ros_publish_heading(publisher: Publisher, data: Heading) -> None:
     publisher.publish(msg)
 
 # Health
-def ros_publish_health(publisher: Publisher, data: Health) -> None:
+def _ros_publish_health(publisher: Publisher, data: Health) -> None:
     """
     Takes input of Publisher, and Health, consisting of:
         bool is_armable,
@@ -218,7 +218,7 @@ def ros_publish_health(publisher: Publisher, data: Health) -> None:
     publisher.publish(msg)
 
 # Position
-def ros_publish_position(publisher: Publisher, data: Position) -> None:
+def _ros_publish_position(publisher: Publisher, data: Position) -> None:
     """
     Takes input of Publisher, and Position, consisting of:
         double latitude_deg,
@@ -232,7 +232,7 @@ def ros_publish_position(publisher: Publisher, data: Position) -> None:
     publisher.publish(msg)
 
 # Imu
-def ros_publish_imu(publisher: Publisher, data: Imu) -> None:
+def _ros_publish_imu(publisher: Publisher, data: Imu) -> None:
     """
     Takes input of Publisher, and Imu, consisting of:
         AccelerationFrd: (float forward_m_s2, float right_m_s2, float down_m_s2),
@@ -251,7 +251,7 @@ def ros_publish_imu(publisher: Publisher, data: Imu) -> None:
     publisher.publish(msg)
 
 # LandedState (ENUM)
-def ros_publish_landed_state(publisher: Publisher, data: LandedState) -> None:
+def _ros_publish_landed_state(publisher: Publisher, data: LandedState) -> None:
     """
     Takes input of Publisher, and LandedState, enum:
         UNKNOWN
@@ -268,7 +268,7 @@ def ros_publish_landed_state(publisher: Publisher, data: LandedState) -> None:
 # MavFrame map
 mavframe_map = {'UNDEF': 0.0, 'BODY_NED': 1.0, 'VISION_NED': 2.0, 'ESTIM_NED': 3.0}
 # Odometry
-def ros_publish_odometry(publisher: Publisher, data: Odometry) -> None:
+def _ros_publish_odometry(publisher: Publisher, data: Odometry) -> None:
     """
     Takes input of Publisher, and Odometry, consisting of:
         uint64 time_usec
@@ -303,7 +303,7 @@ def ros_publish_odometry(publisher: Publisher, data: Odometry) -> None:
     publisher.publish(msg)
 
 # PositionVelocityNED
-def ros_publish_position_velocity_ned(publisher: Publisher, data: PositionVelocityNed) -> None:
+def _ros_publish_position_velocity_ned(publisher: Publisher, data: PositionVelocityNed) -> None:
     """
     Takes input of Publisher, and PositionVelocityNed, consisting of:
         PositionNed position: (float north_m, float east_m, float down_m),
@@ -321,7 +321,7 @@ def ros_publish_position_velocity_ned(publisher: Publisher, data: PositionVeloci
     publisher.publish(msg)
 
 # RawGPS
-def ros_publish_raw_gps(publisher: Publisher, data: RawGps) -> None:
+def _ros_publish_raw_gps(publisher: Publisher, data: RawGps) -> None:
     """
     Takes input of Publisher, and Position, consisting of:
         uint64 timestamp_us,
@@ -357,7 +357,7 @@ def ros_publish_raw_gps(publisher: Publisher, data: RawGps) -> None:
     publisher.publish(msg)
 
 # RCStatus
-def ros_publish_rc_status(publisher: Publisher, data: RcStatus) -> None:
+def _ros_publish_rc_status(publisher: Publisher, data: RcStatus) -> None:
     """
     Takes input of Publisher, and RcStatus, consisting of:
         bool was_available_once,
@@ -370,7 +370,7 @@ def ros_publish_rc_status(publisher: Publisher, data: RcStatus) -> None:
     publisher.publish(msg)
 
 # ScaledPressure
-def ros_publish_scaled_pressure(publisher: Publisher, data: ScaledPressure) -> None:
+def _ros_publish_scaled_pressure(publisher: Publisher, data: ScaledPressure) -> None:
     """
     Takes input of Publisher, and ScaledPressure, consisting of:
         uint64 timestamp_us,
@@ -389,7 +389,7 @@ def ros_publish_scaled_pressure(publisher: Publisher, data: ScaledPressure) -> N
     publisher.publish(msg)
 
 # StatusText
-def ros_publish_status_text(publisher: Publisher, data: StatusText) -> None:
+def _ros_publish_status_text(publisher: Publisher, data: StatusText) -> None:
     """
     Takes input of Publisher, and StatusText, consisting of:
         StatusTextType type enum:
@@ -409,14 +409,14 @@ def ros_publish_status_text(publisher: Publisher, data: StatusText) -> None:
     publisher.publish(msg)
 
 # UnixEpochTime
-def ros_publish_unix_epoch_time(publisher: Publisher, data: int) -> None:
+def _ros_publish_unix_epoch_time(publisher: Publisher, data: int) -> None:
     """Takes input of Publisher, and int, publishes UInt64 to ros topic"""
     msg = UInt64()
     msg.data = data
     publisher.publish(msg)
 
 # VelocityNed
-def ros_publish_velocity_ned(publisher: Publisher, data: VelocityNed) -> None:
+def _ros_publish_velocity_ned(publisher: Publisher, data: VelocityNed) -> None:
     """
     Takes input of Publisher, and VelocityNed, consisting of:
         float north_m_s,
@@ -429,7 +429,7 @@ def ros_publish_velocity_ned(publisher: Publisher, data: VelocityNed) -> None:
     publisher.publish(msg)
 
 # VtolState (ENUM) <-- also probably not necessary for our drone
-def ros_publish_vtol_state(publisher: Publisher, data: VtolState) -> None:
+def _ros_publish_vtol_state(publisher: Publisher, data: VtolState) -> None:
     """
     Takes input of Publisher, and VtolState, enum:
         UNDEFINED
@@ -444,7 +444,7 @@ def ros_publish_vtol_state(publisher: Publisher, data: VtolState) -> None:
     publisher.publish(msg)
 
 
-def handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
+def _handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
     """Create a publisher and pair it with a method to publish different mavsdk data types"""
     publisher = node.create_publisher(data_type, name, 10)
     return partial(method, publisher)
@@ -452,98 +452,98 @@ def handle_publisher(node: Node, name: str, data_type, method: Callable) -> part
 
 def register_telemetry_publishers(node: Node, telemetry: Telemetry) -> None:
     telemetry.register_armed_handler(
-        handle_publisher(node, PREFIX + 'armed', Bool, ros_publish_bool)
+        _handle_publisher(node, PREFIX + 'armed', Bool, _ros_publish_bool)
     )
     telemetry.register_actuator_control_target_handler(
-        handle_publisher(node, PREFIX + 'actuator_control_target', String, ros_publish_actuator_control_target)
+        _handle_publisher(node, PREFIX + 'actuator_control_target', String, _ros_publish_actuator_control_target)
     )
     telemetry.register_attitude_angular_velocity_body_handler(
-        handle_publisher(node, PREFIX + 'attitude_angular_velocity_body', Float32MultiArray, ros_publish_velocity_body)
+        _handle_publisher(node, PREFIX + 'attitude_angular_velocity_body', Float32MultiArray, _ros_publish_velocity_body)
     )
     telemetry.register_attitude_euler_handler(
-        handle_publisher(node, PREFIX + 'attitude_euler', Float32MultiArray, ros_publish_euler)
+        _handle_publisher(node, PREFIX + 'attitude_euler', Float32MultiArray, _ros_publish_euler)
     )
     telemetry.register_attitude_quaternion_handler(
-        handle_publisher(node, PREFIX + 'attitude_quaternion', Float32MultiArray, ros_publish_quaternion)
+        _handle_publisher(node, PREFIX + 'attitude_quaternion', Float32MultiArray, _ros_publish_quaternion)
     )
     telemetry.register_battery_handler(
-        handle_publisher(node, PREFIX + 'battery', Float32MultiArray, ros_publish_battery)
+        _handle_publisher(node, PREFIX + 'battery', Float32MultiArray, _ros_publish_battery)
     )
     telemetry.register_camera_attitude_euler_handler(
-        handle_publisher(node, PREFIX + 'camera_attitude_euler', Float32MultiArray, ros_publish_euler)
+        _handle_publisher(node, PREFIX + 'camera_attitude_euler', Float32MultiArray, _ros_publish_euler)
     )
     telemetry.register_camera_attitude_quaternion_handler(
-        handle_publisher(node, PREFIX + 'camera_attitude_quaternion', Float32MultiArray, ros_publish_quaternion)
+        _handle_publisher(node, PREFIX + 'camera_attitude_quaternion', Float32MultiArray, _ros_publish_quaternion)
     )
     telemetry.register_distance_sensor_handler(
-        handle_publisher(node, PREFIX + 'distance_sensor', Float32MultiArray, ros_publish_distance)
+        _handle_publisher(node, PREFIX + 'distance_sensor', Float32MultiArray, _ros_publish_distance)
     )
     telemetry.register_fixedwing_metrics_handler(
-        handle_publisher(node, PREFIX + 'fixedwing_metrics', Float32MultiArray, ros_publish_fixedwing)
+        _handle_publisher(node, PREFIX + 'fixedwing_metrics', Float32MultiArray, _ros_publish_fixedwing)
     )
     telemetry.register_flight_mode_handler(
-        handle_publisher(node, PREFIX + 'flight_mode', String, ros_publish_flight_mode)
+        _handle_publisher(node, PREFIX + 'flight_mode', String, _ros_publish_flight_mode)
     )
     telemetry.register_gps_info_handler(
-        handle_publisher(node, PREFIX + 'gps_info', Float32MultiArray, ros_publish_gps_info)
+        _handle_publisher(node, PREFIX + 'gps_info', Float32MultiArray, _ros_publish_gps_info)
     )
     telemetry.register_ground_truth_handler(
-        handle_publisher(node, PREFIX + 'ground_truth', Float64MultiArray, ros_publish_ground_truth)
+        _handle_publisher(node, PREFIX + 'ground_truth', Float64MultiArray, _ros_publish_ground_truth)
     )
     telemetry.register_heading_handler(
-        handle_publisher(node, PREFIX + 'heading', Float64, ros_publish_heading)
+        _handle_publisher(node, PREFIX + 'heading', Float64, _ros_publish_heading)
     )
     telemetry.register_health_all_ok_handler(
-        handle_publisher(node, PREFIX + 'health_all_ok', Bool, ros_publish_bool)
+        _handle_publisher(node, PREFIX + 'health_all_ok', Bool, _ros_publish_bool)
     )
     telemetry.register_health_handler(
-        handle_publisher(node, PREFIX + 'health', UInt8MultiArray, ros_publish_health)
+        _handle_publisher(node, PREFIX + 'health', UInt8MultiArray, _ros_publish_health)
     )
     telemetry.register_home_handler(
-        handle_publisher(node, PREFIX + 'home', Float64MultiArray, ros_publish_position)
+        _handle_publisher(node, PREFIX + 'home', Float64MultiArray, _ros_publish_position)
     )
     telemetry.register_imu_handler(
-        handle_publisher(node, PREFIX + 'imu', Float32MultiArray, ros_publish_imu)
+        _handle_publisher(node, PREFIX + 'imu', Float32MultiArray, _ros_publish_imu)
     )
     telemetry.register_in_air_handler(
-        handle_publisher(node, PREFIX + 'in_air', Bool, ros_publish_bool)
+        _handle_publisher(node, PREFIX + 'in_air', Bool, _ros_publish_bool)
     )
     telemetry.register_landed_state_handler(
-        handle_publisher(node, PREFIX + 'landed_state', String, ros_publish_landed_state)
+        _handle_publisher(node, PREFIX + 'landed_state', String, _ros_publish_landed_state)
     )
     telemetry.register_odometry_handler(
-        handle_publisher(node, PREFIX + 'odometry', Float32MultiArray, ros_publish_odometry)
+        _handle_publisher(node, PREFIX + 'odometry', Float32MultiArray, _ros_publish_odometry)
     )
     telemetry.register_position_handler(
-        handle_publisher(node, PREFIX + 'position', Float64MultiArray, ros_publish_position)
+        _handle_publisher(node, PREFIX + 'position', Float64MultiArray, _ros_publish_position)
     )
     telemetry.register_position_velocity_ned_handler(
-        handle_publisher(node, PREFIX + 'position_velocity_ned', Float32MultiArray, ros_publish_position_velocity_ned)
+        _handle_publisher(node, PREFIX + 'position_velocity_ned', Float32MultiArray, _ros_publish_position_velocity_ned)
     )
     telemetry.register_raw_gps_handler(
-        handle_publisher(node, PREFIX + 'raw_gps', Float64MultiArray, ros_publish_raw_gps)
+        _handle_publisher(node, PREFIX + 'raw_gps', Float64MultiArray, _ros_publish_raw_gps)
     )
     telemetry.register_raw_imu_handler(
-        handle_publisher(node, PREFIX + 'raw_imu', Float32MultiArray, ros_publish_imu)
+        _handle_publisher(node, PREFIX + 'raw_imu', Float32MultiArray, _ros_publish_imu)
     )
     telemetry.register_rc_status_handler(
-        handle_publisher(node, PREFIX + 'rc_status', Float32MultiArray, ros_publish_rc_status)
+        _handle_publisher(node, PREFIX + 'rc_status', Float32MultiArray, _ros_publish_rc_status)
     )
     telemetry.register_scaled_imu_handler(
-        handle_publisher(node, PREFIX + 'scaled_imu', Float32MultiArray, ros_publish_imu)
+        _handle_publisher(node, PREFIX + 'scaled_imu', Float32MultiArray, _ros_publish_imu)
     )
     telemetry.register_scaled_pressure_handler(
-        handle_publisher(node, PREFIX + 'scaled_pressure', Float32MultiArray, ros_publish_scaled_pressure)
+        _handle_publisher(node, PREFIX + 'scaled_pressure', Float32MultiArray, _ros_publish_scaled_pressure)
     )
     telemetry.register_status_text_handler(
-        handle_publisher(node, PREFIX + 'status_text', String, ros_publish_status_text)
+        _handle_publisher(node, PREFIX + 'status_text', String, _ros_publish_status_text)
     )
     telemetry.register_unix_epoch_time_handler(
-        handle_publisher(node, PREFIX + 'unix_epoch_time', UInt64, ros_publish_unix_epoch_time)
+        _handle_publisher(node, PREFIX + 'unix_epoch_time', UInt64, _ros_publish_unix_epoch_time)
     )
     telemetry.register_velocity_ned_handler(
-        handle_publisher(node, PREFIX + 'velocity_ned', Float32MultiArray, ros_publish_velocity_ned)
+        _handle_publisher(node, PREFIX + 'velocity_ned', Float32MultiArray, _ros_publish_velocity_ned)
     )
     telemetry.register_vtol_state_handler(
-        handle_publisher(node, PREFIX + 'vtol_state', String, ros_publish_vtol_state)
+        _handle_publisher(node, PREFIX + 'vtol_state', String, _ros_publish_vtol_state)
     )
