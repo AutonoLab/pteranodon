@@ -1,19 +1,45 @@
 from rclpy.node import Node
 from rclpy.publisher import Publisher
-from functools import partial
-from typing import Callable
-from std_msgs.msg import String, Bool, Float32MultiArray, Float64MultiArray, Float64, UInt8MultiArray, MultiArrayDimension, UInt64
+from std_msgs.msg import (
+    String,
+    Bool,
+    Float32MultiArray,
+    Float64MultiArray,
+    Float64,
+    UInt8MultiArray,
+    MultiArrayDimension,
+    UInt64,
+)
 from mavsdk.telemetry import (
-    AngularVelocityBody, EulerAngle, Quaternion, 
-    Battery, DistanceSensor, FixedwingMetrics, 
-    FlightMode, GpsInfo, GroundTruth, Heading, 
-    Health, Position, Imu, Odometry, LandedState, 
-    PositionVelocityNed, RawGps, RcStatus, 
-    ScaledPressure, StatusText, VelocityNed, VtolState,
-    ActuatorControlTarget
+    AngularVelocityBody,
+    EulerAngle,
+    Quaternion,
+    Battery,
+    DistanceSensor,
+    FixedwingMetrics,
+    FlightMode,
+    GpsInfo,
+    GroundTruth,
+    Heading,
+    Health,
+    Position,
+    Imu,
+    Odometry,
+    LandedState,
+    PositionVelocityNed,
+    RawGps,
+    RcStatus,
+    ScaledPressure,
+    StatusText,
+    VelocityNed,
+    VtolState,
+    ActuatorControlTarget,
 )
 from pteranodon.plugins.base_plugins.telemetry import Telemetry
+from .handle_publisher import handle_publisher
+
 PREFIX = "drone/mavsdk/pteranodon/"
+
 
 # bool
 def _ros_publish_bool(publisher: Publisher, data: bool):
@@ -22,17 +48,12 @@ def _ros_publish_bool(publisher: Publisher, data: bool):
     msg.data = data
     publisher.publish(msg)
 
-# str or unhandled type conversion
-def _ros_publish_string(publisher: Publisher, data) -> None:
-    """Takes input of Publisher, and str, publishes String to ros topic"""
-    msg = String()
-    msg.data = str(data)
-    publisher.publish(msg)
-    # ros_node.get_logger().info(f"{msg.data}")
 
 # ActuatorControlTarget
-def _ros_publish_actuator_control_target(publisher: Publisher, data: ActuatorControlTarget) -> None:
-    """ No test data
+def _ros_publish_actuator_control_target(
+    publisher: Publisher, data: ActuatorControlTarget
+) -> None:
+    """No test data
     Takes input of Publisher, and ActuatorControlTarget, consisting of:
         int32 group,
         list[float] controls
@@ -40,7 +61,7 @@ def _ros_publish_actuator_control_target(publisher: Publisher, data: ActuatorCon
     """
     print(data)
     msg = Float32MultiArray()
-    msg.data = [data.group] + [x for x in data.controls]
+    msg.data = [data.group] + list(data.controls)
     publisher.publish(msg)
 
 
@@ -57,6 +78,7 @@ def _ros_publish_velocity_body(publisher: Publisher, data: AngularVelocityBody) 
     msg.data = [data.roll_rad_s, data.pitch_rad_s, data.yaw_rad_s]
     publisher.publish(msg)
 
+
 # EulerAngle
 def _ros_publish_euler(publisher: Publisher, data: EulerAngle) -> None:
     """
@@ -69,6 +91,7 @@ def _ros_publish_euler(publisher: Publisher, data: EulerAngle) -> None:
     msg = Float32MultiArray()
     msg.data = [data.roll_deg, data.pitch_deg, data.yaw_deg]
     publisher.publish(msg)
+
 
 # Quaternion
 def _ros_publish_quaternion(publisher: Publisher, data: Quaternion) -> None:
@@ -85,6 +108,7 @@ def _ros_publish_quaternion(publisher: Publisher, data: Quaternion) -> None:
     msg.data = [data.w, data.x, data.y, data.z, float(data.timestamp_us)]
     publisher.publish(msg)
 
+
 # Battery
 def _ros_publish_battery(publisher: Publisher, data: Battery) -> None:
     """
@@ -98,6 +122,7 @@ def _ros_publish_battery(publisher: Publisher, data: Battery) -> None:
     msg.data = [data.voltage_v, data.remaining_percent]
     publisher.publish(msg)
 
+
 # DistanceSensor
 def _ros_publish_distance(publisher: Publisher, data: DistanceSensor) -> None:
     """
@@ -108,8 +133,13 @@ def _ros_publish_distance(publisher: Publisher, data: DistanceSensor) -> None:
     publishes Float32MultiArray[minimum, maximum, current] to ros topic
     """
     msg = Float32MultiArray()
-    msg.data = [data.minimum_distance_m, data.maximum_distance_m, data.current_distance_m]
+    msg.data = [
+        data.minimum_distance_m,
+        data.maximum_distance_m,
+        data.current_distance_m,
+    ]
     publisher.publish(msg)
+
 
 # FixedwingMetrics <-- probably not necessary for drone use
 def _ros_publish_fixedwing(publisher: Publisher, data: FixedwingMetrics) -> None:
@@ -123,6 +153,7 @@ def _ros_publish_fixedwing(publisher: Publisher, data: FixedwingMetrics) -> None
     msg = Float32MultiArray()
     msg.data = [data.airspeed_m_s, data.throttle_percentage, data.climb_rate_m_s]
     publisher.publish(msg)
+
 
 # FlightMode (ENUM)
 def _ros_publish_flight_mode(publisher: Publisher, data: FlightMode) -> None:
@@ -149,6 +180,7 @@ def _ros_publish_flight_mode(publisher: Publisher, data: FlightMode) -> None:
     msg.data = data
     publisher.publish(msg)
 
+
 # GPSInfo
 def _ros_publish_gps_info(publisher: Publisher, data: GpsInfo) -> None:
     """
@@ -168,8 +200,9 @@ def _ros_publish_gps_info(publisher: Publisher, data: GpsInfo) -> None:
     msg.data = [data.num_satellites, data.fix_type]
     publisher.publish(msg)
 
+
 # GroundTruth
-def _ros_publish_ground_truth(publisher: Publisher, data:GroundTruth) -> None:
+def _ros_publish_ground_truth(publisher: Publisher, data: GroundTruth) -> None:
     """
     Takes input of Publisher, and GroundTruth, consisting of:
         double latitude_deg,
@@ -180,6 +213,7 @@ def _ros_publish_ground_truth(publisher: Publisher, data:GroundTruth) -> None:
     msg = Float64MultiArray()
     msg.data = [data.latitude_deg, data.longitude_deg, data.absolute_altitude_m]
     publisher.publish(msg)
+
 
 # Heading
 def _ros_publish_heading(publisher: Publisher, data: Heading) -> None:
@@ -192,15 +226,16 @@ def _ros_publish_heading(publisher: Publisher, data: Heading) -> None:
     msg.data = data.heading_deg
     publisher.publish(msg)
 
+
 # Health
 def _ros_publish_health(publisher: Publisher, data: Health) -> None:
     """
     Takes input of Publisher, and Health, consisting of:
         bool is_armable,
         bool is_gyrometer_calibration_ok,
-        bool is_accelerometer_calibration_ok, 
-        bool is_magnetometer_calibration_ok, 
-        bool is_local_position_ok, 
+        bool is_accelerometer_calibration_ok,
+        bool is_magnetometer_calibration_ok,
+        bool is_local_position_ok,
         bool is_global_position_ok,
         bool is_home_position_ok
     publishes UInt8MultiArray[armable, gyrometer, accelerometer, magnetometer, local_position, global_position, home_position] to ros topic
@@ -208,14 +243,15 @@ def _ros_publish_health(publisher: Publisher, data: Health) -> None:
     msg = UInt8MultiArray()
     msg.data = [
         data.is_armable,
-        data.is_gyrometer_calibration_ok, 
-        data.is_accelerometer_calibration_ok, 
-        data.is_magnetometer_calibration_ok, 
-        data.is_local_position_ok, 
+        data.is_gyrometer_calibration_ok,
+        data.is_accelerometer_calibration_ok,
+        data.is_magnetometer_calibration_ok,
+        data.is_local_position_ok,
         data.is_global_position_ok,
-        data.is_home_position_ok
-        ]
+        data.is_home_position_ok,
+    ]
     publisher.publish(msg)
+
 
 # Position
 def _ros_publish_position(publisher: Publisher, data: Position) -> None:
@@ -228,8 +264,14 @@ def _ros_publish_position(publisher: Publisher, data: Position) -> None:
     publishes Float64MultiArray[latitude, longitude, absolute_altitude, relative_altitude] to ros topic
     """
     msg = Float64MultiArray()
-    msg.data = [data.latitude_deg, data.longitude_deg, data.absolute_altitude_m, data.relative_altitude_m]
+    msg.data = [
+        data.latitude_deg,
+        data.longitude_deg,
+        data.absolute_altitude_m,
+        data.relative_altitude_m,
+    ]
     publisher.publish(msg)
+
 
 # Imu
 def _ros_publish_imu(publisher: Publisher, data: Imu) -> None:
@@ -240,15 +282,32 @@ def _ros_publish_imu(publisher: Publisher, data: Imu) -> None:
         MagneticFieldFrd: (float forward_gauss, float right_gauss, float down_gauss),
         float temperature_degc,
         uint64 timestamp_us
-    publishes Float32MultiArray[forward_m_s2, right_m_s2, down_m_s2, forward_rad_s, right_rad_s, down_rad_s, forward_gauss, right_gauss, down_gauss, temperature_degc, float(timestamp_us)] to ros topic
+    publishes Float32MultiArray[forward_m_s2, right_m_s2, down_m_s2,
+                                forward_rad_s, right_rad_s, down_rad_s,
+                                forward_gauss, right_gauss, down_gauss,
+                                temperature_degc, float(timestamp_us)]
+                                to ros topic
     """
     msg = Float32MultiArray()
-    msg.layout.dim = [MultiArrayDimension(label="rows", size=4), MultiArrayDimension(label="cols", size=3)]
-    msg.data = [data.acceleration_frd.forward_m_s2, data.acceleration_frd.right_m_s2, data.acceleration_frd.down_m_s2, 
-                data.angular_velocity_frd.forward_rad_s, data.angular_velocity_frd.right_rad_s, data.angular_velocity_frd.down_rad_s, 
-                data.magnetic_field_frd.forward_gauss, data.magnetic_field_frd.right_gauss, data.magnetic_field_frd.down_gauss, 
-                data.temperature_degc, float(data.timestamp_us)]
+    msg.layout.dim = [
+        MultiArrayDimension(label="rows", size=4),
+        MultiArrayDimension(label="cols", size=3),
+    ]
+    msg.data = [
+        data.acceleration_frd.forward_m_s2,
+        data.acceleration_frd.right_m_s2,
+        data.acceleration_frd.down_m_s2,
+        data.angular_velocity_frd.forward_rad_s,
+        data.angular_velocity_frd.right_rad_s,
+        data.angular_velocity_frd.down_rad_s,
+        data.magnetic_field_frd.forward_gauss,
+        data.magnetic_field_frd.right_gauss,
+        data.magnetic_field_frd.down_gauss,
+        data.temperature_degc,
+        float(data.timestamp_us),
+    ]
     publisher.publish(msg)
+
 
 # LandedState (ENUM)
 def _ros_publish_landed_state(publisher: Publisher, data: LandedState) -> None:
@@ -265,8 +324,11 @@ def _ros_publish_landed_state(publisher: Publisher, data: LandedState) -> None:
     msg.data = str(data)
     publisher.publish(msg)
 
+
 # MavFrame map
-mavframe_map = {'UNDEF': 0.0, 'BODY_NED': 1.0, 'VISION_NED': 2.0, 'ESTIM_NED': 3.0}
+mavframe_map = {"UNDEF": 0.0, "BODY_NED": 1.0, "VISION_NED": 2.0, "ESTIM_NED": 3.0}
+
+
 # Odometry
 def _ros_publish_odometry(publisher: Publisher, data: Odometry) -> None:
     """
@@ -277,33 +339,52 @@ def _ros_publish_odometry(publisher: Publisher, data: Odometry) -> None:
             BODY_NED = 1
             VISION_NED = 2
             ESTIM_NED = 3
-        MavFrame child_frame_id, 
-        PositionBody position_body: float x_m, float y_m, float z_m, 
-        Quaternion q: float w, float x, float y, float z, uint64 timestamp_us, 
-        VelocityBody velocity_body: float x_m_s, float y_m_s, float z_m_s, 
-        AngularVelocityBody angular_velocity_body: float roll_rad_s, float pitch_rad_s, yaw_rad_s, 
-        Covariance pose_covariance: list[float] covariance_matrix, 
+        MavFrame child_frame_id,
+        PositionBody position_body: float x_m, float y_m, float z_m,
+        Quaternion q: float w, float x, float y, float z, uint64 timestamp_us,
+        VelocityBody velocity_body: float x_m_s, float y_m_s, float z_m_s,
+        AngularVelocityBody angular_velocity_body: float roll_rad_s, float pitch_rad_s, yaw_rad_s,
+        Covariance pose_covariance: list[float] covariance_matrix,
         Covariance velocity_covariance
-    publishes Float32MultiArray[time_usec, 
-                frame_id, 
-                child_frame_id, 
-                position_body.x, position_body.y, position_body.z, 
-                q.w, q.x, q.y, q.z, float(q.uint64), 
-                velocity_body.x, velocity_body.y, velocity.z, 
+    publishes Float32MultiArray[time_usec,
+                frame_id,
+                child_frame_id,
+                position_body.x, position_body.y, position_body.z,
+                q.w, q.x, q.y, q.z, float(q.uint64),
+                velocity_body.x, velocity_body.y, velocity.z,
                 angular_velocity_body.roll, angular_velocity_body.pitch, angular_velocity_body.yaw] to ros topic
     """
     msg = Float32MultiArray()
-    msg.data = [float(data.time_usec), 
-                mavframe_map[str(data.frame_id)],  
-                mavframe_map[str(data.child_frame_id)], 
-                data.position_body.x_m, data.position_body.y_m, data.position_body.z_m, 
-                data.q.w, data.q.x, data.q.y, data.q.z, float(data.q.timestamp_us), 
-                data.velocity_body.x_m_s, data.velocity_body.y_m_s, data.velocity_body.z_m_s, 
-                data.angular_velocity_body.roll_rad_s, data.angular_velocity_body.pitch_rad_s, data.angular_velocity_body.yaw_rad_s]  + [x for x in data.pose_covariance.covariance_matrix] + [x for x in data.velocity_covariance.covariance_matrix]
+    msg.data = (
+        [
+            float(data.time_usec),
+            mavframe_map[str(data.frame_id)],
+            mavframe_map[str(data.child_frame_id)],
+            data.position_body.x_m,
+            data.position_body.y_m,
+            data.position_body.z_m,
+            data.q.w,
+            data.q.x,
+            data.q.y,
+            data.q.z,
+            float(data.q.timestamp_us),
+            data.velocity_body.x_m_s,
+            data.velocity_body.y_m_s,
+            data.velocity_body.z_m_s,
+            data.angular_velocity_body.roll_rad_s,
+            data.angular_velocity_body.pitch_rad_s,
+            data.angular_velocity_body.yaw_rad_s,
+        ]
+        + list(data.pose_covariance.covariance_matrix)
+        + list(data.velocity_covariance.covariance_matrix)
+    )
     publisher.publish(msg)
 
+
 # PositionVelocityNED
-def _ros_publish_position_velocity_ned(publisher: Publisher, data: PositionVelocityNed) -> None:
+def _ros_publish_position_velocity_ned(
+    publisher: Publisher, data: PositionVelocityNed
+) -> None:
     """
     Takes input of Publisher, and PositionVelocityNed, consisting of:
         PositionNed position: (float north_m, float east_m, float down_m),
@@ -311,14 +392,20 @@ def _ros_publish_position_velocity_ned(publisher: Publisher, data: PositionVeloc
     publishes Float32MultiArray[north_m, east_m, down_m, north_m_s, east_m_s, down_m_s] to ros topic
     """
     msg = Float32MultiArray()
-    msg.layout.dim = [MultiArrayDimension(label="rows", size=2), MultiArrayDimension(label="cols", size=3)]
-    msg.data = [data.position.north_m, 
-                data.position.east_m, 
-                data.position.down_m, 
-                data.velocity.north_m_s, 
-                data.velocity.east_m_s, 
-                data.velocity.down_m_s]
+    msg.layout.dim = [
+        MultiArrayDimension(label="rows", size=2),
+        MultiArrayDimension(label="cols", size=3),
+    ]
+    msg.data = [
+        data.position.north_m,
+        data.position.east_m,
+        data.position.down_m,
+        data.velocity.north_m_s,
+        data.velocity.east_m_s,
+        data.velocity.down_m_s,
+    ]
     publisher.publish(msg)
+
 
 # RawGPS
 def _ros_publish_raw_gps(publisher: Publisher, data: RawGps) -> None:
@@ -332,29 +419,36 @@ def _ros_publish_raw_gps(publisher: Publisher, data: RawGps) -> None:
         float vdop,
         float velocity_m_s,
         float cog_deg,
-        float altitude_ellipsoid_m, 
-        float horizontal_uncertainty_m, 
+        float altitude_ellipsoid_m,
+        float horizontal_uncertainty_m,
         float vertical_uncertainty_m,
-        float velocity_uncertainty_m_s, 
+        float velocity_uncertainty_m_s,
         float heading_uncertainty_deg
-    publishes Float64MultiArray[float(timestamp_us), latitude, longitude, absolute_altitude, hdop, vdop, velocity, cog, altitude_ellipsoid, horizontal_uncert, vertical_uncert, velocity_uncert, heading_uncert] to ros topic
+    publishes Float64MultiArray[
+        float(timestamp_us), latitude, longitude, absolute_altitude,
+        hdop, vdop, velocity, cog, altitude_ellipsoid,
+        horizontal_uncert, vertical_uncert, velocity_uncert, heading_uncert]
+    to ros topic
     """
     msg = Float64MultiArray()
-    msg.data = [float(data.timestamp_us), 
-                data.latitude_deg, 
-                data.longitude_deg, 
-                data.absolute_altitude_m, 
-                data.hdop, 
-                data.vdop, 
-                data.velocity_m_s, 
-                data.cog_deg, 
-                data.altitude_ellipsoid_m, 
-                data.horizontal_uncertainty_m, 
-                data.vertical_uncertainty_m,
-                data.velocity_uncertainty_m_s, 
-                data.heading_uncertainty_deg, 
-                data.yaw_deg]
+    msg.data = [
+        float(data.timestamp_us),
+        data.latitude_deg,
+        data.longitude_deg,
+        data.absolute_altitude_m,
+        data.hdop,
+        data.vdop,
+        data.velocity_m_s,
+        data.cog_deg,
+        data.altitude_ellipsoid_m,
+        data.horizontal_uncertainty_m,
+        data.vertical_uncertainty_m,
+        data.velocity_uncertainty_m_s,
+        data.heading_uncertainty_deg,
+        data.yaw_deg,
+    ]
     publisher.publish(msg)
+
 
 # RCStatus
 def _ros_publish_rc_status(publisher: Publisher, data: RcStatus) -> None:
@@ -366,8 +460,13 @@ def _ros_publish_rc_status(publisher: Publisher, data: RcStatus) -> None:
     publishes Float32MultiArray[float(was_available), float(is_available), signal_strength_percent] to ros topic
     """
     msg = Float32MultiArray()
-    msg.data = [float(data.was_available_once), float(data.is_available), data.signal_strength_percent]
+    msg.data = [
+        float(data.was_available_once),
+        float(data.is_available),
+        data.signal_strength_percent,
+    ]
     publisher.publish(msg)
+
 
 # ScaledPressure
 def _ros_publish_scaled_pressure(publisher: Publisher, data: ScaledPressure) -> None:
@@ -378,15 +477,21 @@ def _ros_publish_scaled_pressure(publisher: Publisher, data: ScaledPressure) -> 
         float differential_pressure_hpa,
         float temperature_deg,
         float differential_pressure_temperature_deg
-    publishes Float32MultiArray[float(timestamp_us), absolute_pressure, differential_pressure, temperature, differential_pressure_temperature] to ros topic
+    publishes Float32MultiArray[
+        float(timestamp_us), absolute_pressure, differential_pressure,
+        temperature, differential_pressure_temperature]
+    to ros topic
     """
     msg = Float32MultiArray()
-    msg.data = [float(data.timestamp_us), 
-                data.absolute_pressure_hpa, 
-                data.differential_pressure_hpa, 
-                data.temperature_deg, 
-                data.differential_pressure_temperature_deg]
+    msg.data = [
+        float(data.timestamp_us),
+        data.absolute_pressure_hpa,
+        data.differential_pressure_hpa,
+        data.temperature_deg,
+        data.differential_pressure_temperature_deg,
+    ]
     publisher.publish(msg)
+
 
 # StatusText
 def _ros_publish_status_text(publisher: Publisher, data: StatusText) -> None:
@@ -408,12 +513,14 @@ def _ros_publish_status_text(publisher: Publisher, data: StatusText) -> None:
     msg.data = str(str(data.type) + ": " + str(data.text))
     publisher.publish(msg)
 
+
 # UnixEpochTime
 def _ros_publish_unix_epoch_time(publisher: Publisher, data: int) -> None:
     """Takes input of Publisher, and int, publishes UInt64 to ros topic"""
     msg = UInt64()
     msg.data = data
     publisher.publish(msg)
+
 
 # VelocityNed
 def _ros_publish_velocity_ned(publisher: Publisher, data: VelocityNed) -> None:
@@ -427,6 +534,7 @@ def _ros_publish_velocity_ned(publisher: Publisher, data: VelocityNed) -> None:
     msg = Float32MultiArray()
     msg.data = [data.north_m_s, data.east_m_s, data.down_m_s]
     publisher.publish(msg)
+
 
 # VtolState (ENUM) <-- also probably not necessary for our drone
 def _ros_publish_vtol_state(publisher: Publisher, data: VtolState) -> None:
@@ -444,106 +552,169 @@ def _ros_publish_vtol_state(publisher: Publisher, data: VtolState) -> None:
     publisher.publish(msg)
 
 
-def _handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
-    """Create a publisher and pair it with a method to publish different mavsdk data types"""
-    publisher = node.create_publisher(data_type, name, 10)
-    return partial(method, publisher)
-
-
 def register_telemetry_publishers(node: Node, telemetry: Telemetry) -> None:
+    """Register handlers for telemetry metrics"""
     telemetry.register_armed_handler(
-        _handle_publisher(node, PREFIX + 'armed', Bool, _ros_publish_bool)
+        handle_publisher(node, PREFIX + "armed", Bool, _ros_publish_bool)
     )
     telemetry.register_actuator_control_target_handler(
-        _handle_publisher(node, PREFIX + 'actuator_control_target', String, _ros_publish_actuator_control_target)
+        handle_publisher(
+            node,
+            PREFIX + "actuator_control_target",
+            String,
+            _ros_publish_actuator_control_target,
+        )
     )
     telemetry.register_attitude_angular_velocity_body_handler(
-        _handle_publisher(node, PREFIX + 'attitude_angular_velocity_body', Float32MultiArray, _ros_publish_velocity_body)
+        handle_publisher(
+            node,
+            PREFIX + "attitude_angular_velocity_body",
+            Float32MultiArray,
+            _ros_publish_velocity_body,
+        )
     )
     telemetry.register_attitude_euler_handler(
-        _handle_publisher(node, PREFIX + 'attitude_euler', Float32MultiArray, _ros_publish_euler)
+        handle_publisher(
+            node, PREFIX + "attitude_euler", Float32MultiArray, _ros_publish_euler
+        )
     )
     telemetry.register_attitude_quaternion_handler(
-        _handle_publisher(node, PREFIX + 'attitude_quaternion', Float32MultiArray, _ros_publish_quaternion)
+        handle_publisher(
+            node,
+            PREFIX + "attitude_quaternion",
+            Float32MultiArray,
+            _ros_publish_quaternion,
+        )
     )
     telemetry.register_battery_handler(
-        _handle_publisher(node, PREFIX + 'battery', Float32MultiArray, _ros_publish_battery)
+        handle_publisher(
+            node, PREFIX + "battery", Float32MultiArray, _ros_publish_battery
+        )
     )
     telemetry.register_camera_attitude_euler_handler(
-        _handle_publisher(node, PREFIX + 'camera_attitude_euler', Float32MultiArray, _ros_publish_euler)
+        handle_publisher(
+            node,
+            PREFIX + "camera_attitude_euler",
+            Float32MultiArray,
+            _ros_publish_euler,
+        )
     )
     telemetry.register_camera_attitude_quaternion_handler(
-        _handle_publisher(node, PREFIX + 'camera_attitude_quaternion', Float32MultiArray, _ros_publish_quaternion)
+        handle_publisher(
+            node,
+            PREFIX + "camera_attitude_quaternion",
+            Float32MultiArray,
+            _ros_publish_quaternion,
+        )
     )
     telemetry.register_distance_sensor_handler(
-        _handle_publisher(node, PREFIX + 'distance_sensor', Float32MultiArray, _ros_publish_distance)
+        handle_publisher(
+            node, PREFIX + "distance_sensor", Float32MultiArray, _ros_publish_distance
+        )
     )
     telemetry.register_fixedwing_metrics_handler(
-        _handle_publisher(node, PREFIX + 'fixedwing_metrics', Float32MultiArray, _ros_publish_fixedwing)
+        handle_publisher(
+            node,
+            PREFIX + "fixedwing_metrics",
+            Float32MultiArray,
+            _ros_publish_fixedwing,
+        )
     )
     telemetry.register_flight_mode_handler(
-        _handle_publisher(node, PREFIX + 'flight_mode', String, _ros_publish_flight_mode)
+        handle_publisher(node, PREFIX + "flight_mode", String, _ros_publish_flight_mode)
     )
     telemetry.register_gps_info_handler(
-        _handle_publisher(node, PREFIX + 'gps_info', Float32MultiArray, _ros_publish_gps_info)
+        handle_publisher(
+            node, PREFIX + "gps_info", Float32MultiArray, _ros_publish_gps_info
+        )
     )
     telemetry.register_ground_truth_handler(
-        _handle_publisher(node, PREFIX + 'ground_truth', Float64MultiArray, _ros_publish_ground_truth)
+        handle_publisher(
+            node, PREFIX + "ground_truth", Float64MultiArray, _ros_publish_ground_truth
+        )
     )
     telemetry.register_heading_handler(
-        _handle_publisher(node, PREFIX + 'heading', Float64, _ros_publish_heading)
+        handle_publisher(node, PREFIX + "heading", Float64, _ros_publish_heading)
     )
     telemetry.register_health_all_ok_handler(
-        _handle_publisher(node, PREFIX + 'health_all_ok', Bool, _ros_publish_bool)
+        handle_publisher(node, PREFIX + "health_all_ok", Bool, _ros_publish_bool)
     )
     telemetry.register_health_handler(
-        _handle_publisher(node, PREFIX + 'health', UInt8MultiArray, _ros_publish_health)
+        handle_publisher(node, PREFIX + "health", UInt8MultiArray, _ros_publish_health)
     )
     telemetry.register_home_handler(
-        _handle_publisher(node, PREFIX + 'home', Float64MultiArray, _ros_publish_position)
+        handle_publisher(
+            node, PREFIX + "home", Float64MultiArray, _ros_publish_position
+        )
     )
     telemetry.register_imu_handler(
-        _handle_publisher(node, PREFIX + 'imu', Float32MultiArray, _ros_publish_imu)
+        handle_publisher(node, PREFIX + "imu", Float32MultiArray, _ros_publish_imu)
     )
     telemetry.register_in_air_handler(
-        _handle_publisher(node, PREFIX + 'in_air', Bool, _ros_publish_bool)
+        handle_publisher(node, PREFIX + "in_air", Bool, _ros_publish_bool)
     )
     telemetry.register_landed_state_handler(
-        _handle_publisher(node, PREFIX + 'landed_state', String, _ros_publish_landed_state)
+        handle_publisher(
+            node, PREFIX + "landed_state", String, _ros_publish_landed_state
+        )
     )
     telemetry.register_odometry_handler(
-        _handle_publisher(node, PREFIX + 'odometry', Float32MultiArray, _ros_publish_odometry)
+        handle_publisher(
+            node, PREFIX + "odometry", Float32MultiArray, _ros_publish_odometry
+        )
     )
     telemetry.register_position_handler(
-        _handle_publisher(node, PREFIX + 'position', Float64MultiArray, _ros_publish_position)
+        handle_publisher(
+            node, PREFIX + "position", Float64MultiArray, _ros_publish_position
+        )
     )
     telemetry.register_position_velocity_ned_handler(
-        _handle_publisher(node, PREFIX + 'position_velocity_ned', Float32MultiArray, _ros_publish_position_velocity_ned)
+        handle_publisher(
+            node,
+            PREFIX + "position_velocity_ned",
+            Float32MultiArray,
+            _ros_publish_position_velocity_ned,
+        )
     )
     telemetry.register_raw_gps_handler(
-        _handle_publisher(node, PREFIX + 'raw_gps', Float64MultiArray, _ros_publish_raw_gps)
+        handle_publisher(
+            node, PREFIX + "raw_gps", Float64MultiArray, _ros_publish_raw_gps
+        )
     )
     telemetry.register_raw_imu_handler(
-        _handle_publisher(node, PREFIX + 'raw_imu', Float32MultiArray, _ros_publish_imu)
+        handle_publisher(node, PREFIX + "raw_imu", Float32MultiArray, _ros_publish_imu)
     )
     telemetry.register_rc_status_handler(
-        _handle_publisher(node, PREFIX + 'rc_status', Float32MultiArray, _ros_publish_rc_status)
+        handle_publisher(
+            node, PREFIX + "rc_status", Float32MultiArray, _ros_publish_rc_status
+        )
     )
     telemetry.register_scaled_imu_handler(
-        _handle_publisher(node, PREFIX + 'scaled_imu', Float32MultiArray, _ros_publish_imu)
+        handle_publisher(
+            node, PREFIX + "scaled_imu", Float32MultiArray, _ros_publish_imu
+        )
     )
     telemetry.register_scaled_pressure_handler(
-        _handle_publisher(node, PREFIX + 'scaled_pressure', Float32MultiArray, _ros_publish_scaled_pressure)
+        handle_publisher(
+            node,
+            PREFIX + "scaled_pressure",
+            Float32MultiArray,
+            _ros_publish_scaled_pressure,
+        )
     )
     telemetry.register_status_text_handler(
-        _handle_publisher(node, PREFIX + 'status_text', String, _ros_publish_status_text)
+        handle_publisher(node, PREFIX + "status_text", String, _ros_publish_status_text)
     )
     telemetry.register_unix_epoch_time_handler(
-        _handle_publisher(node, PREFIX + 'unix_epoch_time', UInt64, _ros_publish_unix_epoch_time)
+        handle_publisher(
+            node, PREFIX + "unix_epoch_time", UInt64, _ros_publish_unix_epoch_time
+        )
     )
     telemetry.register_velocity_ned_handler(
-        _handle_publisher(node, PREFIX + 'velocity_ned', Float32MultiArray, _ros_publish_velocity_ned)
+        handle_publisher(
+            node, PREFIX + "velocity_ned", Float32MultiArray, _ros_publish_velocity_ned
+        )
     )
     telemetry.register_vtol_state_handler(
-        _handle_publisher(node, PREFIX + 'vtol_state', String, _ros_publish_vtol_state)
+        handle_publisher(node, PREFIX + "vtol_state", String, _ros_publish_vtol_state)
     )

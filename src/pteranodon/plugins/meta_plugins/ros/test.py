@@ -1,15 +1,13 @@
-from pteranodon import SimpleDrone, AbstractDrone
 import time
+import sys
 import rclpy
 from rclpy.node import Node
-from base_plugins import (
-    action_server, camera_server, 
-    camera, component_information_server, core, 
-    gimbal, mission_raw_server, mission_raw, mission,
-    shell, telemetry,  tracking_server, transponder
-)
+from base_plugins import camera, core, telemetry
+from pteranodon import SimpleDrone
+
 
 def main(args=None):
+    """Main publisher testing"""
     rclpy.init(args=args)
     drone = SimpleDrone("udp://:14540")
 
@@ -18,7 +16,7 @@ def main(args=None):
 
     # node_action = Node("action_server")
     # action_server.register_action_server_publishers(node_action, drone.action_server)
-    
+
     # --> Returns KeyError in "python3.10/site-packages/pteranodon/plugins/plugin_manager.py", line 240
     # node_camera_server = Node("camera_server")
     # camera_server.register_camera_server_publishers(node_camera_server, drone.camera_server)
@@ -75,4 +73,4 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-    exit()
+    sys.exit()

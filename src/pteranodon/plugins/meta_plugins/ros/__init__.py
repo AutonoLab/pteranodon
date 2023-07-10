@@ -1,3 +1,4 @@
-from .ros import Ros
+from . import base_plugins
+from .ros_plugin import Ros
 
-__all__ = ['Ros']
+__all__ = ["base_plugins", "Ros"]

@@ -1,12 +1,12 @@
 from rclpy.node import Node
 from rclpy.publisher import Publisher
-from functools import partial
-from typing import Callable
 from std_msgs.msg import Bool
 from mavsdk.core import ConnectionState
 from pteranodon.plugins.base_plugins.core import Core
+from .handle_publisher import handle_publisher
 
 PREFIX = "drone/mavsdk/pteranodon/"
+
 
 def _ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -> None:
     """
@@ -19,12 +19,11 @@ def _ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -
     msg.data = data.is_connected
     publisher.publish(msg)
 
-def _handle_publisher(node: Node, name: str, data_type, method: Callable) -> partial:
-    """Create a publisher and pair it with a method to publish different mavsdk data types"""
-    publisher = node.create_publisher(data_type, name, 10)
-    return partial(method, publisher)
 
 def register_core_publishers(node: Node, core: Core) -> None:
+    """Register handlers for core metrics"""
     core.register_connection_state_handler(
-        _handle_publisher(node, PREFIX + 'connection_state', Bool, _ros_publish_connection_state)
+        handle_publisher(
+            node, PREFIX + "connection_state", Bool, _ros_publish_connection_state
+        )
     )
