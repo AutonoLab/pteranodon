@@ -7,17 +7,17 @@ from mavsdk import System
 from rclpy.node import Node
 import rclpy
 from .base_plugins import (
-    action_server,
+    # action_server,
     camera,
     core,
-    gimbal,
-    mission_raw_server,
-    mission_raw,
-    mission,
-    shell,
+    # gimbal,
+    # mission_raw_server,
+    # mission_raw,
+    # mission,
+    # shell,
     telemetry,
-    tracking_server,
-    transponder,
+    # tracking_server,
+    # transponder,
     # component_information_server,
     # camera_server,
 )
@@ -73,30 +73,30 @@ class Ros(AbstractMetaPlugin):
         """Starts the ROS2 node."""
         rclpy.init()
         telemetry.register_telemetry_publishers(self.node_telemetry, self._telemetry)
-        action_server.register_action_server_publishers(
-            self.node_actionserver, self._action_server
-        )
+        # action_server.register_action_server_publishers(
+        #     self.node_actionserver, self._action_server
+        # )
         # camera_server.register_camera_server_publishers(self.node_cameraserver, self._camera_server)
         camera.register_camera_publishers(self.node_camera, self._camera)
         # component_information_server.register_component_info_server_publishers(
         #     self.node_component_info_server, self._component_info_server
         # )
         core.register_core_publishers(self.node_core, self._core)
-        gimbal.register_gimbal_publishers(self.node_gimbal, self._gimbal)
-        mission_raw_server.register_mission_raw_server_publishers(
-            self.node_missionrawserver, self._mission_raw_server
-        )
-        mission_raw.register_mission_raw_publishers(
-            self.node_missionraw, self._mission_raw
-        )
-        mission.register_mission_publishers(self.node_mission, self._mission)
-        shell.register_shell_publishers(self.node_shell, self._shell)
-        tracking_server.register_tracking_server_publishers(
-            self.node_trackingserver, self._tracking_server
-        )
-        transponder.register_transponder_publishers(
-            self.node_transponder, self._transponder
-        )
+        # gimbal.register_gimbal_publishers(self.node_gimbal, self._gimbal)
+        # mission_raw_server.register_mission_raw_server_publishers(
+        #     self.node_missionrawserver, self._mission_raw_server
+        # )
+        # mission_raw.register_mission_raw_publishers(
+        #     self.node_missionraw, self._mission_raw
+        # )
+        # mission.register_mission_publishers(self.node_mission, self._mission)
+        # shell.register_shell_publishers(self.node_shell, self._shell)
+        # tracking_server.register_tracking_server_publishers(
+        #     self.node_trackingserver, self._tracking_server
+        # )
+        # transponder.register_transponder_publishers(
+        #     self.node_transponder, self._transponder
+        # )
 
     def stop(self):
         """Stops the ROS2 node."""

@@ -13,7 +13,6 @@ def _ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -
     Takes input of Publisher, and ConnectionState, consisting of:
         bool is_connected
     publishes Bool(is_connected) to ros topic
-
     """
     msg = Bool()
     msg.data = data.is_connected
