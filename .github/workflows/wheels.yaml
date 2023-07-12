@@ -57,7 +57,9 @@ jobs:
   #     shell: bash
 
   #   - name: Install dependencies
-  #     run: ./scripts/install.sh
+  #     run: 
+  #       ./scripts/install.sh
+  #       ./scripts
 
   #   - uses: actions/upload-artifact@v3
   #     with:

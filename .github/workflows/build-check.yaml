@@ -24,6 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         ./scripts/install.sh
+        ./scripts/install_ros.sh
 
     - name: Install build
       run: |
