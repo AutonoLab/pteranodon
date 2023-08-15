@@ -82,19 +82,21 @@ class Ros(AbstractMetaPlugin):
         self._node_transponder = Node("transponder")
         self._transponder = self._base_plugins["transponder"]
 
-        self._plugins_list = [("telemetry", telemetry),
-                           ("action_server", action_server),
-                           ("camera_server", camera_server),
-                           ("camera", camera),
-                           ("component_info_server", component_information_server),
-                           ("core", core),
-                           ("gimbal", gimbal),
-                           ("mission_raw_server", mission_raw_server),
-                           ("mission_raw", mission_raw),
-                           ("mission", mission),
-                           ("shell", shell),
-                           ("tracking_server", tracking_server),
-                           ("transponder", transponder)]
+        self._plugins_list = [
+            ("telemetry", telemetry),
+            ("action_server", action_server),
+            ("camera_server", camera_server),
+            ("camera", camera),
+            ("component_info_server", component_information_server),
+            ("core", core),
+            ("gimbal", gimbal),
+            ("mission_raw_server", mission_raw_server),
+            ("mission_raw", mission_raw),
+            ("mission", mission),
+            ("shell", shell),
+            ("tracking_server", tracking_server),
+            ("transponder", transponder),
+        ]
 
         self._end_init()
 
@@ -108,7 +110,7 @@ class Ros(AbstractMetaPlugin):
                 register = getattr(lib, f"register_{name}_publishers")
                 node = getattr(self, f"_node_{name}")
                 plugin = getattr(self, f"_{name}")
-                
+
                 # plugin.register_plugin_publishers(self._node_plugin, self._plugin)
                 register(node, plugin)
                 print("Registered " + name)
@@ -118,5 +120,5 @@ class Ros(AbstractMetaPlugin):
         for name, _ in self._plugins_list:
             if hasattr(self, f"_node_{name}"):
                 getattr(self, f"_node_{name}").destroy_node()
-        
+
         # rclpy.shutdown()
