@@ -139,7 +139,14 @@ class PluginManager:
             AbstractExtensionPlugin.register(ext_type)
 
         for meta_type in meta_plugin_types:
-            meta_plugin = meta_type(self._system, self._loop, self._logger, self._base_plugins, self._ext_plugins, self._ext_args)  # type: ignore
+            meta_plugin = meta_type(
+                self._system,
+                self._loop,
+                self._logger,
+                self._base_plugins,
+                self._ext_plugins,
+                self._ext_args,
+            )  # type: ignore
             if not meta_plugin.ready:
                 self._logger.error(
                     f"Plugin {meta_plugin.name} is not ready after intialization!"

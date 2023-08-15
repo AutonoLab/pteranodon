@@ -7,19 +7,19 @@ from mavsdk import System
 from rclpy.node import Node
 import rclpy
 from .base_plugins import (
-    # action_server,
+    action_server,
+    camera_server,
     camera,
+    component_information_server,
     core,
-    # gimbal,
-    # mission_raw_server,
-    # mission_raw,
-    # mission,
-    # shell,
+    gimbal,
+    mission_raw_server,
+    mission_raw,
+    mission,
+    shell,
     telemetry,
-    # tracking_server,
-    # transponder,
-    # component_information_server,
-    # camera_server,
+    tracking_server,
+    transponder,
 )
 from ..abstract_meta_plugin import AbstractMetaPlugin
 
@@ -40,77 +40,83 @@ class Ros(AbstractMetaPlugin):
             "ros", system, loop, logger, base_plugins, ext_plugins, ext_args
         )
 
-        self.node_telemetry = Node("telemetry")
+        rclpy.init()
+
+        # telemetry
+        self._node_telemetry = Node("telemetry")
         self._telemetry = self._base_plugins["telemetry"]
-        self.node_actionserver = Node("action_server")
-        self._action_server = self._base_plugins["action_server"]
-        # self.node_cameraserver = Node("camera_server")
+        # action_server
+        # self._node_action_server = Node("action_server")
+        # self._action_server = self._base_plugins["action_server"]
+        # camera_server
+        # self.node_camera_server = Node("camera_server")
         # self._camera_server = self._base_plugins["camera_server"]
-        self.node_camera = Node("camera")
+        # camera
+        self._node_camera = Node("camera")
         self._camera = self._base_plugins["camera"]
+        # component_info_server
         # self.node_component_info_server = Node("component_info_server")
         # self._component_info_server = self._base_plugins["component_information_server"]
-        self.node_core = Node("core")
+        # core
+        self._node_core = Node("core")
         self._core = self._base_plugins["core"]
-        self.node_gimbal = Node("gimbal")
+        # gimbal
+        self._node_gimbal = Node("gimbal")
         self._gimbal = self._base_plugins["gimbal"]
-        self.node_missionrawserver = Node("mission_raw_server")
+        # mission_raw_server
+        self._node_mission_raw_server = Node("mission_raw_server")
         self._mission_raw_server = self._base_plugins["mission_raw_server"]
-        self.node_missionraw = Node("mission_raw")
+        # mission_raw
+        self._node_mission_raw = Node("mission_raw")
         self._mission_raw = self._base_plugins["mission_raw"]
-        self.node_mission = Node("mission")
+        # mission
+        self._node_mission = Node("mission")
         self._mission = self._base_plugins["mission"]
-        self.node_shell = Node("shell")
+        # shell
+        self._node_shell = Node("shell")
         self._shell = self._base_plugins["shell"]
-        self.node_trackingserver = Node("tracking_server")
+        # tracking_server
+        self._node_tracking_server = Node("tracking_server")
         self._tracking_server = self._base_plugins["tracking_server"]
-        self.node_transponder = Node("transponder")
+        # transponder
+        self._node_transponder = Node("transponder")
         self._transponder = self._base_plugins["transponder"]
+
+        self._plugins_list = [("telemetry", telemetry),
+                           ("action_server", action_server),
+                           ("camera_server", camera_server),
+                           ("camera", camera),
+                           ("component_info_server", component_information_server),
+                           ("core", core),
+                           ("gimbal", gimbal),
+                           ("mission_raw_server", mission_raw_server),
+                           ("mission_raw", mission_raw),
+                           ("mission", mission),
+                           ("shell", shell),
+                           ("tracking_server", tracking_server),
+                           ("transponder", transponder)]
 
         self._end_init()
 
     def start(self):
         """Starts the ROS2 node."""
-        rclpy.init()
-        telemetry.register_telemetry_publishers(self.node_telemetry, self._telemetry)
-        # action_server.register_action_server_publishers(
-        #     self.node_actionserver, self._action_server
-        # )
-        # camera_server.register_camera_server_publishers(self.node_cameraserver, self._camera_server)
-        camera.register_camera_publishers(self.node_camera, self._camera)
-        # component_information_server.register_component_info_server_publishers(
-        #     self.node_component_info_server, self._component_info_server
-        # )
-        core.register_core_publishers(self.node_core, self._core)
-        # gimbal.register_gimbal_publishers(self.node_gimbal, self._gimbal)
-        # mission_raw_server.register_mission_raw_server_publishers(
-        #     self.node_missionrawserver, self._mission_raw_server
-        # )
-        # mission_raw.register_mission_raw_publishers(
-        #     self.node_missionraw, self._mission_raw
-        # )
-        # mission.register_mission_publishers(self.node_mission, self._mission)
-        # shell.register_shell_publishers(self.node_shell, self._shell)
-        # tracking_server.register_tracking_server_publishers(
-        #     self.node_trackingserver, self._tracking_server
-        # )
-        # transponder.register_transponder_publishers(
-        #     self.node_transponder, self._transponder
-        # )
+        print("Starting ROS node")
+
+        for name, lib in self._plugins_list:
+            # check if plugin has register_plugin_publishers function
+            if hasattr(lib, f"register_{name}_publishers"):
+                register = getattr(lib, f"register_{name}_publishers")
+                node = getattr(self, f"_node_{name}")
+                plugin = getattr(self, f"_{name}")
+                
+                # plugin.register_plugin_publishers(self._node_plugin, self._plugin)
+                register(node, plugin)
+                print("Registered " + name)
 
     def stop(self):
         """Stops the ROS2 node."""
-        self.node_actionserver.destroy_node()
-        # self.node_cameraserver.destroy_node()
-        self.node_camera.destroy_node()
-        # self.node_component_info_server.destroy_node()
-        self.node_core.destroy_node()
-        self.node_gimbal.destroy_node()
-        self.node_mission.destroy_node()
-        self.node_missionraw.destroy_node()
-        self.node_missionrawserver.destroy_node()
-        self.node_shell.destroy_node()
-        self.node_telemetry.destroy_node()
-        self.node_trackingserver.destroy_node()
-        self.node_transponder.destroy_node()
-        rclpy.shutdown()
+        for name, _ in self._plugins_list:
+            if hasattr(self, f"_node_{name}"):
+                getattr(self, f"_node_{name}").destroy_node()
+        
+        # rclpy.shutdown()

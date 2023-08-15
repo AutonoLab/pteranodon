@@ -1,9 +1,8 @@
 from pteranodon import SimpleDrone
+import sys
 import time
 import rclpy
 from rclpy.node import Node
-from sys import path
-# path.append('../../src/pteranodon/plugins/meta_plugins/ros')
 from pteranodon.plugins.meta_plugins.ros.base_plugins import (
     action_server, camera_server, 
     camera, component_information_server, core, 
@@ -11,8 +10,8 @@ from pteranodon.plugins.meta_plugins.ros.base_plugins import (
     shell, telemetry,  tracking_server, transponder
 )
 
-def main(args=None):
-    rclpy.init(args=args)
+def _main(args=None):
+    #rclpy.init(args=args)
     drone = SimpleDrone("udp://:14540")
 
     node_telemetry = Node("telemetry")
@@ -70,11 +69,14 @@ def main(args=None):
     print("loop done")
     time.sleep(10)
     print("teardown")
+    node_telemetry.destroy_node()
+    node_camera.destroy_node()
+    node_core.destroy_node()
     rclpy.shutdown()
     drone.teardown()
     print("complete")
 
 
 if __name__ == "__main__":
-    main()
-    exit()
+    _main()
+    sys.exit()

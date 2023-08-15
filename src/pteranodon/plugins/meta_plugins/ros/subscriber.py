@@ -1,7 +1,5 @@
 from rclpy.node import Node
 
-PREFIX = "drone/mavsdk/pteranodon/"
-
 
 class Subscriber(Node):
     """ROS subscriber node"""

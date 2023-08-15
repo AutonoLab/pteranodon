@@ -1,49 +1,54 @@
 #!/bin/bash
 
-python3 rospub_test.py &
+prefix="/drone/mavsdk/pteranodon/"
+
+# python3 manual_publish_test.py &
+python3 ros_start_test.py &
+
+pid=$!
 
 # wait to register publishers
-sleep 5
+sleep 4
 
 topics=(
-    "/drone/mavsdk/pteranodon/actuator_control_target"
-    "/drone/mavsdk/pteranodon/armed"
-    "/drone/mavsdk/pteranodon/attitude_angular_velocity_body"
-    "/drone/mavsdk/pteranodon/attitude_euler"
-    "/drone/mavsdk/pteranodon/attitude_quaternion"
-    "/drone/mavsdk/pteranodon/battery"
-    "/drone/mavsdk/pteranodon/camera_attitude_euler"
-    "/drone/mavsdk/pteranodon/camera_attitude_quaternion"
-    "/drone/mavsdk/pteranodon/capture_info"
-    "/drone/mavsdk/pteranodon/connection_state"
-    "/drone/mavsdk/pteranodon/distance_sensor"
-    "/drone/mavsdk/pteranodon/fixedwing_metrics"
-    "/drone/mavsdk/pteranodon/flight_mode"
-    "/drone/mavsdk/pteranodon/gps_info"
-    "/drone/mavsdk/pteranodon/ground_truth"
-    "/drone/mavsdk/pteranodon/heading"
-    "/drone/mavsdk/pteranodon/health"
-    "/drone/mavsdk/pteranodon/health_all_ok"
-    "/drone/mavsdk/pteranodon/home"
-    "/drone/mavsdk/pteranodon/imu"
-    "/drone/mavsdk/pteranodon/in_air"
-    "/drone/mavsdk/pteranodon/information"
-    "/drone/mavsdk/pteranodon/landed_state"
-    "/drone/mavsdk/pteranodon/mode"
-    "/drone/mavsdk/pteranodon/odometry"
-    "/drone/mavsdk/pteranodon/position"
-    "/drone/mavsdk/pteranodon/position_velocity_ned"
-    "/drone/mavsdk/pteranodon/raw_gps"
-    "/drone/mavsdk/pteranodon/raw_imu"
-    "/drone/mavsdk/pteranodon/rc_status"
-    "/drone/mavsdk/pteranodon/scaled_imu"
-    "/drone/mavsdk/pteranodon/scaled_pressure"
-    "/drone/mavsdk/pteranodon/status"
-    "/drone/mavsdk/pteranodon/status_text"
-    "/drone/mavsdk/pteranodon/unix_epoch_time"
-    "/drone/mavsdk/pteranodon/velocity_ned"
-    "/drone/mavsdk/pteranodon/video_stream_info"
-    "/drone/mavsdk/pteranodon/vtol_state"
+    "${prefix}actuator_control_target"
+    "${prefix}armed"
+    "${prefix}attitude_angular_velocity_body"
+    "${prefix}attitude_euler"
+    "${prefix}attitude_quaternion"
+    "${prefix}battery"
+    "${prefix}camera_attitude_euler"
+    "${prefix}camera_attitude_quaternion"
+    "${prefix}capture_info"
+    "${prefix}connection_state"
+    "${prefix}distance_sensor"
+    "${prefix}fixedwing_metrics"
+    "${prefix}flight_mode"
+    "${prefix}gps_info"
+    "${prefix}ground_truth"
+    "${prefix}heading"
+    "${prefix}health"
+    "${prefix}health_all_ok"
+    "${prefix}home"
+    "${prefix}imu"
+    "${prefix}in_air"
+    "${prefix}information"
+    "${prefix}landed_state"
+    "${prefix}mode"
+    "${prefix}odometry"
+    "${prefix}position"
+    "${prefix}position_velocity_ned"
+    "${prefix}raw_gps"
+    "${prefix}raw_imu"
+    "${prefix}rc_status"
+    "${prefix}scaled_imu"
+    "${prefix}scaled_pressure"
+    "${prefix}status"
+    "${prefix}status_text"
+    "${prefix}unix_epoch_time"
+    "${prefix}velocity_ned"
+    "${prefix}video_stream_info"
+    "${prefix}vtol_state"
     )
 
 for topic in "${topics[@]}"; do
@@ -55,3 +60,7 @@ for topic in "${topics[@]}"; do
     echo "'$topic' is NOT being published"
   fi
 done
+
+kill $pid
+
+exit 0

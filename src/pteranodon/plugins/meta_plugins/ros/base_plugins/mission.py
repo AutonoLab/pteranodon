@@ -4,9 +4,8 @@
 
 # # from mavsdk.mission import
 # from pteranodon.plugins.base_plugins.mission import Mission
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_incoming_mission(publisher: Publisher, data) -> None:

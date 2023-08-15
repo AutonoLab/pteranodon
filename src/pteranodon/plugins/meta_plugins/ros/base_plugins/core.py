@@ -3,9 +3,8 @@ from rclpy.publisher import Publisher
 from std_msgs.msg import Bool
 from mavsdk.core import ConnectionState
 from pteranodon.plugins.base_plugins.core import Core
+from ..prefix import PREFIX
 from .handle_publisher import handle_publisher
-
-PREFIX = "drone/mavsdk/pteranodon/"
 
 
 def _ros_publish_connection_state(publisher: Publisher, data: ConnectionState) -> None:

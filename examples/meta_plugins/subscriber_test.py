@@ -2,8 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String, Bool, Float32MultiArray, Float64MultiArray, Float64, UInt8MultiArray, UInt64
-
-PREFIX = "drone/mavsdk/pteranodon/"
+from pteranodon.plugins.meta_plugins.ros import PREFIX
 
 class Subscriber(Node):
 
@@ -18,7 +17,7 @@ class Subscriber(Node):
         self.get_logger().info(f"{msg.data}")
 
 
-def main(args=None):
+def _main(args=None):
     rclpy.init(args=args)
 
     subscriber = Subscriber()
@@ -113,4 +112,4 @@ def main(args=None):
 
 
 if __name__ == '__main__':
-    main()
+    _main()

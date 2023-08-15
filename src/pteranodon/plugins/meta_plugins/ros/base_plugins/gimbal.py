@@ -4,9 +4,8 @@
 
 # # from mavsdk.gimbal import ControlMode, ControlStatus
 # from pteranodon.plugins.base_plugins.gimbal import Gimbal
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_control(publisher: Publisher, data) -> None:

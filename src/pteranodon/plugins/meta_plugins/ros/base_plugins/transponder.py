@@ -4,9 +4,9 @@
 
 # # from mavsdk.transponder import Transponder as TransponderType
 # from pteranodon.plugins.base_plugins.transponder import Transponder
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
+#
 
 
 # def _ros_publish_transponder(publisher: Publisher, data) -> None:

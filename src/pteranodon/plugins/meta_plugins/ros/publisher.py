@@ -22,7 +22,7 @@ class Publisher(Node):
         # self.get_logger().info(f"{msg.data}")
 
 
-def main(args=None):
+def _main(args=None):
     """Test in main"""
     rclpy.init(args=args)
 
@@ -35,4 +35,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    main()
+    _main()

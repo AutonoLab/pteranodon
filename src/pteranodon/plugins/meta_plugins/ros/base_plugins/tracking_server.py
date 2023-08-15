@@ -4,9 +4,8 @@
 
 # # from mavsdk.tracking_server import TrackPoint, TrackRectangle
 # from pteranodon.plugins.base_plugins.tracking_server import TrackingServer
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_tracking_point_command(publisher: Publisher, data) -> None:

@@ -49,4 +49,5 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
 RUN apt update
 RUN apt upgrade
 RUN apt install ros-foxy-desktop python3-argcomplete
+RUN apt install ros-foxy-ros-base ros-dev-tools
 RUN source /opt/ros/foxy/setup.bash

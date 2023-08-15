@@ -3,9 +3,8 @@
 # from mavsdk.action_server import ArmDisarm
 # from std_msgs.msg import String, UInt8MultiArray
 # from pteranodon.plugins.base_plugins.action_server import ActionServer
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_arm_disarm(publisher: Publisher, data: ArmDisarm) -> None:

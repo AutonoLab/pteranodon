@@ -4,9 +4,8 @@
 
 # # from mavsdk.camera_server import TakePhotoFeedback
 # from pteranodon.plugins.base_plugins.camera_server import CameraServer
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_take_photo(publisher: Publisher, data) -> None:

@@ -3,9 +3,8 @@ from rclpy.publisher import Publisher
 from std_msgs.msg import String
 from mavsdk.camera import Mode  # , CaptureInfo, Information, VideoStreamInfo, Status
 from pteranodon.plugins.base_plugins.camera import Camera
+from ..prefix import PREFIX
 from .handle_publisher import handle_publisher
-
-PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_capture_info(publisher: Publisher, data) -> None:

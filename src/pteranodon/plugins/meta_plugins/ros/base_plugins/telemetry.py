@@ -36,9 +36,8 @@ from mavsdk.telemetry import (
     ActuatorControlTarget,
 )
 from pteranodon.plugins.base_plugins.telemetry import Telemetry
+from ..prefix import PREFIX
 from .handle_publisher import handle_publisher
-
-PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # bool

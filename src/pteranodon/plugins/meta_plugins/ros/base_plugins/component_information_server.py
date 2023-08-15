@@ -6,9 +6,8 @@
 # from pteranodon.plugins.base_plugins.component_information_server import (
 #     ComponentInformationServer,
 # )
+# from ..prefix import PREFIX
 # from .handle_publisher import handle_publisher
-
-# PREFIX = "drone/mavsdk/pteranodon/"
 
 
 # def _ros_publish_float_param(publisher: Publisher, data) -> None:

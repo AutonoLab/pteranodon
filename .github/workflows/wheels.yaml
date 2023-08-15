@@ -59,7 +59,7 @@ jobs:
   #   - name: Install dependencies
   #     run: 
   #       ./scripts/install.sh
-  #       ./scripts
+  #       ./scripts/install_ros.sh
 
   #   - uses: actions/upload-artifact@v3
   #     with:
