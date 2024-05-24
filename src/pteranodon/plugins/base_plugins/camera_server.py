@@ -59,7 +59,7 @@ class CameraServer(AbstractBasePlugin):
         function in here
 
         :param callback: The function which returns the parameters to respond_take_photo
-        :type callback: Callable[[int], Tuple[camera.TakePhotoFeedback, camera.CaptureInfo]]
+        :type callback: Callable[[int], Tuple[camera.CameraFeedback, camera.CaptureInfo]]
         """
         # Even though this doesn't call anything, it really cements the importance
         if not self._check_cam_info_set("Set Photo Request Callback"):
@@ -125,14 +125,14 @@ class CameraServer(AbstractBasePlugin):
 
     def _respond_take_photo(
         self,
-        take_photo_feedback: camera_server.TakePhotoFeedback,
+        take_photo_feedback: camera_server.CameraFeedback,
         capture_info: camera_server.CaptureInfo,
     ):
         """
         Respond to an image capture request from SubscribeTakePhoto (_take_photo).
 
         :param take_photo_feedback: The feedback
-        :type take_photo_feedback: camera_server.TakePhotoFeedback
+        :type take_photo_feedback: camera_server.CameraFeedback
         :param capture_info: The capture information
         :type capture_info: camera_server.CaptureInfo
         """
