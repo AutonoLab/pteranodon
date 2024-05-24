@@ -7,3 +7,7 @@ sudo apt install -y python3-gi python3-gi-cairo gir1.2-gtk-3.0
 
 # installations for the extensions modules
 sudo apt install -y libopencv-dev
+
+# install specific python package for PX4
+pip3 install empy==3.*
+pip3 install jinja2==3.*
