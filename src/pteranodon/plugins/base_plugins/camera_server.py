@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Callable, Tuple, Optional
 
 from mavsdk import System, camera_server
-from mavsdk.camera_server import TakePhotoFeedback, CaptureInfo
+from mavsdk.camera_server import CameraFeedback, CaptureInfo
 
 from .abstract_base_plugin import AbstractBasePlugin
 
@@ -13,7 +13,7 @@ class CameraServer(AbstractBasePlugin):
     Provides handling of camera trigger commands.
     """
 
-    PhotoRequestCallbackType = Callable[[int], Tuple[TakePhotoFeedback, CaptureInfo]]
+    PhotoRequestCallbackType = Callable[[int], Tuple[CameraFeedback, CaptureInfo]]
 
     def __init__(
         self,
@@ -70,7 +70,7 @@ class CameraServer(AbstractBasePlugin):
     @staticmethod
     def _default_photo_request_callback(
         index: int,
-    ) -> Tuple[TakePhotoFeedback, CaptureInfo]:
+    ) -> Tuple[CameraFeedback, CaptureInfo]:
         """
         The default implementation of the method which takes an index and returns CaptureInfo and feedback.
         Called when a `take_photo` request is received, result is passed to `respond_take_photo`
@@ -78,7 +78,7 @@ class CameraServer(AbstractBasePlugin):
         :param index: take_photo index
         :type index: int32
         :return: The parameters of respond_take_photo, the feedback and the capture information
-        :rtype: Tuple[TakePhotoFeedback, CaptureInfo]
+        :rtype: Tuple[CameraFeedback, CaptureInfo]
         """
         position = camera_server.Position(0, 0, 0, 0)
         quat = camera_server.Quaternion(0, 0, 0, 0)
@@ -92,7 +92,7 @@ class CameraServer(AbstractBasePlugin):
             file_url="/",
         )
 
-        return TakePhotoFeedback.FAILED, capture_info
+        return CameraFeedback.FAILED, capture_info
 
     def _take_photo(self) -> None:
         capture_req_idx_opt = self._async_gen_data[

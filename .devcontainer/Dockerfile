@@ -42,7 +42,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
 RUN pip3 install --upgrade pip && \
-    pip3 install empy \
+    pip3 install empy==3.* \
                  future \
                  jinja2 \
                  kconfiglib \
