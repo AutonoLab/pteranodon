@@ -1,10 +1,11 @@
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Dict, Union, Callable, Tuple, Deque
+from typing import Dict, Union, Callable, Tuple
 from collections import deque
 from functools import partial
 import atexit
 import os
+import json
 import configparser
 
 from mavsdk import System
@@ -29,7 +30,7 @@ class Config(AbstractExtensionPlugin):
 
         self._param: Param = self._base_plugins["param"]
         self._telemetry: Telemetry = self._base_plugins["telemetry"]
-        self._stack: Deque[Callable] = deque()
+        self._stack: deque[Callable] = deque()
 
         atexit.register(self.reset)
 
@@ -44,39 +45,22 @@ class Config(AbstractExtensionPlugin):
 
     def set_param(self, param_name: str, param_value: Union[float, int, str]) -> None:
         """Sets the parameter of the drone and adds it to the stack of changes to be undone on exit."""
-        try:
-            param_setter, old_param = self._get_type_call(
-                param_name.lower(), param_value
-            )
-        except (
-            KeyError
-        ):  # checks if the parameter is all caps vs. all lower case, no mixed in PX4
-            param_setter, old_param = self._get_type_call(
-                param_name.upper(), param_value
-            )
-        if param_setter is None:
-            self._logger.error(
-                f"Unsupported type: {type(param_value)}. Supported types: float, int, str"
-            )
-            raise TypeError(
-                f"Unsupported type: {type(param_value)}. Supported types: float, int, str"
-            )
+        param_setter, old_param = self._get_type_call(param_name, param_value)
         self._stack.appendleft(partial(param_setter, old_param))
         param_setter(param_name, param_value)
 
     def _get_type_call(
         self, param_name: str, param_value: Union[float, int, str]
-    ) -> Tuple[Union[Callable, None], Union[float, int, str, None]]:
+    ) -> Tuple[Callable, Union[float, int, str]]:
         """Returns the appropriate method call to Param to undo and the previous value of the parameter."""
         if isinstance(param_value, float):
             return self._param.set_param_float, self._param.get_param_float(param_name)
-        if isinstance(param_value, int):
+        elif isinstance(param_value, int):
             return self._param.set_param_int, self._param.get_param_int(param_name)
-        if isinstance(param_value, str):
+        elif isinstance(param_value, str):
             return self._param.set_param_custom, self._param.get_param_custom(
                 param_name
             )
-        return None, None
 
     def reset(self) -> None:
         """Resets the drone to its original configuration."""
@@ -99,41 +83,20 @@ class Config(AbstractExtensionPlugin):
             self._logger.error(f"Unsupported filetype: {file_path}")
             raise ValueError(f"Unsupported filetype: {file_path}")
 
-    @staticmethod
-    def _convert_str(param_value: str, section: str) -> Union[float, int, str]:
-        """Converts a string to a float, int, or str."""
-        if section == "int_params":
-            return int(param_value)
-        if section == "float_params":
-            return float(param_value)
-        return param_value
-
     def _from_cfg(self, file_path: str) -> None:
         """Sets the configuration of the drone from a cfg file."""
         config = configparser.ConfigParser()
         config.read(file_path)
         for section in config.sections():
-            if section not in [
-                "int_params",
-                "float_params",
-                "custom_params",
-                "telemetry",
-            ]:
-                raise ValueError(f"Invalid section: {section}")
-
             if section != "telemetry":
                 for key, value in config.items(section):
-                    try:
-                        param_val = Config._convert_str(value, section)
-                        self.set_param(key, param_val)
-                        self._logger.info(f"Set {key} to {param_val}")
-                    except KeyError:
-                        self._logger.warning(f"Invalid parameter name: {key}")
+                    self.set_param(key, value)
+                    self._logger.info(f"Set {key} to {value}")
             else:
                 for key, value in config.items(section):
                     try:
                         attr = getattr(self._telemetry, key)
                         attr(value)
-                    except AttributeError as exc:
+                    except AttributeError:
                         self._logger.error(f"Invalid telemetry attribute: {key}")
-                        self._logger.error(exc)
+                        raise AttributeError(f"Invalid telemetry attribute: {key}")

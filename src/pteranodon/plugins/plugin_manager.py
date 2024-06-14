@@ -41,6 +41,8 @@ from .base_plugins import (
 )
 from .extension_plugins.abstract_extension_plugin import AbstractExtensionPlugin
 from .extension_plugins import Config, Sensor, Relative, Power
+from .meta_plugins.abstract_meta_plugin import AbstractMetaPlugin
+from .meta_plugins import Ros
 from .custom_plugins import AbstractCustomPlugin
 
 
@@ -64,6 +66,7 @@ class PluginManager:
         self._base_plugins: Dict[str, AbstractBasePlugin] = {}
         self._ext_plugins: Dict[str, AbstractExtensionPlugin] = {}
         self._custom_plugins: Dict[str, AbstractCustomPlugin] = {}
+        self._meta_plugins: Dict[str, AbstractMetaPlugin] = {}
 
         # Relatively sorted by amount of data being requested during init
         # Lowest to the highest generators, Highest to the lowest bandwidth in __init__
@@ -110,6 +113,9 @@ class PluginManager:
             key=self._get_sort_keys,
             reverse=False,
         )
+        meta_plugin_types: List[Type[AbstractMetaPlugin]] = sorted(
+            [Ros], key=self._get_sort_keys, reverse=False
+        )
 
         for base_type in base_plugin_types:
             self._logger.info(f"Beginning setup of: {base_type} plugin")
@@ -132,6 +138,23 @@ class PluginManager:
             self._ext_plugins[ext_plugin.name] = ext_plugin
             AbstractExtensionPlugin.register(ext_type)
 
+        for meta_type in meta_plugin_types:
+            meta_plugin = meta_type(
+                self._system,
+                self._loop,
+                self._logger,
+                self._base_plugins,
+                self._ext_plugins,
+                self._ext_args,
+            )  # type: ignore
+            if not meta_plugin.ready:
+                self._logger.error(
+                    f"Plugin {meta_plugin.name} is not ready after intialization!"
+                )
+                continue
+            self._meta_plugins[meta_plugin.name] = meta_plugin
+            AbstractMetaPlugin.register(meta_type)
+
     @property
     def base_plugins(self) -> Dict[str, AbstractBasePlugin]:
         """
@@ -152,6 +175,13 @@ class PluginManager:
         :return: Dict ; Returns a dictionary of custom plugins
         """
         return self._custom_plugins
+
+    @property
+    def meta_plugins(self) -> Dict[str, AbstractMetaPlugin]:
+        """
+        :return: Dict ; Returns a dictionary of meta plugins
+        """
+        return self._meta_plugins
 
     def add_plugin(
         self, new_plugin: Union[AbstractCustomPlugin, Type[AbstractCustomPlugin]]
@@ -208,6 +238,8 @@ class PluginManager:
             base_plugin.cancel_futures()
         for ext_plugin in self._ext_plugins.values():
             ext_plugin.cancel_futures()
+        for meta_plugin in self._meta_plugins.values():
+            meta_plugin.cancel_futures()
         for custom_plugin in self._custom_plugins.values():
             custom_plugin.cancel_futures()
 
@@ -455,3 +487,10 @@ class PluginManager:
         :return: The Power plugin class instance
         """
         return self.ext_plugins["power"]  # type: ignore
+
+    @property
+    def ros(self) -> Ros:
+        """
+        :return: The Ros plugin class instance
+        """
+        return self.meta_plugins["ros"]  # type: ignore
