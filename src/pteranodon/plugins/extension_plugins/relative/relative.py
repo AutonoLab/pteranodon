@@ -26,7 +26,7 @@ class Relative(AbstractExtensionPlugin):
         ext_args: Dict,
     ) -> None:
         super().__init__("relative", system, loop, logger, base_plugins, ext_args)
-        self._min_follow_distance = 10.0
+        self._min_follow_distance = 1.0
 
         try:
             if self._ext_args["min_follow_distance"] is not None:
@@ -89,6 +89,7 @@ class Relative(AbstractExtensionPlugin):
         if test_min:
             total_distance = sqrt(pow(front, 2) + pow(right, 2) + pow(down, 2))
             if total_distance < self._min_follow_distance:
+                self._logger.warning("Minimum following distance not met, setting velocity to 0")
                 await self._system.offboard.set_velocity_body(
                     VelocityBodyYawspeed(0, 0, 0, 0)
                 )
@@ -110,6 +111,10 @@ class Relative(AbstractExtensionPlugin):
         task_opt = self._telemetry.position_velocity_ned
         task2_opt = self._telemetry.attitude_euler
         if task_opt is None:
+            self._logger.warning("Could not find telemetry.position_velocity_ned, skipping relative movement")
+            return None
+        if task2_opt is None:
+            self._logger.warning("Could not find telemetry.attitude_euler, skipping relative movement")
             return None
 
         task: PositionVelocityNed = task_opt
