@@ -80,7 +80,7 @@ class PluginManager:
                 Core,
                 Failure,
                 FollowMe,
-                Ftp,
+                # Ftp,
                 Geofence,
                 Gimbal,
                 Info,
